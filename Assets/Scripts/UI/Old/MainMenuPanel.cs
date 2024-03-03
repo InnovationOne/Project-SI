@@ -47,11 +47,11 @@ public class MainMenuPanel : MonoBehaviour
         {
             if (i == panelNum)
                 continue;
-            panels[i].GetComponent<TitleScreenAnimation>().ToggleMenu();
+            //panels[i].GetComponent<TitleScreenAnimation>().ToggleMenu();
             buttons[i].SetActive(false);
         }
         
-        panels[panelNum].GetComponent<TitleScreenAnimation>().ToggleMenu();
+        //panels[panelNum].GetComponent<TitleScreenAnimation>().ToggleMenu();
         buttons[panelNum].SetActive(true);
     }
 

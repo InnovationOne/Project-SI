@@ -1,6 +1,6 @@
-
 using UnityEngine;
 
+// Verwalte alle Events, die im Spiel auftreten können
 public class EventsManager : MonoBehaviour {
     public static EventsManager Instance { get; private set; }
 
