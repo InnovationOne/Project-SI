@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Pumpkin
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 4
+  DaysToGrow: 18
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 608c0684c06e41c4cbf18cba80dc54dc, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 11
+  SeasonsToGrow: 02000000
+  MinItemAmountToSpawn: 1
+  MaxItemAmountToSpawn: 1
+  TimeGrowthStages: 060000000c000000
+  DeadSpritesGrowthStages:
+  - {fileID: 1900199365, guid: aa748e7d64f4b5c43a43cf6602e8a971, type: 3}
+  - {fileID: 288143664, guid: aa748e7d64f4b5c43a43cf6602e8a971, type: 3}
+  - {fileID: -1532657395, guid: aa748e7d64f4b5c43a43cf6602e8a971, type: 3}
+  - {fileID: -1105440707, guid: aa748e7d64f4b5c43a43cf6602e8a971, type: 3}
+  - {fileID: 1668922102, guid: aa748e7d64f4b5c43a43cf6602e8a971, type: 3}
+  SpritesGrowthStages:
+  - {fileID: 1401946257, guid: 1aea4251dbd35d24d89a14e9e6335779, type: 3}
+  - {fileID: -225589038, guid: 1aea4251dbd35d24d89a14e9e6335779, type: 3}
+  - {fileID: 796014236, guid: 1aea4251dbd35d24d89a14e9e6335779, type: 3}
+  - {fileID: -1575018119, guid: 1aea4251dbd35d24d89a14e9e6335779, type: 3}
+  - {fileID: -1109478668, guid: 1aea4251dbd35d24d89a14e9e6335779, type: 3}
+  - {fileID: -799124034, guid: 1aea4251dbd35d24d89a14e9e6335779, type: 3}

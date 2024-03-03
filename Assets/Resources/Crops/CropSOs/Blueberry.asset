@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Blueberry
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 2
+  DaysToGrow: 7
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: c235cb6683911d04bb32c8b2c5de5457, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 5
+  SeasonsToGrow: 01000000
+  MinItemAmountToSpawn: 5
+  MaxItemAmountToSpawn: 7
+  TimeGrowthStages: 0200000004000000
+  DeadSpritesGrowthStages:
+  - {fileID: -670486614, guid: 184cdf2fdaf65084bb5fef7d05658a94, type: 3}
+  - {fileID: -692281762, guid: 184cdf2fdaf65084bb5fef7d05658a94, type: 3}
+  - {fileID: -833390632, guid: 184cdf2fdaf65084bb5fef7d05658a94, type: 3}
+  - {fileID: 543302239, guid: 184cdf2fdaf65084bb5fef7d05658a94, type: 3}
+  - {fileID: 1779335955, guid: 184cdf2fdaf65084bb5fef7d05658a94, type: 3}
+  SpritesGrowthStages:
+  - {fileID: 1556477362, guid: 09d3983dd7e29014a87f053915859565, type: 3}
+  - {fileID: 617907304, guid: 09d3983dd7e29014a87f053915859565, type: 3}
+  - {fileID: 538299742, guid: 09d3983dd7e29014a87f053915859565, type: 3}
+  - {fileID: -646655059, guid: 09d3983dd7e29014a87f053915859565, type: 3}
+  - {fileID: -1619311308, guid: 09d3983dd7e29014a87f053915859565, type: 3}
+  - {fileID: -1440248137, guid: 09d3983dd7e29014a87f053915859565, type: 3}

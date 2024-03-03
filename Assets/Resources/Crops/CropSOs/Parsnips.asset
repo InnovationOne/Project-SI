@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Parsnips
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 1
+  DaysToGrow: 7
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 8061f0fd8edec08478b8ad1a2bc91034, type: 2}
+  LeavesHole: 1
+  IsHarvestedByScythe: 0
+  CanRegrow: 0
+  DaysToRegrow: 0
+  SeasonsToGrow: 00000000
+  MinItemAmountToSpawn: 1
+  MaxItemAmountToSpawn: 1
+  TimeGrowthStages: 0200000004000000
+  DeadSpritesGrowthStages:
+  - {fileID: 1440655261, guid: dabe026ffd694e54c9f29d37ee8e2cb1, type: 3}
+  - {fileID: -794300449, guid: dabe026ffd694e54c9f29d37ee8e2cb1, type: 3}
+  - {fileID: 1590671782, guid: dabe026ffd694e54c9f29d37ee8e2cb1, type: 3}
+  - {fileID: -688836458, guid: dabe026ffd694e54c9f29d37ee8e2cb1, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -545908167, guid: 1d21060c914fc104f88216a0c7253a3b, type: 3}
+  - {fileID: -676772148, guid: 1d21060c914fc104f88216a0c7253a3b, type: 3}
+  - {fileID: -994937292, guid: 1d21060c914fc104f88216a0c7253a3b, type: 3}
+  - {fileID: -1551818132, guid: 1d21060c914fc104f88216a0c7253a3b, type: 3}
+  - {fileID: -1074707309, guid: 1d21060c914fc104f88216a0c7253a3b, type: 3}

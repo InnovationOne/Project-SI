@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Jalapeno
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 10
+  DaysToGrow: 9
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 071b68f09d2fc314bbf887381981105e, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 5
+  SeasonsToGrow: 02000000
+  MinItemAmountToSpawn: 2
+  MaxItemAmountToSpawn: 4
+  TimeGrowthStages: 0300000006000000
+  DeadSpritesGrowthStages:
+  - {fileID: -1868184949, guid: 0c729323aefd1e74e9d626f6c5582809, type: 3}
+  - {fileID: -408357901, guid: 0c729323aefd1e74e9d626f6c5582809, type: 3}
+  - {fileID: 1919973303, guid: 0c729323aefd1e74e9d626f6c5582809, type: 3}
+  - {fileID: 1978725088, guid: 0c729323aefd1e74e9d626f6c5582809, type: 3}
+  - {fileID: -839721025, guid: 0c729323aefd1e74e9d626f6c5582809, type: 3}
+  SpritesGrowthStages:
+  - {fileID: 1592443497, guid: 44fb1b5d46325304ca6d60e0b62a3e0d, type: 3}
+  - {fileID: -1011135959, guid: 44fb1b5d46325304ca6d60e0b62a3e0d, type: 3}
+  - {fileID: -1564205667, guid: 44fb1b5d46325304ca6d60e0b62a3e0d, type: 3}
+  - {fileID: 1026157410, guid: 44fb1b5d46325304ca6d60e0b62a3e0d, type: 3}
+  - {fileID: 20435733, guid: 44fb1b5d46325304ca6d60e0b62a3e0d, type: 3}
+  - {fileID: -1949035097, guid: 44fb1b5d46325304ca6d60e0b62a3e0d, type: 3}

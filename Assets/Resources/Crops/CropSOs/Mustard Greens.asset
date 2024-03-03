@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Mustard Greens
+  m_EditorClassIdentifier: 
+  CropID: 50
+  CropRarity: 1
+  DaysToGrow: 6
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 7f100e3599b14f0488c677c2117c78e1, type: 2}
+  LeavesHole: 1
+  IsHarvestedByScythe: 0
+  CanRegrow: 0
+  DaysToRegrow: 0
+  SeasonsToGrow: 02000000
+  MinItemAmountToSpawn: 1
+  MaxItemAmountToSpawn: 1
+  TimeGrowthStages: 0200000004000000
+  DeadSpritesGrowthStages:
+  - {fileID: 28360234, guid: e0ca1e9d33cbaf046a47dea2345c1d6e, type: 3}
+  - {fileID: -1720713819, guid: e0ca1e9d33cbaf046a47dea2345c1d6e, type: 3}
+  - {fileID: -468656823, guid: e0ca1e9d33cbaf046a47dea2345c1d6e, type: 3}
+  - {fileID: 650631555, guid: e0ca1e9d33cbaf046a47dea2345c1d6e, type: 3}
+  SpritesGrowthStages:
+  - {fileID: 403500988, guid: 739f0f5b712ab0d46ab33f0749953342, type: 3}
+  - {fileID: -548139693, guid: 739f0f5b712ab0d46ab33f0749953342, type: 3}
+  - {fileID: -880720092, guid: 739f0f5b712ab0d46ab33f0749953342, type: 3}
+  - {fileID: 759392744, guid: 739f0f5b712ab0d46ab33f0749953342, type: 3}
+  - {fileID: 542983427, guid: 739f0f5b712ab0d46ab33f0749953342, type: 3}

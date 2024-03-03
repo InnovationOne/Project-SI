@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Pistachio
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 3
+  DaysToGrow: 10
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: f3be53ab782f06246a9fa9bd2de03610, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 8
+  SeasonsToGrow: 02000000
+  MinItemAmountToSpawn: 4
+  MaxItemAmountToSpawn: 6
+  TimeGrowthStages: 0300000006000000
+  DeadSpritesGrowthStages:
+  - {fileID: 1952599497, guid: 4c34eaf134e9dc04ea9becff7f5dc74f, type: 3}
+  - {fileID: -1264801978, guid: 4c34eaf134e9dc04ea9becff7f5dc74f, type: 3}
+  - {fileID: 1993946531, guid: 4c34eaf134e9dc04ea9becff7f5dc74f, type: 3}
+  - {fileID: -268739111, guid: 4c34eaf134e9dc04ea9becff7f5dc74f, type: 3}
+  - {fileID: 708288125, guid: 4c34eaf134e9dc04ea9becff7f5dc74f, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -1916923079, guid: 3fbefea005390514cb145c664c9ea04f, type: 3}
+  - {fileID: 1919019480, guid: 3fbefea005390514cb145c664c9ea04f, type: 3}
+  - {fileID: -662344834, guid: 3fbefea005390514cb145c664c9ea04f, type: 3}
+  - {fileID: 1622868791, guid: 3fbefea005390514cb145c664c9ea04f, type: 3}
+  - {fileID: -1033434784, guid: 3fbefea005390514cb145c664c9ea04f, type: 3}
+  - {fileID: -769273423, guid: 3fbefea005390514cb145c664c9ea04f, type: 3}

@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Brussels Sprouts
+  m_EditorClassIdentifier: 
+  CropID: 11
+  CropRarity: 3
+  DaysToGrow: 13
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: f4a2f505706ef6a4badcf888711e9a34, type: 2}
+  LeavesHole: 1
+  IsHarvestedByScythe: 0
+  CanRegrow: 0
+  DaysToRegrow: 0
+  SeasonsToGrow: 00000000
+  MinItemAmountToSpawn: 5
+  MaxItemAmountToSpawn: 7
+  TimeGrowthStages: 0400000008000000
+  DeadSpritesGrowthStages:
+  - {fileID: -1320196645, guid: 8f12787301fc2524b886536a169abb51, type: 3}
+  - {fileID: -1640908922, guid: 8f12787301fc2524b886536a169abb51, type: 3}
+  - {fileID: 621847475, guid: 8f12787301fc2524b886536a169abb51, type: 3}
+  - {fileID: 420167819, guid: 8f12787301fc2524b886536a169abb51, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -1438085694, guid: 47d44de5c326d8c438923dcb2faffa3e, type: 3}
+  - {fileID: 372884742, guid: 47d44de5c326d8c438923dcb2faffa3e, type: 3}
+  - {fileID: 797381002, guid: 47d44de5c326d8c438923dcb2faffa3e, type: 3}
+  - {fileID: 1496983992, guid: 47d44de5c326d8c438923dcb2faffa3e, type: 3}
+  - {fileID: -1546849022, guid: 47d44de5c326d8c438923dcb2faffa3e, type: 3}

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Hops
+  m_EditorClassIdentifier: 
+  CropID: 36
+  CropRarity: 2
+  DaysToGrow: 8
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: b734c44eb6ecb0e4a8508710b53da189, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 7
+  SeasonsToGrow: 02000000
+  MinItemAmountToSpawn: 5
+  MaxItemAmountToSpawn: 6
+  TimeGrowthStages: 0300000005000000
+  DeadSpritesGrowthStages:
+  - {fileID: 1595683452, guid: 8ce462b751f3874428afad31c2ec3e21, type: 3}
+  - {fileID: 764960139, guid: 8ce462b751f3874428afad31c2ec3e21, type: 3}
+  - {fileID: 632015917, guid: 8ce462b751f3874428afad31c2ec3e21, type: 3}
+  - {fileID: -365947681, guid: 8ce462b751f3874428afad31c2ec3e21, type: 3}
+  - {fileID: 205524326, guid: 8ce462b751f3874428afad31c2ec3e21, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -1258902323, guid: 52660b9ba6068284897ad46b34457309, type: 3}
+  - {fileID: -446753679, guid: 52660b9ba6068284897ad46b34457309, type: 3}
+  - {fileID: -685475319, guid: 52660b9ba6068284897ad46b34457309, type: 3}
+  - {fileID: 147261953, guid: 52660b9ba6068284897ad46b34457309, type: 3}
+  - {fileID: -1713044923, guid: 52660b9ba6068284897ad46b34457309, type: 3}
+  - {fileID: 296745709, guid: 52660b9ba6068284897ad46b34457309, type: 3}

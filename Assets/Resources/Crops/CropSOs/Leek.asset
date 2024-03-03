@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Leek
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 1
+  DaysToGrow: 7
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: fd1b906f5e8668b4e81111ac91e685b7, type: 2}
+  LeavesHole: 1
+  IsHarvestedByScythe: 0
+  CanRegrow: 0
+  DaysToRegrow: 0
+  SeasonsToGrow: 01000000
+  MinItemAmountToSpawn: 2
+  MaxItemAmountToSpawn: 3
+  TimeGrowthStages: 0200000004000000
+  DeadSpritesGrowthStages:
+  - {fileID: 1158246681, guid: 270f1ac4b0b7f5348bb0d43577361d92, type: 3}
+  - {fileID: -1167204585, guid: 270f1ac4b0b7f5348bb0d43577361d92, type: 3}
+  - {fileID: -706595005, guid: 270f1ac4b0b7f5348bb0d43577361d92, type: 3}
+  - {fileID: -1998826675, guid: 270f1ac4b0b7f5348bb0d43577361d92, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -294704508, guid: 5b0c045c0f033ff4ea500bdb4b50ff2b, type: 3}
+  - {fileID: -2085135263, guid: 5b0c045c0f033ff4ea500bdb4b50ff2b, type: 3}
+  - {fileID: -1912982974, guid: 5b0c045c0f033ff4ea500bdb4b50ff2b, type: 3}
+  - {fileID: 602914576, guid: 5b0c045c0f033ff4ea500bdb4b50ff2b, type: 3}
+  - {fileID: 1524776606, guid: 5b0c045c0f033ff4ea500bdb4b50ff2b, type: 3}

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Red Radish
+  m_EditorClassIdentifier: 
+  CropID: 66
+  CropRarity: 1
+  DaysToGrow: 5
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 514574e1ccd052c4c9243539345d310f, type: 2}
+  LeavesHole: 1
+  IsHarvestedByScythe: 0
+  CanRegrow: 0
+  DaysToRegrow: 0
+  SeasonsToGrow: 00000000
+  MinItemAmountToSpawn: 1
+  MaxItemAmountToSpawn: 1
+  TimeGrowthStages: 0200000003000000
+  DeadSpritesGrowthStages:
+  - {fileID: 33738009, guid: 24584053627953040b9374b1f446d2a4, type: 3}
+  - {fileID: -363665552, guid: 24584053627953040b9374b1f446d2a4, type: 3}
+  - {fileID: -1044725017, guid: 24584053627953040b9374b1f446d2a4, type: 3}
+  - {fileID: -434181595, guid: 24584053627953040b9374b1f446d2a4, type: 3}
+  - {fileID: 55712717, guid: 24584053627953040b9374b1f446d2a4, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -1958125124, guid: 1878daf87be7b2e4fb0f897f198d4a53, type: 3}
+  - {fileID: 223593303, guid: 1878daf87be7b2e4fb0f897f198d4a53, type: 3}
+  - {fileID: 544748155, guid: 1878daf87be7b2e4fb0f897f198d4a53, type: 3}
+  - {fileID: -1670587971, guid: 1878daf87be7b2e4fb0f897f198d4a53, type: 3}
+  - {fileID: 1884966728, guid: 1878daf87be7b2e4fb0f897f198d4a53, type: 3}
+  - {fileID: -708832444, guid: 1878daf87be7b2e4fb0f897f198d4a53, type: 3}

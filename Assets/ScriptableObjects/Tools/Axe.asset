@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d1cd96ec5c0d0147a5f57b5da317010, type: 3}
+  m_Name: Axe
+  m_EditorClassIdentifier: 
+  ItemID: 0
+  ItemType: 0
+  ItemTypeID: 0
+  WikiType: 1
+  ItemName: Axe
+  ItemIcon: {fileID: 21300000, guid: 98cb2e1736b7d6c4fa9309f826c64ac4, type: 3}
+  ToolItemRarity:
+  - {fileID: -1657888758, guid: 131596cfdd1fe6c4396dd06938edcfee, type: 3}
+  - {fileID: -2077321883, guid: 131596cfdd1fe6c4396dd06938edcfee, type: 3}
+  - {fileID: 1450201949, guid: 131596cfdd1fe6c4396dd06938edcfee, type: 3}
+  - {fileID: 325285379, guid: 131596cfdd1fe6c4396dd06938edcfee, type: 3}
+  - {fileID: 151412386, guid: 131596cfdd1fe6c4396dd06938edcfee, type: 3}
+  - {fileID: 2136946648, guid: 131596cfdd1fe6c4396dd06938edcfee, type: 3}
+  FullDescription: 
+  ItemInfoText: 
+  FunnyText: 
+  CanBeMuseum: 0
+  IsWeapon: 0
+  Damage: 0
+  IsStackable: 0
+  MaxStackableAmount: 1
+  CanBeSold: 0
+  BuyPrice: 0
+  LowestRaritySellPrice: 0
+  CanRestoreHpOrEnergy: 0
+  LowestRarityRestoringHpAmount: 0
+  LowestRarityRestoringEnergyAmount: 0
+  IsTool: 1
+  OnGridAction:
+  - {fileID: 11400000, guid: d61de2f2323346a4cb7382b6c5ad91a1, type: 2}
+  - {fileID: 11400000, guid: 9e1953c952a6a6d4990c8535078255ca, type: 2}
+  UsageOrDamageOnAction: 010000000200000004000000080000001000000020000000
+  VolumeOrBiteRate: 
+  CatchChance: 
+  EnergyOnAction: 050000000400000003000000030000000200000001000000
+  IsSeed: 0
+  CropToGrow: {fileID: 0}
+  IsPlaceableObject: 0
+  ObjectPrefabToPlace: {fileID: 0}
+  ItemSOToPickUpObject: {fileID: 0}

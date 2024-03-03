@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Lotus Root
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 1
+  DaysToGrow: 4
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: af01c42f5c84ad5428ec6c605c74d823, type: 2}
+  LeavesHole: 1
+  IsHarvestedByScythe: 0
+  CanRegrow: 0
+  DaysToRegrow: 0
+  SeasonsToGrow: 00000000
+  MinItemAmountToSpawn: 1
+  MaxItemAmountToSpawn: 3
+  TimeGrowthStages: 0200000003000000
+  DeadSpritesGrowthStages:
+  - {fileID: -900776912, guid: 442e1ef032e2c7f42bf385887ff68d7a, type: 3}
+  - {fileID: -1763334097, guid: 442e1ef032e2c7f42bf385887ff68d7a, type: 3}
+  - {fileID: 1356344607, guid: 442e1ef032e2c7f42bf385887ff68d7a, type: 3}
+  - {fileID: -962027038, guid: 442e1ef032e2c7f42bf385887ff68d7a, type: 3}
+  SpritesGrowthStages:
+  - {fileID: 1341214030, guid: 502d2311bc814bf4993229445899e2a5, type: 3}
+  - {fileID: 292859516, guid: 502d2311bc814bf4993229445899e2a5, type: 3}
+  - {fileID: -819892002, guid: 502d2311bc814bf4993229445899e2a5, type: 3}
+  - {fileID: -1767990331, guid: 502d2311bc814bf4993229445899e2a5, type: 3}
+  - {fileID: 662041548, guid: 502d2311bc814bf4993229445899e2a5, type: 3}

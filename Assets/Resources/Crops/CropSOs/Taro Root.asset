@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Taro Root
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 1
+  DaysToGrow: 5
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: b152a93ac485bf74898f82cd5332d1e4, type: 2}
+  LeavesHole: 1
+  IsHarvestedByScythe: 0
+  CanRegrow: 0
+  DaysToRegrow: 0
+  SeasonsToGrow: 00000000
+  MinItemAmountToSpawn: 1
+  MaxItemAmountToSpawn: 1
+  TimeGrowthStages: 0200000003000000
+  DeadSpritesGrowthStages:
+  - {fileID: 949308782, guid: 07ce27bfd01c0ed47a5476196fccc1de, type: 3}
+  - {fileID: -1236681405, guid: 07ce27bfd01c0ed47a5476196fccc1de, type: 3}
+  - {fileID: 1795670175, guid: 07ce27bfd01c0ed47a5476196fccc1de, type: 3}
+  - {fileID: -1614785782, guid: 07ce27bfd01c0ed47a5476196fccc1de, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -2130222427, guid: bef0fbc3c283be44081a6cbb6d3a6ac8, type: 3}
+  - {fileID: 116895803, guid: bef0fbc3c283be44081a6cbb6d3a6ac8, type: 3}
+  - {fileID: 358911639, guid: bef0fbc3c283be44081a6cbb6d3a6ac8, type: 3}
+  - {fileID: -822430000, guid: bef0fbc3c283be44081a6cbb6d3a6ac8, type: 3}
+  - {fileID: 420362214, guid: bef0fbc3c283be44081a6cbb6d3a6ac8, type: 3}

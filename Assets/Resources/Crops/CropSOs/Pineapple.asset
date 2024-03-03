@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Pineapple
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 4
+  DaysToGrow: 14
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 9dfbc0e19df8b2340a0c6601985c985f, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 9
+  SeasonsToGrow: 00000000
+  MinItemAmountToSpawn: 1
+  MaxItemAmountToSpawn: 1
+  TimeGrowthStages: 0500000009000000
+  DeadSpritesGrowthStages:
+  - {fileID: 936502277, guid: 1667216c005305e4fb6e344520aba715, type: 3}
+  - {fileID: 526079735, guid: 1667216c005305e4fb6e344520aba715, type: 3}
+  - {fileID: 1620499940, guid: 1667216c005305e4fb6e344520aba715, type: 3}
+  - {fileID: 697043418, guid: 1667216c005305e4fb6e344520aba715, type: 3}
+  - {fileID: -880229233, guid: 1667216c005305e4fb6e344520aba715, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -1781847488, guid: 7388e15014fd36347a82e1df9038e029, type: 3}
+  - {fileID: -376010706, guid: 7388e15014fd36347a82e1df9038e029, type: 3}
+  - {fileID: 53301005, guid: 7388e15014fd36347a82e1df9038e029, type: 3}
+  - {fileID: 1053467921, guid: 7388e15014fd36347a82e1df9038e029, type: 3}
+  - {fileID: -1530561607, guid: 7388e15014fd36347a82e1df9038e029, type: 3}
+  - {fileID: 276429627, guid: 7388e15014fd36347a82e1df9038e029, type: 3}

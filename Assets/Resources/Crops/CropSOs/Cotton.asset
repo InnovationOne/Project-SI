@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Cotton
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 3
+  DaysToGrow: 12
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 905a473c970ec2c4ba3c7c54c85ceadb, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 0
+  DaysToRegrow: 0
+  SeasonsToGrow: 02000000
+  MinItemAmountToSpawn: 4
+  MaxItemAmountToSpawn: 6
+  TimeGrowthStages: 0400000008000000
+  DeadSpritesGrowthStages:
+  - {fileID: -972020447, guid: b22cea543484cf542a0b04d27c7174fc, type: 3}
+  - {fileID: 251325334, guid: b22cea543484cf542a0b04d27c7174fc, type: 3}
+  - {fileID: -148572180, guid: b22cea543484cf542a0b04d27c7174fc, type: 3}
+  - {fileID: 1923396094, guid: b22cea543484cf542a0b04d27c7174fc, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -629506881, guid: b88d948907845bd4c96f492f6474a112, type: 3}
+  - {fileID: -1296598827, guid: b88d948907845bd4c96f492f6474a112, type: 3}
+  - {fileID: -1586477292, guid: b88d948907845bd4c96f492f6474a112, type: 3}
+  - {fileID: 305239722, guid: b88d948907845bd4c96f492f6474a112, type: 3}
+  - {fileID: -1052390177, guid: b88d948907845bd4c96f492f6474a112, type: 3}

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Yellow Pumpkin
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 3
+  DaysToGrow: 15
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 7a02257532f0d16429af099f3b44b9f6, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 7
+  SeasonsToGrow: 02000000
+  MinItemAmountToSpawn: 1
+  MaxItemAmountToSpawn: 1
+  TimeGrowthStages: 050000000a000000
+  DeadSpritesGrowthStages:
+  - {fileID: 475955845, guid: 8668294f74f34294288a79e4e5d110e4, type: 3}
+  - {fileID: 1948719613, guid: 8668294f74f34294288a79e4e5d110e4, type: 3}
+  - {fileID: 717155048, guid: 8668294f74f34294288a79e4e5d110e4, type: 3}
+  - {fileID: -83162550, guid: 8668294f74f34294288a79e4e5d110e4, type: 3}
+  - {fileID: -1636014777, guid: 8668294f74f34294288a79e4e5d110e4, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -1924843648, guid: 9421fb07e3524bb498c86e33c0ad5905, type: 3}
+  - {fileID: -442357423, guid: 9421fb07e3524bb498c86e33c0ad5905, type: 3}
+  - {fileID: -368472730, guid: 9421fb07e3524bb498c86e33c0ad5905, type: 3}
+  - {fileID: 571347768, guid: 9421fb07e3524bb498c86e33c0ad5905, type: 3}
+  - {fileID: 1872752314, guid: 9421fb07e3524bb498c86e33c0ad5905, type: 3}
+  - {fileID: 1380910834, guid: 9421fb07e3524bb498c86e33c0ad5905, type: 3}

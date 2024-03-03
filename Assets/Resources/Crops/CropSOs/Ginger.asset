@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Ginger
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 2
+  DaysToGrow: 9
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: dbb060008f589114bbd2f5bbf32164d3, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 0
+  DaysToRegrow: 0
+  SeasonsToGrow: 02000000
+  MinItemAmountToSpawn: 3
+  MaxItemAmountToSpawn: 4
+  TimeGrowthStages: 0300000006000000
+  DeadSpritesGrowthStages:
+  - {fileID: 318905245, guid: 2e7e8a090c12c1c4e887aca556b82a70, type: 3}
+  - {fileID: -1168398564, guid: 2e7e8a090c12c1c4e887aca556b82a70, type: 3}
+  - {fileID: 931455244, guid: 2e7e8a090c12c1c4e887aca556b82a70, type: 3}
+  - {fileID: -1063490130, guid: 2e7e8a090c12c1c4e887aca556b82a70, type: 3}
+  SpritesGrowthStages:
+  - {fileID: 465493116, guid: 645f0afe234f1cc49bd354a96b504f81, type: 3}
+  - {fileID: -1717080796, guid: 645f0afe234f1cc49bd354a96b504f81, type: 3}
+  - {fileID: -997521669, guid: 645f0afe234f1cc49bd354a96b504f81, type: 3}
+  - {fileID: 1330044808, guid: 645f0afe234f1cc49bd354a96b504f81, type: 3}
+  - {fileID: -878177190, guid: 645f0afe234f1cc49bd354a96b504f81, type: 3}

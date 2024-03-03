@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Blackberry
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 2
+  DaysToGrow: 8
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: a5af7b7f1f10d6148921ef523f5de241, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 6
+  SeasonsToGrow: 01000000
+  MinItemAmountToSpawn: 2
+  MaxItemAmountToSpawn: 4
+  TimeGrowthStages: 0300000005000000
+  DeadSpritesGrowthStages:
+  - {fileID: 1230163037, guid: 672196e88a8d41143bef3e3ee77b524d, type: 3}
+  - {fileID: 1194976041, guid: 672196e88a8d41143bef3e3ee77b524d, type: 3}
+  - {fileID: 2063677535, guid: 672196e88a8d41143bef3e3ee77b524d, type: 3}
+  - {fileID: -106436531, guid: 672196e88a8d41143bef3e3ee77b524d, type: 3}
+  - {fileID: 1111687451, guid: 672196e88a8d41143bef3e3ee77b524d, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -535593284, guid: 69c7aacbf3421204dbe3c64f93848aec, type: 3}
+  - {fileID: 1253240959, guid: 69c7aacbf3421204dbe3c64f93848aec, type: 3}
+  - {fileID: -89152211, guid: 69c7aacbf3421204dbe3c64f93848aec, type: 3}
+  - {fileID: -2046058606, guid: 69c7aacbf3421204dbe3c64f93848aec, type: 3}
+  - {fileID: 1304664288, guid: 69c7aacbf3421204dbe3c64f93848aec, type: 3}
+  - {fileID: 1148790357, guid: 69c7aacbf3421204dbe3c64f93848aec, type: 3}

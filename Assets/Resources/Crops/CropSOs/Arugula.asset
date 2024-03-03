@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Arugula
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 1
+  DaysToGrow: 5
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 9ab271be16fe55645960bd13cb146e8e, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 3
+  SeasonsToGrow: 00000000
+  MinItemAmountToSpawn: 2
+  MaxItemAmountToSpawn: 4
+  TimeGrowthStages: 0200000003000000
+  DeadSpritesGrowthStages:
+  - {fileID: -1189898321, guid: 421ac424bbc9998459436a064fd668ff, type: 3}
+  - {fileID: 231571200, guid: 421ac424bbc9998459436a064fd668ff, type: 3}
+  - {fileID: -936317859, guid: 421ac424bbc9998459436a064fd668ff, type: 3}
+  - {fileID: 1092133045, guid: 421ac424bbc9998459436a064fd668ff, type: 3}
+  - {fileID: -1984861098, guid: 421ac424bbc9998459436a064fd668ff, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -1976751614, guid: 2f3476ba36f4bb24c9a6947c35f07b44, type: 3}
+  - {fileID: -1871598356, guid: 2f3476ba36f4bb24c9a6947c35f07b44, type: 3}
+  - {fileID: 1522796934, guid: 2f3476ba36f4bb24c9a6947c35f07b44, type: 3}
+  - {fileID: 1091846455, guid: 2f3476ba36f4bb24c9a6947c35f07b44, type: 3}
+  - {fileID: -2014228939, guid: 2f3476ba36f4bb24c9a6947c35f07b44, type: 3}
+  - {fileID: 1026929371, guid: 2f3476ba36f4bb24c9a6947c35f07b44, type: 3}

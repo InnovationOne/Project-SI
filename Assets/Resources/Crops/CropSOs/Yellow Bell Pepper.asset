@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Yellow Bell Pepper
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 1
+  DaysToGrow: 9
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 53c8abed921879f44ba56af8ac56b5f8, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 6
+  SeasonsToGrow: 01000000
+  MinItemAmountToSpawn: 2
+  MaxItemAmountToSpawn: 3
+  TimeGrowthStages: 0300000006000000
+  DeadSpritesGrowthStages:
+  - {fileID: -1279760030, guid: 2dd69d5e2110e8b4db00d3cbd98a839f, type: 3}
+  - {fileID: -1818114726, guid: 2dd69d5e2110e8b4db00d3cbd98a839f, type: 3}
+  - {fileID: 1573991810, guid: 2dd69d5e2110e8b4db00d3cbd98a839f, type: 3}
+  - {fileID: -1453259196, guid: 2dd69d5e2110e8b4db00d3cbd98a839f, type: 3}
+  - {fileID: 1381055042, guid: 2dd69d5e2110e8b4db00d3cbd98a839f, type: 3}
+  SpritesGrowthStages:
+  - {fileID: 1019087057, guid: 4cccbefadc6893d4eb5eb4adf7ae452c, type: 3}
+  - {fileID: -1632435856, guid: 4cccbefadc6893d4eb5eb4adf7ae452c, type: 3}
+  - {fileID: -89582577, guid: 4cccbefadc6893d4eb5eb4adf7ae452c, type: 3}
+  - {fileID: 1334778821, guid: 4cccbefadc6893d4eb5eb4adf7ae452c, type: 3}
+  - {fileID: -444914084, guid: 4cccbefadc6893d4eb5eb4adf7ae452c, type: 3}
+  - {fileID: 1290331425, guid: 4cccbefadc6893d4eb5eb4adf7ae452c, type: 3}

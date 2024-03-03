@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Sweet Potato
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 3
+  DaysToGrow: 9
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 9b8b0c1552038e649bf07c70d30fd027, type: 2}
+  LeavesHole: 1
+  IsHarvestedByScythe: 0
+  CanRegrow: 0
+  DaysToRegrow: 0
+  SeasonsToGrow: 02000000
+  MinItemAmountToSpawn: 3
+  MaxItemAmountToSpawn: 4
+  TimeGrowthStages: 0300000006000000
+  DeadSpritesGrowthStages:
+  - {fileID: 374046203, guid: 2896538368b34c74ba2f80722d8d979b, type: 3}
+  - {fileID: -649580646, guid: 2896538368b34c74ba2f80722d8d979b, type: 3}
+  - {fileID: 846285366, guid: 2896538368b34c74ba2f80722d8d979b, type: 3}
+  - {fileID: 1111255988, guid: 2896538368b34c74ba2f80722d8d979b, type: 3}
+  SpritesGrowthStages:
+  - {fileID: -1160795131, guid: 576753677d84b684693bf208475a3962, type: 3}
+  - {fileID: -376489481, guid: 576753677d84b684693bf208475a3962, type: 3}
+  - {fileID: 306381069, guid: 576753677d84b684693bf208475a3962, type: 3}
+  - {fileID: 553690911, guid: 576753677d84b684693bf208475a3962, type: 3}
+  - {fileID: -1330747607, guid: 576753677d84b684693bf208475a3962, type: 3}

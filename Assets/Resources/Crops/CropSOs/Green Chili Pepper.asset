@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Green Chili Pepper
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 2
+  DaysToGrow: 9
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 1af2d8a2500bd504da9790e6f2764ce4, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 6
+  SeasonsToGrow: 01000000
+  MinItemAmountToSpawn: 3
+  MaxItemAmountToSpawn: 4
+  TimeGrowthStages: 0300000006000000
+  DeadSpritesGrowthStages:
+  - {fileID: -1745603489, guid: 143e49a210483f54eb6206e553ca48cc, type: 3}
+  - {fileID: 2132094037, guid: 143e49a210483f54eb6206e553ca48cc, type: 3}
+  - {fileID: 352548799, guid: 143e49a210483f54eb6206e553ca48cc, type: 3}
+  - {fileID: -73785152, guid: 143e49a210483f54eb6206e553ca48cc, type: 3}
+  - {fileID: 768465667, guid: 143e49a210483f54eb6206e553ca48cc, type: 3}
+  SpritesGrowthStages:
+  - {fileID: 1491940935, guid: bc3233d52c928b848b7f55b562ec227d, type: 3}
+  - {fileID: 1411169415, guid: bc3233d52c928b848b7f55b562ec227d, type: 3}
+  - {fileID: 209005538, guid: bc3233d52c928b848b7f55b562ec227d, type: 3}
+  - {fileID: -284195666, guid: bc3233d52c928b848b7f55b562ec227d, type: 3}
+  - {fileID: 1050767761, guid: bc3233d52c928b848b7f55b562ec227d, type: 3}
+  - {fileID: 1810597178, guid: bc3233d52c928b848b7f55b562ec227d, type: 3}

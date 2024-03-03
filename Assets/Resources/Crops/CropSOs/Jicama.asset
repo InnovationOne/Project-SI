@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Jicama
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 4
+  DaysToGrow: 18
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 141e47568a0ad5446a10b970f8790c9d, type: 2}
+  LeavesHole: 1
+  IsHarvestedByScythe: 0
+  CanRegrow: 0
+  DaysToRegrow: 0
+  SeasonsToGrow: 00000000
+  MinItemAmountToSpawn: 2
+  MaxItemAmountToSpawn: 4
+  TimeGrowthStages: 060000000c000000
+  DeadSpritesGrowthStages:
+  - {fileID: 1551912656, guid: 32206a36833fdec42a534e2f15304715, type: 3}
+  - {fileID: 1523759966, guid: 32206a36833fdec42a534e2f15304715, type: 3}
+  - {fileID: -581681834, guid: 32206a36833fdec42a534e2f15304715, type: 3}
+  - {fileID: 1456708738, guid: 32206a36833fdec42a534e2f15304715, type: 3}
+  SpritesGrowthStages:
+  - {fileID: 866265267, guid: 551c9f8fce3758b46bd2873b40500920, type: 3}
+  - {fileID: -440612413, guid: 551c9f8fce3758b46bd2873b40500920, type: 3}
+  - {fileID: -1850070330, guid: 551c9f8fce3758b46bd2873b40500920, type: 3}
+  - {fileID: 942804772, guid: 551c9f8fce3758b46bd2873b40500920, type: 3}
+  - {fileID: 1012416218, guid: 551c9f8fce3758b46bd2873b40500920, type: 3}

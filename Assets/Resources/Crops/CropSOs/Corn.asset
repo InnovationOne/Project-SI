@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Corn
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 1
+  DaysToGrow: 7
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 30212499ac651a64ea109fbdb6d39898, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 5
+  SeasonsToGrow: 02000000
+  MinItemAmountToSpawn: 3
+  MaxItemAmountToSpawn: 4
+  TimeGrowthStages: 0200000004000000
+  DeadSpritesGrowthStages:
+  - {fileID: -2043411267, guid: 637e7a70ebb333746ba5f384ca6e1984, type: 3}
+  - {fileID: -1744481853, guid: 637e7a70ebb333746ba5f384ca6e1984, type: 3}
+  - {fileID: -581532362, guid: 637e7a70ebb333746ba5f384ca6e1984, type: 3}
+  - {fileID: -1810358015, guid: 637e7a70ebb333746ba5f384ca6e1984, type: 3}
+  - {fileID: 473323273, guid: 637e7a70ebb333746ba5f384ca6e1984, type: 3}
+  SpritesGrowthStages:
+  - {fileID: 11892417, guid: fff7f82072d87d94599620c3dc595f42, type: 3}
+  - {fileID: -2137516732, guid: fff7f82072d87d94599620c3dc595f42, type: 3}
+  - {fileID: 1956244896, guid: fff7f82072d87d94599620c3dc595f42, type: 3}
+  - {fileID: -135792309, guid: fff7f82072d87d94599620c3dc595f42, type: 3}
+  - {fileID: 379472862, guid: fff7f82072d87d94599620c3dc595f42, type: 3}
+  - {fileID: 384801705, guid: fff7f82072d87d94599620c3dc595f42, type: 3}

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Iceberg Lettuce
+  m_EditorClassIdentifier: 
+  CropID: 0
+  CropRarity: 1
+  DaysToGrow: 5
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: 0f527cb077ff31c44ab8048afba6239e, type: 2}
+  LeavesHole: 0
+  IsHarvestedByScythe: 0
+  CanRegrow: 1
+  DaysToRegrow: 3
+  SeasonsToGrow: 01000000
+  MinItemAmountToSpawn: 1
+  MaxItemAmountToSpawn: 1
+  TimeGrowthStages: 0200000003000000
+  DeadSpritesGrowthStages:
+  - {fileID: -904877477, guid: f61ae349a709f7b4b939e9e8d30a3aa2, type: 3}
+  - {fileID: -1507560554, guid: f61ae349a709f7b4b939e9e8d30a3aa2, type: 3}
+  - {fileID: -1779494151, guid: f61ae349a709f7b4b939e9e8d30a3aa2, type: 3}
+  - {fileID: 846432697, guid: f61ae349a709f7b4b939e9e8d30a3aa2, type: 3}
+  - {fileID: 1292700805, guid: f61ae349a709f7b4b939e9e8d30a3aa2, type: 3}
+  SpritesGrowthStages:
+  - {fileID: 788478921, guid: 9dead73c1c6fc02479bb3941515087d5, type: 3}
+  - {fileID: 1813400918, guid: 9dead73c1c6fc02479bb3941515087d5, type: 3}
+  - {fileID: -1175078226, guid: 9dead73c1c6fc02479bb3941515087d5, type: 3}
+  - {fileID: 1566270019, guid: 9dead73c1c6fc02479bb3941515087d5, type: 3}
+  - {fileID: -914647367, guid: 9dead73c1c6fc02479bb3941515087d5, type: 3}
+  - {fileID: 1898130667, guid: 9dead73c1c6fc02479bb3941515087d5, type: 3}

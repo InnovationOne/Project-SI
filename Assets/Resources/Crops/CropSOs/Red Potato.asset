@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
+  m_Name: Red Potato
+  m_EditorClassIdentifier: 
+  CropID: 65
+  CropRarity: 1
+  DaysToGrow: 8
+  ItemToGrowAndSpawn: {fileID: 11400000, guid: de40344eb2c0e244e874da0d903dfdcc, type: 2}
+  LeavesHole: 1
+  IsHarvestedByScythe: 0
+  CanRegrow: 0
+  DaysToRegrow: 0
+  SeasonsToGrow: 00000000
+  MinItemAmountToSpawn: 3
+  MaxItemAmountToSpawn: 4
+  TimeGrowthStages: 0300000005000000
+  DeadSpritesGrowthStages:
+  - {fileID: -1775631576, guid: cb7cfe813d684a94990f60435fa88a6c, type: 3}
+  - {fileID: -1409111765, guid: cb7cfe813d684a94990f60435fa88a6c, type: 3}
+  - {fileID: 1121493238, guid: cb7cfe813d684a94990f60435fa88a6c, type: 3}
+  - {fileID: -1730885431, guid: cb7cfe813d684a94990f60435fa88a6c, type: 3}
+  SpritesGrowthStages:
+  - {fileID: 126512573, guid: f5f6bcfdfe877384a903f26d597287bb, type: 3}
+  - {fileID: -36117469, guid: f5f6bcfdfe877384a903f26d597287bb, type: 3}
+  - {fileID: 41731294, guid: f5f6bcfdfe877384a903f26d597287bb, type: 3}
+  - {fileID: -802485227, guid: f5f6bcfdfe877384a903f26d597287bb, type: 3}
+  - {fileID: 1610853503, guid: f5f6bcfdfe877384a903f26d597287bb, type: 3}
