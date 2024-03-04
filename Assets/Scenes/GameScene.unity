@@ -12355,7 +12355,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!114 &657602736
@@ -26280,7 +26280,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 0
+  orthographic size: 7.5
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -28628,7 +28628,7 @@ SpriteRenderer:
   m_Size: {x: 1.3333334, y: 2.6666667}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &1462761538
@@ -66253,6 +66253,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: eba25e9f2c609974abdf0771815bd7ed, type: 2}
   _cropHole: {fileID: -1814234902, guid: 5a7b40c9dffd5ff479cd5289db01199b, type: 3}
   _cropsSpritePrefab: {fileID: 9079669687861950075, guid: 61380a55f8c9c5c46abfc62f4717ddaa, type: 3}
+  _cropDatabase: {fileID: 11400000, guid: f1bad354e78320f428434c301f9c6be8, type: 2}
 --- !u!114 &1582453587
 MonoBehaviour:
   m_ObjectHideFlags: 0
