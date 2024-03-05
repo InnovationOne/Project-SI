@@ -48,7 +48,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     public override void OnNetworkSpawn() {
         if (IsOwner) {
             if (LocalInstance != null) {
-                Debug.LogError("There is more than one local instance of PlayerHealthAndEnergyController in the scene!");
+                //Debug.LogError("There is more than one local instance of PlayerHealthAndEnergyController in the scene!");
                 return;
             }
             LocalInstance = this;
@@ -58,18 +58,18 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     private void FixedUpdate() {
         // While in bed regen hp and energy.
         if (_localPlayer.InBed) {
-            Debug.Log($"Player is in bed. Restored {_regenHpAmountInBed} hp and {_regenEnergyAmountInBed} energy.");
+            //Debug.Log($"Player is in bed. Restored {_regenHpAmountInBed} hp and {_regenEnergyAmountInBed} energy.");
             _currentHp += _regenHpAmountInBed;
             _currentEnergy += _regenEnergyAmountInBed;
         }
     }
 
     private void TimeAndWeatherManager_OnNextDayStarted() {
-        Debug.Log("Restored max hp for next day.");
+        //Debug.Log("Restored max hp for next day.");
         RestoreHp(_maxHp);
 
         var energyToRestore = _currentEnergy >= _maxEnergy * _minimumEnergyMultiplierForFullReset ? _maxEnergy : _maxEnergy * _energyMultiplierForNoneFullReset;
-        Debug.Log($"Restored {energyToRestore} for next day.");
+        //Debug.Log($"Restored {energyToRestore} for next day.");
         RestoreEnergy(energyToRestore);
     }
 
@@ -77,7 +77,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     #region Health
     public void RemoveHp(float amount) {
         // Log the action
-        Debug.Log("Hp removed.");
+        //Debug.Log("Hp removed.");
 
         // Deduct health
         _currentHp -= amount;
@@ -87,7 +87,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
         // Check if the player is dead
         if (_currentHp <= 0) {
-            Debug.Log("Player is dead.");
+            //Debug.Log("Player is dead.");
             // TODO: Play death animation
 
             ClearInventory();
@@ -101,14 +101,14 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
     public void RestoreHp(float amount) {
         // Log the action
-        Debug.Log("Hp restored.");
+        //Debug.Log("Hp restored.");
 
         // Increase health
         _currentHp += amount;
 
         // Ensure health doesn't exceed the maximum
         if (_currentHp > _maxHp) {
-            Debug.Log("Max Hp reached.");
+            //Debug.Log("Max Hp reached.");
             _currentHp = _maxHp;
         }
 
@@ -121,13 +121,13 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     }
 
     private void ClearInventory() {
-        Debug.Log("Cleared inventory.");
+        //Debug.Log("Cleared inventory.");
         // Clear the player's inventory
         //GetComponent<PlayerInventoryController>().InventoryContainer.slots.Clear();
     }
 
     private void RespawnPlayer() {
-        Debug.Log("Set player to hospital position and set hp.");
+        //Debug.Log("Set player to hospital position and set hp.");
         transform.position = _hospitalRespawnPosition;
         _currentHp = _hpAtRespawn;
 
@@ -136,7 +136,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
     public void ChangeMaxHp(int newMaxHp) {
         // Log the action
-        Debug.Log("Max Hp changed.");
+        //Debug.Log("Max Hp changed.");
 
         // Update maximum health
         _maxHp = newMaxHp;
@@ -155,7 +155,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     #region Energy
     public void RemoveEnergy(float amount) {
         // Log the action
-        Debug.Log("Energy removed.");
+        //Debug.Log("Energy removed.");
 
         // Deduct energy
         _currentEnergy -= amount;
@@ -165,7 +165,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
         // Check if the player is exhausted
         if (_currentEnergy <= 0) {
-            Debug.Log("Player is exhausted.");
+            //Debug.Log("Player is exhausted.");
 
             // TODO: Play exhausted animation
 
@@ -176,14 +176,14 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     }
 
     public void RestoreEnergy(float amount) {
-        Debug.Log("Energy restored.");
+        //Debug.Log("Energy restored.");
 
         // Increase energy
         _currentEnergy += amount;
 
         // Ensure energy doesn't exceed the maximum
         if (_currentEnergy > _maxEnergy) {
-            Debug.Log("Max energy reached.");
+            //Debug.Log("Max energy reached.");
             _currentEnergy = _maxEnergy;
         }
 
@@ -196,7 +196,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     }
 
     public void ChangeMaxEnergy(int newMaxEnergy) {
-        Debug.Log("Max Energy changed.");
+        //Debug.Log("Max Energy changed.");
 
         // Update maximum energy
         _maxEnergy = newMaxEnergy;

@@ -20,7 +20,7 @@ public class PlayerMarkerController : NetworkBehaviour {
     // Area Marker Params
     private bool _useAreaIndicator;
     private float _currentChangeSizeTimer;
-    private int _currentToolRarity;
+    private int _currentToolMaxRarity;
     private int _currentlyUsedRarity;
     private int _energyCost;
     private int[] _areaSizes;
@@ -68,8 +68,11 @@ public class PlayerMarkerController : NetworkBehaviour {
     }
 
     private void PlayerToolbeltController_OnToolbeltChanged() {
-        EnableMoveSpeed();
-        _useAreaIndicator = false;
+        if (_useAreaIndicator) {
+            _useAreaIndicator = false;
+            ResetMarkerTiles();
+            EnableMoveSpeed();
+        }
     }
 
 
@@ -83,8 +86,10 @@ public class PlayerMarkerController : NetworkBehaviour {
             transform.position.x + _boxCollider2D.offset.x + lastMotionVector.x,
             transform.position.y + _boxCollider2D.offset.y + lastMotionVector.y);
 
+        Debug.Log(_useAreaIndicator);
         if (_useAreaIndicator) {
             UseAreaMarker(_tilemapManager.GetGridPosition(position), lastMotionVector);
+            _lastCellPosition = Vector3Int.zero;
         } else {
             ShowMarker(_tilemapManager.GetGridPosition(position));
         }
@@ -92,13 +97,14 @@ public class PlayerMarkerController : NetworkBehaviour {
 
 
     #region Area Marker
-    public void WantToPlowWaterTile(int toolRarity, int[] areaSizes, int energyCost, ToolTypes toolType) {
-        _currentToolRarity = toolRarity;
+    public void TriggerAreaMarker(int toolRarity, int[] areaSizes, int energyCost, ToolTypes toolType) {
+        _currentChangeSizeTimer = 0f;
+        _currentlyUsedRarity = 0;
+        _currentToolMaxRarity = toolRarity;
         _areaSizes = areaSizes;
         _energyCost = energyCost;
         _useAreaIndicator = true;
         _toolType = toolType;
-
         _playerMovementController.SetMoveAndRunSpeed(false);
     }
 
@@ -108,7 +114,6 @@ public class PlayerMarkerController : NetworkBehaviour {
 
         if (Input.GetMouseButtonUp(0)) {
             _useAreaIndicator = false;
-
             ProcessToolAction();
             ResetMarkerTiles();
             EnableMoveSpeed();
@@ -127,16 +132,9 @@ public class PlayerMarkerController : NetworkBehaviour {
                 Debug.LogError("No valid tool type.");
                 break;
         }
-
-        _currentChangeSizeTimer = 0f;
-        _currentlyUsedRarity = 0;
     }
 
-    private void ResetMarkerTiles() {
-        foreach (var cell in _areaPositions) {
-            SetTile(cell);
-        }
-    }
+    
 
     private void EnableMoveSpeed() {
         _playerMovementController.SetMoveAndRunSpeed(true);
@@ -156,14 +154,16 @@ public class PlayerMarkerController : NetworkBehaviour {
         MarkTilesAndAddToList(cellPositions);
     }
 
+    // Change the area size every _areaChangeSizeTimer seconds
     private void UpdateAreaSize() {
         _currentChangeSizeTimer += Time.deltaTime;
-        if (_currentChangeSizeTimer >= _areaChangeSizeTimer && _currentlyUsedRarity < _currentToolRarity) {
+        if (_currentChangeSizeTimer >= _areaChangeSizeTimer && _currentlyUsedRarity < _currentToolMaxRarity) {
             _currentChangeSizeTimer = 0f;
             _currentlyUsedRarity++;
         }
     }
 
+    // Calculate the area dimensions based on the last motion vector (horizontal or vertical)
     private void CalculateAreaDimensions(Vector2 lastMotionVector, int currentAreaSize, out int xsize, out int ysize) {
         if (lastMotionVector.x == 0) {
             xsize = currentAreaSize / 10;
@@ -192,6 +192,13 @@ public class PlayerMarkerController : NetworkBehaviour {
         return positions;
     }
 
+    private void ResetMarkerTiles() {
+        foreach (var cell in _areaPositions) {
+            SetTile(cell);
+        }
+        _areaPositions.Clear();
+    }
+
     private void MarkTilesAndAddToList(Vector3Int[,] positions) {
         foreach (var position in positions) {
             _areaPositions.Add(position);
@@ -201,7 +208,8 @@ public class PlayerMarkerController : NetworkBehaviour {
     #endregion
 
 
-    // Show the Maker on the map
+    #region Single Marker
+    // Show the single maker on the map
     private void ShowMarker(Vector3Int position) {
         MarkedCellPosition = position;
 
@@ -215,8 +223,9 @@ public class PlayerMarkerController : NetworkBehaviour {
         _lastCellPosition = MarkedCellPosition;
     }
 
-
+    // Set a tile to marker on the marker tilemap
     private void SetTile(Vector3Int position, TileBase tileBase = null) {
         _targetTilemap.SetTile(position, tileBase);
     }
+    #endregion
 }

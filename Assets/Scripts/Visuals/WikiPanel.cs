@@ -223,7 +223,7 @@ public class WikiPanel : MonoBehaviour {
     }
 
     public void OnLeftClick(int buttonID) {
-        ShowDetailedItem(_itemDatabase.GetItem(buttonID));
+        ShowDetailedItem(_itemDatabase.GetItemFromItemId(buttonID));
         _lastWikiItemID = buttonID;
     }
 

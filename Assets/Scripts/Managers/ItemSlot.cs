@@ -14,7 +14,7 @@ public class ItemSlot {
     }
 
     public ItemSlot(int itemID, int amount, int rarityID) {
-        var item = ItemManager.Instance.ItemDatabase.GetItem(itemID);
+        var item = ItemManager.Instance.ItemDatabase.GetItemFromItemId(itemID);
 
         Item = item;
         Amount = amount;
@@ -22,7 +22,7 @@ public class ItemSlot {
     }
 
     public void Set(int itemID, int amount, int rarityID) {
-        var item = ItemManager.Instance.ItemDatabase.GetItem(itemID);
+        var item = ItemManager.Instance.ItemDatabase.GetItemFromItemId(itemID);
 
         Item = item;
         Amount = amount;
@@ -30,7 +30,7 @@ public class ItemSlot {
     }
 
     public void Copy(int itemID, int amount, int rarityID) {
-        var item = ItemManager.Instance.ItemDatabase.GetItem(itemID);
+        var item = ItemManager.Instance.ItemDatabase.GetItemFromItemId(itemID);
 
         Item = item;
         Amount = amount;

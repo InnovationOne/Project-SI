@@ -15,8 +15,6 @@ public class ItemDatabaseSO : ScriptableObject {
         }).ToList();
     }
 
-
-
     public void SetItemTypeID() {
         var sortedItems = Items
             .OrderBy(x => x.ItemType)
@@ -48,7 +46,7 @@ public class ItemDatabaseSO : ScriptableObject {
         }
     }
 
-    public ItemSO GetItem(int itemID) {
+    public ItemSO GetItemFromItemId(int itemID) {
         return Items.Find(itemSO => itemSO.ItemID == itemID);
     }
 }

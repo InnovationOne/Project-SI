@@ -1,6 +1,5 @@
 using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -14,17 +13,6 @@ using UnityEngine.Tilemaps;
 public class CropsManager : NetworkBehaviour, IDataPersistance {
     public static CropsManager Instance { get; private set; }
 
-    [Header("Debug: Crop Unit Test")]
-    [SerializeField] private bool _initCropUnitTest = false;
-    [ConditionalHide("_initCropUnitTest", true)]
-    [SerializeField] private bool _testCropAlive = true;
-    [ConditionalHide("_initCropUnitTest", true)]
-    [SerializeField] private bool _testCropDead = true;
-    [ConditionalHide("_initCropUnitTest", true)]
-    [SerializeField] private int _testCropMultiplier = 1;
-    private const int MAX_SPRITE_SIZE = 7;
-    private const int UNIT_TEST_X_POS = 40;
-
     [Header("Debug: Save and Load")]
     [SerializeField] private bool _saveCrops = true;
     [SerializeField] private bool _loadCrops = true;
@@ -34,7 +22,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [SerializeField] private int _notWateredDamage = 25; //Damage applied to the crop if not watered
     [SerializeField] private int _maxCropDamage = 100;
     [SerializeField] private int _probabilityToDeleteUnseededTile = 25; //Chance in percent to delete unseeded tile
-    [SerializeField] private int[] _probabilityToSpawnRarity = { 50, 30, 15, 5 }; //50% common, 30% rare, 15% epic, 5% legendary
+    [SerializeField] private int[] _probabilityToSpawnRarity = { 30, 15, 5 }; //30% rare, 15% epic, 5% legendary
 
     [Header("Reference: TileBases")]
     [SerializeField] private RuleTile _dirtDry;
@@ -50,12 +38,12 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [SerializeField] private HarvestCrop _cropsSpritePrefab;
 
     private Tilemap _targetTilemap;
-    [SerializeField] private CropDatabase _cropDatabase;
+    [SerializeField] private CropDatabaseSO _cropDatabase;
     private CropTileContainer _cropTileContainer;
     private TilemapManager _tilemapReadManager;
     private PlaceableObjectsManager _placeableObjectsManager;
 
-    private const int TRANSFER_BATCH_SIZE = 100;
+    private const int TRANSFER_BATCH_SIZE = 80;
 
 
     /// <summary>
@@ -108,12 +96,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         if (IsServer) {
             // Subscribe to the event triggered when a client is connected to the network
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_OnClientConnected;
-        }
-
-        // Check if the crop unit test flag is set to true
-        if (_initCropUnitTest) {
-            // Run the crop unit test
-            CropUnitTest();
         }
     }
 
@@ -226,7 +208,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Iterate over each crop in the crop tiles
         foreach (int crop in _cropTileContainer.CropTiles.Select(tile => tile.CropId).Where(crop => crop >= 0)) {
             // Add the seasons in which the crop can grow to the hash set
-            seasonsToSurvive.UnionWith(_cropDatabase.GetCropFromCropId(crop).SeasonsToGrow);
+            seasonsToSurvive.UnionWith(_cropDatabase.GetCropSOFromCropId(crop).SeasonsToGrow);
         }
 
         // Return the hash set of seasons
@@ -282,7 +264,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
                     // Otherwise, update the alive crop tile
                     UpdateAliveCropTile(cropTile);
                 }
-
                 // Visualize the changes to the crop
                 VisualizeCropChanges(cropTile);
             }
@@ -329,7 +310,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="cropTile">The crop tile to update.</param>
     private void UpdateDeadCropTile(CropTile cropTile) {
         // If the crop stage of the crop tile is 0
-        if (cropTile.GetCropStage(_cropDatabase.GetCropFromCropId(cropTile.CropId)) == 0) {
+        if (cropTile.GetCropStage(_cropDatabase.GetCropSOFromCropId(cropTile.CropId)) == 0) {
             // Reset the crop tile
             cropTile.ResetCropTile();
         }
@@ -341,9 +322,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="cropTile">The crop tile to update.</param>
     private void UpdateAliveCropTile(CropTile cropTile) {
         // If the crop in the crop tile is not done growing
-        if (!cropTile.IsCropDoneGrowing(_cropDatabase.GetCropFromCropId(cropTile.CropId))) {
+        if (!cropTile.IsCropDoneGrowing(_cropDatabase.GetCropSOFromCropId(cropTile.CropId))) {
             // Increment the current grow timer of the crop tile
-            cropTile.CurrentGrowTimer++;
+            cropTile.CurrentGrowthTimer++;
         }
     }
 
@@ -405,13 +386,23 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     /// <param name="cropTile">The crop tile to visualize.</param>
     private void VisualizeCropChanges(CropTile cropTile) {
+        if (cropTile == null) {
+            Debug.LogError("CropTile ist null.");
+            return;
+        }
+        if (cropTile.CropId < 0) {
+            Debug.LogError($"At {cropTile.CropPosition}, CropId is -1");
+            return;
+        }
+
+        CropSO cropSO = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);
         // If the crop is dead and its stage is not 0
-        if (cropTile.IsDead(cropTile, _maxCropDamage) && cropTile.GetCropStage(_cropDatabase.GetCropFromCropId(cropTile.CropId)) != 0) {
+        if (cropTile.IsDead(cropTile, _maxCropDamage) && cropTile.GetCropStage(cropSO) != 0) {
             // Set the sprite of the crop tile to the corresponding dead sprite
-            cropTile.SpriteRenderer.sprite = _cropDatabase.GetCropFromCropId(cropTile.CropId).DeadSpritesGrowthStages[cropTile.GetCropStage(_cropDatabase.GetCropFromCropId(cropTile.CropId)) - 1];
+            cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = cropSO.DeadSpritesGrowthStages[cropTile.GetCropStage(cropSO) - 1];
         } else {
             // Otherwise, set the sprite of the crop tile to the corresponding growth stage sprite
-            cropTile.SpriteRenderer.sprite = _cropDatabase.GetCropFromCropId(cropTile.CropId).SpritesGrowthStages[cropTile.GetCropStage(_cropDatabase.GetCropFromCropId(cropTile.CropId))];
+            cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = cropSO.SpritesGrowthStages[cropTile.GetCropStage(cropSO)];
         }
     }
 
@@ -424,15 +415,13 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         HarvestCrop prefab = Instantiate(_cropsSpritePrefab, transform);
         // Set the prefab of the crop tile
         cropTile.Prefab = prefab;
-        // Get the sprite renderer component of the prefab and set it to the crop tile
-        cropTile.SpriteRenderer = prefab.GetComponent<SpriteRenderer>();
 
         // Calculate the world position of the crop tile on the grid
         Vector3 worldPosition = TilemapManager.Instance.FixPositionOnGrid(_targetTilemap.CellToWorld(cropTile.CropPosition));
         // Set the position of the prefab in the world
-        cropTile.Prefab.transform.position = worldPosition + new Vector3(0, 0.5f) + new Vector3(cropTile.SpriteRendererPosition.x, cropTile.SpriteRendererPosition.y, -0.1f);
+        cropTile.Prefab.transform.position = worldPosition + new Vector3(0, 0.5f) + new Vector3(cropTile.SpriteRendererOffset.x, cropTile.SpriteRendererOffset.y, -0.1f);
         // Set the scale of the prefab
-        cropTile.Prefab.transform.localScale = cropTile.SpriteRendererScale;
+        cropTile.Prefab.transform.localScale = new Vector3(cropTile.SpriteRendererXScale, 1, 1);
         // Set the position of the crop on the prefab
         cropTile.Prefab.SetCropPosition(cropTile.CropPosition);
     }
@@ -523,7 +512,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private void PlowTileClientRpc(string canPlowTilePositionsJSON) {
         // Deserialize the JSON string back to a list of positions
         var canPlowTilePositions = JsonConvert.DeserializeObject<List<Vector3Int>>(canPlowTilePositionsJSON);
-
+        foreach (var position in canPlowTilePositions) {
+            Debug.Log($"Position: {position}");
+        }
         // For each position that can be plowed
         foreach (var position in canPlowTilePositions) {
             // Create a crop tile at the position
@@ -535,10 +526,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
     private CropTile CreateCropTile(Vector3Int position) {
         // Create a new crop tile at the given position
-        var crop = new CropTile {
-            CropPosition = position,
-        };
+        var crop = new CropTile { };
 
+        crop.CropPosition = position;
         // Get the rule tile at the given position
         RuleTile ruleTile = _targetTilemap.GetTile<RuleTile>(position);
         // If the rule tile is a wet dirt tile, set the crop tile as watered
@@ -564,7 +554,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [ServerRpc(RequireOwnership = false)]
     public void SeedTileServerRpc(Vector3Int position, int itemId, ServerRpcParams serverRpcParams = default) {
         // Check if the position is not plowed or is already seeded
-        if (!_cropTileContainer.IsPositionPlowed(position) || _cropTileContainer.IsPositionSeeded(position)) {
+        if (!_cropTileContainer.IsPositionPlowed(position) ||
+            _cropTileContainer.IsPositionSeeded(position) ||
+            ItemManager.Instance.ItemDatabase.Items[itemId].CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason)) {
             // If it is, handle the client callback and return
             HandleClientCallback(serverRpcParams, false);
             return;
@@ -645,18 +637,18 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="itemId">The ID of the item associated with the crop tile.</param>
     private void InitializeCropTileSpriteRenderer(CropTile cropTile, Vector3 spriteRendererPosition, int spriteRendererScaleX, int itemId) {
         // Set the position of the sprite renderer
-        cropTile.SpriteRendererPosition = spriteRendererPosition;
-        cropTile.SpriteRenderer.transform.position += cropTile.SpriteRendererPosition;
+        cropTile.SpriteRendererOffset = spriteRendererPosition;
+        cropTile.Prefab.transform.position += (Vector3)cropTile.SpriteRendererOffset;
 
         // Set the properties of the crop tile based on the given item ID
         SetCropTileProperties(cropTile, itemId);
 
         // Set the position of the crop for harvesting
-        cropTile.SpriteRenderer.gameObject.GetComponent<HarvestCrop>().SetCropPosition(cropTile.CropPosition);
+        cropTile.Prefab.SetCropPosition(cropTile.CropPosition);
 
         // Set the scale of the sprite renderer
-        cropTile.SpriteRendererScale = new Vector3Int(spriteRendererScaleX, 1, 1);
-        cropTile.SpriteRenderer.transform.localScale = cropTile.SpriteRendererScale;
+        cropTile.SpriteRendererXScale = spriteRendererScaleX;
+        cropTile.Prefab.transform.localScale = new Vector3(cropTile.SpriteRendererXScale, 1, 1);
     }
 
     /// <summary>
@@ -667,12 +659,14 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private void SetCropTileProperties(CropTile cropTile, int itemId) {
         // Get the crop ID from the item database using the given item ID
         int cropId = ItemManager.Instance.ItemDatabase.Items[itemId].CropToGrow.CropID;
+
+        Debug.Log($"SetCropTileProperties | CropId: {cropId}");
         cropTile.CropId = cropId;
 
         // Get the crop from the crop database using the crop ID
-        CropSO crop = _cropDatabase.GetCropFromCropId(cropId);
+        CropSO crop = _cropDatabase.GetCropSOFromCropId(cropId);
         // Set the sprite of the crop tile based on its growth stage
-        cropTile.SpriteRenderer.sprite = crop.SpritesGrowthStages[cropTile.GetCropStage(crop)];
+        cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = crop.SpritesGrowthStages[cropTile.GetCropStage(crop)];
     }
     #endregion
 
@@ -729,7 +723,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <returns>True if the crop is ready to be harvested, false otherwise.</returns>
     private bool CropIsReadyToHarvest(CropTile cropTile) {
         // Get the crop from the crop database using the crop ID
-        CropSO crop = _cropDatabase.GetCropFromCropId(cropTile.CropId);
+        CropSO crop = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);
         // Check if the crop is done growing and is not dead
         return cropTile.IsCropDoneGrowing(crop) && !cropTile.IsDead(cropTile, _maxCropDamage);
     }
@@ -741,7 +735,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <returns>The calculated item count.</returns>
     private int CalculateItemCount(CropTile cropTile) {
         // Get the crop from the crop database using the crop ID
-        CropSO crop = _cropDatabase.GetCropFromCropId(cropTile.CropId);
+        CropSO crop = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);
         // Calculate the item count by generating a random number between the minimum and maximum item amount to spawn
         return UnityEngine.Random.Range(crop.MinItemAmountToSpawn, crop.MaxItemAmountToSpawn);
     }
@@ -753,14 +747,17 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private int CalculateItemRarity() {
         // Generate a random number between 0 and 100
         int itemToSpawn = UnityEngine.Random.Range(0, 100);
+        Debug.Log(_probabilityToSpawnRarity[2]);
         // Determine the rarity of the item to spawn based on the generated number and the probability to spawn rarity
-        return itemToSpawn switch {
-            int n when (n <= 100 - _probabilityToSpawnRarity[0]) => 4,
-            int n when (n <= 100 - _probabilityToSpawnRarity[1]) => 3,
-            int n when (n <= 100 - _probabilityToSpawnRarity[2]) => 2,
-            int n when (n <= 100 - _probabilityToSpawnRarity[3]) => 1,
-            _ => -1,
-        };
+        if (itemToSpawn > 100 - _probabilityToSpawnRarity[2]) {
+            return 0;
+        } else if (itemToSpawn > 100 - _probabilityToSpawnRarity[1]) {
+            return 1;
+        } else if (itemToSpawn > 100 - _probabilityToSpawnRarity[0]) {
+            return 2;
+        } else {
+            return 3;
+        }
     }
 
     /// <summary>
@@ -774,7 +771,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Get the crop tile at the given position
         CropTile cropTile = _cropTileContainer.GetCropTileAtPosition(position);
         // Get the crop from the crop database using the crop ID
-        CropSO crop = _cropDatabase.GetCropFromCropId(cropTile.CropId);
+        CropSO crop = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);
 
         // Spawn items at the position of the harvested crop
         ItemSpawnManager.Instance.SpawnItemAtPosition(
@@ -798,43 +795,13 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // If the crop can regrow, set it to regrow and adjust the grow timer
         if (crop.CanRegrow) {
             cropTile.IsRegrowing = true;
-            cropTile.CurrentGrowTimer -= crop.DaysToRegrow;
+            cropTile.CurrentGrowthTimer -= crop.DaysToRegrow;
             VisualizeCropChanges(cropTile);
         }
-        // If the crop leaves a hole, set the sprite to a hole and start the fade out coroutine
-        else if (crop.LeavesHole) {
-            cropTile.SpriteRenderer.sprite = _cropHole;
-            StartCoroutine(HarvestCropHoleFadeOutCoroutine(cropTile));
-        }
-        // If the crop does not regrow and does not leave a hole, destroy the crop tile
+        // If the crop does not regrow, destroy the crop tile
         else {
             DestroyCropTilePlantClientRpc(cropTile.CropPosition);
         }
-    }
-
-    /// <summary>
-    /// Represents an enumerator that supports iterating over a collection of elements asynchronously.
-    /// </summary>
-    /// <returns>An object that can be used to iterate over the collection.</returns>
-    private IEnumerator HarvestCropHoleFadeOutCoroutine(CropTile cropTile) {
-        // Set the duration of the fade
-        float fadeDuration = 1f;
-        float timer = 0f;
-
-        // While the timer is less than the fade duration, decrease the alpha of the sprite color
-        while (timer < fadeDuration) {
-            float alpha = 1f - (timer / fadeDuration);
-            Color spriteColor = cropTile.SpriteRenderer.color;
-            spriteColor.a = alpha;
-            cropTile.SpriteRenderer.color = spriteColor;
-
-            // Increment the timer by the time since the last frame
-            timer += Time.deltaTime;
-            yield return null;
-        }
-
-        // After the fade is complete, destroy the crop tile
-        DestroyCropTilePlantClientRpc(cropTile.CropPosition);
     }
     #endregion
 
@@ -1013,15 +980,14 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
             // If the crop is not watered, increase its damage.
             // If the crop is watered and its damage is greater than 0, decrease its damage.
-            cropTile.Damage = (!cropTile.IsWatered) ? cropTile.Damage + _notWateredDamage : (cropTile.Damage > 0) ? cropTile.Damage - _notWateredDamage : default;
+            cropTile.Damage = !cropTile.IsWatered ? cropTile.Damage + _notWateredDamage : cropTile.Damage = 0;
 
             // Generate a random number and check if the crop will die based on its damage.
             if (UnityEngine.Random.Range(0, _maxCropDamage) < cropTile.Damage) {
                 cropTile.Damage = _maxCropDamage;
             }
 
-            // Mark the tile as not watered after processing.
-            cropTile.IsWatered = false;
+            cropTile.IsWatered = UnityEngine.Random.Range(0, 100) < cropTile.KeepWateredScaler * 100 ? true : false;
 
             // Visualize the changes to the tile.
             VisualizeTileChanges(cropTile);
@@ -1093,7 +1059,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         int itemRarity = CalculateItemRarity();
 
         // Retrieve the crop from the database
-        CropSO crop = _cropDatabase.GetCropFromCropId(cropTile.CropId);
+        CropSO crop = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);
 
         // Check if the crop is done growing and if it can be harvested by a scythe
         bool cropDoneGrowing = cropTile.IsCropDoneGrowing(crop);
@@ -1249,92 +1215,4 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     }
     #endregion
 
-
-    #region Crop Test
-    /// <summary>
-    /// Performs a unit test for the Crop Manager.
-    /// Creates crop tiles and crops based on the crop database.
-    /// Visualizes the changes in the crop tiles.
-    /// Keeps track of the number of created crops.
-    /// </summary>
-    private void CropUnitTest() {
-        // Initialize variables for the positions of alive and dead crops, the sprite offset, and the count of created crops
-        int aliveXPos = UNIT_TEST_X_POS;
-        int deadXPos = UNIT_TEST_X_POS + MAX_SPRITE_SIZE;
-        int spriteOffset = MAX_SPRITE_SIZE * 2;
-        int createdCrops = 0;
-
-        // For each multiplier, create crops for each crop in the database
-        for (int j = 0; j < _testCropMultiplier; j++) {
-            int yPosAdd = 0;
-            foreach (var cropSO in _cropDatabase.GetCropsFromDatabase()) {
-                // If the flag to test alive crops is set, create alive crops
-                if (_testCropAlive) {
-                    for (int i = 0; i < cropSO.SpritesGrowthStages.Count; i++) {
-                        // Create a new crop tile at the specified position
-                        var cropTile = new CropTile {
-                            CropPosition = new Vector3Int(aliveXPos + i, yPosAdd),
-                        };
-                        // Visualize the changes in the crop tile
-                        VisualizeTileChanges(cropTile);
-                        // Try to add the crop tile to the container
-                        _cropTileContainer.TryAddCropTileToContainer(cropTile);
-
-                        // Create a crop prefab at the crop tile
-                        CreateCropPrefab(cropTile);
-                        // Set the crop ID and sprite of the crop tile
-                        cropTile.CropId = cropSO.CropID;
-                        cropTile.SpriteRenderer.sprite = cropSO.SpritesGrowthStages[i];
-                        // Set the scale of the crop prefab
-                        cropTile.Prefab.transform.localScale = new Vector3Int(1, 1, 1);
-
-                        // Increment the count of created crops
-                        createdCrops++;
-                    }
-                }
-
-                // If the flag to test dead crops is set, create dead crops
-                if (_testCropDead) {
-                    for (int i = 0; i < cropSO.DeadSpritesGrowthStages.Count; i++) {
-                        // Create a new crop tile at the specified position
-                        var cropTile = new CropTile {
-                            CropPosition = new Vector3Int(deadXPos + i, yPosAdd),
-                        };
-                        // Visualize the changes in the crop tile
-                        VisualizeTileChanges(cropTile);
-                        // Try to add the crop tile to the container
-                        _cropTileContainer.TryAddCropTileToContainer(cropTile);
-
-                        // Create a crop prefab at the crop tile
-                        CreateCropPrefab(cropTile);
-                        // Set the crop ID and sprite of the crop tile
-                        cropTile.CropId = cropSO.CropID;
-                        cropTile.SpriteRenderer.sprite = cropSO.DeadSpritesGrowthStages[i];
-                        // Set the scale of the crop prefab
-                        cropTile.Prefab.transform.localScale = new Vector3Int(1, 1, 1);
-
-                        // Increment the count of created crops
-                        createdCrops++;
-                    }
-                }
-
-                // Increment the y position for the next crop
-                yPosAdd++;
-            }
-
-            // If both alive and dead crops are being tested, increment the x positions by the sprite offset
-            // Otherwise, increment the x positions by the unit test x position
-            if (_testCropAlive && _testCropDead) {
-                aliveXPos += spriteOffset;
-                deadXPos += spriteOffset;
-            } else {
-                aliveXPos += UNIT_TEST_X_POS;
-                deadXPos += UNIT_TEST_X_POS;
-            }
-        }
-
-        // Log the number of created crops for the unit test
-        Debug.Log("Created " + createdCrops + " crops for Crop Manager Unit Test");
-    }
-    #endregion
 }

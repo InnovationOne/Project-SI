@@ -21,15 +21,14 @@ public class GroceryStore : Store, IDataPersistance {
         _storeVisual.ClearContentBox();
 
         for (int i = 0; i < _storeContainer.Items.Count; i++) {
-            if (_storeContainer.Items[i].CropToGrow.CropRarity <= _groceryStoreLevel) {
-                // When the store is upgraded for the crops
-                foreach (TimeAndWeatherManager.SeasonName seasonName in _storeContainer.Items[i].CropToGrow.SeasonsToGrow) {
-                    if (seasonName == (TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason) {
-                        // When the season is the current season
-                        _storeVisual.SpawnStoreItemSlot(_storeContainer.Items[i]);
-                    }
+            // When the store is upgraded for the crops
+            foreach (TimeAndWeatherManager.SeasonName seasonName in _storeContainer.Items[i].CropToGrow.SeasonsToGrow) {
+                if (seasonName == (TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason) {
+                    // When the season is the current season
+                    _storeVisual.SpawnStoreItemSlot(_storeContainer.Items[i]);
                 }
             }
+
         }
     }
 

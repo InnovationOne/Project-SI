@@ -7,10 +7,8 @@ public class CropSO : ScriptableObject {
     [HideInInspector] public int CropID;
 
     [Header("Params")]
-    public int CropRarity;
     public int DaysToGrow;
     public ItemSO ItemToGrowAndSpawn;
-    public bool LeavesHole;
     public bool IsHarvestedByScythe;
     public bool CanRegrow;
     [ConditionalHide("CanRegrow", true)]
@@ -23,7 +21,6 @@ public class CropSO : ScriptableObject {
     public int MaxItemAmountToSpawn;
 
     [Header("Grow Stages")]
-    public List<int> TimeGrowthStages;
     public List<Sprite> DeadSpritesGrowthStages;
     public List<Sprite> SpritesGrowthStages;
 }

@@ -5,17 +5,20 @@ using UnityEngine;
 public class CropTile {
     public int CropId;
     public Vector3Int CropPosition;
-    public int CurrentGrowTimer;
+    public int CurrentGrowthTimer;
     public bool IsRegrowing;
     public bool IsWatered;
     public int Damage;
-    public HarvestCrop Prefab;
+    public HarvestCrop Prefab; // GameObject with HarvestCrop script and SpriteRenderer etc.
+    public Vector2 SpriteRendererOffset;
+    public int SpriteRendererXScale;
 
-    // ### Maybe delete later, since its not needed at runtime ###
-    public SpriteRenderer SpriteRenderer;
-    public Vector3 SpriteRendererPosition;
-    public Vector3Int SpriteRendererScale;
-
+    // Fertilizer
+    public float GrowthTimeScaler;
+    public float RegrowthTimeScaler;
+    public float QualityScaler;
+    public float QuantityScaler;
+    public float KeepWateredScaler;
 
     // Constructor to initialize a CropTile
     public CropTile() {
@@ -24,18 +27,22 @@ public class CropTile {
 
     // Get the current growth stage of the crop
     public int GetCropStage(CropSO crop) {
+        float growthProgress = CurrentGrowthTimer / (crop.DaysToGrow * GrowthTimeScaler);
         if (IsRegrowing && !IsCropDoneGrowing(crop)) {
             return 5;
-        } else if (CurrentGrowTimer == 0) {
-            return 0; // Seeded
-        } else {
-            for (int i = 0; i < crop.TimeGrowthStages.Count; i++) {
-                if (CurrentGrowTimer < crop.TimeGrowthStages[i]) {
-                    return i + 1;
-                }
-            }
-
+        } else if (IsCropDoneGrowing(crop)) {
             return 4;
+        } else if (growthProgress >= 0.66) {
+            return 3;
+        } else if (growthProgress >= 0.33) {
+            return 2;
+        } else if (CurrentGrowthTimer > 0) {
+            return 1;
+        } else if (CurrentGrowthTimer == 0) {
+            return 0; // Sprouted
+        } else {
+            Debug.LogError($"Crop growth stage not found! CurrentGrowTimer {CurrentGrowthTimer}");
+            return -1;
         }
     }
 
@@ -43,19 +50,21 @@ public class CropTile {
         return cropTile.Damage >= maxDamage;
     }
 
-    // Check if the crop is done growing
     public bool IsCropDoneGrowing(CropSO crop) {
-        return CurrentGrowTimer >= crop.DaysToGrow;
+        return CurrentGrowthTimer >= crop.DaysToGrow * GrowthTimeScaler;
     }
 
-    // Reset the CropTile to its initial state
     public void ResetCropTile() {
         CropId = -1;
-        CurrentGrowTimer = 0;
+        CurrentGrowthTimer = 0;
         IsRegrowing = false;
         Damage = 0;
-        SpriteRendererPosition = Vector3.zero;
-        SpriteRendererScale = Vector3Int.one;
+        Prefab = null;
+        GrowthTimeScaler = 1f;
+        RegrowthTimeScaler = 1f;
+        QualityScaler = 1f;
+        QuantityScaler = 1f;
+        KeepWateredScaler = 0f;
     }
 }
 
@@ -70,4 +79,9 @@ public class CropTileData {
     public float SpriteRendererXPosition;
     public float SpriteRendererYPosition;
     public int SpriteRendererXScale;
+    public float GrowthTimeScaler;
+    public float RegrowthTimeScaler;
+    public float QualityScaler;
+    public float QuantityScaler;
+    public float KeepWateredScaler;
 }

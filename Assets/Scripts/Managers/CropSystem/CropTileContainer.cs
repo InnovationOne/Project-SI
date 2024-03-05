@@ -1,9 +1,14 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class CropTileContainer {
-    public List<CropTile> CropTiles { get; private set; } = new List<CropTile>();
+    public List<CropTile> CropTiles { get; private set; }
+
+    public CropTileContainer() { 
+        CropTiles = new List<CropTile>();
+    }
 
     // Find a CropTile at a specific position.
     public CropTile GetCropTileAtPosition(Vector3Int position) {
@@ -17,8 +22,7 @@ public class CropTileContainer {
 
     // Check if a position is seeded (a CropTile exists with a growing crop at that position).
     public bool IsPositionSeeded(Vector3Int position) {
-        var cropTile = GetCropTileAtPosition(position);
-        return cropTile != null && cropTile.CropId >= 0;
+        return CropTiles.Any(tile => tile.CropPosition == position && tile.CropId >= 0);
     }
 
     // Try to add a CropTile to the container. Returns true if added, false otherwise.
@@ -53,12 +57,12 @@ public class CropTileContainer {
             var cropTileData = new CropTileData {
                 CropId = cropTile.CropId,
                 CropPosition = cropTile.CropPosition,
-                CurrentGrowTimer = cropTile.CurrentGrowTimer,
+                CurrentGrowTimer = cropTile.CurrentGrowthTimer,
                 IsRegrowing = cropTile.IsRegrowing,
                 Damage = cropTile.Damage,
-                SpriteRendererXPosition = cropTile.SpriteRendererPosition.x,
-                SpriteRendererYPosition = cropTile.SpriteRendererPosition.y,
-                SpriteRendererXScale = cropTile.SpriteRendererScale.x,
+                SpriteRendererXPosition = cropTile.SpriteRendererOffset.x,
+                SpriteRendererYPosition = cropTile.SpriteRendererOffset.y,
+                SpriteRendererXScale = cropTile.SpriteRendererXScale,
             };
             var cropTileJSON = JsonConvert.SerializeObject(cropTileData);
             cropsContainerJSON.Add(cropTileJSON);
@@ -74,11 +78,11 @@ public class CropTileContainer {
             cropTiles.Add(new CropTile {
                 CropId = cropTileData.CropId,
                 CropPosition = cropTileData.CropPosition,
-                CurrentGrowTimer = cropTileData.CurrentGrowTimer,
+                CurrentGrowthTimer = cropTileData.CurrentGrowTimer,
                 IsRegrowing = cropTileData.IsRegrowing,
                 Damage = cropTileData.Damage,
-                SpriteRendererPosition = new Vector3(cropTileData.SpriteRendererXPosition, cropTileData.SpriteRendererYPosition, -5),
-                SpriteRendererScale = new Vector3Int(cropTileData.SpriteRendererXScale, 1, 1),
+                SpriteRendererOffset = new Vector3(cropTileData.SpriteRendererXPosition, cropTileData.SpriteRendererYPosition, -5),
+                SpriteRendererXScale = cropTileData.SpriteRendererXScale,
             });
         }
         return cropTiles;

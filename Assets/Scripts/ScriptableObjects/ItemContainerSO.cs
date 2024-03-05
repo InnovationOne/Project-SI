@@ -33,7 +33,7 @@ public class ItemContainerSO : ScriptableObject {
         UpdateToolbeltSize();
         UpdateInventorySize();
 
-        var item = ItemManager.Instance.ItemDatabase.GetItem(itemID);
+        var item = ItemManager.Instance.ItemDatabase.GetItemFromItemId(itemID);
         int remainingAmount;
 
         if (item.IsStackable) {
@@ -50,7 +50,7 @@ public class ItemContainerSO : ScriptableObject {
     }
 
     private int AddItemToExistingItemSlot(int itemID, int amount, int rarityID, bool skipToolbelt) {
-        var item = ItemManager.Instance.ItemDatabase.GetItem(itemID);
+        var item = ItemManager.Instance.ItemDatabase.GetItemFromItemId(itemID);
 
         while (amount > 0) {
             // Look for existing item slots
@@ -73,7 +73,7 @@ public class ItemContainerSO : ScriptableObject {
     }
 
     private int AddItemToEmptyItemSlot(int itemID, int amount, int rarityID, bool skipToolbelt) {
-        var item = ItemManager.Instance.ItemDatabase.GetItem(itemID);
+        var item = ItemManager.Instance.ItemDatabase.GetItemFromItemId(itemID);
 
         while (amount > 0) {
             int emptyItemSlotIndex = -1;
@@ -111,7 +111,7 @@ public class ItemContainerSO : ScriptableObject {
         UpdateToolbeltSize();
         UpdateInventorySize();
 
-        var item = ItemManager.Instance.ItemDatabase.GetItem(itemID);
+        var item = ItemManager.Instance.ItemDatabase.GetItemFromItemId(itemID);
         int remainingAmount;
 
         if (item.IsStackable) {
@@ -128,7 +128,7 @@ public class ItemContainerSO : ScriptableObject {
     }
 
     private int CheckToAddItemToExistingItemSlot(int itemID, int amount, int rarityID, bool skipToolbelt = false) {
-        var item = ItemManager.Instance.ItemDatabase.GetItem(itemID);
+        var item = ItemManager.Instance.ItemDatabase.GetItemFromItemId(itemID);
 
         while (amount > 0) {
             // Look for existing item slots
@@ -149,7 +149,7 @@ public class ItemContainerSO : ScriptableObject {
     }
 
     private int CheckToAddItemToEmptyItemSlot(int itemID, int amount, int rarityID, bool skipToolbelt = false) {
-        var item = ItemManager.Instance.ItemDatabase.GetItem(itemID);
+        var item = ItemManager.Instance.ItemDatabase.GetItemFromItemId(itemID);
 
         while (amount > 0) {
             int emptyItemSlotIndex = -1;
@@ -220,7 +220,7 @@ public class ItemContainerSO : ScriptableObject {
 
     // This function removes the amount of an item from the item container
     private void RemoveTheItemAmount(int itemID, int amount, int rarityID) {
-        var item = ItemManager.Instance.ItemDatabase.GetItem(itemID);
+        var item = ItemManager.Instance.ItemDatabase.GetItemFromItemId(itemID);
 
         while (amount > 0) {
             // Find the item to remove

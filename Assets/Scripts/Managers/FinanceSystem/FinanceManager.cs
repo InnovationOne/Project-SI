@@ -106,7 +106,7 @@ public class FinanceManager : NetworkBehaviour, IDataPersistance {
                 // do smth else
             } else {
                 // Add the item to the inventory
-                Debug.Log($"{ItemManager.Instance.ItemDatabase.GetItem(itemId).ItemName} added for {money} money");
+                Debug.Log($"{ItemManager.Instance.ItemDatabase.GetItemFromItemId(itemId).ItemName} added for {money} money");
                 PlayerInventoryController.LocalInstance.InventoryContainer.AddItemToItemContainer(itemId, amount, rarity, false);
             }
         }
