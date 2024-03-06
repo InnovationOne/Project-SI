@@ -349,6 +349,27 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     }
     #endregion
 
+    #region Debug
+    public void SetTime(int hours, int minutes) {
+        _currentTime = hours * 3600 + minutes * 60;
+        OnUpdateUITime?.Invoke((int)GetHours(), (int)GetMinutes());
+    }
+
+    public void SetDay(int day) {
+        CurrentDay = day;
+        OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
+    }
+
+    public void SetSeason(int season) {
+        CurrentSeason = season;
+        OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
+    }
+
+    public void SetYear(int year) {
+        _currentYear = year;
+        OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
+    }
+    #endregion
 
     #region Save & Load
     public void SaveData(GameData data) {

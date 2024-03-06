@@ -56,7 +56,7 @@ public class PauseGameManager : NetworkBehaviour {
     }
 
     private void Start() {
-        InputManager.Instance.OnReturnAction += InputManager_TogglePauseGame;
+        InputManager.Instance.OnEscapeAction += InputManager_TogglePauseGame;
         InputManager.Instance.OnPauseAction += InputManager_TogglePauseGame;
 
         PauseGamePanel.Instance.OnResumeGameButtonPressed += InputManager_TogglePauseGame;

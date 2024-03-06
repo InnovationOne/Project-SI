@@ -39,7 +39,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
     private Tilemap _targetTilemap;
     [SerializeField] private CropDatabaseSO _cropDatabase;
-    private CropTileContainer _cropTileContainer;
+    public CropTileContainer CropTileContainer { get; private set; }
     private TilemapManager _tilemapReadManager;
     private PlaceableObjectsManager _placeableObjectsManager;
 
@@ -63,7 +63,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Get the Tilemap component attached to the same GameObject
         _targetTilemap = GetComponent<Tilemap>();
         // Create a new instance of CropTileContainer
-        _cropTileContainer = new CropTileContainer();
+        CropTileContainer = new CropTileContainer();
 
         // Configure the serialization settings for Vector3
         JsonConvert.DefaultSettings = () => new JsonSerializerSettings {
@@ -110,7 +110,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         var cropJsonsForTransfer = new List<string>(TRANSFER_BATCH_SIZE);
 
         // Serialize each crop tile in the crop tile container and add the JSON representation to the list
-        foreach (var cropJson in _cropTileContainer.SerializeCropTileContainer(_cropTileContainer.CropTiles)) {
+        foreach (var cropJson in CropTileContainer.SerializeCropTileContainer(CropTileContainer.CropTiles)) {
             cropJsonsForTransfer.Add(cropJson);
 
             // If the batch size is reached, send the batch of crop JSONs to the late-joining client and clear the list
@@ -188,7 +188,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         var seasonsToSurvive = GetSeasonsToSurvive();
 
         // Iterate over each crop tile
-        foreach (CropTile cropTile in _cropTileContainer.CropTiles) {
+        foreach (CropTile cropTile in CropTileContainer.CropTiles) {
             // If the crop tile has a crop and the crop cannot survive in the next season
             if (cropTile.CropId >= 0 && !seasonsToSurvive.Contains((TimeAndWeatherManager.SeasonName)nextSeasonIndex)) {
                 // Set the damage of the crop to the maximum
@@ -206,7 +206,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         var seasonsToSurvive = new HashSet<TimeAndWeatherManager.SeasonName>();
 
         // Iterate over each crop in the crop tiles
-        foreach (int crop in _cropTileContainer.CropTiles.Select(tile => tile.CropId).Where(crop => crop >= 0)) {
+        foreach (int crop in CropTileContainer.CropTiles.Select(tile => tile.CropId).Where(crop => crop >= 0)) {
             // Add the seasons in which the crop can grow to the hash set
             seasonsToSurvive.UnionWith(_cropDatabase.GetCropSOFromCropId(crop).SeasonsToGrow);
         }
@@ -239,7 +239,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [ClientRpc]
     private void ClearCropTilesContainerClientRpc() {
         // Clear the crop tiles container
-        _cropTileContainer.ClearCropTileContainer();
+        CropTileContainer.ClearCropTileContainer();
 
         // Iterate over each child of this transform
         foreach (Transform child in transform) {
@@ -253,7 +253,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     private void UpdateCropTilesOnServer() {
         // Iterate over each crop tile in the container
-        foreach (var cropTile in _cropTileContainer.CropTiles) {
+        foreach (var cropTile in CropTileContainer.CropTiles) {
             // If the crop tile has a crop
             if (cropTile.CropId >= 0) {
                 // If the crop is dead
@@ -273,7 +273,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         var cropJsonsForTransfer = new List<string>(TRANSFER_BATCH_SIZE);
 
         // Iterate over each serialized crop tile in the container
-        foreach (var cropJson in _cropTileContainer.SerializeCropTileContainer(_cropTileContainer.CropTiles)) {
+        foreach (var cropJson in CropTileContainer.SerializeCropTileContainer(CropTileContainer.CropTiles)) {
             // Add the serialized crop tile to the list
             cropJsonsForTransfer.Add(cropJson);
 
@@ -350,9 +350,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="cropsContainerJSON">The JSON string representing the crops container.</param>
     private void ReciveAndUnboxCropsContainerJSON(string cropsContainerJSON) {
         // Deserialize the crops container JSON into a list of crop tiles
-        foreach (var cropTile in _cropTileContainer.DeserializeCropTileContainer(cropsContainerJSON)) {
+        foreach (var cropTile in CropTileContainer.DeserializeCropTileContainer(cropsContainerJSON)) {
             // Try to add the crop tile to the container
-            if (_cropTileContainer.TryAddCropTileToContainer(cropTile)) {
+            if (CropTileContainer.TryAddCropTileToContainer(cropTile)) {
                 // If the crop tile has a crop
                 if (cropTile.CropId >= 0) {
                     // Create a crop prefab for the crop tile
@@ -482,7 +482,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <returns>True if the tile can be plowed, false otherwise.</returns>
     private bool CanPlowTile(Vector3Int position) {
         // Check if the position is not already plowed, if the tile at the position can be plowed, and if there is no object placed at the position
-        return !_cropTileContainer.IsPositionPlowed(position) &&
+        return !CropTileContainer.IsPositionPlowed(position) &&
                Array.IndexOf(_tilesThatCanBePlowed, _tilemapReadManager.ReturnTileBaseAtGridPosition(position)) != -1 &&
                !_placeableObjectsManager.IsPositionPlaced(position);
     }
@@ -512,9 +512,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private void PlowTileClientRpc(string canPlowTilePositionsJSON) {
         // Deserialize the JSON string back to a list of positions
         var canPlowTilePositions = JsonConvert.DeserializeObject<List<Vector3Int>>(canPlowTilePositionsJSON);
-        foreach (var position in canPlowTilePositions) {
-            Debug.Log($"Position: {position}");
-        }
         // For each position that can be plowed
         foreach (var position in canPlowTilePositions) {
             // Create a crop tile at the position
@@ -537,7 +534,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
 
         // Try to add the crop tile to the container
-        _cropTileContainer.TryAddCropTileToContainer(crop);
+        CropTileContainer.TryAddCropTileToContainer(crop);
         // Return the created crop tile
         return crop;
     }
@@ -545,18 +542,12 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
 
     #region Seed Crop Tile
-    /// <summary>
-    /// Server RPC method for seeding a tile with a crop.
-    /// </summary>
-    /// <param name="position">The position of the tile to seed.</param>
-    /// <param name="itemId">The ID of the crop item.</param>
-    /// <param name="serverRpcParams">Optional parameters for the server RPC.</param>
     [ServerRpc(RequireOwnership = false)]
-    public void SeedTileServerRpc(Vector3Int position, int itemId, ServerRpcParams serverRpcParams = default) {
+    public void SeedTileServerRpc(Vector3Int wantToSeedTilePosition, int itemId, ServerRpcParams serverRpcParams = default) {
         // Check if the position is not plowed or is already seeded
-        if (!_cropTileContainer.IsPositionPlowed(position) ||
-            _cropTileContainer.IsPositionSeeded(position) ||
-            ItemManager.Instance.ItemDatabase.Items[itemId].CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason)) {
+        if (!CropTileContainer.IsPositionPlowed(wantToSeedTilePosition) ||
+            CropTileContainer.IsPositionSeeded(wantToSeedTilePosition) ||
+            !ItemManager.Instance.ItemDatabase.Items[itemId].CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason)) {
             // If it is, handle the client callback and return
             HandleClientCallback(serverRpcParams, false);
             return;
@@ -575,7 +566,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         HandleClientCallback(serverRpcParams, true);
 
         // Call the client RPC method to seed the tile
-        SeedTileClientRpc(position, spriteRendererPosition, spriteRendererScaleX, itemId);
+        SeedTileClientRpc(wantToSeedTilePosition, spriteRendererPosition, spriteRendererScaleX, itemId);
     }
 
     /// <summary>
@@ -614,9 +605,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="spriteRendererScaleX">The X scale of the crop sprite renderer.</param>
     /// <param name="itemId">The ID of the crop item.</param>
     [ClientRpc]
-    private void SeedTileClientRpc(Vector3Int position, Vector3 spriteRendererPosition, int spriteRendererScaleX, int itemId) {
+    private void SeedTileClientRpc(Vector3Int canSeedTilePosition, Vector3 spriteRendererPosition, int spriteRendererScaleX, int itemId) {
         // Get the crop tile at the specified position
-        CropTile cropTile = _cropTileContainer.GetCropTileAtPosition(position);
+        CropTile cropTile = CropTileContainer.GetCropTileAtPosition(canSeedTilePosition);
 
         // Create the crop prefab
         CreateCropPrefab(cropTile);
@@ -706,10 +697,10 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <returns>True if the crop can be harvested, false otherwise.</returns>
     private bool CanHarvestCrop(Vector3Int gridPosition, out CropTile cropTile) {
         // Get the crop tile at the given grid position
-        cropTile = _cropTileContainer.GetCropTileAtPosition(gridPosition);
+        cropTile = CropTileContainer.GetCropTileAtPosition(gridPosition);
 
         // Check if the position is seeded and the crop is ready to harvest
-        if (!_cropTileContainer.IsPositionSeeded(gridPosition) || !CropIsReadyToHarvest(cropTile)) {
+        if (!CropTileContainer.IsPositionSeeded(gridPosition) || !CropIsReadyToHarvest(cropTile)) {
             return false;
         }
 
@@ -769,7 +760,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [ClientRpc]
     private void HarvestCropClientRpc(Vector3Int position, int itemCountToSpawn, int itemRarity) {
         // Get the crop tile at the given position
-        CropTile cropTile = _cropTileContainer.GetCropTileAtPosition(position);
+        CropTile cropTile = CropTileContainer.GetCropTileAtPosition(position);
         // Get the crop from the crop database using the crop ID
         CropSO crop = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);
 
@@ -873,7 +864,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <returns>True if the tile can be watered, false otherwise.</returns>
     private bool CanWaterTile(Vector3Int position) {
         // Check if the tile at the given position is plowed
-        return _cropTileContainer.IsPositionPlowed(position);
+        return CropTileContainer.IsPositionPlowed(position);
     }
 
     /// <summary>
@@ -890,7 +881,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Iterate over the positions of the tiles that can be watered
         foreach (var position in canPlowTilePositions) {
             // Get the crop tile at the current position
-            CropTile cropTile = _cropTileContainer.GetCropTileAtPosition(position);
+            CropTile cropTile = CropTileContainer.GetCropTileAtPosition(position);
             // Set the crop tile to be watered
             cropTile.IsWatered = true;
             // Visualize the changes to the tile
@@ -925,7 +916,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private void WaterAllCropTiles() {
         // Iterate over all crop tiles and set their watered status to true.
         // Then visualize the changes.
-        foreach (CropTile cropTile in _cropTileContainer.CropTiles) {
+        foreach (CropTile cropTile in CropTileContainer.CropTiles) {
             cropTile.IsWatered = true;
             VisualizeTileChanges(cropTile);
         }
@@ -948,7 +939,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private void DryAllCropTiles() {
         // Iterate over all crop tiles and set their watered status to false.
         // Then visualize the changes.
-        foreach (CropTile cropTile in _cropTileContainer.CropTiles) {
+        foreach (CropTile cropTile in CropTileContainer.CropTiles) {
             cropTile.IsWatered = false;
             VisualizeTileChanges(cropTile);
         }
@@ -970,7 +961,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     private void CheckIfWateredAndApplyDamage() {
         // Iterate over all crop tiles.
-        foreach (CropTile cropTile in _cropTileContainer.CropTiles) {
+        foreach (CropTile cropTile in CropTileContainer.CropTiles) {
             // If there's no crop on the tile, mark it as not watered and continue to the next tile.
             if (cropTile.CropId == -1) {
                 cropTile.IsWatered = false;
@@ -1014,7 +1005,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             case ToolTypes.Scythe:
                 // If the position is not seeded, set success to false
                 // Otherwise, harvest the crop and set success to true
-                if (!_cropTileContainer.IsPositionSeeded(position)) {
+                if (!CropTileContainer.IsPositionSeeded(position)) {
                     success = false;
                     break;
                 } else {
@@ -1025,7 +1016,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             case ToolTypes.Pickaxe:
                 // If the position is not plowed, set success to false
                 // Otherwise, pick the crop and set success to true
-                if (!_cropTileContainer.IsPositionPlowed(position)) {
+                if (!CropTileContainer.IsPositionPlowed(position)) {
                     success = false;
                     break;
                 } else {
@@ -1052,7 +1043,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="position">The position of the crop to be harvested.</param>
     private void ScytheCrop(Vector3Int position) {
         // Retrieve the crop tile at the specified position
-        CropTile cropTile = _cropTileContainer.GetCropTileAtPosition(position);
+        CropTile cropTile = CropTileContainer.GetCropTileAtPosition(position);
 
         // Calculate the item count and rarity
         int itemCount = CalculateItemCount(cropTile);
@@ -1088,7 +1079,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private void PickaxeCrop(Vector3Int position) {
         // If the position is seeded, destroy the seed
         // Otherwise, destroy the plowed tile
-        if (_cropTileContainer.IsPositionSeeded(position)) {
+        if (CropTileContainer.IsPositionSeeded(position)) {
             // Destroy seed
             DestroyCropTilePlantClientRpc(position);
         } else {
@@ -1102,9 +1093,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     /// <param name="position">The position of the crop tile.</param>
     [ClientRpc]
-    private void DestroyCropTilePlantClientRpc(Vector3Int position) {
+    public void DestroyCropTilePlantClientRpc(Vector3Int position) {
         // Retrieve the crop tile from the container
-        CropTile cropTile = _cropTileContainer.GetCropTileAtPosition(position);
+        CropTile cropTile = CropTileContainer.GetCropTileAtPosition(position);
 
         // Destroy the crop tile's prefab
         Destroy(cropTile.Prefab.gameObject);
@@ -1120,10 +1111,10 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [ClientRpc]
     private void DestroyCropTileClientRpc(Vector3Int position) {
         // Retrieve the crop tile from the container at the given position
-        CropTile cropTile = _cropTileContainer.GetCropTileAtPosition(position);
+        CropTile cropTile = CropTileContainer.GetCropTileAtPosition(position);
 
         // Remove the retrieved crop tile from the container
-        _cropTileContainer.RemoveCropTileFromContainer(cropTile);
+        CropTileContainer.RemoveCropTileFromContainer(cropTile);
 
         // Determine the appropriate tile based on whether the crop tile is watered or not
         TileBase targetTile = cropTile.IsWatered ? _dirtWet : _dirtDry;
@@ -1138,13 +1129,13 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     private void DeleteSomeUnseededTiles() {
         // Create a list of tiles to remove, which are unseeded and should be removed based on probability
-        var tilesToRemove = _cropTileContainer.CropTiles
+        var tilesToRemove = CropTileContainer.CropTiles
             .Where(cropTile => cropTile.CropId == -1 && ShouldRemoveTile())
             .ToList();
 
         // For each tile in the list, remove it from the container and set the tile at its position on the target tilemap to null
         foreach (var cropTile in tilesToRemove) {
-            _cropTileContainer.RemoveCropTileFromContainer(cropTile);
+            CropTileContainer.RemoveCropTileFromContainer(cropTile);
             _targetTilemap.SetTile(cropTile.CropPosition, null);
         }
     }
@@ -1186,7 +1177,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <returns>True if the position is seeded with a crop, false otherwise.</returns>
     public bool IsPositionSeeded(Vector3Int position) {
         // Check if the given position is seeded in the crop tile container
-        return _cropTileContainer.IsPositionSeeded(position);
+        return CropTileContainer.IsPositionSeeded(position);
     }
 
 
@@ -1198,7 +1189,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     public void SaveData(GameData data) {
         // If the flag to save crops is set, serialize the crop data and store it in the game data
         if (_saveCrops) {
-            data.CropsOnMap = JsonConvert.SerializeObject(_cropTileContainer.SerializeCropTileContainer(_cropTileContainer.CropTiles));
+            data.CropsOnMap = JsonConvert.SerializeObject(CropTileContainer.SerializeCropTileContainer(CropTileContainer.CropTiles));
         }
     }
 

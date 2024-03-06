@@ -67,7 +67,7 @@ public class InventoryMasterVisual : MonoBehaviour {
         InputManager.Instance.OnRelationAction += InputManager_OnRelationAction;
         InputManager.Instance.OnCollectionAction += InputManager_OnCollectionAction;
         InputManager.Instance.OnCharacterAction += InputManager_OnCharacterAction;
-        InputManager.Instance.OnReturnAction += InputManager_OnReturnAction;
+        InputManager.Instance.OnEscapeAction += InputManager_OnReturnAction;
 
         //_subPanels[3].GetComponent<WikiPanel>().StartForWikiVisual();
         for (int i = 1; i < _subPanels.Length; i++) {

@@ -86,7 +86,6 @@ public class PlayerMarkerController : NetworkBehaviour {
             transform.position.x + _boxCollider2D.offset.x + lastMotionVector.x,
             transform.position.y + _boxCollider2D.offset.y + lastMotionVector.y);
 
-        Debug.Log(_useAreaIndicator);
         if (_useAreaIndicator) {
             UseAreaMarker(_tilemapManager.GetGridPosition(position), lastMotionVector);
             _lastCellPosition = Vector3Int.zero;

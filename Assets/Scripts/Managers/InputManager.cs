@@ -18,7 +18,7 @@ public class InputManager : NetworkBehaviour {
     public event Action OnCharacterAction;
     public event Action OnMissionAction;
     public event Action OnMapAction;
-    public event Action OnReturnAction;
+    public event Action OnEscapeAction;
     public event Action OnPauseAction;
 
     public event Action OnToolbeltSlot1Action;
@@ -34,6 +34,9 @@ public class InputManager : NetworkBehaviour {
 
     public event Action OnLeftClickAction;
     public event Action OnRightClickAction;
+
+    public event Action OnDebugConsoleAction;
+    public event Action OnEnterAction;
 
 
     private PlayerInputActions playerInputActions;
@@ -64,7 +67,7 @@ public class InputManager : NetworkBehaviour {
 
         playerInputActions.Player.Mission.performed += Mission_performed;
         playerInputActions.Player.Map.performed += Map_performed;
-        playerInputActions.Player.Return.performed += Return_performed;
+
         playerInputActions.Player.Pause.performed += Pause_performed;
 
         playerInputActions.Player.ToolbeltSlot1.performed += ToolbeltSlot1_performed;
@@ -80,120 +83,158 @@ public class InputManager : NetworkBehaviour {
 
         playerInputActions.Player.LeftClick.performed += LeftClick_performed;
         playerInputActions.Player.RightClick.performed += RightClick_performed;
+
+        playerInputActions.Player.DebugConsole.performed += DebugConsole_performed;
+        playerInputActions.Player.Enter.performed += Enter_performed;
+        playerInputActions.Player.Escape.performed += Escape_performed;
     }
 
     private void Run_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnRunAction?.Invoke();
     }
 
     private void DropItem_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnDropItemAction?.Invoke();
     }
 
     private void Interact_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnInteractAction?.Invoke();
     }
 
     private void Inventory_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnInventoryAction?.Invoke();
     }
 
     private void Craft_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnCraftAction?.Invoke();
     }
 
     private void Relation_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnRelationAction?.Invoke();
     }
 
     private void Wiki_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnCollectionAction?.Invoke();
     }
 
     private void Character_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnCharacterAction?.Invoke();
     }
 
     private void Mission_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnMissionAction?.Invoke();
     }
 
     private void Map_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnMapAction?.Invoke();
     }
 
-    private void Return_performed(InputAction.CallbackContext obj) {
-        OnReturnAction?.Invoke();
+    private void Escape_performed(InputAction.CallbackContext obj) {
+        OnEscapeAction?.Invoke();
     }
 
     private void Pause_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnPauseAction?.Invoke();
     }
 
     private void ToolbeltSlot1_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnToolbeltSlot1Action?.Invoke();
     }
 
     private void ToolbeltSlot2_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnToolbeltSlot2Action?.Invoke();
     }
 
     private void ToolbeltSlot3_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnToolbeltSlot3Action?.Invoke();
     }
 
     private void ToolbeltSlot4_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnToolbeltSlot4Action?.Invoke();
     }
 
     private void ToolbeltSlot5_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnToolbeltSlot5Action?.Invoke();
     }
 
     private void ToolbeltSlot6_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnToolbeltSlot6Action?.Invoke();
     }
 
     private void ToolbeltSlot7_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnToolbeltSlot7Action?.Invoke();
     }
 
     private void ToolbeltSlot8_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnToolbeltSlot8Action?.Invoke();
     }
 
     private void ToolbeltSlot9_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnToolbeltSlot9Action?.Invoke();
     }
 
     private void ToolbeltSlot10_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnToolbeltSlot10Action?.Invoke();
     }
 
     private void LeftClick_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnLeftClickAction?.Invoke();
     }
 
     private void RightClick_performed(InputAction.CallbackContext obj) {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
         OnRightClickAction?.Invoke();
     }
 
+    public void DebugConsole_performed(InputAction.CallbackContext obj) {
+        OnDebugConsoleAction?.Invoke();
+    }
+
+    public void Enter_performed(InputAction.CallbackContext obj) {
+        OnEnterAction?.Invoke();
+    }
+
     public Vector2 GetMovementVectorNormalized() {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return Vector2.zero; }
         return playerInputActions.Player.Movement.ReadValue<Vector2>().normalized;
     }
 
     public Vector2 GetMouseWheelVector() {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return Vector2.zero; }
         return playerInputActions.Player.ToolbeltSlotSelect.ReadValue<Vector2>();
     }
 
     public Vector2 GetPointerPosition() {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return Vector2.zero; }
         return playerInputActions.Player.PointerPosition.ReadValue<Vector2>();
     }
 
     public bool GetShiftPressed() {
+        if (PlayerDebugController.Instance.ShowDebugConsole) { return false; }
         return playerInputActions.Player.Run.ReadValue<float>() > 0;
     }
-
 
 
     private void OnDestroy() {
@@ -207,8 +248,10 @@ public class InputManager : NetworkBehaviour {
         playerInputActions.Player.Character.performed -= Character_performed;
         playerInputActions.Player.Mission.performed -= Mission_performed;
         playerInputActions.Player.Map.performed -= Map_performed;
-        playerInputActions.Player.Return.performed -= Return_performed;
+        playerInputActions.Player.Escape.performed -= Escape_performed;
         playerInputActions.Player.Pause.performed -= Pause_performed;
+        playerInputActions.Player.DebugConsole.performed -= DebugConsole_performed;
+        playerInputActions.Player.Enter.performed -= Enter_performed;
 
         playerInputActions.Player.ToolbeltSlot1.performed -= ToolbeltSlot1_performed;
         playerInputActions.Player.ToolbeltSlot2.performed -= ToolbeltSlot2_performed;
@@ -223,5 +266,7 @@ public class InputManager : NetworkBehaviour {
 
         playerInputActions.Player.LeftClick.performed -= LeftClick_performed;
         playerInputActions.Player.RightClick.performed -= RightClick_performed;
+
+
     }
 }

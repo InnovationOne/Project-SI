@@ -116,7 +116,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
         if (!_success) {
             if (_elapsedTime >= _timeout) {
-                Debug.LogError($"{toolAction.name} | ToolAction timeout!");
+                //Debug.LogError($"{toolAction.name} | ToolAction timeout!");
             }
             // Recursilve call when tool action was unsuccessful
             StartToolAction(enumerator);

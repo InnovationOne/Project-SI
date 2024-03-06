@@ -127,7 +127,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Return"",
+                    ""name"": ""Escape"",
                     ""type"": ""Button"",
                     ""id"": ""9372f303-6fdc-48f8-a978-3dade3b13881"",
                     ""expectedControlType"": ""Button"",
@@ -269,6 +269,24 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""DebugConsole"",
+                    ""type"": ""Button"",
+                    ""id"": ""144c53cb-25c0-41e5-b659-9370647ee1a8"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Enter"",
+                    ""type"": ""Button"",
+                    ""id"": ""36414c15-293e-447c-95fd-e437a0419b66"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -433,7 +451,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard"",
-                    ""action"": ""Return"",
+                    ""action"": ""Escape"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -777,6 +795,28 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""PointerPosition"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9c4768ac-be2c-4a44-a7af-8273b305032c"",
+                    ""path"": ""<Keyboard>/f1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DebugConsole"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3e9ff987-fa3c-42ca-99cf-9e948117210e"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Enter"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -813,7 +853,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_Character = m_Player.FindAction("Character", throwIfNotFound: true);
         m_Player_Mission = m_Player.FindAction("Mission", throwIfNotFound: true);
         m_Player_Map = m_Player.FindAction("Map", throwIfNotFound: true);
-        m_Player_Return = m_Player.FindAction("Return", throwIfNotFound: true);
+        m_Player_Escape = m_Player.FindAction("Escape", throwIfNotFound: true);
         m_Player_Pause = m_Player.FindAction("Pause", throwIfNotFound: true);
         m_Player_ToolbeltSlotSelect = m_Player.FindAction("Toolbelt Slot Select", throwIfNotFound: true);
         m_Player_ToolbeltSlot1 = m_Player.FindAction("Toolbelt Slot 1", throwIfNotFound: true);
@@ -829,6 +869,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_LeftClick = m_Player.FindAction("LeftClick", throwIfNotFound: true);
         m_Player_RightClick = m_Player.FindAction("RightClick", throwIfNotFound: true);
         m_Player_PointerPosition = m_Player.FindAction("PointerPosition", throwIfNotFound: true);
+        m_Player_DebugConsole = m_Player.FindAction("DebugConsole", throwIfNotFound: true);
+        m_Player_Enter = m_Player.FindAction("Enter", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -901,7 +943,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Character;
     private readonly InputAction m_Player_Mission;
     private readonly InputAction m_Player_Map;
-    private readonly InputAction m_Player_Return;
+    private readonly InputAction m_Player_Escape;
     private readonly InputAction m_Player_Pause;
     private readonly InputAction m_Player_ToolbeltSlotSelect;
     private readonly InputAction m_Player_ToolbeltSlot1;
@@ -917,6 +959,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_LeftClick;
     private readonly InputAction m_Player_RightClick;
     private readonly InputAction m_Player_PointerPosition;
+    private readonly InputAction m_Player_DebugConsole;
+    private readonly InputAction m_Player_Enter;
     public struct PlayerActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -932,7 +976,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @Character => m_Wrapper.m_Player_Character;
         public InputAction @Mission => m_Wrapper.m_Player_Mission;
         public InputAction @Map => m_Wrapper.m_Player_Map;
-        public InputAction @Return => m_Wrapper.m_Player_Return;
+        public InputAction @Escape => m_Wrapper.m_Player_Escape;
         public InputAction @Pause => m_Wrapper.m_Player_Pause;
         public InputAction @ToolbeltSlotSelect => m_Wrapper.m_Player_ToolbeltSlotSelect;
         public InputAction @ToolbeltSlot1 => m_Wrapper.m_Player_ToolbeltSlot1;
@@ -948,6 +992,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @LeftClick => m_Wrapper.m_Player_LeftClick;
         public InputAction @RightClick => m_Wrapper.m_Player_RightClick;
         public InputAction @PointerPosition => m_Wrapper.m_Player_PointerPosition;
+        public InputAction @DebugConsole => m_Wrapper.m_Player_DebugConsole;
+        public InputAction @Enter => m_Wrapper.m_Player_Enter;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -990,9 +1036,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Map.started += instance.OnMap;
             @Map.performed += instance.OnMap;
             @Map.canceled += instance.OnMap;
-            @Return.started += instance.OnReturn;
-            @Return.performed += instance.OnReturn;
-            @Return.canceled += instance.OnReturn;
+            @Escape.started += instance.OnEscape;
+            @Escape.performed += instance.OnEscape;
+            @Escape.canceled += instance.OnEscape;
             @Pause.started += instance.OnPause;
             @Pause.performed += instance.OnPause;
             @Pause.canceled += instance.OnPause;
@@ -1038,6 +1084,12 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @PointerPosition.started += instance.OnPointerPosition;
             @PointerPosition.performed += instance.OnPointerPosition;
             @PointerPosition.canceled += instance.OnPointerPosition;
+            @DebugConsole.started += instance.OnDebugConsole;
+            @DebugConsole.performed += instance.OnDebugConsole;
+            @DebugConsole.canceled += instance.OnDebugConsole;
+            @Enter.started += instance.OnEnter;
+            @Enter.performed += instance.OnEnter;
+            @Enter.canceled += instance.OnEnter;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -1075,9 +1127,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Map.started -= instance.OnMap;
             @Map.performed -= instance.OnMap;
             @Map.canceled -= instance.OnMap;
-            @Return.started -= instance.OnReturn;
-            @Return.performed -= instance.OnReturn;
-            @Return.canceled -= instance.OnReturn;
+            @Escape.started -= instance.OnEscape;
+            @Escape.performed -= instance.OnEscape;
+            @Escape.canceled -= instance.OnEscape;
             @Pause.started -= instance.OnPause;
             @Pause.performed -= instance.OnPause;
             @Pause.canceled -= instance.OnPause;
@@ -1123,6 +1175,12 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @PointerPosition.started -= instance.OnPointerPosition;
             @PointerPosition.performed -= instance.OnPointerPosition;
             @PointerPosition.canceled -= instance.OnPointerPosition;
+            @DebugConsole.started -= instance.OnDebugConsole;
+            @DebugConsole.performed -= instance.OnDebugConsole;
+            @DebugConsole.canceled -= instance.OnDebugConsole;
+            @Enter.started -= instance.OnEnter;
+            @Enter.performed -= instance.OnEnter;
+            @Enter.canceled -= instance.OnEnter;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1171,7 +1229,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnCharacter(InputAction.CallbackContext context);
         void OnMission(InputAction.CallbackContext context);
         void OnMap(InputAction.CallbackContext context);
-        void OnReturn(InputAction.CallbackContext context);
+        void OnEscape(InputAction.CallbackContext context);
         void OnPause(InputAction.CallbackContext context);
         void OnToolbeltSlotSelect(InputAction.CallbackContext context);
         void OnToolbeltSlot1(InputAction.CallbackContext context);
@@ -1187,5 +1245,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnLeftClick(InputAction.CallbackContext context);
         void OnRightClick(InputAction.CallbackContext context);
         void OnPointerPosition(InputAction.CallbackContext context);
+        void OnDebugConsole(InputAction.CallbackContext context);
+        void OnEnter(InputAction.CallbackContext context);
     }
 }
