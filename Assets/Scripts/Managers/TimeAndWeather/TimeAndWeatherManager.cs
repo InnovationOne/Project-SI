@@ -130,12 +130,6 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     #endregion
 
     private void Update() {
-        // Debug
-        if (Input.GetKeyDown(KeyCode.L)) {
-            StartNextDay();
-        }
-
-
         // Update the time
         _currentTime += Time.deltaTime * _timeScale;
         // Check if the current time is past the time to sleep
@@ -216,7 +210,7 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
         _timeAgents.Remove(timeAgent);
     }
 
-    public void StartNextDay() {
+    private void StartNextDay() {
         InvokeTimeAgentsIfNeeded();
 
         ResetDayAndAdvanceTime();
@@ -275,10 +269,10 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     }
 
     private void UpdateUIAndInvokeEvents() {
-        GetWeatherForcast();
-        UpdateUIAndInvokeEventsClientRpc(GetTodaysGlobalLightColor());
-
         OnNextDayStarted?.Invoke();
+        GetWeatherForcast();
+        ApplyWeather();
+        UpdateUIAndInvokeEventsClientRpc(GetTodaysGlobalLightColor());
     }
 
     [ClientRpc]
@@ -308,7 +302,9 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
             // 15% chance for thunder
             _weatherForecast[2] = WeatherName.Thunder;
         }
+    }
 
+    private void ApplyWeather() {
         if (_weatherForecast[0] == WeatherName.Rain) {
             OnChangeRainIntensity?.Invoke(LIGHT_RAN_INTENSITY);
             AudioManager.Instance.SetAmbienceWeather(WeatherName.Sun);
@@ -350,24 +346,33 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     #endregion
 
     #region Debug
-    public void SetTime(int hours, int minutes) {
+    public void DebugStartNextDay() {
+        StartNextDay();
+    }
+    public void DebugSetTime(int hours, int minutes) {
         _currentTime = hours * 3600 + minutes * 60;
         OnUpdateUITime?.Invoke((int)GetHours(), (int)GetMinutes());
     }
 
-    public void SetDay(int day) {
+    public void DebugSetDay(int day) {
         CurrentDay = day;
         OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
     }
 
-    public void SetSeason(int season) {
+    public void DebugSetSeason(int season) {
         CurrentSeason = season;
         OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
     }
 
-    public void SetYear(int year) {
+    public void DebugSetYear(int year) {
         _currentYear = year;
         OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
+    }
+
+    public void DebugSetWeather(int weather) {
+        _weatherForecast[0] = (WeatherName)weather;
+        ApplyWeather();
+        UpdateUIAndInvokeEventsClientRpc(GetTodaysGlobalLightColor());
     }
     #endregion
 

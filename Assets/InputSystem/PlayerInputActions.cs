@@ -287,6 +287,24 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ArrowUp"",
+                    ""type"": ""Button"",
+                    ""id"": ""0c25133c-de17-4393-ba79-efbe1d797c67"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ArrowDown"",
+                    ""type"": ""Button"",
+                    ""id"": ""4cfaa4ec-18d0-41e4-9575-0a3fe13babce"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -817,6 +835,39 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Enter"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4539feef-074e-44f5-8a22-f2b94466b3d1"",
+                    ""path"": ""<Keyboard>/numpadEnter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Enter"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""26b4e2dd-9fb6-4ae9-a46f-87a885e918a9"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ArrowUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0815ba96-83e5-4d9d-b48b-6c6e005884f6"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ArrowDown"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -871,6 +922,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_PointerPosition = m_Player.FindAction("PointerPosition", throwIfNotFound: true);
         m_Player_DebugConsole = m_Player.FindAction("DebugConsole", throwIfNotFound: true);
         m_Player_Enter = m_Player.FindAction("Enter", throwIfNotFound: true);
+        m_Player_ArrowUp = m_Player.FindAction("ArrowUp", throwIfNotFound: true);
+        m_Player_ArrowDown = m_Player.FindAction("ArrowDown", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -961,6 +1014,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_PointerPosition;
     private readonly InputAction m_Player_DebugConsole;
     private readonly InputAction m_Player_Enter;
+    private readonly InputAction m_Player_ArrowUp;
+    private readonly InputAction m_Player_ArrowDown;
     public struct PlayerActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -994,6 +1049,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @PointerPosition => m_Wrapper.m_Player_PointerPosition;
         public InputAction @DebugConsole => m_Wrapper.m_Player_DebugConsole;
         public InputAction @Enter => m_Wrapper.m_Player_Enter;
+        public InputAction @ArrowUp => m_Wrapper.m_Player_ArrowUp;
+        public InputAction @ArrowDown => m_Wrapper.m_Player_ArrowDown;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1090,6 +1147,12 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Enter.started += instance.OnEnter;
             @Enter.performed += instance.OnEnter;
             @Enter.canceled += instance.OnEnter;
+            @ArrowUp.started += instance.OnArrowUp;
+            @ArrowUp.performed += instance.OnArrowUp;
+            @ArrowUp.canceled += instance.OnArrowUp;
+            @ArrowDown.started += instance.OnArrowDown;
+            @ArrowDown.performed += instance.OnArrowDown;
+            @ArrowDown.canceled += instance.OnArrowDown;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -1181,6 +1244,12 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Enter.started -= instance.OnEnter;
             @Enter.performed -= instance.OnEnter;
             @Enter.canceled -= instance.OnEnter;
+            @ArrowUp.started -= instance.OnArrowUp;
+            @ArrowUp.performed -= instance.OnArrowUp;
+            @ArrowUp.canceled -= instance.OnArrowUp;
+            @ArrowDown.started -= instance.OnArrowDown;
+            @ArrowDown.performed -= instance.OnArrowDown;
+            @ArrowDown.canceled -= instance.OnArrowDown;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1247,5 +1316,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnPointerPosition(InputAction.CallbackContext context);
         void OnDebugConsole(InputAction.CallbackContext context);
         void OnEnter(InputAction.CallbackContext context);
+        void OnArrowUp(InputAction.CallbackContext context);
+        void OnArrowDown(InputAction.CallbackContext context);
     }
 }

@@ -260,10 +260,12 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
                 if (cropTile.IsDead(cropTile, _maxCropDamage)) {
                     // Update the dead crop tile
                     UpdateDeadCropTile(cropTile);
+                    Debug.Log($"CropTile: {cropTile.CropId} | IsDead?: {cropTile.IsDead(cropTile, _maxCropDamage)} | Damage: {cropTile.Damage}");
                 } else {
                     // Otherwise, update the alive crop tile
                     UpdateAliveCropTile(cropTile);
                 }
+                
                 // Visualize the changes to the crop
                 VisualizeCropChanges(cropTile);
             }

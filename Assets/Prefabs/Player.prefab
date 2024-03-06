@@ -5206,7 +5206,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb4168fdbf07d0c4c905f15dfc52957d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentInventorySize: 10
+  CurrentInventorySize: 30
   InventoryContainer: {fileID: 11400000, guid: ad30eefffce794449977b1c9b488a5bf, type: 2}
 --- !u!114 &755965836529844699
 MonoBehaviour:
@@ -5248,7 +5248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7e7eca603bfb2e4b9ee69140c971dca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CurrentToolbeltSize: 5
+  CurrentToolbeltSize: 10
 --- !u!114 &7280026062797871308
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5376,3 +5376,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb68d80f2cce75745887ff42ad47f25c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CommandList: []

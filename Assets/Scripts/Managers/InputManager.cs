@@ -38,6 +38,9 @@ public class InputManager : NetworkBehaviour {
     public event Action OnDebugConsoleAction;
     public event Action OnEnterAction;
 
+    public event Action OnArrowUpAction;
+    public event Action OnArrowDownAction;
+
 
     private PlayerInputActions playerInputActions;
 
@@ -87,6 +90,9 @@ public class InputManager : NetworkBehaviour {
         playerInputActions.Player.DebugConsole.performed += DebugConsole_performed;
         playerInputActions.Player.Enter.performed += Enter_performed;
         playerInputActions.Player.Escape.performed += Escape_performed;
+
+        playerInputActions.Player.ArrowUp.performed += ArrowUp_performed;
+        playerInputActions.Player.ArrowDown.performed += ArrowDown_performed;
     }
 
     private void Run_performed(InputAction.CallbackContext obj) {
@@ -216,6 +222,14 @@ public class InputManager : NetworkBehaviour {
         OnEnterAction?.Invoke();
     }
 
+    public void ArrowUp_performed(InputAction.CallbackContext obj) {
+        OnArrowUpAction?.Invoke();
+    }
+
+    public void ArrowDown_performed(InputAction.CallbackContext obj) {
+        OnArrowDownAction?.Invoke();
+    }
+
     public Vector2 GetMovementVectorNormalized() {
         if (PlayerDebugController.Instance.ShowDebugConsole) { return Vector2.zero; }
         return playerInputActions.Player.Movement.ReadValue<Vector2>().normalized;
@@ -266,7 +280,8 @@ public class InputManager : NetworkBehaviour {
 
         playerInputActions.Player.LeftClick.performed -= LeftClick_performed;
         playerInputActions.Player.RightClick.performed -= RightClick_performed;
-
-
+        
+        playerInputActions.Player.ArrowUp.performed -= ArrowUp_performed;
+        playerInputActions.Player.ArrowDown.performed -= ArrowDown_performed;
     }
 }
