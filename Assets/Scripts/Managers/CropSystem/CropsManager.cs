@@ -22,7 +22,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [SerializeField] private int _notWateredDamage = 25; //Damage applied to the crop if not watered
     [SerializeField] private int _maxCropDamage = 100;
     [SerializeField] private int _probabilityToDeleteUnseededTile = 25; //Chance in percent to delete unseeded tile
-    [SerializeField] private int[] _probabilityToSpawnRarity = { 30, 15, 5 }; //30% rare, 15% epic, 5% legendary
+    [SerializeField] private int[] _probabilityToSpawnRarity = { 70, 20, 8, 2 }; //70% Copper, 20% Iron, 8% Gold, 2% Diamond
 
     [Header("Reference: TileBases")]
     [SerializeField] private RuleTile _dirtDry;
@@ -265,7 +265,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
                     // Otherwise, update the alive crop tile
                     UpdateAliveCropTile(cropTile);
                 }
-                
+
                 // Visualize the changes to the crop
                 VisualizeCropChanges(cropTile);
             }
@@ -325,7 +325,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private void UpdateAliveCropTile(CropTile cropTile) {
         // If the crop in the crop tile is not done growing
         if (!cropTile.IsCropDoneGrowing(_cropDatabase.GetCropSOFromCropId(cropTile.CropId))) {
-            // Increment the current grow timer of the crop tile
+            // Increment the current grow timer of the crop tile.
             cropTile.CurrentGrowthTimer++;
         }
     }
@@ -543,13 +543,84 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     #endregion
 
 
+    #region Fertilize Crop Tile
+
+    [ServerRpc(RequireOwnership = false)]
+    public void FertilizeTileServerRpc(Vector3Int wantToFertilizeTilePosition, int itemId, ServerRpcParams serverRpcParams = default) {
+        Debug.Log("Server: Try to fertilize croptile");
+
+        // Check if the position is not plowed or is already fertilized
+        if (!CropTileContainer.IsPositionPlowed(wantToFertilizeTilePosition) ||
+            !CropTileContainer.IsPositionSeeded(wantToFertilizeTilePosition) ||
+            !CropTileContainer.CanPositionBeFertilized(wantToFertilizeTilePosition, itemId)) {
+            // If it is, handle the client callback and return
+            HandleClientCallback(serverRpcParams, false);
+            Debug.Log($"Cannot Fertilize: " +
+                $"Plowed: {!CropTileContainer.IsPositionPlowed(wantToFertilizeTilePosition)}, " +
+                $"Seeded: {!CropTileContainer.IsPositionSeeded(wantToFertilizeTilePosition)}, " +
+                $"PositionCanBeFertilized {CropTileContainer.CanPositionBeFertilized(wantToFertilizeTilePosition, itemId)}");
+            return;
+        }
+
+        Debug.Log("Can Fertilize");
+
+        // Handle the reduction of the item from the sender's inventory
+        HandleItemReduction(serverRpcParams, itemId);
+
+        // Handle the client callback
+        HandleClientCallback(serverRpcParams, true);
+
+        // Call the client RPC method to fertilize the tile
+        FertilizeTileClientRpc(wantToFertilizeTilePosition, itemId);
+    }
+
+    [ClientRpc]
+    private void FertilizeTileClientRpc(Vector3Int canFertilizeTilePosition, int itemId) {
+        Debug.Log("Client: Fertilize croptile");
+        // Get the crop tile at the specified position
+        CropTile cropTile = CropTileContainer.GetCropTileAtPosition(canFertilizeTilePosition);
+        FertilizerSO fertilizerSO = ItemManager.Instance.ItemDatabase.Items[itemId] as FertilizerSO;
+        SetFertilizerValueAndSprite(cropTile, fertilizerSO);
+
+        // Visualize the changes made to the crop tile
+        VisualizeCropChanges(cropTile);
+    }
+
+    private void SetFertilizerValueAndSprite(CropTile cropTile, FertilizerSO fertilizerSO) {
+        switch (fertilizerSO.FertilizerType) {
+            case FertilizerSO.FertilizerTypes.GrowthTime:
+                cropTile.GrowthTimeScaler += fertilizerSO.FertilizerBonusValue / 100;
+                cropTile.Prefab.SetGrowthTimeFertilizerSprite(fertilizerSO.FertilizerCropTileColor);
+                break;
+            case FertilizerSO.FertilizerTypes.RegrowthTime:
+                cropTile.RegrowthTimeScaler += fertilizerSO.FertilizerBonusValue / 100;
+                cropTile.Prefab.SetRegrowthTimeFertilizerSprite(fertilizerSO.FertilizerCropTileColor);
+                break;
+            case FertilizerSO.FertilizerTypes.Quality:
+                cropTile.QualityScaler = fertilizerSO.FertilizerBonusValue;
+                cropTile.Prefab.SetQualityFertilizerSprite(fertilizerSO.FertilizerCropTileColor);
+                break;
+            case FertilizerSO.FertilizerTypes.Quantity:
+                cropTile.QuantityScaler += fertilizerSO.FertilizerBonusValue / 100;
+                cropTile.Prefab.SetQuantityFertilizerSprite(fertilizerSO.FertilizerCropTileColor);
+                break;
+            case FertilizerSO.FertilizerTypes.Water:
+                cropTile.WaterScaler += fertilizerSO.FertilizerBonusValue / 100;
+                cropTile.Prefab.SetWaterFertilizerSprite(fertilizerSO.FertilizerCropTileColor);
+                break;
+        }
+
+    }
+    #endregion
+
+
     #region Seed Crop Tile
     [ServerRpc(RequireOwnership = false)]
     public void SeedTileServerRpc(Vector3Int wantToSeedTilePosition, int itemId, ServerRpcParams serverRpcParams = default) {
         // Check if the position is not plowed or is already seeded
         if (!CropTileContainer.IsPositionPlowed(wantToSeedTilePosition) ||
             CropTileContainer.IsPositionSeeded(wantToSeedTilePosition) ||
-            !ItemManager.Instance.ItemDatabase.Items[itemId].CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason)) {
+            !(ItemManager.Instance.ItemDatabase.Items[itemId] as SeedSO).CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason)) {
             // If it is, handle the client callback and return
             HandleClientCallback(serverRpcParams, false);
             return;
@@ -651,9 +722,8 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="itemId">The ID of the item associated with the crop tile.</param>
     private void SetCropTileProperties(CropTile cropTile, int itemId) {
         // Get the crop ID from the item database using the given item ID
-        int cropId = ItemManager.Instance.ItemDatabase.Items[itemId].CropToGrow.CropID;
+        int cropId = (ItemManager.Instance.ItemDatabase.Items[itemId] as SeedSO).CropToGrow.CropID;
 
-        Debug.Log($"SetCropTileProperties | CropId: {cropId}");
         cropTile.CropId = cropId;
 
         // Get the crop from the crop database using the crop ID
@@ -682,7 +752,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Calculate the number of items to spawn when the crop is harvested
         int itemCountToSpawn = CalculateItemCount(cropTile);
         // Calculate the rarity of the items to be spawned
-        int itemRarity = CalculateItemRarity();
+        int itemRarity = CalculateItemRarity(cropTile.QualityScaler);
 
         // Handle the client callback
         HandleClientCallback(serverRpcParams, true);
@@ -729,28 +799,31 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private int CalculateItemCount(CropTile cropTile) {
         // Get the crop from the crop database using the crop ID
         CropSO crop = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);
-        // Calculate the item count by generating a random number between the minimum and maximum item amount to spawn
-        return UnityEngine.Random.Range(crop.MinItemAmountToSpawn, crop.MaxItemAmountToSpawn);
+
+        // Ensure that the product of the scaler and the item amount is treated as an integer
+        int minItems = Mathf.RoundToInt(crop.MinItemAmountToSpawn * cropTile.QuantityScaler);
+        int maxItems = Mathf.RoundToInt(crop.MaxItemAmountToSpawn * cropTile.QuantityScaler);
+
+        // Calculate the item count by generating a random number between the adjusted minimum and maximum item amount to spawn
+        return UnityEngine.Random.Range(minItems, maxItems);
     }
+
 
     /// <summary>
     /// Calculates the rarity of an item to be spawned based on the probability to spawn rarity.
     /// </summary>
     /// <returns>The rarity of the item to be spawned. Returns -1 if no rarity is determined.</returns>
-    private int CalculateItemRarity() {
+    private int CalculateItemRarity(float rarityBonus) {
         // Generate a random number between 0 and 100
-        int itemToSpawn = UnityEngine.Random.Range(0, 100);
-        Debug.Log(_probabilityToSpawnRarity[2]);
-        // Determine the rarity of the item to spawn based on the generated number and the probability to spawn rarity
-        if (itemToSpawn > 100 - _probabilityToSpawnRarity[2]) {
-            return 0;
-        } else if (itemToSpawn > 100 - _probabilityToSpawnRarity[1]) {
-            return 1;
-        } else if (itemToSpawn > 100 - _probabilityToSpawnRarity[0]) {
-            return 2;
-        } else {
-            return 3;
-        }
+        int rarityToSpawn = UnityEngine.Random.Range(0, 100);
+
+        // Determine the rarity of the item to spawn based on the probability to spawn rarity
+        return rarityToSpawn switch {
+            _ when rarityToSpawn <= _probabilityToSpawnRarity[3] + rarityBonus => 0, //e.g. rarity to spawn is 5, probability to spawn rarity is 2, bonus is 30; 5 <= 2 + 30; //5 <= 32; //=> 0
+            _ when rarityToSpawn <= _probabilityToSpawnRarity[2] + rarityBonus => 1,
+            _ when rarityToSpawn <= _probabilityToSpawnRarity[1] + rarityBonus => 2,
+            _ => 3,
+        };
     }
 
     /// <summary>
@@ -971,16 +1044,17 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
                 continue;
             }
 
-            // If the crop is not watered, increase its damage.
-            // If the crop is watered and its damage is greater than 0, decrease its damage.
-            cropTile.Damage = !cropTile.IsWatered ? cropTile.Damage + _notWateredDamage : cropTile.Damage = 0;
+            cropTile.IsWatered = UnityEngine.Random.Range(0, 100) < cropTile.WaterScaler ? true : false;
+            cropTile.WaterScaler = 0f;
+            cropTile.Prefab.SetWaterFertilizerSprite(); // Disable the sprite and set the color to white.
+
+            // If the crop is not watered, increase its damage, else decrease the damage.
+            cropTile.Damage += cropTile.IsWatered ? -_notWateredDamage : _notWateredDamage;
 
             // Generate a random number and check if the crop will die based on its damage.
             if (UnityEngine.Random.Range(0, _maxCropDamage) < cropTile.Damage) {
                 cropTile.Damage = _maxCropDamage;
             }
-
-            cropTile.IsWatered = UnityEngine.Random.Range(0, 100) < cropTile.KeepWateredScaler * 100 ? true : false;
 
             // Visualize the changes to the tile.
             VisualizeTileChanges(cropTile);
@@ -1049,7 +1123,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         // Calculate the item count and rarity
         int itemCount = CalculateItemCount(cropTile);
-        int itemRarity = CalculateItemRarity();
+        int itemRarity = CalculateItemRarity(cropTile.QualityScaler);
 
         // Retrieve the crop from the database
         CropSO crop = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);

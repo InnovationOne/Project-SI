@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -6,7 +7,7 @@ using UnityEngine;
 public class CropTileContainer {
     public List<CropTile> CropTiles { get; private set; }
 
-    public CropTileContainer() { 
+    public CropTileContainer() {
         CropTiles = new List<CropTile>();
     }
 
@@ -25,10 +26,29 @@ public class CropTileContainer {
         return CropTiles.Any(tile => tile.CropPosition == position && tile.CropId >= 0);
     }
 
+    // Checks if the position is fertilized with a specific fertilizer type.
+    public bool CanPositionBeFertilized(Vector3Int position, int itemId) {
+        FertilizerSO fertilizerSO = ItemManager.Instance.ItemDatabase.Items[itemId] as FertilizerSO;
+
+        // Check if the position can be fertilized
+        if (fertilizerSO.FertilizerType == FertilizerSO.FertilizerTypes.Water || CropTiles.Any(tile => tile.CropPosition == position && tile.CurrentGrowthTimer == 0f)) {
+            return fertilizerSO.FertilizerType switch {
+                FertilizerSO.FertilizerTypes.GrowthTime => CropTiles.Any(tile => tile.CropPosition == position && tile.GrowthTimeScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1),
+                FertilizerSO.FertilizerTypes.RegrowthTime => CropTiles.Any(tile => tile.CropPosition == position && tile.RegrowthTimeScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1),
+                FertilizerSO.FertilizerTypes.Quality => CropTiles.Any(tile => tile.CropPosition == position && tile.QualityScaler < fertilizerSO.FertilizerBonusValue),
+                FertilizerSO.FertilizerTypes.Quantity => CropTiles.Any(tile => tile.CropPosition == position && tile.QuantityScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1),
+                FertilizerSO.FertilizerTypes.Water => CropTiles.Any(tile => tile.CropPosition == position && tile.WaterScaler < (fertilizerSO.FertilizerBonusValue / 100)),
+                _ => throw new ArgumentOutOfRangeException(nameof(fertilizerSO.FertilizerType), "Unsupported fertilizer type"),
+            };
+        }
+
+        return false;
+    }
+
     // Try to add a CropTile to the container. Returns true if added, false otherwise.
     public bool TryAddCropTileToContainer(CropTile crop) {
         if (IsPositionPlowed(crop.CropPosition)) {
-            Debug.LogWarning("Cannot add a cropTile that has already been added to the crop tile container!");
+            Debug.LogError("Cannot add a cropTile that has already been added to the crop tile container!");
             return false;
         }
 
@@ -39,7 +59,7 @@ public class CropTileContainer {
     // Remove a CropTile from the container.
     public void RemoveCropTileFromContainer(CropTile crop) {
         if (!IsPositionPlowed(crop.CropPosition)) {
-            Debug.LogWarning("The crop you want to remove isn't in the CropTileContainer");
+            Debug.LogError("The crop you want to remove isn't in the CropTileContainer");
             return;
         }
 

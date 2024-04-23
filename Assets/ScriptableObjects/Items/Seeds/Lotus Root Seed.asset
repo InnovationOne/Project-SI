@@ -9,35 +9,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d1cd96ec5c0d0147a5f57b5da317010, type: 3}
+  m_Script: {fileID: 11500000, guid: 00047e703060fbd48ab540ceb5c8fcea, type: 3}
   m_Name: Lotus Root Seed
   m_EditorClassIdentifier: 
-  ItemID: 0
+  ItemID: 144
   ItemType: 5
-  ItemTypeID: 0
-  WikiType: 2
+  ItemTypeID: 47
   ItemName: Lotus Root Seed
   ItemIcon: {fileID: 21300000, guid: 152a615b58e683e4cb084cd3b790673a, type: 3}
-  ToolItemRarity: []
-  FullDescription: 
-  ItemInfoText: 
-  FunnyText: 
-  CanBeMuseum: 0
-  IsWeapon: 0
-  Damage: 0
   IsStackable: 1
-  MaxStackableAmount: 100
+  MaxStackableAmount: 99
+  CanBeBought: 1
+  BuyPrice: 170
   CanBeSold: 1
-  BuyPrice: 0
-  LowestRaritySellPrice: 0
-  CanRestoreHpOrEnergy: 0
-  LowestRarityRestoringHpAmount: 0
-  LowestRarityRestoringEnergyAmount: 0
-  OnGridAction:
+  LowestRaritySellPrice: 85
+  ItemInfoHoverText: 
+  LeftClickAction:
   - {fileID: 11400000, guid: d28c8e540d8e6ff40978661f4905f0ed, type: 2}
-  OnItemUsed: {fileID: 11400000, guid: d28c8e540d8e6ff40978661f4905f0ed, type: 2}
-  UsageOrDamageOnAction: 
-  EnergyOnAction: 
   CropToGrow: {fileID: 11400000, guid: 843d66e78017cad488a50abe16dc5ca4, type: 2}
-  ObjectPrefabToPlace: {fileID: 0}
-  ItemSOToPickUpObject: {fileID: 0}
+  MinSeedFromFruit: 1
+  MaxSeedFromFruit: 2

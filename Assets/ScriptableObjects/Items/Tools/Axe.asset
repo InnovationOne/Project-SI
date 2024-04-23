@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bba8e0c7705831442842ff6a46903f08, type: 3}
+  m_Name: Axe
+  m_EditorClassIdentifier: 
+  ItemID: 0
+  ItemType: 0
+  ItemTypeID: 1
+  ItemName: Axe
+  ItemIcon: {fileID: 21300000, guid: 98cb2e1736b7d6c4fa9309f826c64ac4, type: 3}
+  IsStackable: 0
+  MaxStackableAmount: 1
+  CanBeBought: 0
+  BuyPrice: 0
+  CanBeSold: 0
+  LowestRaritySellPrice: 0
+  ItemInfoHoverText: 
+  LeftClickAction:
+  - {fileID: 11400000, guid: d61de2f2323346a4cb7382b6c5ad91a1, type: 2}
+  ToolItemRarity:
+  - {fileID: -1657888758, guid: 131596cfdd1fe6c4396dd06938edcfee, type: 3}
+  - {fileID: -2077321883, guid: 131596cfdd1fe6c4396dd06938edcfee, type: 3}
+  - {fileID: 1450201949, guid: 131596cfdd1fe6c4396dd06938edcfee, type: 3}
+  - {fileID: 325285379, guid: 131596cfdd1fe6c4396dd06938edcfee, type: 3}
+  - {fileID: 151412386, guid: 131596cfdd1fe6c4396dd06938edcfee, type: 3}
+  - {fileID: 2136946648, guid: 131596cfdd1fe6c4396dd06938edcfee, type: 3}
+  IsWeapon: 0
+  Damage: 0
+  UsageOrDamageOnAction: 
+  VolumeOrBiteRate: 
+  CatchChance: 
+  EnergyOnAction: 000000000000000000000000000000000000000000000000

@@ -136,7 +136,7 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
         if (_dragItemSlot.Item != null) {
             _dragItemPanel.gameObject.SetActive(true);
 
-            var toolRarity = _dragItemSlot.Item.ItemType == ItemTypes.Tools ? _dragItemSlot.Item.ToolItemRarity[_dragItemSlot.RarityID - 1] : null;
+            var toolRarity = _dragItemSlot.Item.ItemType == ItemTypes.Tools ? (_dragItemSlot.Item as ToolSO).ToolItemRarity[_dragItemSlot.RarityID - 1] : null;
 
             _dragItemPanel.SetItemSlot(_dragItemSlot, toolRarity);
         } else {

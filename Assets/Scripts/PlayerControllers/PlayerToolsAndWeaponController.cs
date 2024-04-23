@@ -72,8 +72,8 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
         if (Input.GetMouseButtonDown(0)) {
             // Use weapon
-            if (itemSO.IsWeapon) {
-                WeaponAction(itemSO);
+            if (itemSO is ToolSO tool && tool.IsWeapon) {
+                WeaponAction(tool);
             }
 
             ToolAction(itemSO);
@@ -81,13 +81,13 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     }
 
     private void WeaponAction(ItemSO itemSO) {
-        _playerAttackController.Attack(itemSO.Damage, new Vector2(_playerMarkerController.MarkedCellPosition.x + 0.5f, _playerMarkerController.MarkedCellPosition.y + 0.5f));
+        _playerAttackController.Attack((itemSO as ToolSO).Damage, new Vector2(_playerMarkerController.MarkedCellPosition.x + 0.5f, _playerMarkerController.MarkedCellPosition.y + 0.5f));
     }
 
     #region Tool Actions
     private void ToolAction(ItemSO itemSO) {
         // Starte den rekursiven Vorgang
-        StartToolAction(itemSO.OnGridAction.GetEnumerator());
+        StartToolAction(itemSO.LeftClickAction.GetEnumerator());
     }
 
     private void StartToolAction(IEnumerator<ToolActionSO> enumerator) {

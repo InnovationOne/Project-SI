@@ -9,35 +9,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d1cd96ec5c0d0147a5f57b5da317010, type: 3}
+  m_Script: {fileID: 11500000, guid: 00047e703060fbd48ab540ceb5c8fcea, type: 3}
   m_Name: Green Chili Pepper Seed
   m_EditorClassIdentifier: 
-  ItemID: 0
+  ItemID: 128
   ItemType: 5
-  ItemTypeID: 0
-  WikiType: 2
+  ItemTypeID: 30
   ItemName: Green Chili Pepper Seed
   ItemIcon: {fileID: 21300000, guid: bbe16d1bc8831764192c029bce321c0d, type: 3}
-  ToolItemRarity: []
-  FullDescription: 
-  ItemInfoText: 
-  FunnyText: 
-  CanBeMuseum: 0
-  IsWeapon: 0
-  Damage: 0
   IsStackable: 1
-  MaxStackableAmount: 100
+  MaxStackableAmount: 99
+  CanBeBought: 1
+  BuyPrice: 185
   CanBeSold: 1
-  BuyPrice: 0
-  LowestRaritySellPrice: 0
-  CanRestoreHpOrEnergy: 0
-  LowestRarityRestoringHpAmount: 0
-  LowestRarityRestoringEnergyAmount: 0
-  OnGridAction:
+  LowestRaritySellPrice: 93
+  ItemInfoHoverText: 
+  LeftClickAction:
   - {fileID: 11400000, guid: d28c8e540d8e6ff40978661f4905f0ed, type: 2}
-  OnItemUsed: {fileID: 11400000, guid: d28c8e540d8e6ff40978661f4905f0ed, type: 2}
-  UsageOrDamageOnAction: 
-  EnergyOnAction: 
   CropToGrow: {fileID: 11400000, guid: b1ba9c36f2845fb4ca01b81d8091b916, type: 2}
-  ObjectPrefabToPlace: {fileID: 0}
-  ItemSOToPickUpObject: {fileID: 0}
+  MinSeedFromFruit: 1
+  MaxSeedFromFruit: 3

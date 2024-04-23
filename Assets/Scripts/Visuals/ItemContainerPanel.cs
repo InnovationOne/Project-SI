@@ -1,7 +1,5 @@
-using System;
 using System.Text;
 using TMPro;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -101,7 +99,7 @@ public abstract class ItemContainerPanel : MonoBehaviour {
                 if (ItemContainer.ItemSlots[i].RarityID == 0) {
                     ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], null);
                 } else if (ItemContainer.ItemSlots[i].Item.ItemType == ItemTypes.Tools) {
-                    ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], ItemContainer.ItemSlots[i].Item.ToolItemRarity[ItemContainer.ItemSlots[i].RarityID - 1]);
+                    ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], (ItemContainer.ItemSlots[i].Item as ToolSO).ToolItemRarity[ItemContainer.ItemSlots[i].RarityID - 1]);
                 } else {
                     ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], RaritySprites[ItemContainer.ItemSlots[i].RarityID - 1]);
                 }
@@ -146,7 +144,7 @@ public abstract class ItemContainerPanel : MonoBehaviour {
 
     private void ShowItemInWiki() {
         if (_buttonIndex >= 0) {
-            PlayerWikiController.LocalInstance.ShowItemInWiki(ItemContainer.ItemSlots[_buttonIndex].Item.ItemID);
+            //PlayerWikiController.LocalInstance.ShowItemInWiki(ItemContainer.ItemSlots[_buttonIndex].Item.ItemID);
         } else {
             Debug.LogWarning("No valid button index was given!");
         }
@@ -218,6 +216,7 @@ public abstract class ItemContainerPanel : MonoBehaviour {
                 rarityOffset = 1;
             }
 
+            /*
             if (_itemSlotForShowInfo.Item.CanRestoreHpOrEnergy) {
                 itemSlotInfoStringBuilder.Append("<color=#992e2e>" + "+" + (int)(_itemSlotForShowInfo.Item.LowestRarityRestoringHpAmount *
                     _itemSlotForShowInfo.Item.ItemRarityScaler[_itemSlotForShowInfo.RarityID - rarityOffset]) + " HP" + "</color>" + " ");
@@ -228,6 +227,7 @@ public abstract class ItemContainerPanel : MonoBehaviour {
                 itemSlotInfoStringBuilder.Append("<color=#2e6c99>" + "+" + (int)(_itemSlotForShowInfo.Item.LowestRaritySellPrice *
                     _itemSlotForShowInfo.Item.ItemRarityScaler[_itemSlotForShowInfo.RarityID - rarityOffset]) + " Gold" + "</color>");
             }
+            */
 
             _itemInfoText.text = itemSlotInfoStringBuilder.ToString();
             SetItemInfoNewSize();

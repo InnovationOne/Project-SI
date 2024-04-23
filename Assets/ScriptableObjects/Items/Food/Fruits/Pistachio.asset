@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
+  m_Name: Pistachio
+  m_EditorClassIdentifier: 
+  ItemID: 65
+  ItemType: 4
+  ItemTypeID: 0
+  ItemName: Pistachio
+  ItemIcon: {fileID: 21300000, guid: f5700be2e7d54a2448802e53bd4a6c08, type: 3}
+  ItemInfoHoverText: 
+  IsStackable: 1
+  MaxStackableAmount: 99
+  CanBeBought: 0
+  BuyPrice: 0
+  CanBeSold: 1
+  LowestRaritySellPrice: 255
+  CanRestoreHpOrEnergy: 1
+  LowestRarityRestoringHpAmount: 27
+  LowestRarityRestoringEnergyAmount: 60

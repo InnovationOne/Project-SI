@@ -5,20 +5,21 @@ using UnityEngine;
 public class CropTile {
     public int CropId;
     public Vector3Int CropPosition;
-    public int CurrentGrowthTimer;
+    public float CurrentGrowthTimer;
     public bool IsRegrowing;
     public bool IsWatered;
     public int Damage;
     public HarvestCrop Prefab; // GameObject with HarvestCrop script and SpriteRenderer etc.
     public Vector2 SpriteRendererOffset;
     public int SpriteRendererXScale;
+    public bool InGreenhouse;
 
     // Fertilizer
     public float GrowthTimeScaler;
     public float RegrowthTimeScaler;
     public float QualityScaler;
     public float QuantityScaler;
-    public float KeepWateredScaler;
+    public float WaterScaler;
 
     // Constructor to initialize a CropTile
     public CropTile() {
@@ -32,13 +33,13 @@ public class CropTile {
             return 5;
         } else if (IsCropDoneGrowing(crop)) {
             return 4;
-        } else if (growthProgress >= 0.66) {
+        } else if (growthProgress >= 0.66f) {
             return 3;
-        } else if (growthProgress >= 0.33) {
+        } else if (growthProgress >= 0.33f) {
             return 2;
-        } else if (CurrentGrowthTimer > 0) {
+        } else if (CurrentGrowthTimer > 0f) {
             return 1;
-        } else if (CurrentGrowthTimer == 0) {
+        } else if (CurrentGrowthTimer == 0f) {
             return 0; // Sprouted
         } else {
             Debug.LogError($"Crop growth stage not found! CurrentGrowTimer {CurrentGrowthTimer}");
@@ -60,11 +61,12 @@ public class CropTile {
         IsRegrowing = false;
         Damage = 0;
         Prefab = null;
+        InGreenhouse = false;
         GrowthTimeScaler = 1f;
         RegrowthTimeScaler = 1f;
         QualityScaler = 1f;
         QuantityScaler = 1f;
-        KeepWateredScaler = 0f;
+        WaterScaler = 0f;
     }
 }
 
@@ -73,7 +75,7 @@ public class CropTile {
 public class CropTileData {
     public int CropId;
     public Vector3Int CropPosition;
-    public int CurrentGrowTimer;
+    public float CurrentGrowTimer;
     public bool IsRegrowing;
     public int Damage;
     public float SpriteRendererXPosition;

@@ -38,7 +38,8 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     }
 
     private void VisualizeObjectOnMap(PlaceableObject objectToPlace) {
-        GameObject prefabGameObject = Instantiate(objectToPlace.placedObject.ObjectPrefabToPlace);
+        ObjectSO objectSO = objectToPlace.placedObject as ObjectSO;
+        GameObject prefabGameObject = Instantiate(objectSO.ObjectPrefabToPlace);
 
         prefabGameObject.transform.position = TilemapManager.Instance.FixPositionOnGrid(_targetTilemap.CellToWorld(objectToPlace.objectPositionOnGrid));
 
@@ -64,8 +65,9 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
 
     public void PickUpObject(Vector3Int gridPosition) {
         PlaceableObject placedObject = placeableObjectsContainer.Get(gridPosition);
+        ObjectSO objectSO = placedObject.placedObject as ObjectSO;
 
-        if (placedObject == null || placedObject.placedObject.ItemSOToPickUpObject.ItemID != PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().Item.ItemID) {
+        if (placedObject == null || objectSO.ItemSOToPickUpObject.ItemID != PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().Item.ItemID) {
             return;
         }
 

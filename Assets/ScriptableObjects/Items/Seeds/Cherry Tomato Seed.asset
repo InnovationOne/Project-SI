@@ -9,35 +9,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d1cd96ec5c0d0147a5f57b5da317010, type: 3}
+  m_Script: {fileID: 11500000, guid: 00047e703060fbd48ab540ceb5c8fcea, type: 3}
   m_Name: Cherry Tomato Seed
   m_EditorClassIdentifier: 
-  ItemID: 0
+  ItemID: 113
   ItemType: 5
-  ItemTypeID: 0
-  WikiType: 2
+  ItemTypeID: 15
   ItemName: Cherry Tomato Seed
   ItemIcon: {fileID: 21300000, guid: e6d57a89336e77540bf598ae5aa687ef, type: 3}
-  ToolItemRarity: []
-  FullDescription: 
-  ItemInfoText: 
-  FunnyText: 
-  CanBeMuseum: 0
-  IsWeapon: 0
-  Damage: 0
   IsStackable: 1
-  MaxStackableAmount: 100
+  MaxStackableAmount: 99
+  CanBeBought: 1
+  BuyPrice: 320
   CanBeSold: 1
-  BuyPrice: 0
-  LowestRaritySellPrice: 0
-  CanRestoreHpOrEnergy: 0
-  LowestRarityRestoringHpAmount: 0
-  LowestRarityRestoringEnergyAmount: 0
-  OnGridAction:
+  LowestRaritySellPrice: 160
+  ItemInfoHoverText: 
+  LeftClickAction:
   - {fileID: 11400000, guid: d28c8e540d8e6ff40978661f4905f0ed, type: 2}
-  OnItemUsed: {fileID: 11400000, guid: d28c8e540d8e6ff40978661f4905f0ed, type: 2}
-  UsageOrDamageOnAction: 
-  EnergyOnAction: 
   CropToGrow: {fileID: 11400000, guid: 91715ae11f49ccf428ee4f410c000eeb, type: 2}
-  ObjectPrefabToPlace: {fileID: 0}
-  ItemSOToPickUpObject: {fileID: 0}
+  MinSeedFromFruit: 2
+  MaxSeedFromFruit: 4

@@ -154,7 +154,7 @@ public class PickUpItem : NetworkBehaviour {
 
         // Shows the tools rarity
         if (_itemSlot.Item.ItemType == ItemTypes.Tools) {
-            pickUpItemToolRaritySR.sprite = _itemSlot.Item.ToolItemRarity[_itemSlot.RarityID - 1];
+            pickUpItemToolRaritySR.sprite = (_itemSlot.Item as ToolSO).ToolItemRarity[_itemSlot.RarityID - 1];
         }
 
         // Set the sprite for the item icon

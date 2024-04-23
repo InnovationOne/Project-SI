@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00047e703060fbd48ab540ceb5c8fcea, type: 3}
+  m_Name: Zucchini Seed
+  m_EditorClassIdentifier: 
+  ItemID: 187
+  ItemType: 5
+  ItemTypeID: 89
+  ItemName: Zucchini Seed
+  ItemIcon: {fileID: 21300000, guid: 11a5428dca18ccd45b066df229444675, type: 3}
+  IsStackable: 1
+  MaxStackableAmount: 99
+  CanBeBought: 1
+  BuyPrice: 170
+  CanBeSold: 1
+  LowestRaritySellPrice: 85
+  ItemInfoHoverText: 
+  LeftClickAction:
+  - {fileID: 11400000, guid: d28c8e540d8e6ff40978661f4905f0ed, type: 2}
+  CropToGrow: {fileID: 11400000, guid: e01b62fb1ec84084593d5b7db2071f67, type: 2}
+  MinSeedFromFruit: 2
+  MaxSeedFromFruit: 4
