@@ -94,7 +94,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         TimeAndWeatherManager.Instance.OnNextSeasonStarted += TimeAndWeatherManager_OnNextSeasonStarted;
         TimeAndWeatherManager.Instance.OnChangeRainIntensity += TimeAndWeatherManager_OnChangeRainIntensity;
 
-        _cropDatabase.AssignCropIds();
+        _cropDatabase.InitializeCrops();
 
         // Get references to the TilemapManager and PlaceableObjectsManager instances
         _tilemapReadManager = TilemapManager.Instance;
@@ -222,9 +222,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         var seasonsToSurvive = new HashSet<TimeAndWeatherManager.SeasonName>();
 
         // Iterate over each crop in the crop tiles
-        foreach (int crop in CropTileContainer.CropTiles.Select(tile => tile.CropId).Where(crop => crop >= 0)) {
+        foreach (int cropId in CropTileContainer.CropTiles.Select(tile => tile.CropId).Where(crop => crop >= 0)) {
             // Add the seasons in which the crop can grow to the hash set
-            seasonsToSurvive.UnionWith(_cropDatabase.GetCropSOFromCropId(crop).SeasonsToGrow);
+            seasonsToSurvive.UnionWith(_cropDatabase[cropId].SeasonsToGrow);
         }
 
         // Return the hash set of seasons
@@ -328,7 +328,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="cropTile">The crop tile to update.</param>
     private void UpdateDeadCropTile(CropTile cropTile) {
         // If the crop stage of the crop tile is 0
-        if (cropTile.GetCropStage(_cropDatabase.GetCropSOFromCropId(cropTile.CropId)) == 0) {
+        if (cropTile.GetCropStage(_cropDatabase[cropTile.CropId]) == 0) {
             // Reset the crop tile
             cropTile.ResetCropTile();
         }
@@ -340,7 +340,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="cropTile">The crop tile to update.</param>
     private void UpdateAliveCropTile(CropTile cropTile) {
         // If the crop in the crop tile is not done growing
-        if (!cropTile.IsCropDoneGrowing(_cropDatabase.GetCropSOFromCropId(cropTile.CropId))) {
+        if (!cropTile.IsCropDoneGrowing(_cropDatabase[cropTile.CropId])) {
             // Increment the current grow timer of the crop tile.
             cropTile.CurrentGrowthTimer++;
         }
@@ -413,7 +413,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             return;
         }
 
-        CropSO cropSO = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);
+        CropSO cropSO = _cropDatabase[cropTile.CropId];
         // If the crop is dead and its stage is not 0
         if (cropTile.IsDead(cropTile, _maxCropDamage) && cropTile.GetCropStage(cropSO) != 0) {
             // Set the sprite of the crop tile to the corresponding dead sprite
@@ -755,7 +755,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         cropTile.CropId = cropId;
 
         // Get the crop from the crop database using the crop ID
-        CropSO crop = _cropDatabase.GetCropSOFromCropId(cropId);
+        CropSO crop = _cropDatabase[cropTile.CropId];
         // Set the sprite of the crop tile based on its growth stage
         cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = crop.SpritesGrowthStages[cropTile.GetCropStage(crop)];
     }
@@ -814,7 +814,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <returns>True if the crop is ready to be harvested, false otherwise.</returns>
     private bool CropIsReadyToHarvest(CropTile cropTile) {
         // Get the crop from the crop database using the crop ID
-        CropSO crop = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);
+        CropSO crop = _cropDatabase[cropTile.CropId];
         // Check if the crop is done growing and is not dead
         return cropTile.IsCropDoneGrowing(crop) && !cropTile.IsDead(cropTile, _maxCropDamage);
     }
@@ -826,7 +826,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <returns>The calculated item count.</returns>
     private int CalculateItemCount(CropTile cropTile) {
         // Get the crop from the crop database using the crop ID
-        CropSO crop = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);
+        CropSO crop = _cropDatabase[cropTile.CropId];
 
         // Ensure that the product of the scaler and the item amount is treated as an integer
         int minItems = Mathf.RoundToInt(crop.MinItemAmountToSpawn * cropTile.QuantityScaler);
@@ -865,7 +865,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Get the crop tile at the given position
         CropTile cropTile = CropTileContainer.GetCropTileAtPosition(position);
         // Get the crop from the crop database using the crop ID
-        CropSO crop = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);
+        CropSO crop = _cropDatabase[cropTile.CropId];
 
         // Spawn items at the position of the harvested crop
         ItemSpawnManager.Instance.SpawnItemAtPosition(
@@ -1165,7 +1165,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         int itemRarity = CalculateItemRarity(cropTile.QualityScaler);
 
         // Retrieve the crop from the database
-        CropSO crop = _cropDatabase.GetCropSOFromCropId(cropTile.CropId);
+        CropSO crop = _cropDatabase[cropTile.CropId];
 
         // Check if the crop is done growing and if it can be harvested by a scythe
         bool cropDoneGrowing = cropTile.IsCropDoneGrowing(crop);
