@@ -17,12 +17,15 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [SerializeField] private bool _saveCrops = true;
     [SerializeField] private bool _loadCrops = true;
 
-    [Header("Params")]
+    [Header("Params: Crop")]
     [SerializeField] private float _cropPositionSpread = 0.1f; //Spread of the crop sprite renderer position
     [SerializeField] private int _notWateredDamage = 25; //Damage applied to the crop if not watered
     [SerializeField] private int _maxCropDamage = 100;
     [SerializeField] private int _probabilityToDeleteUnseededTile = 25; //Chance in percent to delete unseeded tile
     [SerializeField] private int[] _probabilityToSpawnRarity = { 70, 20, 8, 2 }; //70% Copper, 20% Iron, 8% Gold, 2% Diamond
+
+    [Header("Params: Multiplayer")]
+    private const int TRANSFER_BATCH_SIZE = 80; // Batch size for transferring crop JSON data to clients
 
     [Header("Reference: TileBases")]
     [SerializeField] private RuleTile _dirtDry;
@@ -31,19 +34,29 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [SerializeField] private RuleTile _dirtPlowedWet;
     [SerializeField] private TileBase[] _tilesThatCanBePlowed;
 
+    [Header("Reference: Fertilizer")]
+    [SerializeField] private List<FertilizerSO> _growthFertilizer;
+    [SerializeField] private List<FertilizerSO> _regrowthFertilizer;
+    [SerializeField] private List<FertilizerSO> _qualityFertilizer;
+    [SerializeField] private List<FertilizerSO> _quantityFertilizer;
+    [SerializeField] private List<FertilizerSO> _waterFertilizer;
+
     [Header("Reference: After Harvest")]
     [SerializeField] private Sprite _cropHole;
 
     [Header("Reference: Prefab")]
     [SerializeField] private HarvestCrop _cropsSpritePrefab;
 
-    private Tilemap _targetTilemap;
+    [Header("Reference: Database")]
     [SerializeField] private CropDatabaseSO _cropDatabase;
-    public CropTileContainer CropTileContainer { get; private set; }
+    public CropTileContainer CropTileContainer { get; private set; } // Public for cheat commands
+
+    [Header("Reference: Tilemap")]
+    private Tilemap _targetTilemap;
+
+    [Header("Reference: Managers")]
     private TilemapManager _tilemapReadManager;
     private PlaceableObjectsManager _placeableObjectsManager;
-
-    private const int TRANSFER_BATCH_SIZE = 80;
 
 
     /// <summary>
@@ -174,6 +187,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         // Check if the crops have been watered and apply damage if not
         CheckIfWateredAndApplyDamage();
+
+        // Check for crops that are fertilized with water and apply the effect
+        CheckForWaterFertilizedCrops();
 
         // Transfer the crop tile data from the server to the clients
         TransferServerCropTileContainerToClients();
@@ -406,6 +422,33 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             // Otherwise, set the sprite of the crop tile to the corresponding growth stage sprite
             cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = cropSO.SpritesGrowthStages[cropTile.GetCropStage(cropSO)];
         }
+
+
+        if (cropTile.GrowthTimeScaler > 1) {
+            cropTile.Prefab.SetFertilizerSprite(
+                _growthFertilizer.Find(fertilizer => fertilizer.FertilizerBonusValue == Math.Round((cropTile.GrowthTimeScaler - 1) * 100)).FertilizerType,
+                _growthFertilizer.Find(fertilizer => fertilizer.FertilizerBonusValue == Math.Round((cropTile.GrowthTimeScaler - 1) * 100)).FertilizerCropTileColor);
+        }
+        if (cropTile.RegrowthTimeScaler > 1) {
+            cropTile.Prefab.SetFertilizerSprite(
+                _regrowthFertilizer.Find(fertilizer => fertilizer.FertilizerBonusValue == Math.Round((cropTile.RegrowthTimeScaler - 1) * 100)).FertilizerType,
+                _regrowthFertilizer.Find(fertilizer => fertilizer.FertilizerBonusValue == Math.Round((cropTile.RegrowthTimeScaler - 1) * 100)).FertilizerCropTileColor);
+        }
+        if (cropTile.QualityScaler > 1) {
+            cropTile.Prefab.SetFertilizerSprite(
+                _qualityFertilizer.Find(fertilizer => fertilizer.FertilizerBonusValue == cropTile.QualityScaler).FertilizerType,
+                _qualityFertilizer.Find(fertilizer => fertilizer.FertilizerBonusValue == cropTile.QualityScaler).FertilizerCropTileColor);
+        }
+        if (cropTile.QuantityScaler > 1) {
+            cropTile.Prefab.SetFertilizerSprite(
+                _quantityFertilizer.Find(fertilizer => fertilizer.FertilizerBonusValue == Math.Round((cropTile.QuantityScaler - 1) * 100)).FertilizerType,
+                _quantityFertilizer.Find(fertilizer => fertilizer.FertilizerBonusValue == Math.Round((cropTile.QuantityScaler - 1) * 100)).FertilizerCropTileColor);
+        }
+        if (cropTile.WaterScaler > 0) {
+            cropTile.Prefab.SetFertilizerSprite(
+                _waterFertilizer.Find(fertilizer => fertilizer.FertilizerBonusValue == cropTile.WaterScaler).FertilizerType,
+                _waterFertilizer.Find(fertilizer => fertilizer.FertilizerBonusValue == cropTile.WaterScaler).FertilizerCropTileColor);
+        }
     }
 
     /// <summary>
@@ -547,22 +590,14 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
     [ServerRpc(RequireOwnership = false)]
     public void FertilizeTileServerRpc(Vector3Int wantToFertilizeTilePosition, int itemId, ServerRpcParams serverRpcParams = default) {
-        Debug.Log("Server: Try to fertilize croptile");
-
         // Check if the position is not plowed or is already fertilized
         if (!CropTileContainer.IsPositionPlowed(wantToFertilizeTilePosition) ||
             !CropTileContainer.IsPositionSeeded(wantToFertilizeTilePosition) ||
             !CropTileContainer.CanPositionBeFertilized(wantToFertilizeTilePosition, itemId)) {
             // If it is, handle the client callback and return
             HandleClientCallback(serverRpcParams, false);
-            Debug.Log($"Cannot Fertilize: " +
-                $"Plowed: {!CropTileContainer.IsPositionPlowed(wantToFertilizeTilePosition)}, " +
-                $"Seeded: {!CropTileContainer.IsPositionSeeded(wantToFertilizeTilePosition)}, " +
-                $"PositionCanBeFertilized {CropTileContainer.CanPositionBeFertilized(wantToFertilizeTilePosition, itemId)}");
             return;
         }
-
-        Debug.Log("Can Fertilize");
 
         // Handle the reduction of the item from the sender's inventory
         HandleItemReduction(serverRpcParams, itemId);
@@ -576,7 +611,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
     [ClientRpc]
     private void FertilizeTileClientRpc(Vector3Int canFertilizeTilePosition, int itemId) {
-        Debug.Log("Client: Fertilize croptile");
         // Get the crop tile at the specified position
         CropTile cropTile = CropTileContainer.GetCropTileAtPosition(canFertilizeTilePosition);
         FertilizerSO fertilizerSO = ItemManager.Instance.ItemDatabase.Items[itemId] as FertilizerSO;
@@ -589,27 +623,21 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private void SetFertilizerValueAndSprite(CropTile cropTile, FertilizerSO fertilizerSO) {
         switch (fertilizerSO.FertilizerType) {
             case FertilizerSO.FertilizerTypes.GrowthTime:
-                cropTile.GrowthTimeScaler += fertilizerSO.FertilizerBonusValue / 100;
-                cropTile.Prefab.SetGrowthTimeFertilizerSprite(fertilizerSO.FertilizerCropTileColor);
+                cropTile.GrowthTimeScaler = (fertilizerSO.FertilizerBonusValue / 100) + 1;
                 break;
             case FertilizerSO.FertilizerTypes.RegrowthTime:
-                cropTile.RegrowthTimeScaler += fertilizerSO.FertilizerBonusValue / 100;
-                cropTile.Prefab.SetRegrowthTimeFertilizerSprite(fertilizerSO.FertilizerCropTileColor);
+                cropTile.RegrowthTimeScaler = (fertilizerSO.FertilizerBonusValue / 100) + 1;
                 break;
             case FertilizerSO.FertilizerTypes.Quality:
                 cropTile.QualityScaler = fertilizerSO.FertilizerBonusValue;
-                cropTile.Prefab.SetQualityFertilizerSprite(fertilizerSO.FertilizerCropTileColor);
                 break;
             case FertilizerSO.FertilizerTypes.Quantity:
-                cropTile.QuantityScaler += fertilizerSO.FertilizerBonusValue / 100;
-                cropTile.Prefab.SetQuantityFertilizerSprite(fertilizerSO.FertilizerCropTileColor);
+                cropTile.QuantityScaler = (fertilizerSO.FertilizerBonusValue / 100) + 1;
                 break;
             case FertilizerSO.FertilizerTypes.Water:
-                cropTile.WaterScaler += fertilizerSO.FertilizerBonusValue / 100;
-                cropTile.Prefab.SetWaterFertilizerSprite(fertilizerSO.FertilizerCropTileColor);
+                cropTile.WaterScaler = fertilizerSO.FertilizerBonusValue;
                 break;
         }
-
     }
     #endregion
 
@@ -1044,10 +1072,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
                 continue;
             }
 
-            cropTile.IsWatered = UnityEngine.Random.Range(0, 100) < cropTile.WaterScaler ? true : false;
-            cropTile.WaterScaler = 0f;
-            cropTile.Prefab.SetWaterFertilizerSprite(); // Disable the sprite and set the color to white.
-
             // If the crop is not watered, increase its damage, else decrease the damage.
             cropTile.Damage += cropTile.IsWatered ? -_notWateredDamage : _notWateredDamage;
 
@@ -1056,8 +1080,23 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
                 cropTile.Damage = _maxCropDamage;
             }
 
+            cropTile.IsWatered = UnityEngine.Random.Range(0, 100) < cropTile.WaterScaler;
+            cropTile.WaterScaler = 0f;
+            cropTile.Prefab.SetFertilizerSprite(FertilizerSO.FertilizerTypes.Water); // Disable the sprite and set the color to white.
+
             // Visualize the changes to the tile.
             VisualizeTileChanges(cropTile);
+        }
+    }
+
+    private void CheckForWaterFertilizedCrops() {
+        // Iterate over all crop tiles.
+        foreach (CropTile cropTile in CropTileContainer.CropTiles) {
+            if (cropTile.WaterScaler > 0f) {
+                cropTile.IsWatered = UnityEngine.Random.Range(0, 100) < cropTile.WaterScaler;
+                cropTile.WaterScaler = 0f;
+                cropTile.Prefab.SetFertilizerSprite(FertilizerSO.FertilizerTypes.Water); // Disable the sprite and set the color to white.
+            }
         }
     }
     #endregion

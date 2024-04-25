@@ -29,15 +29,16 @@ public class CropTileContainer {
     // Checks if the position is fertilized with a specific fertilizer type.
     public bool CanPositionBeFertilized(Vector3Int position, int itemId) {
         FertilizerSO fertilizerSO = ItemManager.Instance.ItemDatabase.Items[itemId] as FertilizerSO;
+        CropTile cropTile = GetCropTileAtPosition(position);
 
         // Check if the position can be fertilized
-        if (fertilizerSO.FertilizerType == FertilizerSO.FertilizerTypes.Water || CropTiles.Any(tile => tile.CropPosition == position && tile.CurrentGrowthTimer == 0f)) {
+        if (cropTile != null && (fertilizerSO.FertilizerType == FertilizerSO.FertilizerTypes.Water || cropTile.CurrentGrowthTimer == 0f)) {
             return fertilizerSO.FertilizerType switch {
-                FertilizerSO.FertilizerTypes.GrowthTime => CropTiles.Any(tile => tile.CropPosition == position && tile.GrowthTimeScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1),
-                FertilizerSO.FertilizerTypes.RegrowthTime => CropTiles.Any(tile => tile.CropPosition == position && tile.RegrowthTimeScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1),
-                FertilizerSO.FertilizerTypes.Quality => CropTiles.Any(tile => tile.CropPosition == position && tile.QualityScaler < fertilizerSO.FertilizerBonusValue),
-                FertilizerSO.FertilizerTypes.Quantity => CropTiles.Any(tile => tile.CropPosition == position && tile.QuantityScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1),
-                FertilizerSO.FertilizerTypes.Water => CropTiles.Any(tile => tile.CropPosition == position && tile.WaterScaler < (fertilizerSO.FertilizerBonusValue / 100)),
+                FertilizerSO.FertilizerTypes.GrowthTime => cropTile.GrowthTimeScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1,
+                FertilizerSO.FertilizerTypes.RegrowthTime => cropTile.RegrowthTimeScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1 && cropTile.IsRegrowing,
+                FertilizerSO.FertilizerTypes.Quality => cropTile.QualityScaler < fertilizerSO.FertilizerBonusValue,
+                FertilizerSO.FertilizerTypes.Quantity => cropTile.QuantityScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1,
+                FertilizerSO.FertilizerTypes.Water => cropTile.WaterScaler < (fertilizerSO.FertilizerBonusValue / 100),
                 _ => throw new ArgumentOutOfRangeException(nameof(fertilizerSO.FertilizerType), "Unsupported fertilizer type"),
             };
         }
@@ -83,6 +84,11 @@ public class CropTileContainer {
                 SpriteRendererXPosition = cropTile.SpriteRendererOffset.x,
                 SpriteRendererYPosition = cropTile.SpriteRendererOffset.y,
                 SpriteRendererXScale = cropTile.SpriteRendererXScale,
+                GrowthTimeScaler = cropTile.GrowthTimeScaler,
+                RegrowthTimeScaler = cropTile.RegrowthTimeScaler,
+                QualityScaler = cropTile.QualityScaler,
+                QuantityScaler = cropTile.QuantityScaler,
+                WaterScaler = cropTile.WaterScaler,
             };
             var cropTileJSON = JsonConvert.SerializeObject(cropTileData);
             cropsContainerJSON.Add(cropTileJSON);
@@ -103,6 +109,11 @@ public class CropTileContainer {
                 Damage = cropTileData.Damage,
                 SpriteRendererOffset = new Vector3(cropTileData.SpriteRendererXPosition, cropTileData.SpriteRendererYPosition, -5),
                 SpriteRendererXScale = cropTileData.SpriteRendererXScale,
+                GrowthTimeScaler = cropTileData.GrowthTimeScaler,
+                RegrowthTimeScaler = cropTileData.RegrowthTimeScaler,
+                QualityScaler = cropTileData.QualityScaler,
+                QuantityScaler = cropTileData.QuantityScaler,
+                WaterScaler = cropTileData.WaterScaler,
             });
         }
         return cropTiles;

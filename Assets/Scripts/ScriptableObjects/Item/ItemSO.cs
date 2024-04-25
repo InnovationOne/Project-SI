@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public enum ItemTypes {
-    Tools, Resources, Food, Crafts, Plants, Seeds, Fertilizer, Fish, Insects, Artifacts, Minerals, none,
+    Tools, Resources, Food, Crafts, Plants, Seeds, Fertilizer, Rose, Fish, Insects, Artifacts, Minerals, none,
 }
 
 public enum ItemRarityNames {

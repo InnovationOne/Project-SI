@@ -85,5 +85,5 @@ public class CropTileData {
     public float RegrowthTimeScaler;
     public float QualityScaler;
     public float QuantityScaler;
-    public float KeepWateredScaler;
+    public float WaterScaler;
 }
