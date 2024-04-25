@@ -1,13 +1,12 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Database/Crop Database")]
 public class CropDatabaseSO : ScriptableObject {
     // List of crops in the database
-    [SerializeField] private List<CropSO> _crops = new List<CropSO>();
+    [SerializeField] private List<CropSO> _crops = new();
     // Cache to store crops by their IDs for fast lookup
-    private Dictionary<int, CropSO> _cache = new Dictionary<int, CropSO>();
+    private Dictionary<int, CropSO> _cache = new();
 
     /// <summary>
     /// Initializes the crops in the crop database on Start() and cache all crops.

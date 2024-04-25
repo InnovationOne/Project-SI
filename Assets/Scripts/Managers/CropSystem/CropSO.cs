@@ -24,3 +24,4 @@ public class CropSO : ScriptableObject {
     public List<Sprite> DeadSpritesGrowthStages;
     public List<Sprite> SpritesGrowthStages;
 }
+

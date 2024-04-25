@@ -123,7 +123,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         var cropJsonsForTransfer = new List<string>(TRANSFER_BATCH_SIZE);
 
         // Serialize each crop tile in the crop tile container and add the JSON representation to the list
-        foreach (var cropJson in CropTileContainer.SerializeCropTileContainer(CropTileContainer.CropTiles)) {
+        foreach (var cropJson in CropTileContainer.SerializeCropTileContainer()) {
             cropJsonsForTransfer.Add(cropJson);
 
             // If the batch size is reached, send the batch of crop JSONs to the late-joining client and clear the list
@@ -200,35 +200,14 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     /// <param name="nextSeasonIndex">The index of the next season.</param>
     private void TimeAndWeatherManager_OnNextSeasonStarted(int nextSeasonIndex) {
-        // Get the seasons in which the crops need to survive
-        var seasonsToSurvive = GetSeasonsToSurvive();
-
         // Iterate over each crop tile
-        foreach (CropTile cropTile in CropTileContainer.CropTiles) {
+        foreach (CropTile cropTile in CropTileContainer.CropTileMap.Values) {
             // If the crop tile has a crop and the crop cannot survive in the next season
-            if (cropTile.CropId >= 0 && !seasonsToSurvive.Contains((TimeAndWeatherManager.SeasonName)nextSeasonIndex)) {
+            if (cropTile.CropId >= 0 && !_cropDatabase[cropTile.CropId].SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)nextSeasonIndex)) {
                 // Set the damage of the crop to the maximum
                 cropTile.Damage = _maxCropDamage;
             }
         }
-    }
-
-    /// <summary>
-    /// Retrieves the seasons in which the crops need to survive.
-    /// </summary>
-    /// <returns>A HashSet containing the names of the seasons.</returns>
-    private HashSet<TimeAndWeatherManager.SeasonName> GetSeasonsToSurvive() {
-        // Initialize a new hash set to store the seasons
-        var seasonsToSurvive = new HashSet<TimeAndWeatherManager.SeasonName>();
-
-        // Iterate over each crop in the crop tiles
-        foreach (int cropId in CropTileContainer.CropTiles.Select(tile => tile.CropId).Where(crop => crop >= 0)) {
-            // Add the seasons in which the crop can grow to the hash set
-            seasonsToSurvive.UnionWith(_cropDatabase[cropId].SeasonsToGrow);
-        }
-
-        // Return the hash set of seasons
-        return seasonsToSurvive;
     }
     #endregion
 
@@ -269,14 +248,14 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     private void UpdateCropTilesOnServer() {
         // Iterate over each crop tile in the container
-        foreach (var cropTile in CropTileContainer.CropTiles) {
+        foreach (var cropTile in CropTileContainer.CropTileMap.Values) {
             // If the crop tile has a crop
             if (cropTile.CropId >= 0) {
                 // If the crop is dead
-                if (cropTile.IsDead(cropTile, _maxCropDamage)) {
+                if (cropTile.IsDead(_maxCropDamage)) {
                     // Update the dead crop tile
                     UpdateDeadCropTile(cropTile);
-                    Debug.Log($"CropTile: {cropTile.CropId} | IsDead?: {cropTile.IsDead(cropTile, _maxCropDamage)} | Damage: {cropTile.Damage}");
+                    Debug.Log($"CropTile: {cropTile.CropId} | IsDead?: {cropTile.IsDead(_maxCropDamage)} | Damage: {cropTile.Damage}");
                 } else {
                     // Otherwise, update the alive crop tile
                     UpdateAliveCropTile(cropTile);
@@ -291,7 +270,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         var cropJsonsForTransfer = new List<string>(TRANSFER_BATCH_SIZE);
 
         // Iterate over each serialized crop tile in the container
-        foreach (var cropJson in CropTileContainer.SerializeCropTileContainer(CropTileContainer.CropTiles)) {
+        foreach (var cropJson in CropTileContainer.SerializeCropTileContainer()) {
             // Add the serialized crop tile to the list
             cropJsonsForTransfer.Add(cropJson);
 
@@ -370,7 +349,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Deserialize the crops container JSON into a list of crop tiles
         foreach (var cropTile in CropTileContainer.DeserializeCropTileContainer(cropsContainerJSON)) {
             // Try to add the crop tile to the container
-            if (CropTileContainer.TryAddCropTileToContainer(cropTile)) {
+            if (CropTileContainer.AddCropTileToContainer(cropTile)) {
                 // If the crop tile has a crop
                 if (cropTile.CropId >= 0) {
                     // Create a crop prefab for the crop tile
@@ -415,12 +394,12 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         CropSO cropSO = _cropDatabase[cropTile.CropId];
         // If the crop is dead and its stage is not 0
-        if (cropTile.IsDead(cropTile, _maxCropDamage) && cropTile.GetCropStage(cropSO) != 0) {
+        if (cropTile.IsDead(_maxCropDamage) && cropTile.GetCropStage(cropSO) != 0) {
             // Set the sprite of the crop tile to the corresponding dead sprite
-            cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = cropSO.DeadSpritesGrowthStages[cropTile.GetCropStage(cropSO) - 1];
+            cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = cropSO.DeadSpritesGrowthStages[(int)cropTile.GetCropStage(cropSO) - 1];
         } else {
             // Otherwise, set the sprite of the crop tile to the corresponding growth stage sprite
-            cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = cropSO.SpritesGrowthStages[cropTile.GetCropStage(cropSO)];
+            cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = cropSO.SpritesGrowthStages[(int)cropTile.GetCropStage(cropSO)];
         }
 
 
@@ -579,7 +558,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
 
         // Try to add the crop tile to the container
-        CropTileContainer.TryAddCropTileToContainer(crop);
+        CropTileContainer.AddCropTileToContainer(crop);
         // Return the created crop tile
         return crop;
     }
@@ -757,7 +736,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Get the crop from the crop database using the crop ID
         CropSO crop = _cropDatabase[cropTile.CropId];
         // Set the sprite of the crop tile based on its growth stage
-        cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = crop.SpritesGrowthStages[cropTile.GetCropStage(crop)];
+        cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = crop.SpritesGrowthStages[(int)cropTile.GetCropStage(crop)];
     }
     #endregion
 
@@ -816,7 +795,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Get the crop from the crop database using the crop ID
         CropSO crop = _cropDatabase[cropTile.CropId];
         // Check if the crop is done growing and is not dead
-        return cropTile.IsCropDoneGrowing(crop) && !cropTile.IsDead(cropTile, _maxCropDamage);
+        return cropTile.IsCropDoneGrowing(crop) && !cropTile.IsDead(_maxCropDamage);
     }
 
     /// <summary>
@@ -1019,7 +998,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private void WaterAllCropTiles() {
         // Iterate over all crop tiles and set their watered status to true.
         // Then visualize the changes.
-        foreach (CropTile cropTile in CropTileContainer.CropTiles) {
+        foreach (CropTile cropTile in CropTileContainer.CropTileMap.Values) {
             cropTile.IsWatered = true;
             VisualizeTileChanges(cropTile);
         }
@@ -1042,7 +1021,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private void DryAllCropTiles() {
         // Iterate over all crop tiles and set their watered status to false.
         // Then visualize the changes.
-        foreach (CropTile cropTile in CropTileContainer.CropTiles) {
+        foreach (CropTile cropTile in CropTileContainer.CropTileMap.Values) {
             cropTile.IsWatered = false;
             VisualizeTileChanges(cropTile);
         }
@@ -1064,7 +1043,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     private void CheckIfWateredAndApplyDamage() {
         // Iterate over all crop tiles.
-        foreach (CropTile cropTile in CropTileContainer.CropTiles) {
+        foreach (CropTile cropTile in CropTileContainer.CropTileMap.Values) {
             // If there's no crop on the tile, mark it as not watered and continue to the next tile.
             if (cropTile.CropId == -1) {
                 cropTile.IsWatered = false;
@@ -1091,7 +1070,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
     private void CheckForWaterFertilizedCrops() {
         // Iterate over all crop tiles.
-        foreach (CropTile cropTile in CropTileContainer.CropTiles) {
+        foreach (CropTile cropTile in CropTileContainer.CropTileMap.Values) {
             if (cropTile.WaterScaler > 0f) {
                 cropTile.IsWatered = UnityEngine.Random.Range(0, 100) < cropTile.WaterScaler;
                 cropTile.WaterScaler = 0f;
@@ -1244,7 +1223,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     private void DeleteSomeUnseededTiles() {
         // Create a list of tiles to remove, which are unseeded and should be removed based on probability
-        var tilesToRemove = CropTileContainer.CropTiles
+        var tilesToRemove = CropTileContainer.CropTileMap.Values
             .Where(cropTile => cropTile.CropId == -1 && ShouldRemoveTile())
             .ToList();
 
@@ -1304,7 +1283,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     public void SaveData(GameData data) {
         // If the flag to save crops is set, serialize the crop data and store it in the game data
         if (_saveCrops) {
-            data.CropsOnMap = JsonConvert.SerializeObject(CropTileContainer.SerializeCropTileContainer(CropTileContainer.CropTiles));
+            data.CropsOnMap = JsonConvert.SerializeObject(CropTileContainer.SerializeCropTileContainer());
         }
     }
 

@@ -37,7 +37,7 @@ public class PlayerDebugController : MonoBehaviour {
 
 
         REMOVE_ALL_CROPS = new DebugCommand("remove_all_crops", "Removes all crops from the farm", "remove_all_crops", () => {
-            foreach (var crop in CropsManager.Instance.CropTileContainer.CropTiles) {
+            foreach (var crop in CropsManager.Instance.CropTileContainer.CropTileMap.Values) {
                 CropsManager.Instance.DestroyCropTilePlantClientRpc(crop.CropPosition);
             }
         });
