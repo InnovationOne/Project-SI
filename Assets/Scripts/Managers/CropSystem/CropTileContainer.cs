@@ -133,7 +133,7 @@ public class CropTileContainer {
             var cropTileData = JsonConvert.DeserializeObject<CropTileData>(cropTilesJSON);
             cropTiles.Add(new CropTile {
                 CropId = cropTileData.CropId,
-                CropPosition = cropTileData.CropPosition,
+                CropPosition = new Vector3Int((int)cropTileData.CropPosition.x, (int)cropTileData.CropPosition.y, (int)cropTileData.CropPosition.z),
                 CurrentGrowthTimer = cropTileData.CurrentGrowTimer,
                 IsRegrowing = cropTileData.IsRegrowing,
                 Damage = cropTileData.Damage,

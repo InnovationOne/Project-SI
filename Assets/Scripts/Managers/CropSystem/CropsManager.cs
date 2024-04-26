@@ -59,30 +59,34 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private PlaceableObjectsManager _placeableObjectsManager;
 
 
+    // Futur testing
+    //private NetworkList<CropTileData> cropTiles = new NetworkList<CropTileData>();
+
+
     /// <summary>
     /// This method is called when the script instance is being loaded.
     /// It initializes the CropsManager singleton instance, sets up the required components,
     /// and configures the serialization settings for Vector3.
     /// </summary>
     private void Awake() {
-        // Check if there is more than one instance of CropsManager in the scene
         if (Instance != null) {
             Debug.LogError("There is more than one instance of CropsManager in the scene!");
             return;
         }
-        // Set the current instance as the singleton instance
         Instance = this;
 
-        // Get the Tilemap component attached to the same GameObject
+        InitializeComponents();
+    }
+
+    private void InitializeComponents() {
         _targetTilemap = GetComponent<Tilemap>();
-        // Create a new instance of CropTileContainer
         CropTileContainer = new CropTileContainer();
 
-        // Configure the serialization settings for Vector3
         JsonConvert.DefaultSettings = () => new JsonSerializerSettings {
             Converters = { new Vector3Converter() },
         };
     }
+
 
     /// <summary>
     /// Called when the script instance is being loaded.
@@ -1082,59 +1086,34 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
 
     #region Destroy Crop
-    /// <summary>
-    /// Destroys a crop tile on the server and performs the corresponding action based on the tool type used.
-    /// </summary>
-    /// <param name="position">The position of the crop tile to destroy.</param>
-    /// <param name="usedEnergy">The amount of energy used.</param>
-    /// <param name="toolTypes">The type of tool used.</param>
-    /// <param name="serverRpcParams">Additional parameters for the server RPC.</param>
+    
     [ServerRpc(RequireOwnership = false)]
     public void DestroyCropTileServerRpc(Vector3Int position, int usedEnergy, ToolTypes toolTypes, ServerRpcParams serverRpcParams = default) {
-        // Initialize success flag
-        bool success = false;
-
-        // Perform action based on the tool type
-        switch (toolTypes) {
-            case ToolTypes.Scythe:
-                // If the position is not seeded, set success to false
-                // Otherwise, harvest the crop and set success to true
-                if (!CropTileContainer.IsPositionSeeded(position)) {
-                    success = false;
-                    break;
-                } else {
-                    success = true;
-                    ScytheCrop(position);
-                    break;
-                }
-            case ToolTypes.Pickaxe:
-                // If the position is not plowed, set success to false
-                // Otherwise, pick the crop and set success to true
-                if (!CropTileContainer.IsPositionPlowed(position)) {
-                    success = false;
-                    break;
-                } else {
-                    success = true;
-                    PickaxeCrop(position);
-                    break;
-                }
-            default:
-                // Log error if no valid tool type is provided
-                Debug.LogError("No valid tool type");
-                break;
-        }
-
-        // Handle client callback with the success flag
+        bool success = HandleToolAction(position, toolTypes);
         HandleClientCallback(serverRpcParams, success);
-
-        // Handle energy reduction with the used energy
         HandleEnergyReduction(serverRpcParams, usedEnergy);
     }
 
-    /// <summary>
-    /// Harvests a crop using a scythe at the specified position.
-    /// </summary>
-    /// <param name="position">The position of the crop to be harvested.</param>
+    private bool HandleToolAction(Vector3Int position, ToolTypes toolType) {
+        return toolType switch {
+            ToolTypes.Scythe => TryHandleCropWithScythe(position),
+            ToolTypes.Pickaxe => TryHandleCropWithPickaxe(position),
+            _ => throw new ArgumentOutOfRangeException(nameof(toolType), $"No valid tool type: {toolType}"),
+        };
+    }
+
+    private bool TryHandleCropWithScythe(Vector3Int position) {
+        if (!CropTileContainer.IsPositionSeeded(position)) return false;
+        ScytheCrop(position);
+        return true;
+    }
+
+    private bool TryHandleCropWithPickaxe(Vector3Int position) {
+        if (!CropTileContainer.IsPositionPlowed(position)) return false;
+        PickaxeCrop(position);
+        return true;
+    }
+
     private void ScytheCrop(Vector3Int position) {
         // Retrieve the crop tile at the specified position
         CropTile cropTile = CropTileContainer.GetCropTileAtPosition(position);
@@ -1166,10 +1145,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    /// <summary>
-    /// Picks the crop at the specified position. If the position is seeded, the seed is destroyed. Otherwise, the plowed tile is destroyed.
-    /// </summary>
-    /// <param name="position">The position of the crop to pick.</param>
     private void PickaxeCrop(Vector3Int position) {
         // If the position is seeded, destroy the seed
         // Otherwise, destroy the plowed tile
@@ -1182,26 +1157,13 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    /// <summary>
-    /// Destroys the crop tile plant on the client side.
-    /// </summary>
-    /// <param name="position">The position of the crop tile.</param>
     [ClientRpc]
     public void DestroyCropTilePlantClientRpc(Vector3Int position) {
-        // Retrieve the crop tile from the container
         CropTile cropTile = CropTileContainer.GetCropTileAtPosition(position);
-
-        // Destroy the crop tile's prefab
         Destroy(cropTile.Prefab.gameObject);
-
-        // Reset the crop tile
         cropTile.ResetCropTile();
     }
 
-    /// <summary>
-    /// Destroys the crop tile on the client side and updates the tilemap with the appropriate tile based on the watered state.
-    /// </summary>
-    /// <param name="position">The position of the crop tile to destroy.</param>
     [ClientRpc]
     private void DestroyCropTileClientRpc(Vector3Int position) {
         // Retrieve the crop tile from the container at the given position
@@ -1217,10 +1179,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         _targetTilemap.SetTile(position, targetTile);
     }
 
-
-    /// <summary>
-    /// Deletes unseeded tiles from the crop system.
-    /// </summary>
     private void DeleteSomeUnseededTiles() {
         // Create a list of tiles to remove, which are unseeded and should be removed based on probability
         var tilesToRemove = CropTileContainer.CropTileMap.Values
@@ -1234,10 +1192,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    /// <summary>
-    /// Determines whether a tile should be removed based on probability.
-    /// </summary>
-    /// <returns>True if the tile should be removed, false otherwise.</returns>
     private bool ShouldRemoveTile() {
         // Generate a random number between 0 and 100, and return true if it's less than the probability to delete unseeded tile
         int probability = UnityEngine.Random.Range(0, 100);
