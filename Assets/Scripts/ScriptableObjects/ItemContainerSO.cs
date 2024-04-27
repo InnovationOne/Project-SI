@@ -10,8 +10,8 @@ public class ItemContainerSO : ScriptableObject {
     public event Action OnItemsUpdated;
 
     public List<ItemSlot> ItemSlots = new();
-    // public IReadOnlyList<ItemSlot> ItemSlots => itemSlots.AsReadOnly(); TODO: Maybe use this and make ItemSlots private serializefield?
-    // TODO: Maybe use a dict instead of a list for faster access?
+    // public IReadOnlyList<ItemSlot> ItemSlots => itemSlots.AsReadOnly();
+    // TODO: Maybe use this and make ItemSlots private serializefield?
 
     /// <summary>
     /// Initializes the item container with the specified number of slots.
@@ -38,7 +38,7 @@ public class ItemContainerSO : ScriptableObject {
             AddToExisting(itemSO, amount, rarityId, skipToolbelt) :
             AddToEmpty(itemSO, amount, rarityId, skipToolbelt);
 
-        UIUpdate();
+        UpdateUI();
         return remainingAmount;
     }
 
@@ -161,7 +161,7 @@ public class ItemContainerSO : ScriptableObject {
         }
 
         RemoveItemAmount(itemId, amount, rarityId);
-        UIUpdate();
+        UpdateUI();
         return true;
     }
 
@@ -248,9 +248,7 @@ public class ItemContainerSO : ScriptableObject {
             .ThenBy(tuple => tuple.RarityId)
             .ToList();
 
-        foreach (var slot in ItemSlots.Skip(toolbeltSize)) {
-            slot.Clear();
-        }
+        ClearItemSlots();
 
         int index = toolbeltSize;
         foreach (var (Item, Amount, RarityId) in itemTuples) {
@@ -258,7 +256,7 @@ public class ItemContainerSO : ScriptableObject {
                 ItemSlots[index++].Set(Item.ItemId, Amount, RarityId);
             }
         }
-        UIUpdate();
+        UpdateUI();
     }
 
 
@@ -276,30 +274,36 @@ public class ItemContainerSO : ScriptableObject {
         }
         ItemSlots = shiftedSlots;
 
-        UIUpdate();
+        UpdateUI();
     }
 
     /// <summary>
     /// Shoots an item from the specified slot in the item container.
     /// </summary>
-    /// <param name="itemSlotIndex">The index of the slot to shoot the item from.</param>
+    /// <param name="currentItemContainerSlot">The index of the slot to shoot the item from.</param>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when the slot index is out of range.</exception>
-    public void ShootItem(int itemSlotIndex) {
-        if (itemSlotIndex < 0 || itemSlotIndex >= ItemSlots.Count) {
-            throw new ArgumentOutOfRangeException(nameof(itemSlotIndex), "Slot index is out of range.");
+    public void ShootItem(int currentItemContainerSlot) {
+        if (currentItemContainerSlot < 0 || currentItemContainerSlot >= ItemSlots.Count) {
+            throw new ArgumentOutOfRangeException(nameof(currentItemContainerSlot), "Slot index is out of range.");
         }
 
-        var slot = ItemSlots[itemSlotIndex];
+        var slot = ItemSlots[currentItemContainerSlot];
 
         if (--slot.Amount <= 0) {
-            slot.Clear(); 
+            slot.Clear();
         }
 
-        UIUpdate();
+        UpdateUI();
+    }
+
+    public void ClearItemSlots() {
+        foreach (var slot in ItemSlots.Skip(PlayerToolbeltController.LocalInstance.ToolbeltSizes[^1])) {
+            slot.Clear();
+        }
     }
 
     /// <summary>
     /// Updates the UI and invokes the OnItemsUpdated event.
     /// </summary>
-    public void UIUpdate() => OnItemsUpdated?.Invoke();
+    public void UpdateUI() => OnItemsUpdated?.Invoke();
 }

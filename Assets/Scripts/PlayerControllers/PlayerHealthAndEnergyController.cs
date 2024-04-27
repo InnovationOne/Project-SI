@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -5,24 +6,27 @@ using UnityEngine;
 public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPersistance {
     public static PlayerHealthAndEnergyController LocalInstance { get; private set; }
 
-    [Header("Debug: Hp-Params")]
-    [SerializeField] private int _maxHp = 100;
-    [SerializeField] private float _currentHp = 100;
-    [SerializeField] private int _hpAtRespawn = 10;
+    public event Action<float> OnUpdateHealth;
+    public event Action<float> OnUpdateMaxHealth;
+    public event Action<float> OnUpdateEnergy;
+    public event Action<float> OnUpdateMaxEnergy;
+
+    [Header("Health Parameters")]
+    [SerializeField] private float _maxHealth = 100;
+    [SerializeField] private float _currentHealth = 100;
+    [SerializeField] private float _hpAtRespawn = 10;
     [SerializeField] private float _regenHpAmountInBed = 0.5f;
 
-    [Header("Debug: Energy-Params")]
-    [SerializeField] private int _maxEnergy = 100;
+    [Header("Energy Parameters")]
+    [SerializeField] private float _maxEnergy = 100;
     [SerializeField] private float _currentEnergy = 100;
-    [SerializeField] private int _energyAtRespawn = 10;
+    [SerializeField] private float _energyAtRespawn = 10;
     [SerializeField] private float _minimumEnergyMultiplierForFullReset = 0.25f; // Energy is set to max, when rest energy is above 25%
     [SerializeField] private float _energyMultiplierForNoneFullReset = 0.5f; // Energy is set to 50% of max, when rest energy is below 25%
     [SerializeField] private float _regenEnergyAmountInBed = 0.5f;
 
     // TODO Move _hospitalRespawnPosition to the hospital itself
     private Vector2 _hospitalRespawnPosition;
-    private HealthAndEnergyPanel _healthAndEnergyPanel;
-    private TimeAndWeatherManager _timeAndWeatherManager;
     private Player _localPlayer;
 
     private void Awake() {
@@ -31,24 +35,22 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
 
     private void Start() {
-        // Get references
-        _healthAndEnergyPanel = HealthAndEnergyPanel.Instance;
-        _timeAndWeatherManager = TimeAndWeatherManager.Instance;
-        
-        // Subscribe to event
-        _timeAndWeatherManager.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
+        TimeAndWeatherManager.Instance.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
 
-        // Update UI
-        UpdateHealthUI();
-        UpdateMaxHealthUI();
-        UpdateEnergyUI();
-        UpdateMaxEnergyUI();
+        OnUpdateHealth?.Invoke(_currentHealth);
+        OnUpdateMaxHealth?.Invoke(_maxHealth);
+        OnUpdateEnergy?.Invoke(_currentEnergy);
+        OnUpdateMaxEnergy?.Invoke(_maxEnergy);
+    }
+
+    private void OnDestroy() {
+        TimeAndWeatherManager.Instance.OnNextDayStarted -= TimeAndWeatherManager_OnNextDayStarted;
     }
 
     public override void OnNetworkSpawn() {
         if (IsOwner) {
             if (LocalInstance != null) {
-                //Debug.LogError("There is more than one local instance of PlayerHealthAndEnergyController in the scene!");
+                Debug.LogError("There is more than one local instance of PlayerHealthAndEnergyController in the scene!");
                 return;
             }
             LocalInstance = this;
@@ -58,171 +60,119 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     private void FixedUpdate() {
         // While in bed regen hp and energy.
         if (_localPlayer.InBed) {
-            //Debug.Log($"Player is in bed. Restored {_regenHpAmountInBed} hp and {_regenEnergyAmountInBed} energy.");
-            _currentHp += _regenHpAmountInBed;
+            _currentHealth += _regenHpAmountInBed;
             _currentEnergy += _regenEnergyAmountInBed;
         }
     }
 
     private void TimeAndWeatherManager_OnNextDayStarted() {
-        //Debug.Log("Restored max hp for next day.");
-        RestoreHp(_maxHp);
-
-        var energyToRestore = _currentEnergy >= _maxEnergy * _minimumEnergyMultiplierForFullReset ? _maxEnergy : _maxEnergy * _energyMultiplierForNoneFullReset;
-        //Debug.Log($"Restored {energyToRestore} for next day.");
-        RestoreEnergy(energyToRestore);
+        AdjustHealth(_maxHealth);
+        AdjustEnergy(_currentEnergy >= _maxEnergy * _minimumEnergyMultiplierForFullReset ? _maxEnergy : _maxEnergy * _energyMultiplierForNoneFullReset);
+        OnUpdateHealth?.Invoke(_currentHealth);
+        OnUpdateEnergy?.Invoke(_maxEnergy);
     }
 
 
     #region Health
-    public void RemoveHp(float amount) {
-        // Log the action
-        //Debug.Log("Hp removed.");
+    /// <summary>
+    /// Adjusts the player's health by the specified amount.
+    /// </summary>
+    /// <param name="amount">The amount to adjust the health by.</param>
+    public void AdjustHealth(float amount) {
+        _currentHealth = Mathf.Clamp(_currentHealth + amount, 0, _maxHealth);
+        OnUpdateHealth?.Invoke(_currentHealth);
 
-        // Deduct health
-        _currentHp -= amount;
-
-        // Update UI
-        UpdateHealthUI();
-
-        // Check if the player is dead
-        if (_currentHp <= 0) {
-            //Debug.Log("Player is dead.");
-            // TODO: Play death animation
-
-            ClearInventory();
-
-            RespawnPlayer();
-
-            // TODO: Play wake-up animation and in-hospital event for death
+        if (_currentHealth <= 0) {
+            HandlePlayerDeath();
         }
     }
-
-
-    public void RestoreHp(float amount) {
-        // Log the action
-        //Debug.Log("Hp restored.");
-
-        // Increase health
-        _currentHp += amount;
-
-        // Ensure health doesn't exceed the maximum
-        if (_currentHp > _maxHp) {
-            //Debug.Log("Max Hp reached.");
-            _currentHp = _maxHp;
-        }
-
-        // Update UI
-        UpdateHealthUI();
+    
+    /// <summary>
+    /// Adjusts the maximum health of the player.
+    /// </summary>
+    /// <param name="newMaxHealth">The new maximum health value.</param>
+    public void AdjustMaxHealth(int newMaxHealth) {
+        _maxHealth = newMaxHealth;
+        OnUpdateMaxHealth?.Invoke(_maxHealth);
     }
 
-    private void UpdateHealthUI() {
-        _healthAndEnergyPanel.ChangeHp(_currentHp);
-    }
+    /// <summary>
+    /// Handles the player's death.
+    /// </summary>
+    private void HandlePlayerDeath() {
+        // TODO: Play death animation
 
-    private void ClearInventory() {
-        //Debug.Log("Cleared inventory.");
-        // Clear the player's inventory
-        //GetComponent<PlayerInventoryController>().InventoryContainer.slots.Clear();
-    }
+        RespawnPlayer();
 
-    private void RespawnPlayer() {
-        //Debug.Log("Set player to hospital position and set hp.");
-        transform.position = _hospitalRespawnPosition;
-        _currentHp = _hpAtRespawn;
+        // Clear inventory on death
+        //GetComponent<PlayerInventoryController>().InventoryContainer.ClearItemSlots();
 
-        UpdateHealthUI();
-    }
+        // TODO: Play wake-up animation and in-hospital event for death
 
-    public void ChangeMaxHp(int newMaxHp) {
-        // Log the action
-        //Debug.Log("Max Hp changed.");
-
-        // Update maximum health
-        _maxHp = newMaxHp;
-
-        // Update UI with new maximum health
-        _healthAndEnergyPanel.ChangeMaxHp(_maxHp);
-    }
-
-    private void UpdateMaxHealthUI() {
-        _healthAndEnergyPanel.ChangeMaxHp(_maxHp);
+        // Additional death logic
     }
 
     #endregion
 
 
     #region Energy
-    public void RemoveEnergy(float amount) {
-        // Log the action
-        //Debug.Log("Energy removed.");
+    /// <summary>
+    /// Adjusts the energy of the player by the specified amount.
+    /// </summary>
+    /// <param name="amount">The amount to adjust the energy by.</param>
+    public void AdjustEnergy(float amount) {
+        _currentEnergy = Mathf.Clamp(_currentEnergy + amount, 0, _maxEnergy);
+        OnUpdateEnergy?.Invoke(_currentEnergy);
 
-        // Deduct energy
-        _currentEnergy -= amount;
-
-        // Update UI
-        UpdateEnergyUI();
-
-        // Check if the player is exhausted
         if (_currentEnergy <= 0) {
-            //Debug.Log("Player is exhausted.");
-
-            // TODO: Play exhausted animation
-
-            RespawnPlayer();
-
-            // TODO: Play wake-up animation and in-hospital event for exhaustion
+            HandlePlayerExhaustion();
         }
     }
 
-    public void RestoreEnergy(float amount) {
-        //Debug.Log("Energy restored.");
-
-        // Increase energy
-        _currentEnergy += amount;
-
-        // Ensure energy doesn't exceed the maximum
-        if (_currentEnergy > _maxEnergy) {
-            //Debug.Log("Max energy reached.");
-            _currentEnergy = _maxEnergy;
-        }
-
-        // Update UI
-        UpdateEnergyUI();
-    }
-
-    private void UpdateEnergyUI() {
-        _healthAndEnergyPanel.ChangeEnergy(_currentEnergy);
-    }
-
+    /// <summary>
+    /// Changes the maximum energy value for the player.
+    /// </summary>
+    /// <param name="newMaxEnergy">The new maximum energy value.</param>
     public void ChangeMaxEnergy(int newMaxEnergy) {
-        //Debug.Log("Max Energy changed.");
-
-        // Update maximum energy
         _maxEnergy = newMaxEnergy;
-
-        // Update UI with new maximum energy
-        UpdateMaxEnergyUI();
+        OnUpdateMaxEnergy?.Invoke(_maxEnergy);
     }
 
-    private void UpdateMaxEnergyUI() {
-        _healthAndEnergyPanel.ChangeHp(_currentHp);
+    /// <summary>
+    /// Handles the exhaustion of the player.
+    /// </summary>
+    private void HandlePlayerExhaustion() {
+        // TODO: Play exhausted animation
+
+        RespawnPlayer();
+
+        // TODO: Play wake-up animation and in-hospital event for exhaustion
+
+        // Additional exhaustion logic
     }
     #endregion
+
+    /// <summary>
+    /// Respawns the player at the hospital respawn position and restores their health to the value at respawn.
+    /// </summary>
+    private void RespawnPlayer() {
+        transform.position = _hospitalRespawnPosition;
+        _currentHealth = _hpAtRespawn;
+    }
 
 
     #region Save & Load
     public void SavePlayer(PlayerData playerData) {
-        playerData.MaxHp = _maxHp;
-        playerData.CurrentHp = _currentHp;
+        playerData.MaxHp = _maxHealth;
+        playerData.CurrentHp = _currentHealth;
         playerData.MaxEnergy = _maxEnergy;
         playerData.CurrentEnergy = _currentEnergy;
         playerData.HosptitalRespawnPosition = _hospitalRespawnPosition;
     }
 
     public void LoadPlayer(PlayerData playerData) {
-        _maxHp = playerData.MaxHp;
-        _currentHp = playerData.CurrentHp;
+        _maxHealth = playerData.MaxHp;
+        _currentHealth = playerData.CurrentHp;
         _maxEnergy = playerData.MaxEnergy;
         _currentEnergy = playerData.CurrentEnergy;
         _hospitalRespawnPosition = playerData.HosptitalRespawnPosition;

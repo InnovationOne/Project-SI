@@ -104,7 +104,7 @@ public class PlayerMarkerController : NetworkBehaviour {
         _energyCost = energyCost;
         _useAreaIndicator = true;
         _toolType = toolType;
-        _playerMovementController.SetMoveAndRunSpeed(false);
+        _playerMovementController.ChangeMoveSpeed(false);
     }
 
     private void UseAreaMarker(Vector3Int position, Vector2 lastMotionVector) {
@@ -136,7 +136,7 @@ public class PlayerMarkerController : NetworkBehaviour {
     
 
     private void EnableMoveSpeed() {
-        _playerMovementController.SetMoveAndRunSpeed(true);
+        _playerMovementController.ChangeMoveSpeed(true);
     }
 
 

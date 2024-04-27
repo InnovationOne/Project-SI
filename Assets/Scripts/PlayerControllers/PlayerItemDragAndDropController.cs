@@ -69,7 +69,7 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
 
         CheckToClearDragItem();
 
-        _playerInventoryController.InventoryContainer.UIUpdate();
+        _playerInventoryController.InventoryContainer.UpdateUI();
 
         UpdateIcon();
     }
@@ -158,7 +158,7 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
 
         CheckToClearDragItem();
 
-        _playerInventoryController.InventoryContainer.UIUpdate();
+        _playerInventoryController.InventoryContainer.UpdateUI();
 
         UpdateIcon();
     }

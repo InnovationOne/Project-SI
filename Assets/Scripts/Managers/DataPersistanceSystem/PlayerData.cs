@@ -26,9 +26,9 @@ public class PlayerData {
     public string Hotkeys;
 
     [Header("HP & Energy")]
-    public int MaxHp;
+    public float MaxHp;
     public float CurrentHp;
-    public int MaxEnergy;
+    public float MaxEnergy;
     public float CurrentEnergy;
 
     /*
