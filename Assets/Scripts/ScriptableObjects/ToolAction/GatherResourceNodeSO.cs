@@ -19,7 +19,7 @@ public class GatherResourceNodeSO : ToolActionSO {
             ResourceNode resourceNode = collider2D.GetComponent<ResourceNode>();
             
             if (resourceNode != null && resourceNode.CanHitResourceNodeType(canHitNodesOfType)) {
-                resourceNode.HitResourceNode((itemSlot.Item as ToolSO).UsageOrDamageOnAction[itemSlot.RarityID - 1]);
+                resourceNode.HitResourceNode((itemSlot.Item as ToolSO).UsageOrDamageOnAction[itemSlot.RarityId - 1]);
 
                 //return true;
             }

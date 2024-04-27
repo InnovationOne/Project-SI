@@ -47,7 +47,7 @@ public class ResourceNode : NetworkBehaviour {
     }
 
     public void HitResourceNode(int damage) {
-        if (PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().RarityID > _minimumToolRarity) {
+        if (PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().RarityId > _minimumToolRarity) {
             Debug.Log("Tool Rarity to low");
             // Play bounce back animation
 

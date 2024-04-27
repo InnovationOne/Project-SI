@@ -61,22 +61,22 @@ public class ItemConverterInteract : Interactable, IObjectDataPersistence {
                 int remainingAmount;
                 if (_isSeedExtractor) {
                     // Seed Extractor only, with variable amount
-                    remainingAmount = player.GetComponent<PlayerInventoryController>().InventoryContainer.AddItemToItemContainer(
-                        itemSlot.Item.ItemID,
+                    remainingAmount = player.GetComponent<PlayerInventoryController>().InventoryContainer.AddItem(
+                        itemSlot.Item.ItemId,
                         UnityEngine.Random.Range(1, itemSlot.Amount + 1),
-                        itemSlot.RarityID,
+                        itemSlot.RarityId,
                         false);
                 } else {
                     // Everything else, with fix amount
-                    remainingAmount = player.GetComponent<PlayerInventoryController>().InventoryContainer.AddItemToItemContainer(
-                        itemSlot.Item.ItemID,
+                    remainingAmount = player.GetComponent<PlayerInventoryController>().InventoryContainer.AddItem(
+                        itemSlot.Item.ItemId,
                         itemSlot.Amount,
-                        itemSlot.RarityID,
+                        itemSlot.RarityId,
                         false);
                 }
 
                 if (remainingAmount > 0) {
-                    ItemSpawnManager.Instance.SpawnItemAtPosition(transform.position, player.GetComponent<PlayerMovementController>().LastMotionDirection, itemSlot.Item, remainingAmount, itemSlot.RarityID, SpreadType.Circle);
+                    ItemSpawnManager.Instance.SpawnItemAtPosition(transform.position, player.GetComponent<PlayerMovementController>().LastMotionDirection, itemSlot.Item, remainingAmount, itemSlot.RarityId, SpreadType.Circle);
                 }
             }
 
@@ -102,8 +102,8 @@ public class ItemConverterInteract : Interactable, IObjectDataPersistence {
     private bool SelectRecipe(ItemSlot toolbeltItemSlot) {
         foreach (RecipeSO recipeSO in PlaceableObjectsManager.Instance.GetRecipeDatabase().Recipes) {
             for (int i = 0; i < recipeSO.ItemsToConvert.Count; i++) {
-                if (recipeSO.ItemsToConvert[i].Item.ItemID == toolbeltItemSlot.Item.ItemID &&
-                    recipeSO.ItemsToConvert[i].RarityID == toolbeltItemSlot.RarityID &&
+                if (recipeSO.ItemsToConvert[i].Item.ItemId == toolbeltItemSlot.Item.ItemId &&
+                    recipeSO.ItemsToConvert[i].RarityId == toolbeltItemSlot.RarityId &&
                     recipeSO.RecipeType == _recipeType) {
                     _currentRecipe = recipeSO;
 
@@ -118,14 +118,14 @@ public class ItemConverterInteract : Interactable, IObjectDataPersistence {
     // Check if the player has the required auxiliary items
     private bool HasAllNeededItems(Player player) {
         List<ItemSlot> inventory = player.GetComponent<PlayerInventoryController>().InventoryContainer
-            .AddAllItemsTogether(player.GetComponent<PlayerInventoryController>().InventoryContainer.ItemSlots);
+            .CombineItemsByTypeAndRarity(player.GetComponent<PlayerInventoryController>().InventoryContainer.ItemSlots.ToList());
 
         // Check if combinedItems have all the items and amounts required by the recipe
         var matchingNum = _currentRecipe.ItemsNeededToConvert
             .Concat(_currentRecipe.ItemsToConvert)
             .Count(recipe => inventory.Any(inventoryItemSlot =>
                 inventoryItemSlot.Item != null &&
-                inventoryItemSlot.Item.ItemID == recipe.Item.ItemID &&
+                inventoryItemSlot.Item.ItemId == recipe.Item.ItemId &&
                 inventoryItemSlot.Amount >= recipe.Amount));
 
         // Return true if all required items and amounts are met
@@ -138,7 +138,7 @@ public class ItemConverterInteract : Interactable, IObjectDataPersistence {
 
         // Remove the items from the players inventory and add the taken item into the item converter
         foreach (ItemSlot itemSlot in combinedItemSlots) {
-            player.GetComponent<PlayerInventoryController>().InventoryContainer.RemoveAnItemFromTheItemContainer(itemSlot.Item.ItemID, itemSlot.Amount, itemSlot.RarityID);
+            player.GetComponent<PlayerInventoryController>().InventoryContainer.RemoveItem(itemSlot.Item.ItemId, itemSlot.Amount, itemSlot.RarityId);
             _storedLocalItemSlot.Add(itemSlot);
         }
 
@@ -156,7 +156,7 @@ public class ItemConverterInteract : Interactable, IObjectDataPersistence {
 
         // Spawn every item in the list
         foreach (ItemSlot itemSlot in _storedLocalItemSlot) {
-            ItemSpawnManager.Instance.SpawnItemAtPosition(transform.position, player.GetComponent<PlayerMovementController>().LastMotionDirection, itemSlot.Item, itemSlot.Amount, itemSlot.RarityID, SpreadType.Circle);
+            ItemSpawnManager.Instance.SpawnItemAtPosition(transform.position, player.GetComponent<PlayerMovementController>().LastMotionDirection, itemSlot.Item, itemSlot.Amount, itemSlot.RarityId, SpreadType.Circle);
         }
     }
 
@@ -200,9 +200,9 @@ public class ItemConverterInteract : Interactable, IObjectDataPersistence {
 
         for (int i = 0; i < toLoadObjectData.storedItemSlotData.Count; i++) {
             ItemSlot test = new() {
-                Item = ItemManager.Instance.ItemDatabase.Items[toLoadObjectData.storedItemSlotData[i].itemID],
+                Item = ItemManager.Instance.ItemDatabase[toLoadObjectData.storedItemSlotData[i].itemID],
                 Amount = toLoadObjectData.storedItemSlotData[i].amount,
-                RarityID = toLoadObjectData.storedItemSlotData[i].rarityID
+                RarityId = toLoadObjectData.storedItemSlotData[i].rarityID
             };
             _storedLocalItemSlot.Add(test);
         }
@@ -215,7 +215,7 @@ public class ItemConverterInteract : Interactable, IObjectDataPersistence {
         ToSaveObjectData toSaveObjectData = new ToSaveObjectData();
 
         foreach (var slot in _storedLocalItemSlot) {
-            toSaveObjectData.storedItemSlotData.Add(new SaveObjectData(slot.Item.ItemID, slot.Amount, slot.RarityID));
+            toSaveObjectData.storedItemSlotData.Add(new SaveObjectData(slot.Item.ItemId, slot.Amount, slot.RarityId));
         }
 
         toSaveObjectData.timer = _localTimer;

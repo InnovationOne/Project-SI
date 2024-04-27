@@ -596,7 +596,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private void FertilizeTileClientRpc(Vector3Int canFertilizeTilePosition, int itemId) {
         // Get the crop tile at the specified position
         CropTile cropTile = CropTileContainer.GetCropTileAtPosition(canFertilizeTilePosition);
-        FertilizerSO fertilizerSO = ItemManager.Instance.ItemDatabase.Items[itemId] as FertilizerSO;
+        FertilizerSO fertilizerSO = ItemManager.Instance.ItemDatabase[itemId] as FertilizerSO;
         SetFertilizerValueAndSprite(cropTile, fertilizerSO);
 
         // Visualize the changes made to the crop tile
@@ -631,7 +631,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Check if the position is not plowed or is already seeded
         if (!CropTileContainer.IsPositionPlowed(wantToSeedTilePosition) ||
             CropTileContainer.IsPositionSeeded(wantToSeedTilePosition) ||
-            !(ItemManager.Instance.ItemDatabase.Items[itemId] as SeedSO).CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason)) {
+            !(ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason)) {
             // If it is, handle the client callback and return
             HandleClientCallback(serverRpcParams, false);
             return;
@@ -665,7 +665,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         if (NetworkManager.ConnectedClients.ContainsKey(clientId)) {
             // If it is, remove the item from the sender's inventory
             var client = NetworkManager.ConnectedClients[clientId];
-            client.PlayerObject.GetComponent<PlayerInventoryController>().InventoryContainer.RemoveAnItemFromTheItemContainer(itemId, 1, 0);
+            client.PlayerObject.GetComponent<PlayerInventoryController>().InventoryContainer.RemoveItem(itemId, 1, 0);
         }
     }
 
@@ -733,7 +733,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="itemId">The ID of the item associated with the crop tile.</param>
     private void SetCropTileProperties(CropTile cropTile, int itemId) {
         // Get the crop ID from the item database using the given item ID
-        int cropId = (ItemManager.Instance.ItemDatabase.Items[itemId] as SeedSO).CropToGrow.CropID;
+        int cropId = (ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.CropID;
 
         cropTile.CropId = cropId;
 
@@ -1088,16 +1088,16 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     #region Destroy Crop
     
     [ServerRpc(RequireOwnership = false)]
-    public void DestroyCropTileServerRpc(Vector3Int position, int usedEnergy, ToolTypes toolTypes, ServerRpcParams serverRpcParams = default) {
+    public void DestroyCropTileServerRpc(Vector3Int position, int usedEnergy, ToolSO.ToolTypes toolTypes, ServerRpcParams serverRpcParams = default) {
         bool success = HandleToolAction(position, toolTypes);
         HandleClientCallback(serverRpcParams, success);
         HandleEnergyReduction(serverRpcParams, usedEnergy);
     }
 
-    private bool HandleToolAction(Vector3Int position, ToolTypes toolType) {
+    private bool HandleToolAction(Vector3Int position, ToolSO.ToolTypes toolType) {
         return toolType switch {
-            ToolTypes.Scythe => TryHandleCropWithScythe(position),
-            ToolTypes.Pickaxe => TryHandleCropWithPickaxe(position),
+            ToolSO.ToolTypes.Scythe => TryHandleCropWithScythe(position),
+            ToolSO.ToolTypes.Pickaxe => TryHandleCropWithPickaxe(position),
             _ => throw new ArgumentOutOfRangeException(nameof(toolType), $"No valid tool type: {toolType}"),
         };
     }

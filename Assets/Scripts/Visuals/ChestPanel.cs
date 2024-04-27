@@ -43,10 +43,10 @@ public class ChestPanel : ItemContainerPanel {
 
     public override void OnPlayerLeftClick(int buttonIndex) {
         if (Input.GetKey(KeyCode.LeftShift)) {
-            int remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItemToItemContainer(
-                ItemContainer.ItemSlots[buttonIndex].Item.ItemID,
+            int remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(
+                ItemContainer.ItemSlots[buttonIndex].Item.ItemId,
                 ItemContainer.ItemSlots[buttonIndex].Amount,
-                ItemContainer.ItemSlots[buttonIndex].RarityID,
+                ItemContainer.ItemSlots[buttonIndex].RarityId,
                 true);
 
             if (remainingAmount > 0) {

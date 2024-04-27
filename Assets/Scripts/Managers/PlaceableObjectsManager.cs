@@ -67,7 +67,7 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         PlaceableObject placedObject = placeableObjectsContainer.Get(gridPosition);
         ObjectSO objectSO = placedObject.placedObject as ObjectSO;
 
-        if (placedObject == null || objectSO.ItemSOToPickUpObject.ItemID != PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().Item.ItemID) {
+        if (placedObject == null || objectSO.ItemSOToPickUpObject.ItemId != PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().Item.ItemId) {
             return;
         }
 
@@ -132,7 +132,7 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
 
         foreach (SaveObjectData savedObject in toLoadObjectData.toSaveData) {
             PlaceableObject placeableObject = new() {
-                placedObject = ItemManager.Instance.ItemDatabase.Items[savedObject.placedObjectID],
+                placedObject = ItemManager.Instance.ItemDatabase[savedObject.placedObjectID],
                 targetObject = savedObject.targetObject,
                 objectPositionOnGrid = savedObject.objectPositionOnGrid,
                 objectState = savedObject.objectState
@@ -149,7 +149,7 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
             placeableObject.objectState = placeableObject.targetObject.GetComponent<IObjectDataPersistence>()?.SaveObject();
 
             toSaveObjectData.toSaveData.Add(new SaveObjectData(
-                placeableObject.placedObject.ItemID,
+                placeableObject.placedObject.ItemId,
                 placeableObject.targetObject,
                 placeableObject.objectPositionOnGrid,
                 placeableObject.objectState));

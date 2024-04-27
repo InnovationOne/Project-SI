@@ -74,9 +74,9 @@ public class PlayerInventoryController : NetworkBehaviour, IPlayerDataPersistanc
                     -1));
             } else {
                 toSaveData.ItemSlotDataList.Add(new ItemSlotData(
-                    item.Item.ItemID,
+                    item.Item.ItemId,
                     item.Amount,
-                    item.RarityID));
+                    item.RarityId));
             }
         }
 
@@ -95,9 +95,9 @@ public class PlayerInventoryController : NetworkBehaviour, IPlayerDataPersistanc
                 if (toLoadInventory.ItemSlotDataList[i].ItemID == -1) {
                     InventoryContainer.ItemSlots[i].Clear();
                 } else {
-                    InventoryContainer.ItemSlots[i].Item = ItemManager.Instance.ItemDatabase.Items[toLoadInventory.ItemSlotDataList[i].ItemID];
+                    InventoryContainer.ItemSlots[i].Item = ItemManager.Instance.ItemDatabase[toLoadInventory.ItemSlotDataList[i].ItemID];
                     InventoryContainer.ItemSlots[i].Amount = toLoadInventory.ItemSlotDataList[i].Amount;
-                    InventoryContainer.ItemSlots[i].RarityID = toLoadInventory.ItemSlotDataList[i].RarityID;
+                    InventoryContainer.ItemSlots[i].RarityId = toLoadInventory.ItemSlotDataList[i].RarityID;
                 }
             }
         }

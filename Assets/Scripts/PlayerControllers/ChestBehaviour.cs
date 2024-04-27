@@ -44,7 +44,7 @@ public class ChestBehaviour : Interactable, IObjectDataPersistence {
 
     private void Init() {
         _itemContainer = (ItemContainerSO)ScriptableObject.CreateInstance(typeof(ItemContainerSO));
-        _itemContainer.InitializeItemContainer(_itemSlots);
+        _itemContainer.Initialize(_itemSlots);
     }
 
     public override void Interact(Player player) {
@@ -80,7 +80,7 @@ public class ChestBehaviour : Interactable, IObjectDataPersistence {
 
     public override void PickUpItemsInPlacedObject(Player player) {
         foreach (var itemSlot in _itemContainer.ItemSlots) {
-            ItemSpawnManager.Instance.SpawnItemAtPosition(transform.position, player.GetComponent<PlayerMovementController>().LastMotionDirection, itemSlot.Item, itemSlot.Amount, itemSlot.RarityID, SpreadType.Circle);
+            ItemSpawnManager.Instance.SpawnItemAtPosition(transform.position, player.GetComponent<PlayerMovementController>().LastMotionDirection, itemSlot.Item, itemSlot.Amount, itemSlot.RarityId, SpreadType.Circle);
         }
         
     }
@@ -133,9 +133,9 @@ public class ChestBehaviour : Interactable, IObjectDataPersistence {
                 _itemContainer.ItemSlots[i].Clear();
             } else {
                 // Set the item and amount in the inventory slot
-                _itemContainer.ItemSlots[i].Item = ItemManager.Instance.ItemDatabase.Items[toLoadItemContainer.itemData[i].itemId];
+                _itemContainer.ItemSlots[i].Item = ItemManager.Instance.ItemDatabase[toLoadItemContainer.itemData[i].itemId];
                 _itemContainer.ItemSlots[i].Amount = toLoadItemContainer.itemData[i].amount;
-                _itemContainer.ItemSlots[i].RarityID = toLoadItemContainer.itemData[i].rarityID;
+                _itemContainer.ItemSlots[i].RarityId = toLoadItemContainer.itemData[i].rarityID;
             }
         }
     }
@@ -149,7 +149,7 @@ public class ChestBehaviour : Interactable, IObjectDataPersistence {
             if (slot.Item == null) {
                 toSaveItemContainer.itemData.Add(new SaveItemData(-1, -1, -1));
             } else {
-                toSaveItemContainer.itemData.Add(new SaveItemData(slot.Item.ItemID, slot.Amount, slot.RarityID));
+                toSaveItemContainer.itemData.Add(new SaveItemData(slot.Item.ItemId, slot.Amount, slot.RarityId));
             }
         }
 

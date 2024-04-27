@@ -12,7 +12,7 @@ public class PlaceObject : ToolActionSO {
 
         PlaceableObjectsManager.Instance.PlaceObjectOnMap(position);
 
-        PlayerInventoryController.LocalInstance.InventoryContainer.RemoveAnItemFromTheItemContainer(itemSlot.Item.ItemID, 1, itemSlot.RarityID);
+        PlayerInventoryController.LocalInstance.InventoryContainer.RemoveItem(itemSlot.Item.ItemId, 1, itemSlot.RarityId);
 
         //return true;
     }

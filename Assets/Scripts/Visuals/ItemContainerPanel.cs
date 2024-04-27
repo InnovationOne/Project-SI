@@ -52,6 +52,8 @@ public abstract class ItemContainerPanel : MonoBehaviour {
     }
     
     private void Start() {
+        ItemContainer.OnItemsUpdated += ShowUIButtonContains;
+
         Init();
     }
     
@@ -71,18 +73,9 @@ public abstract class ItemContainerPanel : MonoBehaviour {
         }
     }
 
-    private void LateUpdate() {
-        if (ItemContainer == null) return;
-
-        if (ItemContainer.ItemContainerNeedsToBeUpdated) {
-            ShowUIButtonContains();
-            ItemContainer.ItemContainerNeedsToBeUpdated = false;
-        }
-    }
-
     public void Init() {
         //Set the button index on the button
-        for (int i = 0; i < ItemContainer.ItemSlots.Count && i < ItemButtons.Length; i++) {
+        for (int i = 0; i < ItemContainer.ItemSlots .Count && i < ItemButtons.Length; i++) {
             ItemButtons[i].GetComponent<BackpackButton>().SetButtonIndex(i);
         }
 
@@ -96,12 +89,12 @@ public abstract class ItemContainerPanel : MonoBehaviour {
             if (ItemContainer.ItemSlots[i].Item == null) {
                 ItemButtons[i].GetComponent<BackpackButton>().ClearItemSlot();
             } else {
-                if (ItemContainer.ItemSlots[i].RarityID == 0) {
+                if (ItemContainer.ItemSlots[i].RarityId == 0) {
                     ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], null);
-                } else if (ItemContainer.ItemSlots[i].Item.ItemType == ItemTypes.Tools) {
-                    ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], (ItemContainer.ItemSlots[i].Item as ToolSO).ToolItemRarity[ItemContainer.ItemSlots[i].RarityID - 1]);
+                } else if (ItemContainer.ItemSlots[i].Item.ItemType == ItemSO.ItemTypes.Tools) {
+                    ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], (ItemContainer.ItemSlots[i].Item as ToolSO).ToolItemRarity[ItemContainer.ItemSlots[i].RarityId - 1]);
                 } else {
-                    ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], RaritySprites[ItemContainer.ItemSlots[i].RarityID - 1]);
+                    ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], RaritySprites[ItemContainer.ItemSlots[i].RarityId - 1]);
                 }
             }
         }
@@ -156,9 +149,9 @@ public abstract class ItemContainerPanel : MonoBehaviour {
         if (_buttonIndex >= 0) {
             if ((int)_splitAmountSlider.value > 0) {
                 ItemSlot newItemSlot = new();
-                newItemSlot.Set(ItemContainer.ItemSlots[_buttonIndex].Item.ItemID, 
+                newItemSlot.Set(ItemContainer.ItemSlots[_buttonIndex].Item.ItemId, 
                     (int)_splitAmountSlider.value, 
-                    ItemContainer.ItemSlots[_buttonIndex].RarityID);
+                    ItemContainer.ItemSlots[_buttonIndex].RarityId);
                 PlayerItemDragAndDropController.LocalInstance.OnLeftClick(newItemSlot);
 
                 // When all items are "Splitted" clear the item slot
@@ -212,7 +205,7 @@ public abstract class ItemContainerPanel : MonoBehaviour {
 
             StringBuilder itemSlotInfoStringBuilder = new();
             int rarityOffset = 0;
-            if (_itemSlotForShowInfo.RarityID > 0) {
+            if (_itemSlotForShowInfo.RarityId > 0) {
                 rarityOffset = 1;
             }
 

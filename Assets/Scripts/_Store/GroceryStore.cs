@@ -19,17 +19,17 @@ public class GroceryStore : Store, IDataPersistance {
 
     public void ShowGroceryStore() {
         _storeVisual.ClearContentBox();
-
+        /*
         for (int i = 0; i < _storeContainer.Items.Count; i++) {
             // When the store is upgraded for the crops
-            foreach (TimeAndWeatherManager.SeasonName seasonName in (_storeContainer.Items[i] as SeedSO).CropToGrow.SeasonsToGrow) {
+            foreach (TimeAndWeatherManager.SeasonName seasonName in (_storeContainer[i] as SeedSO).CropToGrow.SeasonsToGrow) {
                 if (seasonName == (TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason) {
                     // When the season is the current season
-                    _storeVisual.SpawnStoreItemSlot(_storeContainer.Items[i]);
+                    _storeVisual.SpawnStoreItemSlot(_storeContainer[i]);
                 }
             }
-
         }
+        */
     }
 
     public override void Interact(Player character) {

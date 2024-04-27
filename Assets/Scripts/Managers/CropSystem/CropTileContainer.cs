@@ -1,8 +1,6 @@
-using Ink.Runtime;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class CropTileContainer {
@@ -19,8 +17,7 @@ public class CropTileContainer {
         _cropTileMap.TryGetValue(position, out CropTile tile);
         return tile;
     }
-
-    
+        
     /// <summary>
     /// Checks if a position is plowed in the crop tile map.
     /// </summary>
@@ -46,7 +43,7 @@ public class CropTileContainer {
             return false;
         }
 
-        if (ItemManager.Instance.ItemDatabase.Items[itemId] is not FertilizerSO fertilizerSO) {
+        if (ItemManager.Instance.ItemDatabase[itemId] is not FertilizerSO fertilizerSO) {
             throw new ArgumentException("Invalid item ID for fertilizer.", nameof(itemId));
         }
 

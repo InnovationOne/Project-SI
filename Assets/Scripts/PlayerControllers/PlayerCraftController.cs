@@ -40,27 +40,27 @@ public class PlayerCraftController : NetworkBehaviour {
 
         // Remove the items from the players inventory
         foreach (ItemSlot itemSlot in combinedItemSlots) {
-            GetComponent<PlayerInventoryController>().InventoryContainer.RemoveAnItemFromTheItemContainer(itemSlot.Item.ItemID, itemSlot.Amount, itemSlot.RarityID);
+            GetComponent<PlayerInventoryController>().InventoryContainer.RemoveItem(itemSlot.Item.ItemId, itemSlot.Amount, itemSlot.RarityId);
         }
 
         // Add the items to the inventory or spawn the item at the player position
         foreach (ItemSlot itemSlot in recipe.ItemsToProduce) {
-            if (GetComponent<PlayerInventoryController>().InventoryContainer.AddItemToItemContainer(itemSlot.Item.ItemID, itemSlot.Amount, itemSlot.RarityID, false) > 0) {
-                ItemSpawnManager.Instance.SpawnItemAtPosition(transform.position, GetComponent<PlayerMovementController>().LastMotionDirection, itemSlot.Item, itemSlot.Amount, itemSlot.RarityID, SpreadType.Circle);
+            if (GetComponent<PlayerInventoryController>().InventoryContainer.AddItem(itemSlot.Item.ItemId, itemSlot.Amount, itemSlot.RarityId, false) > 0) {
+                ItemSpawnManager.Instance.SpawnItemAtPosition(transform.position, GetComponent<PlayerMovementController>().LastMotionDirection, itemSlot.Item, itemSlot.Amount, itemSlot.RarityId, SpreadType.Circle);
             }
         }
     }
 
     private bool HasAllNeededItems(RecipeSO recipe) {
         List<ItemSlot> inventory = GetComponent<PlayerInventoryController>().InventoryContainer
-            .AddAllItemsTogether(GetComponent<PlayerInventoryController>().InventoryContainer.ItemSlots);
+            .CombineItemsByTypeAndRarity(GetComponent<PlayerInventoryController>().InventoryContainer.ItemSlots) ;
 
         // Check if combinedItems have all the items and amounts required by the recipe
         var matchingNum = recipe.ItemsNeededToConvert
             .Concat(recipe.ItemsToConvert)
             .Count(recipe => inventory.Any(inventoryItemSlot =>
                 inventoryItemSlot.Item != null &&
-                inventoryItemSlot.Item.ItemID == recipe.Item.ItemID &&
+                inventoryItemSlot.Item.ItemId == recipe.Item.ItemId &&
                 inventoryItemSlot.Amount >= recipe.Amount));
 
         // Return true if all required items and amounts are met

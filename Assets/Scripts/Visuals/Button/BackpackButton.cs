@@ -51,7 +51,7 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
         }
 
         if (raritySprite != null) {
-            if (_itemSlot.Item.ItemType == ItemTypes.Tools) {
+            if (_itemSlot.Item.ItemType == ItemSO.ItemTypes.Tools) {
                 _itemRarityImage.gameObject.SetActive(false);
                 _toolRarityImage.gameObject.SetActive(true);
                 _toolRarityImage.sprite = raritySprite;

@@ -25,7 +25,7 @@ public class PlayerMarkerController : NetworkBehaviour {
     private int _energyCost;
     private int[] _areaSizes;
     private List<Vector3Int> _areaPositions;
-    private ToolTypes _toolType;
+    private ToolSO.ToolTypes _toolType;
 
     // References
     private Tilemap _targetTilemap;
@@ -96,7 +96,7 @@ public class PlayerMarkerController : NetworkBehaviour {
 
 
     #region Area Marker
-    public void TriggerAreaMarker(int toolRarity, int[] areaSizes, int energyCost, ToolTypes toolType) {
+    public void TriggerAreaMarker(int toolRarity, int[] areaSizes, int energyCost, ToolSO.ToolTypes toolType) {
         _currentChangeSizeTimer = 0f;
         _currentlyUsedRarity = 0;
         _currentToolMaxRarity = toolRarity;
@@ -121,10 +121,10 @@ public class PlayerMarkerController : NetworkBehaviour {
 
     private void ProcessToolAction() {
         switch (_toolType) {
-            case ToolTypes.Hoe:
+            case ToolSO.ToolTypes.Hoe:
                 _cropsManager.PlowTiles(_areaPositions, _energyCost);
                 break;
-            case ToolTypes.WateringCan:
+            case ToolSO.ToolTypes.WateringCan:
                 _cropsManager.WaterTiles(_areaPositions, _energyCost);
                 break;
             default:

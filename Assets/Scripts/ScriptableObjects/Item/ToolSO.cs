@@ -1,16 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ToolTypes {
-    Axe, FishingRod, Hoe, MilkingBucket, Pickaxe, Scythe, Shears, WateringCan,
-}
-
-public enum ToolRarityNames {
-    none, Wood, Stone, Copper, Iron, Gold, Diamond,
-}
 // This class contains information used in an item e.g. tool, seed, oven etc.
 [CreateAssetMenu(menuName = "Scriptable Objects/Tool")]
 public class ToolSO : ItemSO {
+    public enum ToolTypes {
+        Axe, FishingRod, Hoe, MilkingBucket, Pickaxe, Scythe, Shears, WateringCan,
+    }
+
+    public enum ToolRarityNames {
+        none, Wood, Stone, Copper, Iron, Gold, Diamond,
+    }
+
     public List<Sprite> ToolItemRarity;
 
     [Header("Attack Settings")]

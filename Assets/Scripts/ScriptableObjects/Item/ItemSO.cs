@@ -1,28 +1,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ItemTypes {
-    Tools, Resources, Food, Crafts, Plants, Seeds, Fertilizer, Rose, Fish, Insects, Artifacts, Minerals, none,
-}
-
-public enum ItemRarityNames {
-    none, Common, Rare, Epic, Legendary,
-}
-
 // This class contains information used in an item e.g. tool, seed, oven etc.
 [CreateAssetMenu(menuName = "Scriptable Objects/Item")]
 public class ItemSO : ScriptableObject {
-    [HideInInspector] public int ItemID;
+    public enum ItemTypes {
+        Tools, Resources, Food, Crafts, Plants, Seeds, Fertilizer, Rose, Fish, Insects, Artifacts, Minerals, none,
+    }
+
+    public enum ItemRarityNames {
+        none, Common, Rare, Epic, Legendary,
+    }
+
+    [HideInInspector] public int ItemId;
     
     [Header("Search & Sort")]
     public ItemTypes ItemType;
-    [HideInInspector] public int ItemTypeID;
 
     // Standart setting of each item    
     [Header("Basic Settings")]
     public string ItemName;
-    public Sprite ItemIcon;    
-    [TextArea(6, 6)]
+    public Sprite ItemIcon;
 
     // When the item can be stacked
     [Header("Stackable Settings")]

@@ -69,13 +69,13 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
 
         CheckToClearDragItem();
 
-        _playerInventoryController.InventoryContainer.ItemContainerNeedsToBeUpdated = true;
+        _playerInventoryController.InventoryContainer.UIUpdate();
 
         UpdateIcon();
     }
 
     private void PlaceItemSlotOnMap() {
-        _itemSpawnManager.SpawnItemFromInventory(_dragItemSlot.Item, _dragItemSlot.Amount, _dragItemSlot.RarityID, transform.position, _playerMovementController.LastMotionDirection);
+        _itemSpawnManager.SpawnItemFromInventory(_dragItemSlot.Item, _dragItemSlot.Amount, _dragItemSlot.RarityId, transform.position, _playerMovementController.LastMotionDirection);
         _dragItemSlot.Amount = 0;
     }
 
@@ -87,7 +87,7 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
             }
         } else if (itemSlot.Item == null) {
             PlaceItemSlotIntoInventory(itemSlot);
-        } else if (_dragItemSlot.Item == itemSlot.Item && _dragItemSlot.RarityID.Equals(itemSlot.RarityID)) {
+        } else if (_dragItemSlot.Item == itemSlot.Item && _dragItemSlot.RarityId.Equals(itemSlot.RarityId)) {
             // Handle switching or stacking items.
             if (itemSlot.Amount == itemSlot.Item.MaxStackableAmount || _dragItemSlot.Amount == _dragItemSlot.Item.MaxStackableAmount) {
                 SwitchItemSlots(itemSlot);
@@ -110,12 +110,12 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
     }
 
     private void PickUpItemSlot(ItemSlot itemSlot) {
-        _dragItemSlot.Copy(itemSlot.Item.ItemID, itemSlot.Amount, itemSlot.RarityID);
+        _dragItemSlot.Copy(itemSlot);
         itemSlot.Clear();
     }
 
     private void PlaceItemSlotIntoInventory(ItemSlot itemSlot) {
-        itemSlot.Copy(_dragItemSlot.Item.ItemID, _dragItemSlot.Amount, _dragItemSlot.RarityID);
+        itemSlot.Copy(_dragItemSlot);
         _dragItemSlot.Amount = 0;
     }
 
@@ -123,20 +123,20 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
         // Save the item and count of the item slot in temporary variables
         ItemSO transferItem = itemSlot.Item;
         int transferCount = itemSlot.Amount;
-        int transferRarityID = itemSlot.RarityID;
+        int transferRarityID = itemSlot.RarityId;
 
         // Copy the contents of the drag item slot to the item slot
-        itemSlot.Copy(_dragItemSlot.Item.ItemID, _dragItemSlot.Amount, _dragItemSlot.RarityID);
+        itemSlot.Copy(_dragItemSlot);
 
         // Set the drag item slot to the saved item and count from the item slot
-        _dragItemSlot.Set(transferItem.ItemID, transferCount, transferRarityID);
+        _dragItemSlot.Set(transferItem.ItemId, transferCount, transferRarityID);
     }
 
     private void UpdateIcon() {
         if (_dragItemSlot.Item != null) {
             _dragItemPanel.gameObject.SetActive(true);
 
-            var toolRarity = _dragItemSlot.Item.ItemType == ItemTypes.Tools ? (_dragItemSlot.Item as ToolSO).ToolItemRarity[_dragItemSlot.RarityID - 1] : null;
+            var toolRarity = _dragItemSlot.Item.ItemType == ItemSO.ItemTypes.Tools ? (_dragItemSlot.Item as ToolSO).ToolItemRarity[_dragItemSlot.RarityId - 1] : null;
 
             _dragItemPanel.SetItemSlot(_dragItemSlot, toolRarity);
         } else {
@@ -158,14 +158,14 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
 
         CheckToClearDragItem();
 
-        _playerInventoryController.InventoryContainer.ItemContainerNeedsToBeUpdated = true;
+        _playerInventoryController.InventoryContainer.UIUpdate();
 
         UpdateIcon();
     }
 
     private void PlaceItemOnMap() {
         int spawnAmount = _inputManager.GetShiftPressed() ? Mathf.Min(_dragItemSlot.Amount, InputManager.SHIFT_KEY_AMOUNT) : 1;
-        _itemSpawnManager.SpawnItemFromInventory(_dragItemSlot.Item, spawnAmount, _dragItemSlot.RarityID, transform.position, _playerMovementController.LastMotionDirection);
+        _itemSpawnManager.SpawnItemFromInventory(_dragItemSlot.Item, spawnAmount, _dragItemSlot.RarityId, transform.position, _playerMovementController.LastMotionDirection);
         _dragItemSlot.Amount -= spawnAmount;
     }
 
@@ -174,9 +174,9 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
         // Else: Item slot is not empty, but the itemId or rarityId doesn't match the drag item's itemId or the item slot is full.
         if (itemSlot.Item == null) {
             itemSlot.Item = _dragItemSlot.Item;
-            itemSlot.RarityID = _dragItemSlot.RarityID;
-        } else if (itemSlot.Item.ItemID != _dragItemSlot.Item.ItemID ||
-                  itemSlot.RarityID != _dragItemSlot.RarityID ||
+            itemSlot.RarityId = _dragItemSlot.RarityId;
+        } else if (itemSlot.Item.ItemId != _dragItemSlot.Item.ItemId ||
+                  itemSlot.RarityId != _dragItemSlot.RarityId ||
                   itemSlot.Amount >= itemSlot.Item.MaxStackableAmount) {
             return;
         }
@@ -210,13 +210,13 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
 
     // Checks if an item can be added to the drag item slot.
     private bool CanAddToDragItem(ItemSlot itemSlot) {
-        return itemSlot.Item.ItemID != _dragItemSlot.Item.ItemID ||
-               itemSlot.RarityID != _dragItemSlot.RarityID ||
+        return itemSlot.Item.ItemId != _dragItemSlot.Item.ItemId ||
+               itemSlot.RarityId != _dragItemSlot.RarityId ||
                itemSlot.Amount >= itemSlot.Item.MaxStackableAmount;
     }
 
     public void AddDragItemBackIntoBackpack(int lastSlotId) {
-        _playerInventoryController.InventoryContainer.ItemSlots[lastSlotId].Set(_dragItemSlot.Item.ItemID, _dragItemSlot.Amount, _dragItemSlot.RarityID);
+        _playerInventoryController.InventoryContainer.ItemSlots[lastSlotId].Set(_dragItemSlot.Item.ItemId, _dragItemSlot.Amount, _dragItemSlot.RarityId);
         ClearDragItem();
     }
 

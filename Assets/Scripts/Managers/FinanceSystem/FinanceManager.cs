@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using Unity.Netcode;
 using System.Collections;
+using static UnityEditor.Progress;
 
 public class FinanceManager : NetworkBehaviour, IDataPersistance {
     public static FinanceManager Instance { get; private set; }
@@ -110,8 +111,8 @@ public class FinanceManager : NetworkBehaviour, IDataPersistance {
         if (itemId == -1) {
             Debug.Log("No item to add.");
         } else {
-            Debug.Log($"{ItemManager.Instance.ItemDatabase.GetItemFromItemId(itemId).ItemName} added for {money} money");
-            PlayerInventoryController.LocalInstance.InventoryContainer.AddItemToItemContainer(itemId, amount, rarity, false);
+            Debug.Log($"{ItemManager.Instance.ItemDatabase[itemId].ItemName} added for {money} money");
+            PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(itemId, amount, rarity, false);
         }
     }
 

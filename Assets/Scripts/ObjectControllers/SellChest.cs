@@ -14,7 +14,8 @@ public class SellChest : Interactable {
         if (character.GetComponent<PlayerToolbeltController>().GetCurrentlySelectedToolbeltItemSlot().Item != null 
             && character.GetComponent<PlayerToolbeltController>().GetCurrentlySelectedToolbeltItemSlot().Item.CanBeSold) {
 
-            _sellBoxContainer.ItemSlots.Add(character.GetComponent<PlayerToolbeltController>().GetCurrentlySelectedToolbeltItemSlot());
+            var itemSlot = character.GetComponent<PlayerToolbeltController>().GetCurrentlySelectedToolbeltItemSlot();
+            _sellBoxContainer.AddItem(itemSlot.Item.ItemId, itemSlot.Amount, itemSlot.RarityId, false);
 
             character.GetComponent<PlayerToolbeltController>().ClearCurrentItemSlot();
         }

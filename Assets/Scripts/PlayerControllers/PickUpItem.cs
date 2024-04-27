@@ -76,7 +76,7 @@ public class PickUpItem : NetworkBehaviour {
         if (_currentCanPickUpTimer < _canPickUpTimer
             || distanceToPlayer > pickUpDistance
             || _closestPlayer == null
-            || !_closestPlayer.GetComponent<PlayerInventoryController>().InventoryContainer.CheckToAddItemToItemContainer(_itemSlot.Item.ItemID, _itemSlot.Amount, _itemSlot.RarityID)) {
+            || !_closestPlayer.GetComponent<PlayerInventoryController>().InventoryContainer.CanAddItem(_itemSlot.Item.ItemId, _itemSlot.Amount, _itemSlot.RarityId)) {
             return;
         }
 
@@ -102,14 +102,14 @@ public class PickUpItem : NetworkBehaviour {
         var playerItemDragAndDropController = _closestPlayer.GetComponent<PlayerItemDragAndDropController>();
 
         // If the distance between the item and character is less than the threshold, add the item to the inventory and destroy the game object
-        if (distanceToPlayer < 0.1f && playerInventoryController.InventoryContainer.CheckToAddItemToItemContainer(_itemSlot.Item.ItemID, _itemSlot.Amount, _itemSlot.RarityID)) {
+        if (distanceToPlayer < 0.1f && playerInventoryController.InventoryContainer.CanAddItem(_itemSlot.Item.ItemId, _itemSlot.Amount, _itemSlot.RarityId)) {
             if (_closestPlayer != Player.LocalInstance) {
                 DestroyGameObjectServerRpc();
                 return;
             }
 
             for (int i = 0; i < _itemSlot.Amount; i++) {
-                EventsManager.Instance.ItemPickedUpEvents.PickedUpItemId(_itemSlot.Item.ItemID);
+                EventsManager.Instance.ItemPickedUpEvents.PickedUpItemId(_itemSlot.Item.ItemId);
             }
 
             // Try to add the item to the drag item.
@@ -119,7 +119,7 @@ public class PickUpItem : NetworkBehaviour {
 
             // Add the item to the inventory
             if (_itemSlot.Amount > 0) {
-                _itemSlot.Amount = playerInventoryController.InventoryContainer.AddItemToItemContainer(_itemSlot.Item.ItemID, _itemSlot.Amount, _itemSlot.RarityID, false);
+                _itemSlot.Amount = playerInventoryController.InventoryContainer.AddItem(_itemSlot.Item.ItemId, _itemSlot.Amount, _itemSlot.RarityId, false);
             }
 
             DestroyGameObjectServerRpc();
@@ -150,11 +150,11 @@ public class PickUpItem : NetworkBehaviour {
     // This function sets the details on the item to spawn in the map
     public void Set(ItemSlot itemSlot) {
         // Set the item and count for this slot
-        _itemSlot.Copy(itemSlot.Item.ItemID, itemSlot.Amount, itemSlot.RarityID);
+        _itemSlot.Copy(itemSlot);
 
         // Shows the tools rarity
-        if (_itemSlot.Item.ItemType == ItemTypes.Tools) {
-            pickUpItemToolRaritySR.sprite = (_itemSlot.Item as ToolSO).ToolItemRarity[_itemSlot.RarityID - 1];
+        if (_itemSlot.Item.ItemType == ItemSO.ItemTypes.Tools) {
+            pickUpItemToolRaritySR.sprite = (_itemSlot.Item as ToolSO).ToolItemRarity[_itemSlot.RarityId - 1];
         }
 
         // Set the sprite for the item icon

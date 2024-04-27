@@ -25,20 +25,16 @@ public class InventoryPanel : ItemContainerPanel {
         }
         Instance = this;
 
-        _sortButton.onClick.AddListener(() => PlayerInventoryController.LocalInstance.InventoryContainer.SortList());
+        _sortButton.onClick.AddListener(() => PlayerInventoryController.LocalInstance.InventoryContainer.SortItems());
         _trashButton.onClick.AddListener(() => PlayerItemDragAndDropController.LocalInstance.ClearDragItem());
     }
 
     private void Start() {
         base.ItemContainerPanelAwake();
 
-        Init();
-    }
+        ItemContainer.OnItemsUpdated += ShowUIButtonContains;
 
-    private void Update() {
-        if (ItemContainer.ItemContainerNeedsToBeUpdated) {
-            ShowUIButtonContains();
-        }
+        Init();
     }
 
     public void InventoryOrToolbeltSizeChanged() {
@@ -87,16 +83,16 @@ public class InventoryPanel : ItemContainerPanel {
         if (Input.GetKey(KeyCode.LeftShift)) {
             int remainingAmount;
             if (buttonIndex < PlayerToolbeltController.LocalInstance.ToolbeltSizes[2]) {
-                remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItemToItemContainer(
-                ItemContainer.ItemSlots[buttonIndex].Item.ItemID,
+                remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(
+                ItemContainer.ItemSlots[buttonIndex].Item.ItemId,
                 ItemContainer.ItemSlots[buttonIndex].Amount,
-                ItemContainer.ItemSlots[buttonIndex].RarityID,
+                ItemContainer.ItemSlots[buttonIndex].RarityId,
                 true);
             } else {
-                remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItemToItemContainer(
-                ItemContainer.ItemSlots[buttonIndex].Item.ItemID,
+                remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(
+                ItemContainer.ItemSlots[buttonIndex].Item.ItemId,
                 ItemContainer.ItemSlots[buttonIndex].Amount,
-                ItemContainer.ItemSlots[buttonIndex].RarityID,
+                ItemContainer.ItemSlots[buttonIndex].RarityId,
                 false);
             }
 

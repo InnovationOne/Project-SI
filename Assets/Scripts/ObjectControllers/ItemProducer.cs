@@ -46,11 +46,11 @@ public class ItemProducer : Interactable {
     public override void Interact(Player player) {
         if (_localTimer <= 0f) {
             foreach (ItemSlot itemSlot in _recipe.ItemsToProduce) {
-                int remainingAmount = player.GetComponent<PlayerInventoryController>().InventoryContainer.AddItemToItemContainer(itemSlot.Item.ItemID, itemSlot.Amount, itemSlot.RarityID, false);
+                int remainingAmount = player.GetComponent<PlayerInventoryController>().InventoryContainer.AddItem(itemSlot.Item.ItemId, itemSlot.Amount, itemSlot.RarityId, false);
 
 
                 if (remainingAmount > 0) {
-                    ItemSpawnManager.Instance.SpawnItemAtPosition(transform.position, player.GetComponent<PlayerMovementController>().LastMotionDirection, itemSlot.Item, remainingAmount, itemSlot.RarityID, SpreadType.Circle);
+                    ItemSpawnManager.Instance.SpawnItemAtPosition(transform.position, player.GetComponent<PlayerMovementController>().LastMotionDirection, itemSlot.Item, remainingAmount, itemSlot.RarityId, SpreadType.Circle);
                 }
             }
 
@@ -68,7 +68,7 @@ public class ItemProducer : Interactable {
 
         // Spawn every item in the list
         foreach (ItemSlot itemSlot in _recipe.ItemsToProduce) {
-            ItemSpawnManager.Instance.SpawnItemAtPosition(transform.position, player.GetComponent<PlayerMovementController>().LastMotionDirection, itemSlot.Item, itemSlot.Amount, itemSlot.RarityID, SpreadType.Circle);
+            ItemSpawnManager.Instance.SpawnItemAtPosition(transform.position, player.GetComponent<PlayerMovementController>().LastMotionDirection, itemSlot.Item, itemSlot.Amount, itemSlot.RarityId, SpreadType.Circle);
         }
     }
 

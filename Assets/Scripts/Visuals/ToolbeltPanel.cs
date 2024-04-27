@@ -36,13 +36,9 @@ public class ToolbeltPanel : ItemContainerPanel {
     }
 
     private void Start() {
-        Init();
-    }
+        ItemContainer.OnItemsUpdated += ShowUIButtonContains;
 
-    private void Update() {
-        if (ItemContainer.ItemContainerNeedsToBeUpdated) {
-            ShowUIButtonContains();
-        }
+        Init();
     }
 
     public void SetToolbeltSize(int toolbeltSize) {

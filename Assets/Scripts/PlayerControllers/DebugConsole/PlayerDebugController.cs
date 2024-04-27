@@ -68,7 +68,7 @@ public class PlayerDebugController : MonoBehaviour {
 
         ADD_ITEM = new DebugCommand<int, int, int>("add_item", "Adds an item to the inventory", "add_item <item_id> <amount> <rarity_id>", (int itemId, int amount, int rarityId) => {
 
-            PlayerInventoryController.LocalInstance.InventoryContainer.AddItemToItemContainer(itemId, amount, rarityId, false);
+            PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(itemId, amount, rarityId, false);
         });
 
         HELP = new DebugCommand("help", "Shows all available commands", "help", () => {

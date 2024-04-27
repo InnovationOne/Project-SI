@@ -34,7 +34,7 @@ public class DragItemPanel : MonoBehaviour {
         }
 
         if (raritySprite != null) {
-            if (itemSlot.Item.ItemType == ItemTypes.Tools) {
+            if (itemSlot.Item.ItemType == ItemSO.ItemTypes.Tools) {
                 _toolRarityImage.gameObject.SetActive(true);
                 _toolRarityImage.sprite = raritySprite;
             } else {

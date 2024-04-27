@@ -33,7 +33,7 @@ public class ItemSpawnManager : NetworkBehaviour {
         spawnPosition.z = -5f;
 
         for (int i = 0; i < amount; i++) {
-            SpawnItemFromInventoryServerRpc(item.ItemID, rarityID, spawnPosition, CalculateThrowPosition(playerPosition, lastMotionDirection));
+            SpawnItemFromInventoryServerRpc(item.ItemId, rarityID, spawnPosition, CalculateThrowPosition(playerPosition, lastMotionDirection));
         }
     }
 
@@ -102,7 +102,7 @@ public class ItemSpawnManager : NetworkBehaviour {
     }
 
     private void SpawnInstance(Vector3 spawnPosition, ItemSO item, int rarityID, Vector3 calculatedPosition) {
-        SpawnInstanceServerRpc(spawnPosition, item.ItemID, rarityID, calculatedPosition);
+        SpawnInstanceServerRpc(spawnPosition, item.ItemId, rarityID, calculatedPosition);
     }
 
     [ServerRpc(RequireOwnership = false)]

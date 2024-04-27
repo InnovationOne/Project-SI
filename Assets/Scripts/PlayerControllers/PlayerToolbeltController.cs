@@ -70,8 +70,8 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
         if (!IsOwner) return;
 
         if (!DragItemPanel.Instance.gameObject.activeSelf) {
-            ItemSpawnManager.Instance.SpawnItemFromInventory(GetCurrentlySelectedToolbeltItemSlot().Item, 1, GetCurrentlySelectedToolbeltItemSlot().RarityID, transform.position, GetComponent<PlayerMovementController>().LastMotionDirection);
-            GetComponent<PlayerInventoryController>().InventoryContainer.ShootOneItemOut(_currentlySelectedToolbeltSlot);
+            ItemSpawnManager.Instance.SpawnItemFromInventory(GetCurrentlySelectedToolbeltItemSlot().Item, 1, GetCurrentlySelectedToolbeltItemSlot().RarityId, transform.position, GetComponent<PlayerMovementController>().LastMotionDirection);
+            GetComponent<PlayerInventoryController>().InventoryContainer.ShootItem(_currentlySelectedToolbeltSlot);
         }
     }
 
@@ -150,14 +150,14 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
         if (mouseWheelDelta < 0f) {
             SetNextToolbelt();
             ToolbeltPanel.Instance.ToolbeltChanged(_currentlySelectedToolbelt, 90f);
-            GetComponent<PlayerInventoryController>().InventoryContainer.ShiftItemSlots(10);
+            GetComponent<PlayerInventoryController>().InventoryContainer.ShiftSlots(10);
             ToolbeltPanel.Instance.ShowUIButtonContains();
             OnToolbeltChanged?.Invoke();
         } else if (mouseWheelDelta > 0f) {
             SetPreviousToolbelt();
             ToolbeltPanel.Instance.ToolbeltChanged(_currentlySelectedToolbelt, -90f);
 
-            GetComponent<PlayerInventoryController>().InventoryContainer.ShiftItemSlots(-10);
+            GetComponent<PlayerInventoryController>().InventoryContainer.ShiftSlots(-10);
             ToolbeltPanel.Instance.ShowUIButtonContains();
             OnToolbeltChanged?.Invoke();
         }
