@@ -127,6 +127,9 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
             case ObjectSO.ObjectTypes.Chest:
                 gameObject.AddComponent<Chest>().Initialize(objectToPlace.ObjectId);
                 break;
+            case ObjectSO.ObjectTypes.Bed:
+                gameObject.AddComponent<Bed>().Initialize(objectToPlace.ObjectId);
+                break;
             default:
                 Debug.LogError("Placeable object for this objecttype isn't implimented!");
                 break;

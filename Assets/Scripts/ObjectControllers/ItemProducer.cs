@@ -27,6 +27,7 @@ public class ItemProducer : Interactable, IObjectDataPersistence {
         _itemId = itemId;
         _recipeId = GetProducerSO().Recipe != null ? GetProducerSO().Recipe.RecipeId : throw new NotImplementedException("Recipe is not set for this item producer");
         ResetTimer();
+        _visual.SetSprite(GetProducerSO().InactiveSprite);
     }
 
     /// <summary>

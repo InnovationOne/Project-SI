@@ -6,6 +6,7 @@ public class ObjectSO : ItemSO {
         ItemProducer,
         ItemConverter,
         Chest,
+        Bed,
     }
 
     [Header("Place Object Settings")]
@@ -18,7 +19,6 @@ public class ObjectSO : ItemSO {
     public ItemSO ItemToPickUpObject;
 
     [Header("Visuals")]
-    public Sprite HighlightSprite;
     public Sprite ActiveSprite;
     public Sprite InactiveSprite;
 }

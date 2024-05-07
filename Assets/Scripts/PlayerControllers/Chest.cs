@@ -36,6 +36,7 @@ public class Chest : Interactable, IObjectDataPersistence {
     public override void Initialize(int itemId) {
         _itemId = itemId;
         InitializeItemContainer();
+        _visual.SetSprite(GetChestSO().InactiveSprite);
     }
 
     /// <summary>

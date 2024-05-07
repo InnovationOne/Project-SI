@@ -35,6 +35,7 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
     public override void Initialize(int itemId) {
         _itemId = itemId;
         ResetTimer();
+        _visual.SetSprite(GetConverterSO().InactiveSprite);
     }
 
     /// <summary>

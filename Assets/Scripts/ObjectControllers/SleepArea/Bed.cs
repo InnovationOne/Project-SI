@@ -1,24 +1,19 @@
 using UnityEngine;
 
 public class Bed : Interactable {
-    [SerializeField] private SpriteRenderer _bedHighlight;
+    [SerializeField] private ObjectVisual _visual;
 
+    private int _itemId;
 
-    private void Awake() {
-        _bedHighlight.gameObject.SetActive(false);
+    public override void Initialize(int itemId) {
+        _itemId = itemId;
+        _visual.SetSprite(GetObjectSO().InactiveSprite);
     }
 
     public override void Interact(Player player) {
-        if (player.InBed) {
-            // Enable movement again
-            player.SetPlayerInBed(false);
-            player.gameObject.GetComponent<PlayerMovementController>().SetCanMoveAndTurn(true);
-        } else {
-            // Block movement
-            player.SetPlayerInBed(true);
-            player.gameObject.GetComponent<PlayerMovementController>().SetCanMoveAndTurn(false);
-        }
-
-        
+        player.SetPlayerInBed(!player.InBed);
+        PlayerMovementController.LocalInstance.SetCanMoveAndTurn(player.InBed);
     }
+
+    private ObjectSO GetObjectSO() => ItemManager.Instance.ItemDatabase[_itemId] as ObjectSO;
 }
