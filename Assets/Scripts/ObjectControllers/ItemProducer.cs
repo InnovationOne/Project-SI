@@ -23,7 +23,7 @@ public class ItemProducer : Interactable, IObjectDataPersistence {
     /// Initializes the item producer with a specific item identifier.
     /// </summary>
     /// <param name="itemId">The item identifier used to fetch recipe details.</param>
-    public void Initialize(int itemId) {
+    public override void Initialize(int itemId) {
         _itemId = itemId;
         _recipeId = GetProducerSO().Recipe != null ? GetProducerSO().Recipe.RecipeId : throw new NotImplementedException("Recipe is not set for this item producer");
         ResetTimer();

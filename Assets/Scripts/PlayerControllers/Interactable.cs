@@ -1,13 +1,15 @@
+using System;
 using UnityEngine;
 
 /// <summary>
 /// Base class for interactable objects within the game.
 /// </summary>
-public class Interactable : MonoBehaviour {
+public abstract class Interactable : MonoBehaviour {
     /// <summary>
     /// Maximum distance at which a player can interact with the object.
     /// </summary>
-    public virtual float MaxDistanceToPlayer { get; protected set; }
+    [NonSerialized] private float _maxDistanceToPlayer;
+    public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
 
     /// <summary>
     /// Defines interaction logic for the interactable object.
@@ -20,4 +22,6 @@ public class Interactable : MonoBehaviour {
     /// </summary>
     /// <param name="player">The player picking up items.</param>
     public virtual void PickUpItemsInPlacedObject(Player player) { }
+
+    public virtual void Initialize(int itemId) { }
 }

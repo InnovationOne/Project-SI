@@ -5,6 +5,7 @@ public class ObjectSO : ItemSO {
     public enum ObjectTypes {
         ItemProducer,
         ItemConverter,
+        Chest,
     }
 
     [Header("Place Object Settings")]

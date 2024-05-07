@@ -52,7 +52,7 @@ public class InventoryMasterVisual : MonoBehaviour {
                 CloseChestWithButton();
             } else if (_storePanel.gameObject.activeSelf) {
                 // Store
-                PlayerInteractController.LocalInstance.InteractAction();
+                //PlayerInteractController.LocalInstance.InteractAction();
             } else {
                 // Other
                 ToggleMasterPanel();

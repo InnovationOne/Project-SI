@@ -1,130 +1,118 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Chest : Interactable, IObjectDataPersistence {
-    [Header("Item Slots in Chest")]
-    [SerializeField] private int _itemSlots;
-
     [Header("References")]
     [SerializeField] private ObjectVisual _visual;
-    [SerializeField] private ChestUI _chestUI;
+    private static readonly ChestUI _chestUI = ChestUI.Instance;
 
-    public override float MaxDistanceToPlayer { get; protected set; } = 1.5f;
-    private ItemContainerSO _itemContainer;    
-    private bool _opened = false;
-    private static bool _canOpenChest = true;
+    [NonSerialized] private const float MAX_DISTANCE_TO_PLAYER = 1.5f;
+    public override float MaxDistanceToPlayer { get => MAX_DISTANCE_TO_PLAYER; }
 
-    private void Start() {
+    private ItemContainerSO _itemContainer;
+    private bool _opened;
+    private int _itemId;
+
+    private void Awake() {
+        InitializeItemContainer();
+    }
+
+    /// <summary>
+    /// Initializes the item container for the chest.
+    /// </summary>
+    private void InitializeItemContainer() {
         if (_itemContainer == null) {
-            Init();
+            _itemContainer = (ItemContainerSO)ScriptableObject.CreateInstance(typeof(ItemContainerSO));
+            _itemContainer.Initialize(GetChestSO().ItemSlots);
         }
     }
 
-    private void Init() {
-        _itemContainer = (ItemContainerSO)ScriptableObject.CreateInstance(typeof(ItemContainerSO));
-        _itemContainer.Initialize(_itemSlots);
+    /// <summary>
+    /// Initializes the chest with the specified item ID.
+    /// </summary>
+    /// <param name="itemId">The ID of the item to initialize the chest with.</param>
+    public override void Initialize(int itemId) {
+        _itemId = itemId;
+        InitializeItemContainer();
     }
 
+    /// <summary>
+    /// Interacts with the chest.
+    /// </summary>
+    /// <param name="player">The player interacting with the chest.</param>
     public override void Interact(Player player) {
+        ToggleChest();
+        UpdateVisual();
+        UpdateUI();
+    }
+
+    /// <summary>
+    /// Toggles the state of the chest (opened or closed).
+    /// </summary>
+    private void ToggleChest() => _opened = !_opened;
+
+    /// <summary>
+    /// Updates the visual appearance of the chest based on its current state.
+    /// </summary>
+    private void UpdateVisual() => _visual.SetSprite(_opened ? GetChestSO().ActiveSprite : GetChestSO().InactiveSprite);
+    
+
+    /// <summary>
+    /// Updates the UI based on the state of the chest.
+    /// If the chest is opened, it shows the item container in the chest UI.
+    /// If the chest is closed, it hides the chest UI.
+    /// </summary>
+    private void UpdateUI() {
         if (_opened) {
-            InventoryMasterVisual.Instance.HideChestPanel();
-            CloseChest();
-        } else if (!_opened && _canOpenChest) {
-            //_chestVisual.sprite = _chestOpenedSprite;
-            InventoryMasterVisual.Instance.ShowChestPanel();
-            ChestUI.Instance.ShowChest(_itemContainer, this);
-            _canOpenChest = false;
-            _opened = true;
-        } else if (!_canOpenChest) {
-            if (player.GetComponent<PlayerInteractController>().LastInteractable == null) { 
-                Debug.LogWarning("No LastInteractedChest found!");
-                return;
-            }
-            player.GetComponent<PlayerInteractController>().LastInteractable.GetComponent<Chest>().CloseChest();
-            InventoryMasterVisual.Instance.HideChestPanel();
+            _chestUI.ShowChest(_itemContainer);
+        } else {
+            _chestUI.HideChest();
         }
     }
 
+    /// <summary>
+    /// Picks up items in the placed object and adds them to the player's inventory.
+    /// </summary>
+    /// <param name="player">The player who is picking up the items.</param>
     public override void PickUpItemsInPlacedObject(Player player) {
-        foreach (var itemSlot in _itemContainer.ItemSlots) {
-            ItemSpawnManager.Instance.SpawnItemServerRpc(
-                itemSlot: itemSlot,
-                initialPosition: transform.position,
-                motionDirection: PlayerMovementController.LocalInstance.LastMotionDirection,
-                spreadType: ItemSpawnManager.SpreadType.Circle);
+        foreach (ItemSlot itemSlot in _itemContainer.ItemSlots) {
+            int remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(itemSlot, false);
+            if (remainingAmount > 0) {
+                ItemSpawnManager.Instance.SpawnItemServerRpc(
+                    itemSlot: itemSlot,
+                    initialPosition: transform.position,
+                    motionDirection: PlayerMovementController.LocalInstance.LastMotionDirection,
+                    spreadType: ItemSpawnManager.SpreadType.Circle);
+            }
         }
-        
     }
 
-    public void CloseChest() {
-        //_chestVisual.sprite = _chestClosedSprite;
-        _opened = false;
-        _canOpenChest = true;
-    }
+    /// <summary>
+    /// Represents a chest scriptable object.
+    /// </summary>
+    private ChestSO GetChestSO() => ItemManager.Instance.ItemDatabase[_itemId] as ChestSO;
 
 
     #region Save & Load
-    [Serializable]
-    public class SaveItemData {
-        public int itemId;
-        public int amount;
-        public int rarityID;
-
-        public SaveItemData(int itemId, int amount, int rarityID) {
-            this.itemId = itemId;
-            this.amount = amount;
-            this.rarityID = rarityID;
+    public string SaveObject() {
+        var itemContainerJson = new List<string>();
+        foreach (var itemSlot in _itemContainer.ItemSlots) {
+            itemContainerJson.Add(JsonConvert.SerializeObject(itemSlot));
         }
-    }
 
-    [Serializable]
-    public class ToSave {
-        public List<SaveItemData> itemData;
-
-        public ToSave() {
-            itemData = new List<SaveItemData>();
-        }
+        return JsonConvert.SerializeObject(itemContainerJson);
     }
 
     public void LoadObject(string data) {
-        if (string.IsNullOrEmpty(data)) {
-            return;
-        }
-
-        if (_itemContainer == null) {
-            Init();
-        }
-
-        ToSave toLoadItemContainer = JsonUtility.FromJson<ToSave>(data);
-
-        // Iterate over the items in the ToSaveItemContainer object
-        for (int i = 0; i < toLoadItemContainer.itemData.Count; i++) {
-            if (toLoadItemContainer.itemData[i].itemId == -1) {
-                _itemContainer.ItemSlots[i].Clear();
-            } else {
-                // Set the item and amount in the inventory slot
-                _itemContainer.ItemSlots[i].ItemId = toLoadItemContainer.itemData[i].itemId;
-                _itemContainer.ItemSlots[i].Amount = toLoadItemContainer.itemData[i].amount;
-                _itemContainer.ItemSlots[i].RarityId = toLoadItemContainer.itemData[i].rarityID;
+        if (!string.IsNullOrEmpty(data)) {
+            var itemContainerJson = JsonConvert.DeserializeObject<List<string>>(data);
+            InitializeItemContainer();
+            foreach (var itemSlot in itemContainerJson) {
+                _itemContainer.AddItem(JsonConvert.DeserializeObject<ItemSlot>(itemSlot), false);
             }
         }
-    }
-
-    public string SaveObject() {
-        // Save the inventory container to a string
-        ToSave toSaveItemContainer = new();
-
-        foreach (var slot in _itemContainer.ItemSlots) {
-            // Check if the slot has an item
-            if (slot.ItemId == -1) {
-                toSaveItemContainer.itemData.Add(new SaveItemData(-1, -1, -1));
-            } else {
-                toSaveItemContainer.itemData.Add(new SaveItemData(slot.ItemId, slot.Amount, slot.RarityId));
-            }
-        }
-
-        return JsonUtility.ToJson(toSaveItemContainer);
     }
     #endregion
 }

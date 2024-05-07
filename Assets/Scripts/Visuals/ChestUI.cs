@@ -6,7 +6,6 @@ public class ChestUI : ItemContainerPanel {
 
     [Header("Settings")]
     [SerializeField] private Button _buttonPrefab;
-    private Chest _chestBehaviour;
 
     [Header("Contentbox")]
     [SerializeField] private Transform _content;
@@ -19,8 +18,9 @@ public class ChestUI : ItemContainerPanel {
         Instance = this;
     }
 
-    public void ShowChest(ItemContainerSO itemContainer, Chest chest) {
-        _chestBehaviour = chest;
+    public void ShowChest(ItemContainerSO itemContainer) {
+        gameObject.SetActive(true);
+
         ItemContainer = itemContainer;
 
         foreach (Transform child in _content) {
@@ -37,8 +37,7 @@ public class ChestUI : ItemContainerPanel {
     }
 
     public void HideChest() {
-        _chestBehaviour.CloseChest();
-        _chestBehaviour = null;
+        gameObject.SetActive(false);
     }
 
     public override void OnPlayerLeftClick(int buttonIndex) {

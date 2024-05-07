@@ -10,25 +10,29 @@ using UnityEngine;
 [RequireComponent(typeof(TimeAgent))]
 public class ItemConverter : Interactable, IObjectDataPersistence {
     [SerializeField] private ObjectVisual _visual;
-    [SerializeField] private SelectRecipeUI _selectRecipeUI;
+    private SelectRecipeUI _selectRecipeUI;
 
-    public override float MaxDistanceToPlayer { get; protected set; } = 1.5f;
+    [NonSerialized] private const float MAX_DISTANCE_TO_PLAYER = 1.5f;
+    public override float MaxDistanceToPlayer { get => MAX_DISTANCE_TO_PLAYER; }
 
     private int _recipeId;
     private int _timer;
     private int _itemId;
-    private List<ItemSlot> _storedItemSlots;
+    private List<ItemSlot> _storedItemSlots = new();
 
     /// <summary>
     /// Initializes and subscribes to time-based events.
     /// </summary>
-    private void Start() => GetComponent<TimeAgent>().onMinuteTimeTick += ItemConverterProcess;
+    private void Start() {
+        _selectRecipeUI = SelectRecipeUI.Instance;
+        GetComponent<TimeAgent>().onMinuteTimeTick += ItemConverterProcess;
+    }
 
     /// <summary>
     /// Initializes the item producer with a specific item identifier.
     /// </summary>
     /// <param name="itemId">The item identifier used to fetch recipe details.</param>
-    public void Initialize(int itemId) {
+    public override void Initialize(int itemId) {
         _itemId = itemId;
         ResetTimer();
     }
