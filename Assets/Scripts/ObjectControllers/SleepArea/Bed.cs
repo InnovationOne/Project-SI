@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SleepArea : Interactable {
+public class Bed : Interactable {
     [SerializeField] private SpriteRenderer _bedHighlight;
 
 
