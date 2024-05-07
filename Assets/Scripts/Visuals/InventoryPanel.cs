@@ -83,17 +83,9 @@ public class InventoryPanel : ItemContainerPanel {
         if (Input.GetKey(KeyCode.LeftShift)) {
             int remainingAmount;
             if (buttonIndex < PlayerToolbeltController.LocalInstance.ToolbeltSizes[2]) {
-                remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(
-                ItemContainer.ItemSlots[buttonIndex].Item.ItemId,
-                ItemContainer.ItemSlots[buttonIndex].Amount,
-                ItemContainer.ItemSlots[buttonIndex].RarityId,
-                true);
+                remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], true);
             } else {
-                remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(
-                ItemContainer.ItemSlots[buttonIndex].Item.ItemId,
-                ItemContainer.ItemSlots[buttonIndex].Amount,
-                ItemContainer.ItemSlots[buttonIndex].RarityId,
-                false);
+                remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], false);
             }
 
             if (remainingAmount > 0) {

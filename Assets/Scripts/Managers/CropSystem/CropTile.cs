@@ -109,14 +109,4 @@ public class CropTileData {
     public float QualityScaler;
     public float QuantityScaler;
     public float WaterScaler;
-
-    /* // Testing in CropsManager.cs
-    public bool Equals(CropTileData other) {
-        return CropPosition.Equals(other.CropPosition) && CropId == other.CropId;
-    }
-
-    public override int GetHashCode() {
-        return CropPosition.GetHashCode() ^ CropId.GetHashCode();
-    }
-    */
 }

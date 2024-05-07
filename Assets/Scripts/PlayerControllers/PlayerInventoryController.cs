@@ -67,14 +67,14 @@ public class PlayerInventoryController : NetworkBehaviour, IPlayerDataPersistanc
 
         foreach (var item in InventoryContainer.ItemSlots) {
             // Check if the slot has an item
-            if (item.Item == null) {
+            if (item.ItemId == -1) {
                 toSaveData.ItemSlotDataList.Add(new ItemSlotData(
                     -1,
                     -1,
                     -1));
             } else {
                 toSaveData.ItemSlotDataList.Add(new ItemSlotData(
-                    item.Item.ItemId,
+                    item.ItemId,
                     item.Amount,
                     item.RarityId));
             }
@@ -95,7 +95,7 @@ public class PlayerInventoryController : NetworkBehaviour, IPlayerDataPersistanc
                 if (toLoadInventory.ItemSlotDataList[i].ItemID == -1) {
                     InventoryContainer.ItemSlots[i].Clear();
                 } else {
-                    InventoryContainer.ItemSlots[i].Item = ItemManager.Instance.ItemDatabase[toLoadInventory.ItemSlotDataList[i].ItemID];
+                    InventoryContainer.ItemSlots[i].ItemId = toLoadInventory.ItemSlotDataList[i].ItemID;
                     InventoryContainer.ItemSlots[i].Amount = toLoadInventory.ItemSlotDataList[i].Amount;
                     InventoryContainer.ItemSlots[i].RarityId = toLoadInventory.ItemSlotDataList[i].RarityID;
                 }

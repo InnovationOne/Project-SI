@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-
 
 public class TilemapManager : NetworkBehaviour {
     public static TilemapManager Instance { get; private set; }
@@ -11,6 +9,9 @@ public class TilemapManager : NetworkBehaviour {
     private Tilemap _targetTilemap;
 
 
+    /// <summary>
+    /// Called when the script instance is being loaded.
+    /// </summary>
     private void Awake() {
         if (Instance != null) {
             throw new Exception("Found more than one Tilemap Read Manager in the scene.");
@@ -21,33 +22,28 @@ public class TilemapManager : NetworkBehaviour {
         _targetTilemap = GetComponent<Tilemap>();
     }
 
-    //### OLD CODE ###
-
-    // Returns the grid position for the given position in world coordinates
-    // If mousePosition is set to true, the position is assumed to be in screen coordinates
-    // and is converted to world coordinates before being converted to a grid position
-    public Vector3Int GetGridPosition(Vector2 position, bool mousePosition = false) {
-        // Convert the position to world coordinates if it is in screen coordinates
-        Vector3 worldposition;
-        if (mousePosition)
-            worldposition = Camera.main.ScreenToWorldPoint(position);
-        else
-            worldposition = position;
-
-        // Convert the world position to a grid position and return it
-        Vector3Int gridposition = _targetTilemap.WorldToCell(worldposition);
-        return gridposition;
+    /// <summary>
+    /// Converts a 2D position to a grid position in the tilemap.
+    /// </summary>
+    /// <param name="position">The 2D position to convert.</param>
+    /// <returns>The grid position in the tilemap.</returns>
+    public Vector3Int GetGridPosition(Vector2 position) {
+        return _targetTilemap.WorldToCell((Vector3)position);
     }
 
+    /// <summary>
+    /// Returns the <see cref="TileBase"/> at the specified grid position.
+    /// </summary>
+    /// <param name="gridposition">The grid position to retrieve the tile from.</param>
+    /// <returns>The <see cref="TileBase"/> at the specified grid position.</returns>
     public TileBase ReturnTileBaseAtGridPosition(Vector3Int gridposition) {
         return _targetTilemap.GetTile(gridposition);
     }
 
-    // Adjust the position of an object to align with the center of a grid cell
-    public Vector3 FixPositionOnGrid(Vector3 cellToWorld) {
-        // Add 0.5 to both the x and y coordinates of the vector
-        return cellToWorld + new Vector3(0.5f, 0.5f);
+    /// <summary>
+    /// Represents a three-dimensional vector.
+    /// </summary>
+    public Vector3 AlignPositionToGridCenter(Vector3 position) {
+        return position + new Vector3(0.5f, 0.5f);
     }
-
-
 }

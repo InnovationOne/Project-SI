@@ -10,8 +10,8 @@ public class AdvancedRuleTile : RuleTile<AdvancedRuleTile.Neighbor> {
     public bool CheckSelf;
 
     public class Neighbor : TilingRuleOutput.Neighbor {
-        public const int This = 1;
-        public const int NotThis = 2;
+        public new const int This = 1;
+        public new const int NotThis = 2;
         public const int Any = 3;
         public const int Specified = 4;
         public const int Nothing = 5;

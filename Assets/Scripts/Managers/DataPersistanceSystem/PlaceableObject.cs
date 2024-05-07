@@ -3,15 +3,15 @@ using UnityEngine;
 
 [Serializable]
 public class PlaceableObject {
-    public ItemSO placedObject;
-    public Transform targetObject;
-    public Vector3Int objectPositionOnGrid;
-    public string objectState;
+    public int ObjectId;
+    public GameObject Prefab;
+    public Vector3Int Position;
+    public string State;
 
-    public PlaceableObject() { }
-
-    public PlaceableObject(ItemSO placedObject, Vector3Int objectPositionOnGrid) {
-        this.placedObject = placedObject;
-        this.objectPositionOnGrid = objectPositionOnGrid;
+    [Serializable]
+    public class PlaceableObjectData {
+        public int ObjectId;
+        public Vector3 Position;
+        public string State;
     }
 }

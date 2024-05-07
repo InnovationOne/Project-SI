@@ -24,7 +24,7 @@ public class PlayerMarkerController : NetworkBehaviour {
     private int _currentlyUsedRarity;
     private int _energyCost;
     private int[] _areaSizes;
-    private List<Vector3Int> _areaPositions;
+    private List<Vector3Int> _areaPositions = new();
     private ToolSO.ToolTypes _toolType;
 
     // References
@@ -43,11 +43,7 @@ public class PlayerMarkerController : NetworkBehaviour {
         _playerToolbeltController = GetComponent<PlayerToolbeltController>();
         _playerMovementController = GetComponent<PlayerMovementController>();
         _playerToolsAndWeaponController = GetComponent<PlayerToolsAndWeaponController>();
-
-        // Get the marker tilemap
         _targetTilemap = GameObject.FindGameObjectWithTag("MarkerTilemap").GetComponent<Tilemap>();
-
-        _areaPositions = new List<Vector3Int>();
     }
 
     private void Start() {
@@ -97,14 +93,18 @@ public class PlayerMarkerController : NetworkBehaviour {
 
     #region Area Marker
     public void TriggerAreaMarker(int toolRarity, int[] areaSizes, int energyCost, ToolSO.ToolTypes toolType) {
+        ResetAreaMarkerState(toolRarity, areaSizes, energyCost, toolType);
+        _playerMovementController.ChangeMoveSpeed(false);
+    }
+
+    private void ResetAreaMarkerState(int toolRarity, int[] sizes, int cost, ToolSO.ToolTypes type) {
         _currentChangeSizeTimer = 0f;
         _currentlyUsedRarity = 0;
         _currentToolMaxRarity = toolRarity;
-        _areaSizes = areaSizes;
-        _energyCost = energyCost;
+        _areaSizes = sizes;
+        _energyCost = cost;
         _useAreaIndicator = true;
-        _toolType = toolType;
-        _playerMovementController.ChangeMoveSpeed(false);
+        _toolType = type;
     }
 
     private void UseAreaMarker(Vector3Int position, Vector2 lastMotionVector) {
@@ -133,11 +133,8 @@ public class PlayerMarkerController : NetworkBehaviour {
         }
     }
 
+    private void EnableMoveSpeed() => _playerMovementController.ChangeMoveSpeed(true);
     
-
-    private void EnableMoveSpeed() {
-        _playerMovementController.ChangeMoveSpeed(true);
-    }
 
 
     private void ShowAreaMarker(Vector3Int position, Vector2 lastMotionVector) {
@@ -212,19 +209,15 @@ public class PlayerMarkerController : NetworkBehaviour {
     private void ShowMarker(Vector3Int position) {
         MarkedCellPosition = position;
 
-        if (MarkedCellPosition == _lastCellPosition) {
-            return;
+        if (MarkedCellPosition != _lastCellPosition) {
+            SetTile(_lastCellPosition);
+            SetTile(MarkedCellPosition, _markerTile);
+
+            _lastCellPosition = MarkedCellPosition;
         }
-
-        SetTile(_lastCellPosition);
-        SetTile(MarkedCellPosition, _markerTile);
-
-        _lastCellPosition = MarkedCellPosition;
     }
 
-    // Set a tile to marker on the marker tilemap
-    private void SetTile(Vector3Int position, TileBase tileBase = null) {
-        _targetTilemap.SetTile(position, tileBase);
-    }
+    private void SetTile(Vector3Int position, TileBase tileBase = null) => _targetTilemap.SetTile(position, tileBase);
+    
     #endregion
 }

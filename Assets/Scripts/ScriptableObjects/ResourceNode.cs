@@ -8,7 +8,7 @@ using UnityEngine;
 public class ResourceNode : NetworkBehaviour {
     [Header("Node Settings")]
     [SerializeField] private ResourceNodeType _nodeType;
-    [SerializeField] private SpreadType _spreadType;
+    [SerializeField] private ItemSpawnManager.SpreadType _spreadType;
     [SerializeField] private int _startingHP;
     [SerializeField] private int _minimumToolRarity;
 
@@ -25,7 +25,6 @@ public class ResourceNode : NetworkBehaviour {
 
     [Header("Visual Settings")]
     [SerializeField] private SpriteRenderer _resourceNodeHighlight;
-
 
     private int _currentHp;
     private BoxCollider2D _boxCollider2D;
@@ -65,7 +64,12 @@ public class ResourceNode : NetworkBehaviour {
 
         int dropCount = Random.Range(_minDropCount, _maxDropCount);
         Vector3 position = new(transform.position.x + _boxCollider2D.offset.x, transform.position.y + _boxCollider2D.offset.y);
-        ItemSpawnManager.Instance.SpawnItemAtPosition(position, PlayerMovementController.LocalInstance.LastMotionDirection, _itemSO, dropCount, _rarityID, _spreadType);
+        ItemSpawnManager.Instance.SpawnItemServerRpc(
+            itemSlot: new ItemSlot(_itemSO.ItemId, dropCount, _rarityID),
+            initialPosition: position, 
+            motionDirection: PlayerMovementController.LocalInstance.LastMotionDirection, 
+            spreadType: _spreadType);
+
 
         DestroyGameObjectServerRpc();
     }

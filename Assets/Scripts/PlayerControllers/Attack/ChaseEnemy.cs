@@ -22,7 +22,7 @@ public class ChaseEnemy : MonoBehaviour {
 
             foreach (Collider2D target in targets) {
                 if (target.TryGetComponent<PlayerHealthAndEnergyController>(out var hpAndEnergyController)) {
-                    hpAndEnergyController.RemoveHp(damage);
+                    hpAndEnergyController.AdjustHealth(-damage);
                 }
             }
         }

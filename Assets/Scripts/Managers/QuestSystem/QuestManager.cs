@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class QuestManager : NetworkBehaviour, IDataPersistance {
     [Header("Config")]
-    [SerializeField] private bool _loadQuestState = true;
+    //[SerializeField] private bool _loadQuestState = true;
 
     private Dictionary<string, Quest> _questMap;
     private List<QuestData> _questDatas;
@@ -34,7 +34,7 @@ public class QuestManager : NetworkBehaviour, IDataPersistance {
         EventsManager.Instance.QuestEvents.OnQuestStepStateChange += QuestStepStateChange;
     }
 
-    private void OnDestroy() {
+    private new void OnDestroy() {
         EventsManager.Instance.QuestEvents.OnStartQuest -= StartQuest;
         EventsManager.Instance.QuestEvents.OnAdvanceQuest -= AdvanceQuest;
         EventsManager.Instance.QuestEvents.OnFinishQuest -= FinishQuest;

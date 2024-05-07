@@ -86,13 +86,13 @@ public abstract class ItemContainerPanel : MonoBehaviour {
         //Set the buttons with the item slots of the container
         for (int i = 0; i < ItemContainer.ItemSlots.Count && i < ItemButtons.Length; i++) {
             //If the slot has no item, clear the button
-            if (ItemContainer.ItemSlots[i].Item == null) {
+            if (ItemContainer.ItemSlots[i].ItemId == -1) {
                 ItemButtons[i].GetComponent<BackpackButton>().ClearItemSlot();
             } else {
                 if (ItemContainer.ItemSlots[i].RarityId == 0) {
                     ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], null);
-                } else if (ItemContainer.ItemSlots[i].Item.ItemType == ItemSO.ItemTypes.Tools) {
-                    ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], (ItemContainer.ItemSlots[i].Item as ToolSO).ToolItemRarity[ItemContainer.ItemSlots[i].RarityId - 1]);
+                } else if (ItemManager.Instance.ItemDatabase[ItemContainer.ItemSlots[i].ItemId].ItemType == ItemSO.ItemTypes.Tools) {
+                    ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], (ItemManager.Instance.ItemDatabase[ItemContainer.ItemSlots[i].ItemId] as ToolSO).ToolItemRarity[ItemContainer.ItemSlots[i].RarityId - 1]);
                 } else {
                     ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], RaritySprites[ItemContainer.ItemSlots[i].RarityId - 1]);
                 }
@@ -102,7 +102,7 @@ public abstract class ItemContainerPanel : MonoBehaviour {
 
     #region RightClickMenu
     public void ShowRightClickMenu(int buttonIndex, Vector3 position) {
-        if (_rightClickMenu == null || _splitAmountSlider == null || _splitButton == null || _splitAmountSliderText == null || ItemContainer.ItemSlots[buttonIndex].Item == null) {
+        if (_rightClickMenu == null || _splitAmountSlider == null || _splitButton == null || _splitAmountSliderText == null || ItemContainer.ItemSlots[buttonIndex].ItemId == -1) {
             return;
         }
 
@@ -149,9 +149,10 @@ public abstract class ItemContainerPanel : MonoBehaviour {
         if (_buttonIndex >= 0) {
             if ((int)_splitAmountSlider.value > 0) {
                 ItemSlot newItemSlot = new();
-                newItemSlot.Set(ItemContainer.ItemSlots[_buttonIndex].Item.ItemId, 
+                newItemSlot.Set(new ItemSlot(
+                    ItemContainer.ItemSlots[_buttonIndex].ItemId, 
                     (int)_splitAmountSlider.value, 
-                    ItemContainer.ItemSlots[_buttonIndex].RarityId);
+                    ItemContainer.ItemSlots[_buttonIndex].RarityId));
                 PlayerItemDragAndDropController.LocalInstance.OnLeftClick(newItemSlot);
 
                 // When all items are "Splitted" clear the item slot
@@ -201,12 +202,12 @@ public abstract class ItemContainerPanel : MonoBehaviour {
         }
 
         if (_currentTime >= TIME_TO_SHOW_ITEM_INFO && !_itemInfo.gameObject.activeSelf) {
-            _itemNameText.text = _itemSlotForShowInfo.Item.ItemName;
+            _itemNameText.text = ItemManager.Instance.ItemDatabase[_itemSlotForShowInfo.ItemId].ItemName;
 
             StringBuilder itemSlotInfoStringBuilder = new();
-            int rarityOffset = 0;
+            //int rarityOffset = 0;
             if (_itemSlotForShowInfo.RarityId > 0) {
-                rarityOffset = 1;
+                //rarityOffset = 1;
             }
 
             /*

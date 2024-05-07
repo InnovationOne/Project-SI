@@ -39,7 +39,7 @@ public class GateBehaviour : Interactable {
 
 
     private void Awake() {
-        _grid = FindObjectOfType<Grid>();
+        _grid = FindFirstObjectByType<Grid>();
     }
 
     private void Start() {

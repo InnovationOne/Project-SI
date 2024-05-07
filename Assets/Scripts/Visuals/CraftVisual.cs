@@ -13,10 +13,10 @@ public class CraftVisual : MonoBehaviour {
         Instance = this;
     }
 
-    public void SpawnCraftItemSlot(RecipeSO recipeSO) {
+    public void SpawnCraftItemSlot(int recipeId) {
         CraftButton craftButton = Instantiate(_buttonPrefab, _content);
 
-        craftButton.SetItemImage(recipeSO.ItemsToProduce[0].Item.ItemIcon);
+        craftButton.SetItemImage(ItemManager.Instance.ItemDatabase[RecipeManager.Instance.RecipeDatabase[recipeId].ItemsToProduce[0].ItemId].ItemIcon);
         craftButton.SetIndex(_lastIndex);
 
         _lastIndex++;

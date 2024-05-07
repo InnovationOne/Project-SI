@@ -35,7 +35,7 @@ public class FenceBehaviour : MonoBehaviour {
 
 
     private void Awake() {
-        _grid = FindObjectOfType<Grid>();
+        _grid = FindFirstObjectByType<Grid>();
     }
 
     private void Start() {

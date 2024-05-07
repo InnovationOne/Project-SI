@@ -445,7 +445,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         cropTile.Prefab = prefab;
 
         // Calculate the world position of the crop tile on the grid
-        Vector3 worldPosition = TilemapManager.Instance.FixPositionOnGrid(_targetTilemap.CellToWorld(cropTile.CropPosition));
+        Vector3 worldPosition = TilemapManager.Instance.AlignPositionToGridCenter(_targetTilemap.CellToWorld(cropTile.CropPosition));
         // Set the position of the prefab in the world
         cropTile.Prefab.transform.position = worldPosition + new Vector3(0, 0.5f) + new Vector3(cropTile.SpriteRendererOffset.x, cropTile.SpriteRendererOffset.y, -0.1f);
         // Set the scale of the prefab
@@ -512,7 +512,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Check if the position is not already plowed, if the tile at the position can be plowed, and if there is no object placed at the position
         return !CropTileContainer.IsPositionPlowed(position) &&
                Array.IndexOf(_tilesThatCanBePlowed, _tilemapReadManager.ReturnTileBaseAtGridPosition(position)) != -1 &&
-               !_placeableObjectsManager.IsPositionPlaced(position);
+               !_placeableObjectsManager.POContainer.PlaceableObjects.ContainsKey(position);
     }
 
     /// <summary>
@@ -528,7 +528,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             // Get the client
             var client = NetworkManager.ConnectedClients[clientId];
             // Reduce the energy of the player
-            client.PlayerObject.GetComponent<PlayerHealthAndEnergyController>().RemoveEnergy(totalUsedEnergy);
+            client.PlayerObject.GetComponent<PlayerHealthAndEnergyController>().AdjustEnergy(-totalUsedEnergy);
         }
     }
 
@@ -665,7 +665,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         if (NetworkManager.ConnectedClients.ContainsKey(clientId)) {
             // If it is, remove the item from the sender's inventory
             var client = NetworkManager.ConnectedClients[clientId];
-            client.PlayerObject.GetComponent<PlayerInventoryController>().InventoryContainer.RemoveItem(itemId, 1, 0);
+            client.PlayerObject.GetComponent<PlayerInventoryController>().InventoryContainer.RemoveItem(new ItemSlot(itemId, 1, 0));
         }
     }
 
@@ -841,23 +841,21 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// Client RPC method for harvesting a crop at a given position.
     /// </summary>
     /// <param name="position">The position of the crop to harvest.</param>
-    /// <param name="itemCountToSpawn">The number of items to spawn after harvesting.</param>
+    /// <param name="itemAmount">The number of items to spawn after harvesting.</param>
     /// <param name="itemRarity">The rarity of the spawned items.</param>
     [ClientRpc]
-    private void HarvestCropClientRpc(Vector3Int position, int itemCountToSpawn, int itemRarity) {
+    private void HarvestCropClientRpc(Vector3Int position, int itemAmount, int itemRarity) {
         // Get the crop tile at the given position
         CropTile cropTile = CropTileContainer.GetCropTileAtPosition(position);
         // Get the crop from the crop database using the crop ID
         CropSO crop = _cropDatabase[cropTile.CropId];
 
         // Spawn items at the position of the harvested crop
-        ItemSpawnManager.Instance.SpawnItemAtPosition(
-            _targetTilemap.CellToWorld(position),
-            Vector2.zero,
-            crop.ItemToGrowAndSpawn,
-            itemCountToSpawn,
-            itemRarity,
-            SpreadType.Circle);
+        ItemSpawnManager.Instance.SpawnItemServerRpc(
+            itemSlot: new ItemSlot(crop.ItemToGrowAndSpawn.ItemId, itemAmount, itemRarity),
+            initialPosition: _targetTilemap.CellToWorld(position),
+            motionDirection: Vector2.zero,
+            spreadType: ItemSpawnManager.SpreadType.Circle);
 
         // Handle the crop after it has been harvested
         HandleCropAfterHarvest(cropTile, crop);
@@ -1214,18 +1212,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             var client = NetworkManager.ConnectedClients[clientId];
             client.PlayerObject.GetComponent<PlayerToolsAndWeaponController>().ClientCallback(success);
         }
-    }
-
-
-    // *TODO* Maybe delete after place object refactor
-    /// <summary>
-    /// Checks if a given position is seeded with a crop.
-    /// </summary>
-    /// <param name="position">The position to check.</param>
-    /// <returns>True if the position is seeded with a crop, false otherwise.</returns>
-    public bool IsPositionSeeded(Vector3Int position) {
-        // Check if the given position is seeded in the crop tile container
-        return CropTileContainer.IsPositionSeeded(position);
     }
 
 

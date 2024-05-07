@@ -30,7 +30,7 @@ public class InventoryMasterVisual : MonoBehaviour {
     public InventorySubPanels LastOpenPanel { get; private set; } = InventorySubPanels.none;
 
     [Header("Chest Panel")]
-    [SerializeField] private ChestPanel _chestPanel;
+    [SerializeField] private ChestUI _chestPanel;
 
     [Header("Store Panel")]
     [SerializeField] private StoreVisual _storePanel;

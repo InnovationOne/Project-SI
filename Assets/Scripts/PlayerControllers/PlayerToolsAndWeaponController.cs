@@ -65,7 +65,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
             return;
         }
 
-        ItemSO itemSO = _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().Item;
+        ItemSO itemSO = ItemManager.Instance.ItemDatabase[_playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId];
         if (itemSO == null) {
             return;
         }

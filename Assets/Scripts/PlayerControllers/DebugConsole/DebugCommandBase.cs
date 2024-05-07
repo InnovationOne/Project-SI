@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class DebugCommandBase : MonoBehaviour
+public class DebugCommandBase
 {
     public string CommandId { get; private set; }
     public string CommandDescription { get; private set; }

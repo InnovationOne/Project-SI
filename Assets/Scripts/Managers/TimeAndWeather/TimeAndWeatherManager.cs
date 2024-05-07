@@ -34,7 +34,6 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     [SerializeField] private AnimationCurve _nightTimeCurve;
     [SerializeField] private Light2D _globalLight;
 
-
     [Header("Time constants")]
     [SerializeField] private float _timeScale = 60f; // Time scale for the ingame time (e.g. 60 means 1 minute ingame is equal to 1 second in real life)
 
@@ -345,31 +344,31 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     }
     #endregion
 
-    #region Debug
-    public void DebugStartNextDay() {
+    #region CheatConsole
+    public void CheatStartNextDay() {
         StartNextDay();
     }
-    public void DebugSetTime(int hours, int minutes) {
+    public void CheatSetTime(int hours, int minutes) {
         _currentTime = hours * 3600 + minutes * 60;
         OnUpdateUITime?.Invoke((int)GetHours(), (int)GetMinutes());
     }
 
-    public void DebugSetDay(int day) {
+    public void CheatSetDay(int day) {
         CurrentDay = day;
         OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
     }
 
-    public void DebugSetSeason(int season) {
+    public void CheatSetSeason(int season) {
         CurrentSeason = season;
         OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
     }
 
-    public void DebugSetYear(int year) {
+    public void CheatSetYear(int year) {
         _currentYear = year;
         OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
     }
 
-    public void DebugSetWeather(int weather) {
+    public void CheatSetWeather(int weather) {
         _weatherForecast[0] = (WeatherName)weather;
         ApplyWeather();
         UpdateUIAndInvokeEventsClientRpc(GetTodaysGlobalLightColor());

@@ -40,9 +40,9 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
     public void SetItemSlot(ItemSlot itemSlot, Sprite raritySprite) {
         _itemSlot = itemSlot;
         _itemIconImage.gameObject.SetActive(true);
-        _itemIconImage.sprite = _itemSlot.Item.ItemIcon;
+        _itemIconImage.sprite = ItemManager.Instance.ItemDatabase[_itemSlot.ItemId].ItemIcon;
 
-        if (_itemSlot.Item.IsStackable) {
+        if (ItemManager.Instance.ItemDatabase[_itemSlot.ItemId].IsStackable) {
             _itemAmountBackgroundImage.gameObject.SetActive(true);
             _itemAmountText.text = _itemSlot.Amount.ToString();
         } else {
@@ -51,7 +51,7 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
         }
 
         if (raritySprite != null) {
-            if (_itemSlot.Item.ItemType == ItemSO.ItemTypes.Tools) {
+            if (ItemManager.Instance.ItemDatabase[_itemSlot.ItemId].ItemType == ItemSO.ItemTypes.Tools) {
                 _itemRarityImage.gameObject.SetActive(false);
                 _toolRarityImage.gameObject.SetActive(true);
                 _toolRarityImage.sprite = raritySprite;

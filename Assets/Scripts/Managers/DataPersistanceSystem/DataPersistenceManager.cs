@@ -126,7 +126,7 @@ public class DataPersistenceManager : NetworkBehaviour {
 
     // Find all scripts that save or load
     private List<IDataPersistance> FindAllDataPersistanceObjects() {
-        IEnumerable<IDataPersistance> dataPersistanceObjects = FindObjectsOfType<MonoBehaviour>(true).OfType<IDataPersistance>();
+        IEnumerable<IDataPersistance> dataPersistanceObjects = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.InstanceID).OfType<IDataPersistance>();
 
         return new List<IDataPersistance>(dataPersistanceObjects);
     }

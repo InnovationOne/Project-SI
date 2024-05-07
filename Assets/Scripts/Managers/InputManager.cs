@@ -56,6 +56,9 @@ public class InputManager : NetworkBehaviour {
         }
 
         playerInputActions = new();
+    }
+
+    private void Start() {
         playerInputActions.Player.Enable();
 
         playerInputActions.Player.Run.performed += Run_performed;
@@ -96,52 +99,52 @@ public class InputManager : NetworkBehaviour {
     }
 
     private void Run_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnRunAction?.Invoke();
     }
 
     private void DropItem_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnDropItemAction?.Invoke();
     }
 
     private void Interact_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnInteractAction?.Invoke();
     }
 
     private void Inventory_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnInventoryAction?.Invoke();
     }
 
     private void Craft_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnCraftAction?.Invoke();
     }
 
     private void Relation_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnRelationAction?.Invoke();
     }
 
     private void Wiki_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnCollectionAction?.Invoke();
     }
 
     private void Character_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnCharacterAction?.Invoke();
     }
 
     private void Mission_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnMissionAction?.Invoke();
     }
 
     private void Map_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnMapAction?.Invoke();
     }
 
@@ -150,67 +153,67 @@ public class InputManager : NetworkBehaviour {
     }
 
     private void Pause_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnPauseAction?.Invoke();
     }
 
     private void ToolbeltSlot1_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot1Action?.Invoke();
     }
 
     private void ToolbeltSlot2_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot2Action?.Invoke();
     }
 
     private void ToolbeltSlot3_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot3Action?.Invoke();
     }
 
     private void ToolbeltSlot4_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot4Action?.Invoke();
     }
 
     private void ToolbeltSlot5_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot5Action?.Invoke();
     }
 
     private void ToolbeltSlot6_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot6Action?.Invoke();
     }
 
     private void ToolbeltSlot7_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot7Action?.Invoke();
     }
 
     private void ToolbeltSlot8_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot8Action?.Invoke();
     }
 
     private void ToolbeltSlot9_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot9Action?.Invoke();
     }
 
     private void ToolbeltSlot10_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot10Action?.Invoke();
     }
 
     private void LeftClick_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnLeftClickAction?.Invoke();
     }
 
     private void RightClick_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnRightClickAction?.Invoke();
     }
 
@@ -231,27 +234,27 @@ public class InputManager : NetworkBehaviour {
     }
 
     public Vector2 GetMovementVectorNormalized() {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return Vector2.zero; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return Vector2.zero; }
         return playerInputActions.Player.Movement.ReadValue<Vector2>().normalized;
     }
 
     public Vector2 GetMouseWheelVector() {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return Vector2.zero; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return Vector2.zero; }
         return playerInputActions.Player.ToolbeltSlotSelect.ReadValue<Vector2>();
     }
 
     public Vector2 GetPointerPosition() {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return Vector2.zero; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return Vector2.zero; }
         return playerInputActions.Player.PointerPosition.ReadValue<Vector2>();
     }
 
     public bool GetShiftPressed() {
-        if (PlayerDebugController.Instance.ShowDebugConsole) { return false; }
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return false; }
         return playerInputActions.Player.Run.ReadValue<float>() > 0;
     }
 
 
-    private void OnDestroy() {
+    private new void OnDestroy() {
         playerInputActions.Player.Run.performed -= Run_performed;
         playerInputActions.Player.DropItem.performed -= DropItem_performed;
         playerInputActions.Player.Interact.performed -= Interact_performed;

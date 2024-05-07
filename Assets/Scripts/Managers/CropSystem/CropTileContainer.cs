@@ -130,11 +130,16 @@ public class CropTileContainer {
             var cropTileData = JsonConvert.DeserializeObject<CropTileData>(cropTilesJSON);
             cropTiles.Add(new CropTile {
                 CropId = cropTileData.CropId,
-                CropPosition = new Vector3Int((int)cropTileData.CropPosition.x, (int)cropTileData.CropPosition.y, (int)cropTileData.CropPosition.z),
+                CropPosition = new Vector3Int(
+                    (int)cropTileData.CropPosition.x, 
+                    (int)cropTileData.CropPosition.y, 
+                    (int)cropTileData.CropPosition.z),
                 CurrentGrowthTimer = cropTileData.CurrentGrowTimer,
                 IsRegrowing = cropTileData.IsRegrowing,
                 Damage = cropTileData.Damage,
-                SpriteRendererOffset = new Vector2(cropTileData.SpriteRendererXPosition, cropTileData.SpriteRendererYPosition),
+                SpriteRendererOffset = new Vector2(
+                    cropTileData.SpriteRendererXPosition, 
+                    cropTileData.SpriteRendererYPosition),
                 SpriteRendererXScale = cropTileData.SpriteRendererXScale,
                 GrowthTimeScaler = cropTileData.GrowthTimeScaler,
                 RegrowthTimeScaler = cropTileData.RegrowthTimeScaler,

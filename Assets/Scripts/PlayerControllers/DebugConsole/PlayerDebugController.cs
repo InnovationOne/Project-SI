@@ -1,8 +1,9 @@
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerDebugController : MonoBehaviour {
-    public static PlayerDebugController Instance { get; private set; }
+public class PlayerDebugController : NetworkBehaviour {
+    public static PlayerDebugController LocalInstance { get; private set; }
 
     public bool ShowDebugConsole { get; private set; } = false;
     private bool showHelp = false;
@@ -27,11 +28,6 @@ public class PlayerDebugController : MonoBehaviour {
     public List<DebugCommandBase> CommandList;
 
     private void Awake() {
-        if (Instance != null) {
-            Debug.LogError("There is more than one local instance of PlayerDebugController in the scene!");
-            return;
-        }
-        Instance = this;
         commandHistory = new List<string>();
         autoCompleteSuggestions = new List<string>();
 
@@ -43,32 +39,32 @@ public class PlayerDebugController : MonoBehaviour {
         });
 
         START_NEXT_DAY = new DebugCommand("start_next_day", "Starts the next day", "start_next_day", () => {
-            TimeAndWeatherManager.Instance.DebugStartNextDay();
+            TimeAndWeatherManager.Instance.CheatStartNextDay();
         });
 
         SET_TIME = new DebugCommand<int, int>("set_time", "Sets the time to the given value", "set_time <hour> <minute>", (int hour, int minute) => {
-            TimeAndWeatherManager.Instance.DebugSetTime(hour, minute);
+            TimeAndWeatherManager.Instance.CheatSetTime(hour, minute);
         });
 
         SET_DAY = new DebugCommand<int>("set_day", "Sets the day to the given value", "set_day <day>", (int day) => {
-            TimeAndWeatherManager.Instance.DebugSetDay(day);
+            TimeAndWeatherManager.Instance.CheatSetDay(day);
         });
 
         SET_SEASON = new DebugCommand<int>("set_season", "Sets the season to the given value", "set_season <season_id>", (int seasonId) => {
-            TimeAndWeatherManager.Instance.DebugSetSeason(seasonId);
+            TimeAndWeatherManager.Instance.CheatSetSeason(seasonId);
         });
 
         SET_YEAR = new DebugCommand<int>("set_year", "Sets the year to the given value", "set_year <year>", (int year) => {
-            TimeAndWeatherManager.Instance.DebugSetYear(year);
+            TimeAndWeatherManager.Instance.CheatSetYear(year);
         });
 
         SET_WEATHER = new DebugCommand<int>("set_weather", "Sets the weather to the given value", "set_weather <weather_id>", (int weatherId) => {
-            TimeAndWeatherManager.Instance.DebugSetWeather(weatherId);
+            TimeAndWeatherManager.Instance.CheatSetWeather(weatherId);
         });
 
         ADD_ITEM = new DebugCommand<int, int, int>("add_item", "Adds an item to the inventory", "add_item <item_id> <amount> <rarity_id>", (int itemId, int amount, int rarityId) => {
 
-            PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(itemId, amount, rarityId, false);
+            PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(new ItemSlot(itemId, amount, rarityId), false);
         });
 
         HELP = new DebugCommand("help", "Shows all available commands", "help", () => {
@@ -94,6 +90,16 @@ public class PlayerDebugController : MonoBehaviour {
         InputManager.Instance.OnEscapeAction += OnEscape;
         InputManager.Instance.OnArrowUpAction += OnArrowUp;
         InputManager.Instance.OnArrowDownAction += OnArrowDown;
+    }
+
+    public override void OnNetworkSpawn() {
+        if (IsOwner) {
+            if (LocalInstance != null) {
+                Debug.LogError("There is more than one local instance of PlayerDebugController in the scene!");
+                return;
+            }
+            LocalInstance = this;
+        }
     }
 
     private void ToggleDebugConsole() {

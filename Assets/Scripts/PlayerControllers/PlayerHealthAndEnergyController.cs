@@ -43,7 +43,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
         OnUpdateMaxEnergy?.Invoke(_maxEnergy);
     }
 
-    private void OnDestroy() {
+    private new void OnDestroy() {
         TimeAndWeatherManager.Instance.OnNextDayStarted -= TimeAndWeatherManager_OnNextDayStarted;
     }
 
@@ -144,7 +144,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     private void HandlePlayerExhaustion() {
         // TODO: Play exhausted animation
 
-        RespawnPlayer();
+        // Respawn next day?
 
         // TODO: Play wake-up animation and in-hospital event for exhaustion
 
@@ -158,6 +158,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     private void RespawnPlayer() {
         transform.position = _hospitalRespawnPosition;
         _currentHealth = _hpAtRespawn;
+        _currentEnergy = _energyAtRespawn;
     }
 
 

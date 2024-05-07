@@ -23,9 +23,9 @@ public class DragItemPanel : MonoBehaviour {
 
     public void SetItemSlot(ItemSlot itemSlot, Sprite raritySprite) {
         _itemIconImage.gameObject.SetActive(true);
-        _itemIconImage.sprite = itemSlot.Item.ItemIcon;
+        _itemIconImage.sprite = ItemManager.Instance.ItemDatabase[itemSlot.ItemId].ItemIcon;
 
-        if (itemSlot.Item.IsStackable) {
+        if (ItemManager.Instance.ItemDatabase[itemSlot.ItemId].IsStackable) {
             _itemAmountBackgroundImage.gameObject.SetActive(true);
             _itemAmountText.text = itemSlot.Amount.ToString();
         } else {
@@ -34,7 +34,7 @@ public class DragItemPanel : MonoBehaviour {
         }
 
         if (raritySprite != null) {
-            if (itemSlot.Item.ItemType == ItemSO.ItemTypes.Tools) {
+            if (ItemManager.Instance.ItemDatabase[itemSlot.ItemId].ItemType == ItemSO.ItemTypes.Tools) {
                 _toolRarityImage.gameObject.SetActive(true);
                 _toolRarityImage.sprite = raritySprite;
             } else {

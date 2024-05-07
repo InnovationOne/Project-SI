@@ -7,12 +7,14 @@ public class PlaceObject : ToolActionSO {
         Debug.Log("PlaceObject.OnApplyToTileMap() not implemented");
         return;
 
-        if (PlaceableObjectsManager.Instance.IsPositionPlaced(position) || CropsManager.Instance.IsPositionSeeded(position)) {
+        if (PlaceableObjectsManager.Instance.POContainer.PlaceableObjects.ContainsKey(position) || CropsManager.Instance.CropTileContainer.IsPositionSeeded(position)) {
         }
 
-        PlaceableObjectsManager.Instance.PlaceObjectOnMap(position);
+        PlaceableObjectsManager.Instance.PlaceObjectOnMapServerRpc(
+            PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId, 
+            position);
 
-        PlayerInventoryController.LocalInstance.InventoryContainer.RemoveItem(itemSlot.Item.ItemId, 1, itemSlot.RarityId);
+        PlayerInventoryController.LocalInstance.InventoryContainer.RemoveItem(itemSlot);
 
         //return true;
     }

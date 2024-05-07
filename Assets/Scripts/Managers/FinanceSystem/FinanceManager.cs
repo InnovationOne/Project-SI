@@ -2,7 +2,6 @@ using UnityEngine;
 using System;
 using Unity.Netcode;
 using System.Collections;
-using static UnityEditor.Progress;
 
 public class FinanceManager : NetworkBehaviour, IDataPersistance {
     public static FinanceManager Instance { get; private set; }
@@ -76,7 +75,7 @@ public class FinanceManager : NetworkBehaviour, IDataPersistance {
 
 
     #region Remove money
-    public IEnumerator PerformRemoveMoney(int money, int itemId = -1, int amount = 0, int rarity = 0) {
+    public IEnumerator PerformRemoveMoney(int money, ItemSlot itemSlot) {
         _callbackSuccessful = false;
         _success = false;
 
@@ -85,7 +84,7 @@ public class FinanceManager : NetworkBehaviour, IDataPersistance {
 
         yield return WaitForServerResponse();
 
-        ProcessRemoveMoneyResult(money, itemId, amount, rarity);
+        ProcessRemoveMoneyResult(money, itemSlot);
     }
 
     private IEnumerator WaitForServerResponse() {
@@ -99,20 +98,20 @@ public class FinanceManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    private void ProcessRemoveMoneyResult(int money, int itemId, int amount, int rarity) {
+    private void ProcessRemoveMoneyResult(int money, ItemSlot itemSlot) {
         if (!_success) {
             Debug.Log($"Not enough money available. Money needed: {money}, money available: {_moneyOfFarm}. {money - _moneyOfFarm} more needed.");
         } else {
-            ManageItemAddition(money, itemId, amount, rarity);
+            ManageItemAddition(money, itemSlot);
         }
     }
 
-    private void ManageItemAddition(int money, int itemId, int amount, int rarity) {
-        if (itemId == -1) {
+    private void ManageItemAddition(int money, ItemSlot itemSlot) {
+        if (itemSlot.ItemId == -1) {
             Debug.Log("No item to add.");
         } else {
-            Debug.Log($"{ItemManager.Instance.ItemDatabase[itemId].ItemName} added for {money} money");
-            PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(itemId, amount, rarity, false);
+            Debug.Log($"{ItemManager.Instance.ItemDatabase[itemSlot.ItemId].ItemName} added for {money} money");
+            PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(itemSlot, false);
         }
     }
 

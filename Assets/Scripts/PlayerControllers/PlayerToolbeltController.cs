@@ -7,6 +7,7 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
     public static PlayerToolbeltController LocalInstance { get; private set; }
 
     public event Action OnToolbeltChanged;
+    public event Action OnToggleToolbelt;
 
     public int[] ToolbeltSizes { get { return new int[] { 5, 7, 10 }; } }
     public int CurrentToolbeltSize = 10;
@@ -39,6 +40,24 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
         PauseGameManager.Instance.OnShowLocalPauseGame += PauseMenuController_OnTogglePauseMenu;
     }
 
+    private new void OnDestroy() {
+        ToolbeltPanel.Instance.OnToolbeltSlotLeftClick -= ToolbeltVisual_OnToolbeltSlotLeftClick;
+
+        InputManager.Instance.OnDropItemAction -= InputManager_OnDropItemAction;
+        InputManager.Instance.OnToolbeltSlot1Action -= InputManager_OnToolbeltSlot1Action;
+        InputManager.Instance.OnToolbeltSlot2Action -= InputManager_OnToolbeltSlot2Action;
+        InputManager.Instance.OnToolbeltSlot3Action -= InputManager_OnToolbeltSlot3Action;
+        InputManager.Instance.OnToolbeltSlot4Action -= InputManager_OnToolbeltSlot4Action;
+        InputManager.Instance.OnToolbeltSlot5Action -= InputManager_OnToolbeltSlot5Action;
+        InputManager.Instance.OnToolbeltSlot6Action -= InputManager_OnToolbeltSlot6Action;
+        InputManager.Instance.OnToolbeltSlot7Action -= InputManager_OnToolbeltSlot7Action;
+        InputManager.Instance.OnToolbeltSlot8Action -= InputManager_OnToolbeltSlot8Action;
+        InputManager.Instance.OnToolbeltSlot9Action -= InputManager_OnToolbeltSlot9Action;
+        InputManager.Instance.OnToolbeltSlot10Action -= InputManager_OnToolbeltSlot10Action;
+
+        PauseGameManager.Instance.OnShowLocalPauseGame -= PauseMenuController_OnTogglePauseMenu;
+    }
+
     public override void OnNetworkSpawn() {
         if (IsOwner) {
             if (LocalInstance != null) {
@@ -62,17 +81,24 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
     }
 
     #region InputManager
-    private void ToolbeltVisual_OnToolbeltSlotLeftClick(int selectedToolbeltSlot) {
-        _currentlySelectedToolbeltSlot = selectedToolbeltSlot;
-    }
-
+    private void ToolbeltVisual_OnToolbeltSlotLeftClick(int selectedToolbeltSlot) => _currentlySelectedToolbeltSlot = selectedToolbeltSlot;
+    
     private void InputManager_OnDropItemAction() {
-        if (!IsOwner) return;
-
-        if (!DragItemPanel.Instance.gameObject.activeSelf) {
-            ItemSpawnManager.Instance.SpawnItemFromInventory(GetCurrentlySelectedToolbeltItemSlot().Item, 1, GetCurrentlySelectedToolbeltItemSlot().RarityId, transform.position, GetComponent<PlayerMovementController>().LastMotionDirection);
-            GetComponent<PlayerInventoryController>().InventoryContainer.ShootItem(_currentlySelectedToolbeltSlot);
+        if (!IsOwner || DragItemPanel.Instance.gameObject.activeSelf) {
+            return;
         }
+
+        var toolbeltItem = GetCurrentlySelectedToolbeltItemSlot();
+        var playerMovement = GetComponent<PlayerMovementController>();
+        var inventoryController = GetComponent<PlayerInventoryController>();
+
+        ItemSpawnManager.Instance.SpawnItemServerRpc(
+            itemSlot: new ItemSlot(toolbeltItem.ItemId, 1, toolbeltItem.RarityId),
+            initialPosition: transform.position, 
+            motionDirection: playerMovement.LastMotionDirection,
+            useInventoryPosition: true);
+
+        inventoryController.InventoryContainer.RemoveItem( new ItemSlot(toolbeltItem.ItemId, 1, toolbeltItem.RarityId));
     }
 
     private void InputManager_OnToolbeltSlot1Action() {
@@ -136,31 +162,39 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
     }
 
     private void SelectToolFromMouseWheel(float mouseWheelDelta) {
+        if (mouseWheelDelta == 0f) {
+            return;
+        }
+
         if (mouseWheelDelta < 0f) {
             SetToolLeft();
-            OnToolbeltChanged?.Invoke();
-        } else if (mouseWheelDelta > 0f) {
+        } else {
             SetToolRight();
-            OnToolbeltChanged?.Invoke();
         }
+
+        OnToolbeltChanged?.Invoke();
         ToolbeltPanel.Instance.SetToolbeltSlotHighlight(_currentlySelectedToolbeltSlot);
     }
 
     private void SelectToolbeltFromMouseWheele(float mouseWheelDelta) {
+        if (mouseWheelDelta == 0f) {
+            return;
+        }
+
+        var inventoryController = GetComponent<PlayerInventoryController>();
+        int shiftAmount = mouseWheelDelta < 0f ? 10 : -10;
+        float rotationAmount = mouseWheelDelta < 0f ? 90f : -90f;
+
         if (mouseWheelDelta < 0f) {
             SetNextToolbelt();
-            ToolbeltPanel.Instance.ToolbeltChanged(_currentlySelectedToolbelt, 90f);
-            GetComponent<PlayerInventoryController>().InventoryContainer.ShiftSlots(10);
-            ToolbeltPanel.Instance.ShowUIButtonContains();
-            OnToolbeltChanged?.Invoke();
-        } else if (mouseWheelDelta > 0f) {
+        } else {
             SetPreviousToolbelt();
-            ToolbeltPanel.Instance.ToolbeltChanged(_currentlySelectedToolbelt, -90f);
-
-            GetComponent<PlayerInventoryController>().InventoryContainer.ShiftSlots(-10);
-            ToolbeltPanel.Instance.ShowUIButtonContains();
-            OnToolbeltChanged?.Invoke();
         }
+
+        ToolbeltPanel.Instance.ToolbeltChanged(_currentlySelectedToolbelt, rotationAmount);
+        inventoryController.InventoryContainer.ShiftSlots(shiftAmount);
+        ToolbeltPanel.Instance.ShowUIButtonContains();
+        OnToolbeltChanged?.Invoke();
     }
     #endregion
 
@@ -199,15 +233,12 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
     }
 
     public void ClearCurrentItemSlot() {
-        gameObject.GetComponent<PlayerInventoryController>().InventoryContainer.ItemSlots[_currentlySelectedToolbeltSlot].Clear();
+        GetComponent<PlayerInventoryController>().InventoryContainer.ClearItemSlot(_currentlySelectedToolbeltSlot);
         ToolbeltPanel.Instance.ShowUIButtonContains();
     }
 
-    public ItemSlot GetCurrentlySelectedToolbeltItemSlot() {
-        return gameObject.GetComponent<PlayerInventoryController>().InventoryContainer.ItemSlots[_currentlySelectedToolbeltSlot];
-    }
-
-    // Blocks the toolselection on the toolbelt - block = true => to block.
+    public ItemSlot GetCurrentlySelectedToolbeltItemSlot()  => PlayerInventoryController.LocalInstance.InventoryContainer.ItemSlots[_currentlySelectedToolbeltSlot];
+    
     public void LockToolbeltSlotSelection() {
         _toolbeltToolSelectionBlocked = true;
     }
@@ -216,14 +247,8 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
         _toolbeltToolSelectionBlocked = false;
     }
 
-    public void ToggleToolbelt() {
-        ToolbeltPanel.Instance.ToggleToolbelt();
-    }
-
-    private void PauseMenuController_OnTogglePauseMenu() {
-        ToolbeltPanel.Instance.ToggleToolbelt();
-    }
-
+    private void PauseMenuController_OnTogglePauseMenu() => OnToggleToolbelt?.Invoke();
+    
 
     #region Save & Load
     public void SavePlayer(PlayerData playerData) {
