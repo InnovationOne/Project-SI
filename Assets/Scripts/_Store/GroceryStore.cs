@@ -43,15 +43,6 @@ public class GroceryStore : Store, IDataPersistance {
         InventoryMasterVisual.Instance.ToggleStorePanel();
     }
 
-    public override void ShowPossibleInteraction(bool show) {
-        // Store is not build yet
-        if (_groceryStoreLevel == 0) {
-            return;
-        }
-
-        _groceryStoreHighlight.gameObject.SetActive(show);
-    }
-
 
     #region Save & Load
     public void LoadData(GameData data) {

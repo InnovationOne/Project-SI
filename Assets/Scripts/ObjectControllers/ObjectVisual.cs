@@ -15,10 +15,4 @@ public class ObjectVisual : MonoBehaviour {
     /// </summary>
     /// <param name="sprite">The sprite to apply to the item producer visual.</param>
     public void SetSprite(Sprite sprite) => _itemProducerVisual.sprite = sprite;
-
-    /// <summary>
-    /// Shows or hides the possible interaction highlight.
-    /// </summary>
-    /// <param name="show">If true, shows the highlight; otherwise, hides it.</param>
-    public void ShowPossibleInteraction(bool show) => _itemProducerHighlight.gameObject.SetActive(show);    
 }

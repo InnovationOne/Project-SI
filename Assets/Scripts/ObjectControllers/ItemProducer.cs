@@ -92,12 +92,6 @@ public class ItemProducer : Interactable, IObjectDataPersistence {
         }
     }
 
-    /// <summary>
-    /// Shows or hides the visual interaction possibility.
-    /// </summary>
-    /// <param name="show">Indicates whether to show or hide the interaction.</param>
-    public override void ShowPossibleInteraction(bool show) => _visual.ShowPossibleInteraction(show);
-
     #region Save & Load
     [Serializable]
     public class ItemProducerData {

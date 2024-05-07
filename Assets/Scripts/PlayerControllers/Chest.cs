@@ -5,36 +5,19 @@ using UnityEngine;
 public class Chest : Interactable, IObjectDataPersistence {
     [Header("Item Slots in Chest")]
     [SerializeField] private int _itemSlots;
+
+    [Header("References")]
     [SerializeField] private ObjectVisual _visual;
+    [SerializeField] private ChestUI _chestUI;
 
-    [Header("Highlight")]
-    [SerializeField] private SpriteRenderer _chestHighlight;
-    [SerializeField] private Sprite _chestClosedHighlight;
-    [SerializeField] private Sprite _chestOpenedHighlight;
-
-    private const float MAX_DISTANCE_TO_PLAYER = 1.5f;
+    public override float MaxDistanceToPlayer { get; protected set; } = 1.5f;
     private ItemContainerSO _itemContainer;    
     private bool _opened = false;
     private static bool _canOpenChest = true;
-    private Player _player;
-
-
-    private void Awake() {
-        //_chestVisual.sprite = _chestClosedSprite;
-        _chestHighlight.gameObject.SetActive(false);
-    }
 
     private void Start() {
-        // When no itemContainer is initialized, initialise a new one
         if (_itemContainer == null) {
             Init();
-        }
-    }
-
-    private void Update() {
-        if (_player != null && Vector2.Distance(_player.transform.position, transform.position) > MAX_DISTANCE_TO_PLAYER) {
-            Interact(_player);
-            _player = null;
         }
     }
 
@@ -51,7 +34,6 @@ public class Chest : Interactable, IObjectDataPersistence {
             //_chestVisual.sprite = _chestOpenedSprite;
             InventoryMasterVisual.Instance.ShowChestPanel();
             ChestUI.Instance.ShowChest(_itemContainer, this);
-            _player = player;
             _canOpenChest = false;
             _opened = true;
         } else if (!_canOpenChest) {
@@ -62,16 +44,6 @@ public class Chest : Interactable, IObjectDataPersistence {
             player.GetComponent<PlayerInteractController>().LastInteractable.GetComponent<Chest>().CloseChest();
             InventoryMasterVisual.Instance.HideChestPanel();
         }
-    }
-
-    public override void ShowPossibleInteraction(bool show) {
-        if (_opened) {
-            _chestHighlight.sprite = _chestOpenedHighlight;
-        } else {
-            _chestHighlight.sprite = _chestClosedHighlight;
-        }
-
-        _chestHighlight.gameObject.SetActive(show);
     }
 
     public override void PickUpItemsInPlacedObject(Player player) {
@@ -87,7 +59,6 @@ public class Chest : Interactable, IObjectDataPersistence {
 
     public void CloseChest() {
         //_chestVisual.sprite = _chestClosedSprite;
-        _player = null;
         _opened = false;
         _canOpenChest = true;
     }

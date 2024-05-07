@@ -21,8 +21,4 @@ public class SleepArea : Interactable {
 
         
     }
-
-    public override void ShowPossibleInteraction(bool show) {
-        _bedHighlight.gameObject.SetActive(show);
-    }
 }

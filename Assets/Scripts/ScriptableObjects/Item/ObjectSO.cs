@@ -1,6 +1,5 @@
 using UnityEngine;
 
-// This class contains information used in an item e.g. tool, seed, oven etc.
 [CreateAssetMenu(menuName = "Scriptable Objects/Object")]
 public class ObjectSO : ItemSO {
     public enum ObjectTypes {
@@ -12,6 +11,7 @@ public class ObjectSO : ItemSO {
     public RecipeSO.RecipeTypes RecipeType;
     public int ProduceTimeInPercent;
     public ObjectTypes ObjectType;
+    public bool CloseUIAndObjectOnPlayerLeave;
 
     [Header("Pick-Up")]
     public ItemSO ItemToPickUpObject;

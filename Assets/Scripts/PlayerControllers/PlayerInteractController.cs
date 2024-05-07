@@ -1,26 +1,28 @@
 using Unity.Netcode;
 using UnityEngine;
 
-// This class handels interactions of the player with the world (e.g. chest, smelter, gate, animals)
+[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(Player))]
 public class PlayerInteractController : NetworkBehaviour {
     public static PlayerInteractController LocalInstance { get; private set; }
 
-    public Interactable LastInteractable { get; private set; }
-
-    [SerializeField] private float _maxInteractDistance = 0.4f;
-
-    private Interactable _lastPossibleInteraction;
-    private BoxCollider2D _boxCollider2d;
-    private Player _localPlayer;
+    private const float MAX_INTERACT_DISTANCE = 0.4f;
+    private Interactable _lastInteractable;
+    private BoxCollider2D _playerCollider;
+    private Player _player;
 
 
     private void Awake() {
-        _boxCollider2d = GetComponent<BoxCollider2D>();
-        _localPlayer = GetComponent<Player>();
+        _playerCollider = GetComponent<BoxCollider2D>();
+        _player = GetComponent<Player>();        
     }
 
     private void Start() {
         InputManager.Instance.OnInteractAction += InputManager_OnInteractAction;
+    }
+
+    private new void OnDestroy() {
+        InputManager.Instance.OnInteractAction -= InputManager_OnInteractAction;
     }
 
     public override void OnNetworkSpawn() {
@@ -34,21 +36,58 @@ public class PlayerInteractController : NetworkBehaviour {
     }
 
     private void Update() {
-        CheckForInteractables();
+        if (IsOwner) {
+            ProcessInteractionCheck();
+            DiscoverInteractables();
+        }
     }
 
-    // Interact with the collider
+    /// <summary>
+    /// Handles the interaction action triggered by the input manager.
+    /// </summary>
     private void InputManager_OnInteractAction() {
-        InteractAction();
+        if (_lastInteractable != null) {
+            _lastInteractable.Interact(_player);
+        }
     }
 
-    private void CheckForInteractables() {
-        Collider2D[] collider2DArray = Physics2D.OverlapCircleAll(_boxCollider2d.bounds.center, _maxInteractDistance);
+    /// <summary>
+    /// Processes the interaction check and triggers the interaction with the last interactable object if it is out of the maximum distance to the player.
+    /// </summary>
+    private void ProcessInteractionCheck() {
+        if (_lastInteractable != null && 
+            _lastInteractable.MaxDistanceToPlayer > 0f && 
+            Vector2.Distance(transform.position, _lastInteractable.transform.position) > _lastInteractable.MaxDistanceToPlayer) {
 
+            _lastInteractable.Interact(_player);
+            _lastInteractable = null;
+        }
+    }
+
+    /// <summary>
+    /// Discovers interactable objects within a certain distance from the player.
+    /// </summary>
+    private void DiscoverInteractables() {
+        var boundsCenter = _playerCollider.bounds.center;
+        var colliders = Physics2D.OverlapCircleAll(boundsCenter, MAX_INTERACT_DISTANCE);
+        var closestCollider = FindClosestInteractable(colliders);
+
+        if (closestCollider != null) {
+            _lastInteractable = closestCollider.GetComponent<Interactable>();
+        } else {
+            _lastInteractable = null;
+        }
+    }
+
+    /// <summary>
+    /// Represents a 2D collider component attached to a game object.
+    /// </summary>
+    private Collider2D FindClosestInteractable(Collider2D[] colliders) {
         Collider2D closestCollider = null;
         float closestDistance = float.MaxValue;
-        foreach (Collider2D collider in collider2DArray) {
-            if (collider.TryGetComponent<Interactable>(out var interact)) {
+
+        foreach (Collider2D collider in colliders) {
+            if (collider.TryGetComponent<Interactable>(out var interactable)) {
                 float distance = Vector2.Distance(transform.position, collider.transform.position);
                 if (distance < closestDistance) {
                     closestDistance = distance;
@@ -57,31 +96,7 @@ public class PlayerInteractController : NetworkBehaviour {
             }
         }
 
-        UpdatePossibleInteraction(closestCollider);
-    }
-
-    private void UpdatePossibleInteraction(Collider2D closestCollider) {
-        if (closestCollider != null) {
-            // Show the possible interaction e.g. ui or highlight etc.
-            if (_lastPossibleInteraction != null && _lastPossibleInteraction.gameObject.GetInstanceID() != closestCollider.gameObject.GetInstanceID()) {
-                _lastPossibleInteraction.ShowPossibleInteraction(false);
-            }
-            _lastPossibleInteraction = closestCollider.GetComponent<Interactable>();
-            _lastPossibleInteraction.ShowPossibleInteraction(true);
-
-        } else if (_lastPossibleInteraction != null) {
-            // Hide the last possible interaction
-            _lastPossibleInteraction.ShowPossibleInteraction(false);
-            _lastPossibleInteraction = null;
-        }
-    }
-
-    public void InteractAction() {
-        if (_lastPossibleInteraction != null) {
-            _lastPossibleInteraction.Interact(_localPlayer);
-
-            LastInteractable = LastInteractable == null ? _lastPossibleInteraction : null;
-        }
+        return closestCollider;
     }
 }
 

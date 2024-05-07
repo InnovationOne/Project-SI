@@ -34,11 +34,6 @@ public class AnimalController : Interactable {
         }
     }
 
-    public override void ShowPossibleInteraction(bool show) {
-        _animalVisual.ShowFPGIcon(_wasFed, _wasPetted, _gaveItem, show);
-        _animalVisual.ShowHighlight(show);
-    }
-
     private void ShowLove() {
         _animalVisual.ShowLoveIcon();
     }

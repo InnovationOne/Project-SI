@@ -12,6 +12,8 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
     [SerializeField] private ObjectVisual _visual;
     [SerializeField] private SelectRecipeUI _selectRecipeUI;
 
+    public override float MaxDistanceToPlayer { get; protected set; } = 1.5f;
+
     private int _recipeId;
     private int _timer;
     private int _itemId;
@@ -203,12 +205,6 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
         _storedItemSlots.Clear();
         _recipeId = -1;
     }
-
-    /// <summary>
-    /// Shows or hides the visual interaction possibility.
-    /// </summary>
-    /// <param name="show">Indicates whether to show or hide the interaction.</param>
-    public override void ShowPossibleInteraction(bool show) => _visual.ShowPossibleInteraction(show);
 
 
     #region Save & Load

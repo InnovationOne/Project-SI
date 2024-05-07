@@ -20,8 +20,4 @@ public class SellChest : Interactable {
             character.GetComponent<PlayerToolbeltController>().ClearCurrentItemSlot();
         }
     }
-
-    public override void ShowPossibleInteraction(bool show) {
-        _sellBoxHighlight.gameObject.SetActive(show);
-    }
 }
