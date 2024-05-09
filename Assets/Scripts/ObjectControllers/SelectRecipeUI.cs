@@ -1,3 +1,5 @@
+using Ink.Parsed;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class SelectRecipeUI : MonoBehaviour {
@@ -11,7 +13,7 @@ public class SelectRecipeUI : MonoBehaviour {
         Instance = this;
     }
 
-    public int SelectRecipe() {
+    public int SelectRecipe(List<RecipeSO> recipes) {
         throw new System.NotImplementedException();
     }
 }

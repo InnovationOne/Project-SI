@@ -41,6 +41,8 @@ public class InputManager : NetworkBehaviour {
     public event Action OnArrowUpAction;
     public event Action OnArrowDownAction;
 
+    public event Action OnLeftControlAction;
+
 
     private PlayerInputActions playerInputActions;
 
@@ -251,6 +253,11 @@ public class InputManager : NetworkBehaviour {
     public bool GetShiftPressed() {
         if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return false; }
         return playerInputActions.Player.Run.ReadValue<float>() > 0;
+    }
+
+    public bool GetLeftControlPressed() {
+        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return false; }
+        return playerInputActions.Player.LeftControl.ReadValue<float>() > 0;
     }
 
 

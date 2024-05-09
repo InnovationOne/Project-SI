@@ -1,12 +1,15 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Scriptable Objects/Object")]
+[CreateAssetMenu(menuName = "Scriptable Objects/ItemSO/ObjectSO")]
 public class ObjectSO : ItemSO {
     public enum ObjectTypes {
         ItemProducer,
         ItemConverter,
         Chest,
         Bed,
+        Fence,
+        Gate,
+        Sprinkler,
     }
 
     [Header("Place Object Settings")]

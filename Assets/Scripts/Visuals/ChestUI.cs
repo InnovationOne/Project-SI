@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ChestUI : ItemContainerPanel {
+public class ChestUI : ItemContainerUI {
     public static ChestUI Instance { get; private set; }
 
     [Header("Settings")]

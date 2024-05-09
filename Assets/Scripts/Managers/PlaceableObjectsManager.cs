@@ -130,6 +130,15 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
             case ObjectSO.ObjectTypes.Bed:
                 gameObject.AddComponent<Bed>().Initialize(objectToPlace.ObjectId);
                 break;
+            case ObjectSO.ObjectTypes.Fence:
+                gameObject.AddComponent<Fence>().Initialize(objectToPlace.ObjectId);
+                break;
+            case ObjectSO.ObjectTypes.Gate:
+                gameObject.AddComponent<Gate>().Initialize(objectToPlace.ObjectId);
+                break;
+            case ObjectSO.ObjectTypes.Sprinkler:
+                gameObject.AddComponent<Sprinkler>().Initialize(objectToPlace.ObjectId);
+                break;
             default:
                 Debug.LogError("Placeable object for this objecttype isn't implimented!");
                 break;
@@ -242,7 +251,7 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="gameObject">The GameObject to handle the pick-up interaction for.</param>
     private void HandlePickUpInteraction(GameObject gameObject) {
         var interactable = gameObject.GetComponent<Interactable>();
-        var fenceBehaviour = gameObject.GetComponent<FenceBehaviour>();
+        var fenceBehaviour = gameObject.GetComponent<Fence>();
 
         if (interactable != null) {
             interactable.PickUpItemsInPlacedObject(Player.LocalInstance);

@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
 using System;
 using UnityEngine;
-using static ItemConverter;
 
 /// <summary>
 /// Manages the production of items based on recipes and timed processes.
@@ -25,9 +24,9 @@ public class ItemProducer : Interactable, IObjectDataPersistence {
     /// <param name="itemId">The item identifier used to fetch recipe details.</param>
     public override void Initialize(int itemId) {
         _itemId = itemId;
-        _recipeId = GetProducerSO().Recipe != null ? GetProducerSO().Recipe.RecipeId : throw new NotImplementedException("Recipe is not set for this item producer");
+        _recipeId = ProducerSO.Recipe != null ? ProducerSO.Recipe.RecipeId : throw new NotImplementedException("Recipe is not set for this item producer");
         ResetTimer();
-        _visual.SetSprite(GetProducerSO().InactiveSprite);
+        _visual.SetSprite(ProducerSO.InactiveSprite);
     }
 
     /// <summary>
@@ -38,7 +37,7 @@ public class ItemProducer : Interactable, IObjectDataPersistence {
             _timer--;
 
             if (_timer == 0f) {
-                GetComponent<ObjectVisual>().SetSprite(GetProducerSO().InactiveSprite);
+                GetComponent<ObjectVisual>().SetSprite(ProducerSO.InactiveSprite);
             }
         }
     }
@@ -51,7 +50,7 @@ public class ItemProducer : Interactable, IObjectDataPersistence {
         if (_timer <= 0f) {
             ProduceItems();
             ResetTimer();
-            _visual.SetSprite(GetProducerSO().ActiveSprite);
+            _visual.SetSprite(ProducerSO.ActiveSprite);
         }
     }
 
@@ -75,13 +74,13 @@ public class ItemProducer : Interactable, IObjectDataPersistence {
     /// <summary>
     /// Resets the production timer based on the recipe's production time.
     /// </summary>
-    private void ResetTimer() => _timer = RecipeManager.Instance.RecipeDatabase[_recipeId].TimeToProduce * GetProducerSO().ProduceTimeInPercent / 100;
+    private void ResetTimer() => _timer = RecipeManager.Instance.RecipeDatabase[_recipeId].TimeToProduce * ProducerSO.ProduceTimeInPercent / 100;
 
     /// <summary>
     /// Fetches the ObjectSO associated with the current item ID.
     /// </summary>
     /// <returns>The ObjectSO associated with the current item.</returns>
-    private ProducerSO GetProducerSO() => ItemManager.Instance.ItemDatabase[_itemId] as ProducerSO;
+    private ProducerSO ProducerSO => ItemManager.Instance.ItemDatabase[_itemId] as ProducerSO;
 
     /// <summary>
     /// Handles the collection of produced items when the object is dismanteled with.

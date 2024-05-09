@@ -23,5 +23,7 @@ public abstract class Interactable : MonoBehaviour {
     /// <param name="player">The player picking up items.</param>
     public virtual void PickUpItemsInPlacedObject(Player player) { }
 
-    public virtual void Initialize(int itemId) { }
+    public virtual void Initialize(int itemId) { 
+
+    }
 }

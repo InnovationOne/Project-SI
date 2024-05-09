@@ -9,7 +9,7 @@
                     "name": "Run",
                     "type": "Button",
                     "id": "7524a51c-5750-4652-aba1-1b1fa3041f4f",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -280,6 +280,15 @@
                     "type": "Button",
                     "id": "4cfaa4ec-18d0-41e4-9575-0a3fe13babce",
                     "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "LeftControl",
+                    "type": "Button",
+                    "id": "d93ef8b4-c964-426a-90ec-bb43fd2db688",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -844,6 +853,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "ArrowDown",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "130ea143-6e6f-49d3-bc27-4e27e3925ffb",
+                    "path": "<Keyboard>/leftCtrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftControl",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

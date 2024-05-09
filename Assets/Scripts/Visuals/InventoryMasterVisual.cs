@@ -147,10 +147,10 @@ public class InventoryMasterVisual : MonoBehaviour {
 
     private void ToggleMasterPanel() {
         gameObject.SetActive(!gameObject.activeSelf);
-        ToolbeltPanel.Instance.ToggleToolbelt();
+        ToolbeltUI.Instance.ToggleToolbelt();
 
         if (DragItemPanel.Instance.gameObject.activeSelf) {
-            PlayerItemDragAndDropController.LocalInstance.AddDragItemBackIntoBackpack(_subPanels[(int)InventorySubPanels.Inventory].GetComponent<InventoryPanel>().LastSlotId);
+            PlayerItemDragAndDropController.LocalInstance.AddDragItemBackIntoBackpack(_subPanels[(int)InventorySubPanels.Inventory].GetComponent<InventoryUI>().LastSlotId);
         }
     }
 

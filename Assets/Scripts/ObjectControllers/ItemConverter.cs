@@ -35,7 +35,7 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
     public override void Initialize(int itemId) {
         _itemId = itemId;
         ResetTimer();
-        _visual.SetSprite(GetConverterSO().InactiveSprite);
+        _visual.SetSprite(ConverterSO.InactiveSprite);
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
     private void ProcessConversion() {
         _storedItemSlots.Clear();
         _storedItemSlots.AddRange(GetRecipeItemsToProduce());
-        _visual.SetSprite(GetConverterSO().InactiveSprite);
+        _visual.SetSprite(ConverterSO.InactiveSprite);
     }
 
     /// <summary>
@@ -89,28 +89,23 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
     /// <returns>True if the item is eligible for a new recipe, false otherwise.</returns>
     private bool IsEligibleForNewRecipe() => PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot() != null && _storedItemSlots.Any();
 
-    /// <summary>
-    /// Selects a recipe based on the currently selected toolbelt item slot.
-    /// </summary>
-    /// <returns>The ID of the selected recipe.</returns>
-    private int SelectRecipe() {
-        ItemSlot toolbeltItemSlot = PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot();
-        return RecipeManager.Instance.RecipeDatabase[toolbeltItemSlot.ItemId] != null ? SelectRecipeAutomatically(toolbeltItemSlot) : _selectRecipeUI.SelectRecipe();
-    }
+    private int SelectRecipe() => ConverterSO.Recipes.Count == 0 ? SelectRecipeAutomatically() : _selectRecipeUI.SelectRecipe(ConverterSO.Recipes);
+    
 
     /// <summary>
     /// Selects a recipe automatically based on the provided toolbelt item slot.
     /// </summary>
     /// <param name="toolbeltItemSlot">The item slot in the toolbelt.</param>
     /// <returns>The ID of the selected recipe, or -1 if no recipe is found.</returns>
-    private int SelectRecipeAutomatically(ItemSlot toolbeltItemSlot) {
+    private int SelectRecipeAutomatically() {
+        ItemSlot toolbeltItemSlot = PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot();
         foreach (var recipe in RecipeManager.Instance.RecipeContainer.Recipes) {
             RecipeSO recipeSO = RecipeManager.Instance.RecipeDatabase[recipe];
 
             for (int i = 0; i < recipeSO.ItemsToConvert.Count; i++) {
                 if (recipeSO.ItemsToConvert[i].ItemId == toolbeltItemSlot.ItemId &&
                     recipeSO.ItemsToConvert[i].RarityId == toolbeltItemSlot.RarityId &&
-                    recipeSO.RecipeType == GetConverterSO().RecipeType) {
+                    recipeSO.RecipeType == ConverterSO.RecipeType) {
 
                     return recipeSO.RecipeId;
                 }
@@ -125,8 +120,7 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
     /// </summary>
     /// <returns>True if the player has all the needed items, false otherwise.</returns>
     private bool HasAllNeededItems() {
-        List<ItemSlot> inventory = PlayerInventoryController.LocalInstance.InventoryContainer
-            .CombineItemsByTypeAndRarity();
+        List<ItemSlot> inventory = PlayerInventoryController.LocalInstance.InventoryContainer.CombineItemsByTypeAndRarity();
 
         var matchingNum = RecipeManager.Instance.RecipeDatabase[_recipeId].ItemsNeededToConvert
             .Concat(RecipeManager.Instance.RecipeDatabase[_recipeId].ItemsToConvert)
@@ -144,7 +138,7 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
     private void StartItemProcessing() {
         DeductRequiredItemsFromInventory();
         ResetTimer();
-        _visual.SetSprite(GetConverterSO().ActiveSprite);
+        _visual.SetSprite(ConverterSO.ActiveSprite);
     }
 
     /// <summary>
@@ -198,13 +192,13 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
     /// <summary>
     /// Resets the production timer based on the recipe's production time.
     /// </summary>
-    private void ResetTimer() => _timer = RecipeManager.Instance.RecipeDatabase[_recipeId].TimeToProduce * GetConverterSO().ProduceTimeInPercent / 100;
+    private void ResetTimer() => _timer = RecipeManager.Instance.RecipeDatabase[_recipeId].TimeToProduce * ConverterSO.ProduceTimeInPercent / 100;
 
     /// <summary>
     /// Fetches the ObjectSO associated with the current item ID.
     /// </summary>
     /// <returns>The ObjectSO associated with the current item.</returns>
-    private ConverterSO GetConverterSO() => ItemManager.Instance.ItemDatabase[_itemId] as ConverterSO;
+    private ConverterSO ConverterSO => ItemManager.Instance.ItemDatabase[_itemId] as ConverterSO;
 
     private void ClearStoredItems() {
         _storedItemSlots.Clear();

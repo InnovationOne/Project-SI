@@ -2,7 +2,7 @@ using UnityEngine;
 
 
 // This class contains information used in an item e.g. tool, seed, oven etc.
-[CreateAssetMenu(menuName = "Scriptable Objects/Food")]
+[CreateAssetMenu(menuName = "Scriptable Objects/ItemSO/FoodSO")]
 public class FoodSO : ItemSO {
     // The player uses a item to heal
     [Header("Use Settings")]

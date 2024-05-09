@@ -25,7 +25,7 @@ public class Chest : Interactable, IObjectDataPersistence {
     private void InitializeItemContainer() {
         if (_itemContainer == null) {
             _itemContainer = (ItemContainerSO)ScriptableObject.CreateInstance(typeof(ItemContainerSO));
-            _itemContainer.Initialize(GetChestSO().ItemSlots);
+            _itemContainer.Initialize(ChestSO.ItemSlots);
         }
     }
 
@@ -36,7 +36,7 @@ public class Chest : Interactable, IObjectDataPersistence {
     public override void Initialize(int itemId) {
         _itemId = itemId;
         InitializeItemContainer();
-        _visual.SetSprite(GetChestSO().InactiveSprite);
+        _visual.SetSprite(ChestSO.InactiveSprite);
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public class Chest : Interactable, IObjectDataPersistence {
     /// <summary>
     /// Updates the visual appearance of the chest based on its current state.
     /// </summary>
-    private void UpdateVisual() => _visual.SetSprite(_opened ? GetChestSO().ActiveSprite : GetChestSO().InactiveSprite);
+    private void UpdateVisual() => _visual.SetSprite(_opened ? ChestSO.ActiveSprite : ChestSO.InactiveSprite);
     
 
     /// <summary>
@@ -93,26 +93,18 @@ public class Chest : Interactable, IObjectDataPersistence {
     /// <summary>
     /// Represents a chest scriptable object.
     /// </summary>
-    private ChestSO GetChestSO() => ItemManager.Instance.ItemDatabase[_itemId] as ChestSO;
+    private ChestSO ChestSO => ItemManager.Instance.ItemDatabase[_itemId] as ChestSO;
 
 
     #region Save & Load
     public string SaveObject() {
-        var itemContainerJson = new List<string>();
-        foreach (var itemSlot in _itemContainer.ItemSlots) {
-            itemContainerJson.Add(JsonConvert.SerializeObject(itemSlot));
-        }
-
-        return JsonConvert.SerializeObject(itemContainerJson);
+        return _itemContainer.SaveItemContainer();
     }
 
     public void LoadObject(string data) {
         if (!string.IsNullOrEmpty(data)) {
-            var itemContainerJson = JsonConvert.DeserializeObject<List<string>>(data);
             InitializeItemContainer();
-            foreach (var itemSlot in itemContainerJson) {
-                _itemContainer.AddItem(JsonConvert.DeserializeObject<ItemSlot>(itemSlot), false);
-            }
+            _itemContainer.LoadItemContainer(data);
         }
     }
     #endregion

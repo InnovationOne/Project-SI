@@ -15,7 +15,7 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
     [SerializeField] private TextMeshProUGUI _itemAmountText;
 
     private int _buttonIndex;
-    private ItemContainerPanel _itemPanel;
+    private ItemContainerUI _itemPanel;
     private ItemSlot _itemSlot;
 
 
@@ -34,7 +34,7 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
     public void SetButtonIndex(int buttonIndex) {
         _buttonIndex = buttonIndex;
 
-        _itemPanel = transform.GetComponentInParent<ItemContainerPanel>();
+        _itemPanel = transform.GetComponentInParent<ItemContainerUI>();
     }
 
     public void SetItemSlot(ItemSlot itemSlot, Sprite raritySprite) {

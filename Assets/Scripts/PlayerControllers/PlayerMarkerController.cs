@@ -30,27 +30,20 @@ public class PlayerMarkerController : NetworkBehaviour {
     // References
     private Tilemap _targetTilemap;
     private BoxCollider2D _boxCollider2D;
-    private PlayerToolbeltController _playerToolbeltController;
-    private PlayerMovementController _playerMovementController;
-    private PlayerToolsAndWeaponController _playerToolsAndWeaponController;
-    private CropsManager _cropsManager;
-    private TilemapManager _tilemapManager;
 
 
     private void Awake() {
         // Get references
         _boxCollider2D = GetComponent<BoxCollider2D>();
-        _playerToolbeltController = GetComponent<PlayerToolbeltController>();
-        _playerMovementController = GetComponent<PlayerMovementController>();
-        _playerToolsAndWeaponController = GetComponent<PlayerToolsAndWeaponController>();
         _targetTilemap = GameObject.FindGameObjectWithTag("MarkerTilemap").GetComponent<Tilemap>();
     }
 
     private void Start() {
-        _cropsManager = CropsManager.Instance;
-        _tilemapManager = TilemapManager.Instance;
+        PlayerToolbeltController.LocalInstance.OnToolbeltChanged += PlayerToolbeltController_OnToolbeltChanged;
+    }
 
-        _playerToolbeltController.OnToolbeltChanged += PlayerToolbeltController_OnToolbeltChanged;
+    private new void OnDestroy() {
+        PlayerToolbeltController.LocalInstance.OnToolbeltChanged -= PlayerToolbeltController_OnToolbeltChanged;
     }
 
     public override void OnNetworkSpawn() {
@@ -77,16 +70,16 @@ public class PlayerMarkerController : NetworkBehaviour {
             return;
         }
 
-        Vector2 lastMotionVector = _playerMovementController.LastMotionDirection;
+        Vector2 lastMotionVector = PlayerMovementController.LocalInstance.LastMotionDirection;
         Vector3 position = new(
             transform.position.x + _boxCollider2D.offset.x + lastMotionVector.x,
             transform.position.y + _boxCollider2D.offset.y + lastMotionVector.y);
 
         if (_useAreaIndicator) {
-            UseAreaMarker(_tilemapManager.GetGridPosition(position), lastMotionVector);
+            UseAreaMarker(TilemapManager.Instance.GetGridPosition(position), lastMotionVector);
             _lastCellPosition = Vector3Int.zero;
         } else {
-            ShowMarker(_tilemapManager.GetGridPosition(position));
+            ShowMarker(TilemapManager.Instance.GetGridPosition(position));
         }
     }
 
@@ -94,7 +87,7 @@ public class PlayerMarkerController : NetworkBehaviour {
     #region Area Marker
     public void TriggerAreaMarker(int toolRarity, int[] areaSizes, int energyCost, ToolSO.ToolTypes toolType) {
         ResetAreaMarkerState(toolRarity, areaSizes, energyCost, toolType);
-        _playerMovementController.ChangeMoveSpeed(false);
+        PlayerMovementController.LocalInstance.ChangeMoveSpeed(false);
     }
 
     private void ResetAreaMarkerState(int toolRarity, int[] sizes, int cost, ToolSO.ToolTypes type) {
@@ -109,7 +102,7 @@ public class PlayerMarkerController : NetworkBehaviour {
 
     private void UseAreaMarker(Vector3Int position, Vector2 lastMotionVector) {
         ShowAreaMarker(position, lastMotionVector);
-        _playerToolsAndWeaponController.AreaMarkerCallback();
+        PlayerToolsAndWeaponController.LocalInstance.AreaMarkerCallback();
 
         if (Input.GetMouseButtonUp(0)) {
             _useAreaIndicator = false;
@@ -122,10 +115,10 @@ public class PlayerMarkerController : NetworkBehaviour {
     private void ProcessToolAction() {
         switch (_toolType) {
             case ToolSO.ToolTypes.Hoe:
-                _cropsManager.PlowTiles(_areaPositions, _energyCost);
+                CropsManager.Instance.PlowTiles(_areaPositions, _energyCost);
                 break;
             case ToolSO.ToolTypes.WateringCan:
-                _cropsManager.WaterTiles(_areaPositions, _energyCost);
+                CropsManager.Instance.WaterTiles(_areaPositions, _energyCost);
                 break;
             default:
                 Debug.LogError("No valid tool type.");
@@ -133,7 +126,7 @@ public class PlayerMarkerController : NetworkBehaviour {
         }
     }
 
-    private void EnableMoveSpeed() => _playerMovementController.ChangeMoveSpeed(true);
+    private void EnableMoveSpeed() => PlayerMovementController.LocalInstance.ChangeMoveSpeed(true);
     
 
 

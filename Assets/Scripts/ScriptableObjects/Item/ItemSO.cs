@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // This class contains information used in an item e.g. tool, seed, oven etc.
-[CreateAssetMenu(menuName = "Scriptable Objects/Item")]
+[CreateAssetMenu(menuName = "Scriptable Objects/ItemSO")]
 public class ItemSO : ScriptableObject {
     public enum ItemTypes {
         Tools, Resources, Food, Crafts, Plants, Seeds, Fertilizer, Rose, Fish, Insects, Artifacts, Minerals, none,

@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using UnityEngine;
 public class ItemContainerSO : ScriptableObject {
     public event Action OnItemsUpdated;
 
-    [SerializeField] private List<ItemSlot> _itemSlots = new();
+    private List<ItemSlot> _itemSlots = new();
     public IReadOnlyList<ItemSlot> ItemSlots => _itemSlots.AsReadOnly();
 
     /// <summary>
@@ -31,8 +32,6 @@ public class ItemContainerSO : ScriptableObject {
     /// <returns>The remaining amount of the item after adding.</returns>
     public int AddItem(ItemSlot itemSlot, bool skipToolbelt) {
         ValidateItemParameters(itemSlot.ItemId, itemSlot.Amount);
-        var itemSO = GetItemSO(itemSlot.ItemId);
-
         int remainingAmount = ItemManager.Instance.ItemDatabase[itemSlot.ItemId].IsStackable ?
             AddToExisting(itemSlot, skipToolbelt) :
             AddToEmpty(itemSlot, skipToolbelt);
@@ -103,8 +102,6 @@ public class ItemContainerSO : ScriptableObject {
     /// <returns>True if the item can be added, false otherwise.</returns>
     public bool CanAddItem(ItemSlot itemSlot, bool skipToolbelt = false) {
         ValidateItemParameters(itemSlot.ItemId, itemSlot.Amount);
-        var itemSO = GetItemSO(itemSlot.ItemId);
-
         int remaining = ItemManager.Instance.ItemDatabase[itemSlot.ItemId].IsStackable ?
             CheckExisting(itemSlot, skipToolbelt) :
             CheckEmpty(itemSlot.Amount, skipToolbelt);
@@ -226,11 +223,6 @@ public class ItemContainerSO : ScriptableObject {
         }
     }
 
-    private ItemSO GetItemSO(int itemId) {
-        var itemSO = ItemManager.Instance.ItemDatabase[itemId];
-        return itemSO == null ? throw new ArgumentException($"Item with ID {itemId} not found in database.") : itemSO;
-    }
-
     /// <summary>
     /// Sorts the items in the item container.
     /// </summary>
@@ -278,7 +270,6 @@ public class ItemContainerSO : ScriptableObject {
     /// </summary>
     public void ClearItemContainer() => _itemSlots.Skip(PlayerToolbeltController.LocalInstance.ToolbeltSizes[^1]).ToList().ForEach(slot => slot.Clear());
 
-
     /// <summary>
     /// Clears the item slot at the specified ID.
     /// </summary>
@@ -289,4 +280,27 @@ public class ItemContainerSO : ScriptableObject {
     /// Updates the UI and invokes the OnItemsUpdated event.
     /// </summary>
     public void UpdateUI() => OnItemsUpdated?.Invoke();
+
+    /// <summary>
+    /// Indexer to access items by their IDs from the list
+    /// </summary>
+    public ItemSlot this[int slotId] => _itemSlots[slotId];
+    
+    public string SaveItemContainer() {
+        var itemContainerJson = new List<string>();
+        foreach (var itemSlot in ItemSlots) {
+            itemContainerJson.Add(JsonConvert.SerializeObject(itemSlot));
+        }
+
+        return JsonConvert.SerializeObject(itemContainerJson);
+    }
+
+    public void LoadItemContainer(string data) {
+        if (!string.IsNullOrEmpty(data)) {
+            var itemContainerJson = JsonConvert.DeserializeObject<List<string>>(data);
+            foreach (var itemSlot in itemContainerJson) {
+                AddItem(JsonConvert.DeserializeObject<ItemSlot>(itemSlot), false);
+            }
+        }
+    }
 }

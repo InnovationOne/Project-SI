@@ -56,8 +56,7 @@ public class PlayerCraftController : NetworkBehaviour {
     }
 
     private bool HasAllNeededItems(RecipeSO recipe) {
-        List<ItemSlot> inventory = GetComponent<PlayerInventoryController>().InventoryContainer
-            .CombineItemsByTypeAndRarity();
+        List<ItemSlot> inventory = GetComponent<PlayerInventoryController>().InventoryContainer.CombineItemsByTypeAndRarity();
 
         // Check if combinedItems have all the items and amounts required by the recipe
         var matchingNum = recipe.ItemsNeededToConvert

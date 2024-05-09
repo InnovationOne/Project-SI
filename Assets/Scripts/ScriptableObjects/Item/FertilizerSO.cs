@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Scriptable Objects/Fertilizer")]
+[CreateAssetMenu(menuName = "Scriptable Objects/ItemSO/FertilizerSO")]
 public class FertilizerSO : ItemSO {
     public enum FertilizerTypes {
         GrowthTime, Quality, Quantity, RegrowthTime, Water,
