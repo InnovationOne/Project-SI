@@ -4,9 +4,13 @@ using UnityEngine;
 [RequireComponent(typeof(PolygonCollider2D))]
 [RequireComponent(typeof(ZDepth))]
 public class ObjectVisual : MonoBehaviour {
-    [Header("ItemProducer Visual")]
-    [SerializeField] private SpriteRenderer _itemProducerVisual;
-    [SerializeField] private PolygonCollider2D _collider2D;
+    private SpriteRenderer _itemProducerVisual;
+    private PolygonCollider2D _collider2D;
+
+    private void Awake() {
+        _itemProducerVisual = GetComponent<SpriteRenderer>();
+        _collider2D = GetComponent<PolygonCollider2D>();
+    }
 
     /// <summary>
     /// Sets the sprite for the item producer visual representation.

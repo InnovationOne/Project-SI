@@ -169,7 +169,7 @@ public class PickUpItem : NetworkBehaviour {
     /// Attempts to add the item to the drag and drop panel.
     /// </summary>
     private void AttemptToAddToDragAndDrop() {
-        if (DragItemPanel.Instance.gameObject.activeSelf) {
+        if (DragItemUI.Instance.gameObject.activeSelf) {
             var dragAndDropController = _closestPlayer.GetComponent<PlayerItemDragAndDropController>();
             _itemSlot.Amount = dragAndDropController.TryToAddItemToDragItem(_itemSlot);
         }

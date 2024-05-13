@@ -171,7 +171,7 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
     /// Handles the action of dropping an item from the player's toolbelt.
     /// </summary>
     private void InputManager_OnDropItemAction() {
-        if (!IsOwner || DragItemPanel.Instance.gameObject.activeSelf) {
+        if (!IsOwner || DragItemUI.Instance.gameObject.activeSelf) {
             return;
         }
 
@@ -229,7 +229,7 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
     /// <summary>
     /// Represents a slot in the player's toolbelt that can hold an item.
     /// </summary>
-    public ItemSlot GetCurrentlySelectedToolbeltItemSlot() => PlayerInventoryController.LocalInstance.InventoryContainer[_selectedToolSlot];
+    public ItemSlot GetCurrentlySelectedToolbeltItemSlot() => PlayerInventoryController.LocalInstance.InventoryContainer.ItemSlots[_selectedToolSlot];
 
     /// <summary>
     /// Locks or unlocks the toolbelt selection.

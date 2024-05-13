@@ -35,14 +35,8 @@ public class RecipeManager : NetworkBehaviour, IDataPersistance {
 
         Instance = this;
         _recipeContainer = new RecipeContainer();
+        _recipeDatabase.InitializeRecipes();
     }
-
-    /// <summary>
-    /// This method is called when the script instance is being loaded.
-    /// It initializes the recipe database.
-    /// </summary>
-    private void Start() => _recipeDatabase.InitializeRecipes();
-    
 
     /// <summary>
     /// Called when the object is spawned on the network.

@@ -73,7 +73,7 @@ public class InventoryMasterVisual : MonoBehaviour {
         for (int i = 1; i < _subPanels.Length; i++) {
             _subPanels[i].SetActive(false);
         }
-        _chestPanel.gameObject.SetActive(false);
+        //_chestPanel.gameObject.SetActive(false);
         _storePanel.gameObject.SetActive(false);
         gameObject.SetActive(false);
     }
@@ -149,7 +149,7 @@ public class InventoryMasterVisual : MonoBehaviour {
         gameObject.SetActive(!gameObject.activeSelf);
         ToolbeltUI.Instance.ToggleToolbelt();
 
-        if (DragItemPanel.Instance.gameObject.activeSelf) {
+        if (DragItemUI.Instance.gameObject.activeSelf) {
             PlayerItemDragAndDropController.LocalInstance.AddDragItemBackIntoBackpack(_subPanels[(int)InventorySubPanels.Inventory].GetComponent<InventoryUI>().LastSlotId);
         }
     }

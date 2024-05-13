@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 public abstract class AdjustingObject : Interactable {
-    [SerializeField] protected ObjectVisual _visual;
+    protected ObjectVisual _visual;
 
     private const int LAYER_MASK_BIT = 8;
     private LayerMask _layerMask = 1 << LAYER_MASK_BIT;
@@ -37,6 +37,7 @@ public abstract class AdjustingObject : Interactable {
 
     private void Awake() {
         _grid = FindFirstObjectByType<Grid>();
+        _visual = GetComponentInChildren<ObjectVisual>();
     }
 
     /// <summary>

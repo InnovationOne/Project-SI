@@ -3,7 +3,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Scriptable Objects/ItemSO/ObjectSO/GateSO")]
 public class GateSO : ObjectSO {
     public Sprite[] Sprites;
-    public Vector2[][] ClosedPolygonColliderPaths = new Vector2[][] {
+    public Vector2[][] ClosePolygonColliderPaths = new Vector2[][] {
         new Vector2[] { // Horizontal-Closed
             new(-0.5f, -0.25f),
             new(-0.5f, -0.5f),

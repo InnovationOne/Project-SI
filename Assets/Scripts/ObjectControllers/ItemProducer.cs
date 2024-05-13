@@ -7,8 +7,7 @@ using UnityEngine;
 /// </summary>
 [RequireComponent(typeof(TimeAgent))]
 public class ItemProducer : Interactable, IObjectDataPersistence {
-    [SerializeField] private ObjectVisual _visual;
-
+    private ObjectVisual _visual;
     private int _recipeId;
     private int _timer;
     private int _itemId;
@@ -26,6 +25,7 @@ public class ItemProducer : Interactable, IObjectDataPersistence {
         _itemId = itemId;
         _recipeId = ProducerSO.Recipe != null ? ProducerSO.Recipe.RecipeId : throw new NotImplementedException("Recipe is not set for this item producer");
         ResetTimer();
+        _visual = GetComponentInChildren<ObjectVisual>();
         _visual.SetSprite(ProducerSO.InactiveSprite);
     }
 

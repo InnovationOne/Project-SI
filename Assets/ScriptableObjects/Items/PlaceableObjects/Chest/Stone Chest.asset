@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60a0d3fc367136548bd09bfcbdac624d, type: 3}
+  m_Name: Stone Chest
+  m_EditorClassIdentifier: 
+  ItemId: 0
+  ItemType: 3
+  ItemName: Stone Chest
+  ItemIcon: {fileID: 0}
+  IsStackable: 1
+  MaxStackableAmount: 10
+  CanBeBought: 0
+  BuyPrice: 0
+  CanBeSold: 1
+  LowestRaritySellPrice: 0
+  ItemInfoHoverText: 
+  LeftClickAction:
+  - {fileID: 11400000, guid: e5b4043eabb4dba4b9bd42c80b78d631, type: 2}
+  ObjectType: 2
+  ItemsToCraftList: []
+  ItemToPickUpObject: {fileID: 11400000, guid: 0455e7dd00e1df9479f2289b436f95bf, type: 2}
+  InactiveSprite: {fileID: 1088684563, guid: 30b573e44bee4814d847a611a39c0cb0, type: 3}
+  ActiveSprite: {fileID: 0}
+  PolygonColliderPath:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  ItemSlots: 10

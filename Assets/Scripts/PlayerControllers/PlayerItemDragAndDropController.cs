@@ -8,11 +8,8 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
 
     private ItemSlot _dragItemSlot;
 
-    // References
-    private PlayerMovementController _playerMovementController;
     private PlayerInventoryController _playerInventoryController;
-    private ItemSpawnManager _itemSpawnManager;
-    private DragItemPanel _dragItemPanel;
+    private DragItemUI _visual;
     private InputManager _inputManager;
 
 
@@ -20,7 +17,6 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
         _dragItemSlot = new ItemSlot();
 
         // References
-        _playerMovementController = GetComponent<PlayerMovementController>();
         _playerInventoryController = GetComponent<PlayerInventoryController>();
     }
 
@@ -33,36 +29,28 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
             LocalInstance = this;
         }
 
-        // References
-        _itemSpawnManager = ItemSpawnManager.Instance;
-        _dragItemPanel = DragItemPanel.Instance;
+        _visual = DragItemUI.Instance;
         _inputManager = InputManager.Instance;
     }
 
     private void Update() {
-        // Check if the current object is the owner and the drag item panel is active
-        if (IsOwner && _dragItemPanel.gameObject.activeSelf) {
-            // Get the pointer position from the input manager
+        if (_visual.gameObject.activeSelf && IsOwner) {
             Vector3 pointerPosition = _inputManager.GetPointerPosition();
 
-            // Round the pointer position to the nearest integer values
             var roundedPosition = new Vector3(
                 Mathf.RoundToInt(pointerPosition.x),
                 Mathf.RoundToInt(pointerPosition.y),
-                _dragItemPanel.transform.position.z // Keep the same z-coordinate
-            );
+                _visual.transform.position.z);
 
-            // Update the position of the drag item panel
-            _dragItemPanel.transform.position = roundedPosition;
+            _visual.transform.position = roundedPosition;
         }
     }
 
 
     #region Left Click
     public void OnLeftClick(ItemSlot itemSlot) {
-        // Place item slot based on pointer position on map or in inventory
         if (!EventSystem.current.IsPointerOverGameObject()) {
-            PlaceItemSlotOnMap();
+            PlaceItemOnMap(_dragItemSlot.Amount);
         } else {
             PickUpPlaceOrSwitchItemSlot(itemSlot);
         }
@@ -74,24 +62,12 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
         UpdateIcon();
     }
 
-    private void PlaceItemSlotOnMap() {
-        ItemSpawnManager.Instance.SpawnItemServerRpc(
-            itemSlot: _dragItemSlot,
-            initialPosition: transform.position,
-            motionDirection: PlayerMovementController.LocalInstance.LastMotionDirection,
-            useInventoryPosition: true);
-        _dragItemSlot.Amount = 0;
-    }
-
     private void PickUpPlaceOrSwitchItemSlot(ItemSlot itemSlot) {
-        if (_dragItemSlot.ItemId == -1) {
-            // Handle picking up an item when drag item is empty.
-            if (ItemManager.Instance.ItemDatabase[itemSlot.ItemId] != null) {
+        if (_dragItemSlot.ItemId == -1 && ItemManager.Instance.ItemDatabase[itemSlot.ItemId] != null) {
                 PickUpItemSlot(itemSlot);
-            }
         } else if (itemSlot.ItemId == -1) {
             PlaceItemSlotIntoInventory(itemSlot);
-        } else if (_dragItemSlot.ItemId == itemSlot.ItemId && _dragItemSlot.RarityId.Equals(itemSlot.RarityId)) {
+        } else if (_dragItemSlot.ItemId == itemSlot.ItemId && _dragItemSlot.RarityId == itemSlot.RarityId) {
             // Handle switching or stacking items.
             if (itemSlot.Amount == ItemManager.Instance.ItemDatabase[itemSlot.ItemId].MaxStackableAmount || _dragItemSlot.Amount == ItemManager.Instance.ItemDatabase[_dragItemSlot.ItemId].MaxStackableAmount) {
                 SwitchItemSlots(itemSlot);
@@ -105,7 +81,6 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
                 // Move items from drag slot to target slot.
                 itemSlot.Amount += amountToMove;
                 _dragItemSlot.Amount -= amountToMove;
-
             }
         }
         else {
@@ -138,15 +113,10 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
 
     private void UpdateIcon() {
         if (ItemManager.Instance.ItemDatabase[_dragItemSlot.ItemId] != null) {
-            _dragItemPanel.gameObject.SetActive(true);
-
-            var toolRarity = ItemManager.Instance.ItemDatabase[_dragItemSlot.ItemId].ItemType == ItemSO.ItemTypes.Tools ? 
-                (ItemManager.Instance.ItemDatabase[_dragItemSlot.ItemId] as ToolSO).ToolItemRarity[_dragItemSlot.RarityId - 1] : 
-                null;
-
-            _dragItemPanel.SetItemSlot(_dragItemSlot, toolRarity);
+            _visual.gameObject.SetActive(true);
+            _visual.SetItemSlot(_dragItemSlot);
         } else {
-            _dragItemPanel.gameObject.SetActive(false);
+            _visual.gameObject.SetActive(false);
         }
 
     }
@@ -157,7 +127,7 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
     public void OnRightClick(ItemSlot itemSlot) {
         // Place item based on pointer position on map or in inventory
         if (!EventSystem.current.IsPointerOverGameObject()) {
-            PlaceItemOnMap();
+            PlaceItemOnMap(_inputManager.GetShiftPressed() ? Mathf.Min(_dragItemSlot.Amount, InputManager.SHIFT_KEY_AMOUNT) : 1);
         } else {
             PlaceItemInInventory(itemSlot);
         }
@@ -169,8 +139,7 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
         UpdateIcon();
     }
 
-    private void PlaceItemOnMap() {
-        int spawnAmount = _inputManager.GetShiftPressed() ? Mathf.Min(_dragItemSlot.Amount, InputManager.SHIFT_KEY_AMOUNT) : 1;
+    private void PlaceItemOnMap(int spawnAmount) {        
         ItemSpawnManager.Instance.SpawnItemServerRpc(
             itemSlot: new ItemSlot(_dragItemSlot.ItemId, spawnAmount, _dragItemSlot.RarityId),
             initialPosition: transform.position, 
@@ -238,6 +207,6 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
 
     public void ClearDragItem() {
         _dragItemSlot.Clear();
-        _dragItemPanel.gameObject.SetActive(false);
+        _visual.gameObject.SetActive(false);
     }
 }

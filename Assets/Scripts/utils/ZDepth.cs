@@ -3,6 +3,7 @@ using UnityEngine;
 // This script is attached to every object that is placed into the world
 public class ZDepth : MonoBehaviour {
     [SerializeField] private bool _isObjectStationary = true;
+    [Header("Spezial collider if necessary")]
     [SerializeField] private Collider2D _objectCollider2D;
 
     private Transform _objectTransform;

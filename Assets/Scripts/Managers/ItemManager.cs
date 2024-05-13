@@ -16,9 +16,7 @@ public class ItemManager : NetworkBehaviour {
         } else {
             Instance = this;
         }
-    }
 
-    private void Start() {
         ItemDatabase.InitializeItems();
     }
 }

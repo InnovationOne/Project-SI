@@ -10,7 +10,7 @@ using UnityEngine;
 public class ItemContainerSO : ScriptableObject {
     public event Action OnItemsUpdated;
 
-    private List<ItemSlot> _itemSlots = new();
+    [SerializeField] private List<ItemSlot> _itemSlots = new();
     public IReadOnlyList<ItemSlot> ItemSlots => _itemSlots.AsReadOnly();
 
     /// <summary>
@@ -280,11 +280,6 @@ public class ItemContainerSO : ScriptableObject {
     /// Updates the UI and invokes the OnItemsUpdated event.
     /// </summary>
     public void UpdateUI() => OnItemsUpdated?.Invoke();
-
-    /// <summary>
-    /// Indexer to access items by their IDs from the list
-    /// </summary>
-    public ItemSlot this[int slotId] => _itemSlots[slotId];
     
     public string SaveItemContainer() {
         var itemContainerJson = new List<string>();

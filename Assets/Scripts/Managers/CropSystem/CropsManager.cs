@@ -85,6 +85,8 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         JsonConvert.DefaultSettings = () => new JsonSerializerSettings {
             Converters = { new Vector3Converter() },
         };
+
+        _cropDatabase.InitializeCrops();
     }
 
 
@@ -97,8 +99,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         TimeAndWeatherManager.Instance.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
         TimeAndWeatherManager.Instance.OnNextSeasonStarted += TimeAndWeatherManager_OnNextSeasonStarted;
         TimeAndWeatherManager.Instance.OnChangeRainIntensity += TimeAndWeatherManager_OnChangeRainIntensity;
-
-        _cropDatabase.InitializeCrops();
 
         // Get references to the TilemapManager and PlaceableObjectsManager instances
         _tilemapReadManager = TilemapManager.Instance;

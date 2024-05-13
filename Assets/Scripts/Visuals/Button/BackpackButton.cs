@@ -79,7 +79,7 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
 
     public void OnPointerClick(PointerEventData eventData) {
         if (eventData.button == PointerEventData.InputButton.Right) { // Right click
-            if (DragItemPanel.Instance.gameObject.activeSelf) {
+            if (DragItemUI.Instance.gameObject.activeSelf) {
                 _itemPanel.OnPlayerRightClick(_buttonIndex);
             } else {
                 _itemPanel.ShowRightClickMenu(_buttonIndex, transform.position);
@@ -97,14 +97,14 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
 
     public void OnBeginDrag(PointerEventData eventData) {
         //Dragged item cannot block the button to trigger events
-        DragItemPanel.Instance.GetComponent<CanvasGroup>().blocksRaycasts = false;
+        DragItemUI.Instance.GetComponent<CanvasGroup>().blocksRaycasts = false;
     }
 
     public void OnDrag(PointerEventData eventData) { }
 
     public void OnEndDrag(PointerEventData eventData) {
         //Dragged item can be clicked again
-        DragItemPanel.Instance.GetComponent<CanvasGroup>().blocksRaycasts = true;
+        DragItemUI.Instance.GetComponent<CanvasGroup>().blocksRaycasts = true;
     }
 
     public void OnDrop(PointerEventData eventData) {

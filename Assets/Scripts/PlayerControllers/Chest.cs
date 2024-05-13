@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Chest : Interactable, IObjectDataPersistence {
     [Header("References")]
-    [SerializeField] private ObjectVisual _visual;
+    private ObjectVisual _visual;
     private static readonly ChestUI _chestUI = ChestUI.Instance;
 
     [NonSerialized] private const float MAX_DISTANCE_TO_PLAYER = 1.5f;
@@ -36,6 +36,7 @@ public class Chest : Interactable, IObjectDataPersistence {
     public override void Initialize(int itemId) {
         _itemId = itemId;
         InitializeItemContainer();
+        _visual = GetComponentInChildren<ObjectVisual>();
         _visual.SetSprite(ChestSO.InactiveSprite);
     }
 

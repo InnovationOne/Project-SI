@@ -66,7 +66,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
                 HideItemInfo();
             }
         } 
-        if (DragItemPanel.Instance.gameObject.activeSelf) {
+        if (DragItemUI.Instance.gameObject.activeSelf) {
             HideItemInfo();
             HideRightClickMenu();
         }

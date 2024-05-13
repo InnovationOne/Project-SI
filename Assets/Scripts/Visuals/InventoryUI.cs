@@ -106,7 +106,7 @@ public class InventoryUI : ItemContainerUI {
         LastSlotId = buttonIndex;
 
         // If the drag item is active, call for the OnRightClick of the ItemDragAndDropManager 
-        if (DragItemPanel.Instance.gameObject.activeSelf) {
+        if (DragItemUI.Instance.gameObject.activeSelf) {
             PlayerItemDragAndDropController.LocalInstance.OnRightClick(ItemContainer.ItemSlots[buttonIndex]);
         }
     }

@@ -1,8 +1,7 @@
 using UnityEngine;
 
 public class Bed : Interactable {
-    [SerializeField] private ObjectVisual _visual;
-
+    private ObjectVisual _visual;
     private int _itemId;
 
     /// <summary>
@@ -11,6 +10,7 @@ public class Bed : Interactable {
     /// <param name="itemId">The ID of the item.</param>
     public override void Initialize(int itemId) {
         _itemId = itemId;
+        _visual = GetComponentInChildren<ObjectVisual>();
         _visual.SetSprite(GetObjectSO().InactiveSprite);
     }
 

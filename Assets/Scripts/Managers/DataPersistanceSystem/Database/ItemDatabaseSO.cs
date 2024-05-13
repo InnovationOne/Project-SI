@@ -26,6 +26,8 @@ public class ItemDatabaseSO : ScriptableObject {
         get {
             if (_cache.TryGetValue(itemId, out var item)) {
                 return item;
+            } else if (itemId == -1) {
+                return null;            
             } else {
                 throw new KeyNotFoundException($"Item with ID {itemId} does not exist in the cache.");
             }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -38,14 +39,10 @@ public class PlayerMarkerController : NetworkBehaviour {
         _targetTilemap = GameObject.FindGameObjectWithTag("MarkerTilemap").GetComponent<Tilemap>();
     }
 
-    private void Start() {
-        PlayerToolbeltController.LocalInstance.OnToolbeltChanged += PlayerToolbeltController_OnToolbeltChanged;
-    }
-
-    private new void OnDestroy() {
-        PlayerToolbeltController.LocalInstance.OnToolbeltChanged -= PlayerToolbeltController_OnToolbeltChanged;
-    }
-
+    private void Start() => PlayerToolbeltController.LocalInstance.OnToolbeltChanged += PlayerToolbeltController_OnToolbeltChanged;
+    
+    private new void OnDestroy() => PlayerToolbeltController.LocalInstance.OnToolbeltChanged -= PlayerToolbeltController_OnToolbeltChanged;
+    
     public override void OnNetworkSpawn() {
         if (IsOwner) {
             if (LocalInstance != null) {
@@ -64,25 +61,24 @@ public class PlayerMarkerController : NetworkBehaviour {
         }
     }
 
-
     private void Update() {
         if (LocalInstance == null) {
             return;
         }
 
-        Vector2 lastMotionVector = PlayerMovementController.LocalInstance.LastMotionDirection;
-        Vector3 position = new(
-            transform.position.x + _boxCollider2D.offset.x + lastMotionVector.x,
-            transform.position.y + _boxCollider2D.offset.y + lastMotionVector.y);
+        Vector2 motionDirection = PlayerMovementController.LocalInstance.LastMotionDirection;
+        Vector3 positionOffset = new(
+            transform.position.x + _boxCollider2D.offset.x + motionDirection.x,
+            transform.position.y + _boxCollider2D.offset.y + motionDirection.y);
+        Vector3Int gridPosition = TilemapManager.Instance.GetGridPosition(positionOffset);
 
         if (_useAreaIndicator) {
-            UseAreaMarker(TilemapManager.Instance.GetGridPosition(position), lastMotionVector);
+            UseAreaMarker(gridPosition, motionDirection);
             _lastCellPosition = Vector3Int.zero;
         } else {
-            ShowMarker(TilemapManager.Instance.GetGridPosition(position));
+            ShowMarker(gridPosition);
         }
     }
-
 
     #region Area Marker
     public void TriggerAreaMarker(int toolRarity, int[] areaSizes, int energyCost, ToolSO.ToolTypes toolType) {
@@ -112,6 +108,17 @@ public class PlayerMarkerController : NetworkBehaviour {
         }
     }
 
+    private void ShowAreaMarker(Vector3Int position, Vector2 motionDirection) {
+        UpdateAreaSize();
+        int size = _areaSizes[_currentlyUsedRarity];
+        CalculateAreaDimensions(motionDirection, size, out int xsize, out int ysize);
+        Vector3Int[,] positions = GenerateCellPositions(position, motionDirection, xsize, ysize);
+
+        ResetMarkerTiles();
+
+        MarkTilesAndAddToList(positions);
+    }
+
     private void ProcessToolAction() {
         switch (_toolType) {
             case ToolSO.ToolTypes.Hoe:
@@ -128,21 +135,6 @@ public class PlayerMarkerController : NetworkBehaviour {
 
     private void EnableMoveSpeed() => PlayerMovementController.LocalInstance.ChangeMoveSpeed(true);
     
-
-
-    private void ShowAreaMarker(Vector3Int position, Vector2 lastMotionVector) {
-        UpdateAreaSize();
-
-        int currentAreaSize = _areaSizes[_currentlyUsedRarity];
-        CalculateAreaDimensions(lastMotionVector, currentAreaSize, out int xsize, out int ysize);
-
-        Vector3Int[,] cellPositions = GenerateCellPositions(position, lastMotionVector, xsize, ysize);
-
-        ResetMarkerTiles();
-
-        MarkTilesAndAddToList(cellPositions);
-    }
-
     // Change the area size every _areaChangeSizeTimer seconds
     private void UpdateAreaSize() {
         _currentChangeSizeTimer += Time.deltaTime;

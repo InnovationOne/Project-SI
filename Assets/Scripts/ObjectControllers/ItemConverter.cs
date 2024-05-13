@@ -9,7 +9,7 @@ using UnityEngine;
 /// </summary>
 [RequireComponent(typeof(TimeAgent))]
 public class ItemConverter : Interactable, IObjectDataPersistence {
-    [SerializeField] private ObjectVisual _visual;
+    private ObjectVisual _visual;
     private SelectRecipeUI _selectRecipeUI;
 
     [NonSerialized] private const float MAX_DISTANCE_TO_PLAYER = 1.5f;
@@ -35,6 +35,7 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
     public override void Initialize(int itemId) {
         _itemId = itemId;
         ResetTimer();
+        _visual = GetComponentInChildren<ObjectVisual>();
         _visual.SetSprite(ConverterSO.InactiveSprite);
     }
 
