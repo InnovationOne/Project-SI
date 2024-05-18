@@ -12,6 +12,10 @@ public class Sprinkler : MonoBehaviour {
         TimeAndWeatherManager.Instance.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
     }
 
+    private void OnDestroy() {
+        TimeAndWeatherManager.Instance.OnNextDayStarted -= TimeAndWeatherManager_OnNextDayStarted;
+    }
+
     /// <summary>
     /// Initializes the sprinkler with the specified item ID.
     /// </summary>

@@ -33,7 +33,7 @@ public class Chest : Interactable, IObjectDataPersistence {
     /// Initializes the chest with the specified item ID.
     /// </summary>
     /// <param name="itemId">The ID of the item to initialize the chest with.</param>
-    public override void Initialize(int itemId) {
+    public override void InitializePreLoad(int itemId) {
         _itemId = itemId;
         InitializeItemContainer();
         _visual = GetComponentInChildren<ObjectVisual>();

@@ -17,7 +17,7 @@ public class PlaceableObjectsContainer {
             if (_placeableObjects.TryGetValue(position, out var placeableObject)) {
                 return placeableObject;
             } else {
-                throw new KeyNotFoundException($"PlaceableObject with Position {position} does not exist in the cache.");
+                return null;
             }
         }
     }
@@ -45,7 +45,7 @@ public class PlaceableObjectsContainer {
         if (_placeableObjects.ContainsKey(position)) {
             _placeableObjects.Remove(position);
         } else {
-            throw new KeyNotFoundException($"Placeable object with position {position} does not exist in the cache.");
+            throw new KeyNotFoundException($"Placeable object with position {position} does not exist.");
         }
     }
 

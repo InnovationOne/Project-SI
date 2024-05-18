@@ -1,5 +1,5 @@
 using Newtonsoft.Json;
-using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -25,6 +25,10 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
 
     [Header("Reference: Prefab")]
     [SerializeField] private GameObject _placeableObjectPrefab;
+
+    [Header("Galaxy Rose")]
+    [SerializeField] private RoseSO _galaxyRose;
+    [SerializeField] private RuntimeAnimatorController _roseDestroyAnimator;
 
     /// <summary>
     /// This method is called when the script instance is being loaded.
@@ -55,6 +59,21 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         if (IsServer) {
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_OnClientConnected;
         }
+
+        RoseTest();
+    }
+
+    private void RoseTest() {
+        Vector3Int localpos = new Vector3Int(5, 0, 0);
+        int i = 264;
+        for (int x = -2; x <= 2; x++) {
+            for (int y = -2; y <= 2; y++) {
+                Vector3Int pos = new Vector3Int(localpos.x + x, localpos.y + y);
+                PlaceObjectOnMapServerRpc(i, pos);
+                i++;
+                if (i == 268) i++;
+            }
+        }
     }
 
     #region Client Late Join & Network Sync    
@@ -64,7 +83,7 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="clientId">The ID of the connected client.</param>
     private void NetworkManager_OnClientConnected(ulong clientId) => NetworkManager_OnClientConnectedClientRpc(clientId, JsonConvert.SerializeObject(_poContainer.SerializePlaceableObjectsContainer()));
 
-    
+
     /// <summary>
     /// This method is a ClientRpc that is called when a client connects to the server.
     /// It receives the client ID and a JSON string representing a POContainer object.
@@ -113,50 +132,53 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="objectToPlace">The placeable object to visualize.</param>
     private void VisualizeObjectOnMap(PlaceableObject objectToPlace) {
         GameObject gameObject = Instantiate(
-            _placeableObjectPrefab, 
-            TilemapManager.Instance.AlignPositionToGridCenter(_targetTilemap.CellToWorld(objectToPlace.Position)), 
+            _placeableObjectPrefab,
+            TilemapManager.Instance.AlignPositionToGridCenter(_targetTilemap.CellToWorld(objectToPlace.Position)),
             Quaternion.identity);
 
+        // For stuff that can or needs to be done before loading
         switch ((ItemManager.Instance.ItemDatabase[objectToPlace.ObjectId] as ObjectSO).ObjectType) {
             case ObjectSO.ObjectTypes.ItemProducer:
-                gameObject.AddComponent<ItemProducer>().Initialize(objectToPlace.ObjectId);
+                gameObject.AddComponent<ItemProducer>().InitializePreLoad(objectToPlace.ObjectId);
                 break;
             case ObjectSO.ObjectTypes.ItemConverter:
-                gameObject.AddComponent<ItemConverter>().Initialize(objectToPlace.ObjectId);
+                gameObject.AddComponent<ItemConverter>().InitializePreLoad(objectToPlace.ObjectId);
                 break;
             case ObjectSO.ObjectTypes.Chest:
-                gameObject.AddComponent<Chest>().Initialize(objectToPlace.ObjectId);
+                gameObject.AddComponent<Chest>().InitializePreLoad(objectToPlace.ObjectId);
                 break;
             case ObjectSO.ObjectTypes.Bed:
-                gameObject.AddComponent<Bed>().Initialize(objectToPlace.ObjectId);
+                gameObject.AddComponent<Bed>().InitializePreLoad(objectToPlace.ObjectId);
                 break;
             case ObjectSO.ObjectTypes.Fence:
-                gameObject.AddComponent<Fence>().Initialize(objectToPlace.ObjectId);
+                gameObject.AddComponent<Fence>().InitializePreLoad(objectToPlace.ObjectId);
                 break;
             case ObjectSO.ObjectTypes.Gate:
-                gameObject.AddComponent<Gate>().Initialize(objectToPlace.ObjectId);
+                gameObject.AddComponent<Gate>().InitializePreLoad(objectToPlace.ObjectId);
                 break;
             case ObjectSO.ObjectTypes.Sprinkler:
                 gameObject.AddComponent<Sprinkler>().Initialize(objectToPlace.ObjectId);
                 break;
+            case ObjectSO.ObjectTypes.Rose:
+                gameObject.GetComponentInChildren<Animator>().runtimeAnimatorController = _roseDestroyAnimator;
+                gameObject.AddComponent<Rose>().Initialize(objectToPlace.ObjectId, _galaxyRose.ItemId, objectToPlace.Position);                
+                break;
             default:
-                Debug.LogError("Placeable object for this objecttype isn't implimented!");
+                Debug.LogError("Placeable object for this object type isn't implimented!");
                 break;
         }
 
-        LoadObjectState(gameObject, objectToPlace.State);
-        
-        objectToPlace.Prefab = gameObject;
-    }
+        // Loading the object data from the object's state from save file
+        gameObject.GetComponent<IObjectDataPersistence>()?.LoadObject(objectToPlace.State);
 
-    /// <summary>
-    /// Loads the state of a game object using the provided object state.
-    /// </summary>
-    /// <param name="gameObject">The game object to load the state for.</param>
-    /// <param name="objectState">The object state to load.</param>
-    private void LoadObjectState(GameObject gameObject, string objectState) {
-        IObjectDataPersistence persistence = gameObject.GetComponent<IObjectDataPersistence>();
-        persistence?.LoadObject(objectState);
+        // For stuff that needs to be done after loading
+        switch ((ItemManager.Instance.ItemDatabase[objectToPlace.ObjectId] as ObjectSO).ObjectType) {
+            case ObjectSO.ObjectTypes.Rose:
+                gameObject.GetComponent<Rose>().PostLoading();
+                break;
+        }
+
+        objectToPlace.Prefab = gameObject;
     }
     #endregion
 
@@ -176,6 +198,15 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
+    public void PlaceObjectOnMapDelayed(Vector3Int position, float delay) {
+        StartCoroutine(PlaceObjectOnMapDelayedCoroutine(position, delay));
+    }
+
+    private IEnumerator PlaceObjectOnMapDelayedCoroutine(Vector3Int position, float delay) {
+        yield return new WaitForSeconds(delay);
+        PlaceObjectOnMapServerRpc(_galaxyRose.ItemId, position);
+    }
+
     /// <summary>
     /// Places an object on the map for all clients using a Remote Procedure Call (RPC).
     /// </summary>
@@ -188,8 +219,8 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
             Position = positionOnGrid
         };
 
-        VisualizeObjectOnMap(placeableObject);
         _poContainer.Add(positionOnGrid, placeableObject);
+        VisualizeObjectOnMap(placeableObject);
     }
     #endregion
 
@@ -240,8 +271,7 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
             motionDirection: PlayerMovementController.LocalInstance.LastMotionDirection,
             spreadType: ItemSpawnManager.SpreadType.Circle);
 
-
-        HandlePickUpInteraction(placedObject.Prefab.gameObject);
+        HandlePickUpInteraction(placedObject.Prefab);
         CleanUpPlacedObject(gridPosition, placedObject);
     }
 
@@ -251,13 +281,32 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="gameObject">The GameObject to handle the pick-up interaction for.</param>
     private void HandlePickUpInteraction(GameObject gameObject) {
         var interactable = gameObject.GetComponent<Interactable>();
-        var fenceBehaviour = gameObject.GetComponent<Fence>();
 
         if (interactable != null) {
             interactable.PickUpItemsInPlacedObject(Player.LocalInstance);
-        } else if (fenceBehaviour != null) {
-            fenceBehaviour.PickUp();
         }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void DestroyObjectServerRPC(Vector3Int gridPosition, ServerRpcParams serverRpcParams = default) {
+        if (!_poContainer.PlaceableObjects.ContainsKey(gridPosition)) {
+            return;
+        }
+
+        if (POContainer[gridPosition].Prefab.TryGetComponent<Rose>(out var roseComponent)) {
+            roseComponent.OnObjectDestroyed();
+            StartCoroutine(DestroyAfterAnimation(roseComponent, gridPosition));
+        }
+    }
+
+    private IEnumerator DestroyAfterAnimation(Rose roseComponent, Vector3Int gridPosition) {
+        yield return new WaitForSeconds(roseComponent.GetComponentInChildren<Animator>().GetCurrentAnimatorStateInfo(0).length);
+        DestroyObjectClientRPC(gridPosition);
+    }
+
+    [ClientRpc]
+    private void DestroyObjectClientRPC(Vector3Int gridPosition) {
+        CleanUpPlacedObject(gridPosition, _poContainer[gridPosition]);
     }
 
     /// <summary>

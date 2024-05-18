@@ -116,9 +116,9 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
     /// <param name="isNext">A boolean value indicating whether to select the next tool (true) or the previous tool (false).</param>
     private void SelectToolFromMouseWheel(bool isNext) {
         if (isNext) {
-            SetToolLeft();
-        } else {
             SetToolRight();
+        } else {            
+            SetToolLeft();
         }
 
         _visual.SetToolbeltSlotHighlight(_selectedToolSlot);

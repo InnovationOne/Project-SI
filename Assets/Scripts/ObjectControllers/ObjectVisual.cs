@@ -2,7 +2,6 @@ using UnityEngine;
 
 [RequireComponent(typeof(SpriteRenderer))]
 [RequireComponent(typeof(PolygonCollider2D))]
-[RequireComponent(typeof(ZDepth))]
 public class ObjectVisual : MonoBehaviour {
     private SpriteRenderer _itemProducerVisual;
     private PolygonCollider2D _collider2D;
@@ -18,8 +17,12 @@ public class ObjectVisual : MonoBehaviour {
     /// <param name="sprite">The sprite to apply to the item producer visual.</param>
     public void SetSprite(Sprite sprite) => _itemProducerVisual.sprite = sprite;
 
-    public void SetCollider(PolygonCollider2D collider) {
-        _collider2D.pathCount = collider.pathCount;
-        _collider2D.points = collider.points;
+    public void SetCollider(int pathCount, bool isTrigger = false) {
+        _collider2D.pathCount = pathCount;
+        _collider2D.isTrigger = isTrigger;
+    }
+
+    public void SetPath(int index, Vector2[] vectors) {
+        _collider2D.SetPath(index, vectors);
     }
 }

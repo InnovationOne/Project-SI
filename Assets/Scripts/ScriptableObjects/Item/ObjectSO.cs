@@ -12,6 +12,7 @@ public class ObjectSO : ItemSO {
         Fence,
         Gate,
         Sprinkler,
+        Rose,
     }
 
     [Header("Place Object Settings")]

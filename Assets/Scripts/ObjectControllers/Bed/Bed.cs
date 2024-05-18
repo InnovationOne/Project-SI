@@ -8,7 +8,7 @@ public class Bed : Interactable {
     /// Initializes the bed object with the specified item ID.
     /// </summary>
     /// <param name="itemId">The ID of the item.</param>
-    public override void Initialize(int itemId) {
+    public override void InitializePreLoad(int itemId) {
         _itemId = itemId;
         _visual = GetComponentInChildren<ObjectVisual>();
         _visual.SetSprite(GetObjectSO().InactiveSprite);

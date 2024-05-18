@@ -59,7 +59,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private PlaceableObjectsManager _placeableObjectsManager;
 
 
-    // Futur testing
+    // Future testing
     //private NetworkList<CropTileData> cropTiles = new NetworkList<CropTileData>();
 
 

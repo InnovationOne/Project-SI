@@ -89,12 +89,12 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
     }
 
     private void PickUpItemSlot(ItemSlot itemSlot) {
-        _dragItemSlot.Copy(itemSlot);
+        _dragItemSlot.Set(itemSlot);
         itemSlot.Clear();
     }
 
     private void PlaceItemSlotIntoInventory(ItemSlot itemSlot) {
-        itemSlot.Copy(_dragItemSlot);
+        itemSlot.Set(_dragItemSlot);
         _dragItemSlot.Amount = 0;
     }
 
@@ -105,7 +105,7 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
         int transferRarityId = itemSlot.RarityId;
 
         // Copy the contents of the drag item slot to the item slot
-        itemSlot.Copy(_dragItemSlot);
+        itemSlot.Set(_dragItemSlot);
 
         // Set the drag item slot to the saved item and count from the item slot
         _dragItemSlot.Set(new ItemSlot(transferItemId, transferCount, transferRarityId));

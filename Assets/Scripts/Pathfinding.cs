@@ -10,32 +10,57 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class Pathfinding : MonoBehaviour {
+    /*
     private const int MOVE_DIAGONAL_COST = 14;
     private const int MOVE_STRAIGHT_COST = 10;
 
     public Tilemap Tilemap;
     private List<Vector3> _pathPoints = new();
+    public Vector3 test;
+    
+    private void Update() {
+        
+        if (Input.GetKeyDown(KeyCode.LeftAlt)) {
+            MoveTo(1f, test);
+        }
+    }
 
-
-    public void MoveTo(float moveSpeed, Vector3Int endGridPosition) {
+    public void MoveTo(float moveSpeed, Vector3 endWorldPosition) {
+        _pathPoints.Clear();
         Vector3Int startGridPosition = Tilemap.WorldToCell(transform.position);
+        Vector3Int endGridPosition = Tilemap.WorldToCell(endWorldPosition);
 
+        bool[] walkabilityMap = new bool[Tilemap.cellBounds.size.x * Tilemap.cellBounds.size.y];
+        for (int x = 0; x < Tilemap.cellBounds.size.x; x++) {
+            for (int y = 0; y < Tilemap.cellBounds.size.y; y++) {
+                Vector3Int cellPosition = new Vector3Int(x + Tilemap.cellBounds.xMin, y + Tilemap.cellBounds.yMin, 0);
+                Vector3 worldPosition = Tilemap.CellToWorld(cellPosition);
+                Collider2D collider = Physics2D.OverlapBox(worldPosition, new Vector2(1f, 1f), 0);
+                walkabilityMap[x + y * Tilemap.cellBounds.size.x] = collider == null;
+            }
+        }
+        NativeArray<bool> nativeWalkabilityMap = new NativeArray<bool>(walkabilityMap, Allocator.TempJob);
         var findPathJob = new FindPathJob {
             startPosition = new int2(startGridPosition.x, startGridPosition.y),
             endPosition = new int2(endGridPosition.x, endGridPosition.y),
             size = new int2(Tilemap.cellBounds.size.x, Tilemap.cellBounds.size.y),
             pathResult = new NativeList<int2>(Allocator.TempJob),
+            walkabilityMap = nativeWalkabilityMap,
         };
 
         JobHandle jobHandle = findPathJob.Schedule();
         jobHandle.Complete();
 
-        for (int i = 0; i < findPathJob.pathResult.Length; i++) {
+        _pathPoints.Add(endWorldPosition);
+        for (int i = 1; i < findPathJob.pathResult.Length; i++) {
             Vector3 worldPos = Tilemap.CellToWorld(new Vector3Int(findPathJob.pathResult[i].x, findPathJob.pathResult[i].y, 0));
+            worldPos += new Vector3(0.5f, 0.5f);
             worldPos.z = 0;
             _pathPoints.Add(worldPos);
         }
 
+        nativeWalkabilityMap.Dispose();
+        //findPathJob.walkabilityMap.Dispose();
         findPathJob.pathResult.Dispose();
         _pathPoints.Reverse();
 
@@ -44,7 +69,7 @@ public class Pathfinding : MonoBehaviour {
 
     private IEnumerator FollowPath(float moveSpeed) {
         foreach (var point in _pathPoints) {
-            while (Vector3.Distance(transform.position, point) > 0.2f) {
+            while (Vector3.Distance(transform.position, point) > 0.1f) {
                 transform.position = Vector3.MoveTowards(transform.position, point, moveSpeed * Time.deltaTime);
                 yield return null;
             }
@@ -58,6 +83,7 @@ public class Pathfinding : MonoBehaviour {
         public int2 endPosition;
         public int2 size;
         public NativeList<int2> pathResult;
+        public NativeArray<bool> walkabilityMap;
 
         public void Execute() {
             NativeArray<PathNode> pathNodeArray = new NativeArray<PathNode>(size.x * size.y, Allocator.Temp);
@@ -71,8 +97,8 @@ public class Pathfinding : MonoBehaviour {
                         CameFromNodeIndex = -1,
                         GCost = int.MaxValue,
                         HCost = CalculateDistanceCost(new int2(x, y), endPosition),
-                        IsWalkable = true,
                     };
+                    pathNode.IsWalkable = walkabilityMap[pathNode.Index];
                     pathNode.CalculateFCost();
                     pathNodeArray[pathNode.Index] = pathNode;
                 }
@@ -136,7 +162,7 @@ public class Pathfinding : MonoBehaviour {
 
                     PathNode neighbourNode = pathNodeArray[neighbourIndex];
                     if (!neighbourNode.IsWalkable) {
-                        // Node not walkable
+                        Debug.Log("Knoten bei " + neighbourPosition + " ist nicht begehbar.");
                         continue;
                     }
 
@@ -209,4 +235,5 @@ public class Pathfinding : MonoBehaviour {
             FCost = GCost + HCost;
         }
     }
+*/
 }

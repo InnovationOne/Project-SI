@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88886aa4db4d9224bb5947fdcc3b9d08, type: 3}
+  m_Name: Dawn Rose
+  m_EditorClassIdentifier: 
+  ItemId: 266
+  ItemType: 3
+  ItemName: Dawn Rose
+  ItemIcon: {fileID: 21300000, guid: 839a77fa85fc0f04dab7c0a3cf47b54f, type: 3}
+  IsStackable: 1
+  MaxStackableAmount: 99
+  CanBeBought: 0
+  BuyPrice: 0
+  CanBeSold: 1
+  LowestRaritySellPrice: 0
+  ItemInfoHoverText: 'Symbolisiert Hoffnung und neues Leben, leuchtend. '
+  LeftClickAction:
+  - {fileID: 11400000, guid: e5b4043eabb4dba4b9bd42c80b78d631, type: 2}
+  ObjectType: 7
+  ItemsToCraftList: []
+  ItemToPickUpObject: {fileID: 11400000, guid: 0455e7dd00e1df9479f2289b436f95bf, type: 2}
+  InactiveSprite: {fileID: 21300000, guid: c483636cd567c854aaa731ef40cd9229, type: 3}
+  ActiveSprite: {fileID: 0}
+  PolygonColliderPath:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  RoseRecipes:
+  - {fileID: 11400000, guid: fa9cebe8464fe764dafb9d9c2e06e8d2, type: 2}
+  - {fileID: 11400000, guid: 2aa0ecf490638034097124cc570e81f3, type: 2}
+  - {fileID: 11400000, guid: cd383021149ec0c478029aca9971c7dd, type: 2}
+  - {fileID: 11400000, guid: be47e8999f2003648bb4ed01642bd5d8, type: 2}
+  - {fileID: 11400000, guid: ab0ccaa27176405439d3598e747562fe, type: 2}
+  - {fileID: 11400000, guid: c8b2fbc6524004e4fb4e6c4b63e752a9, type: 2}
+  ItemForGalaxyRose: {fileID: 11400000, guid: 2189bb5d57a675342979ab5a9433f7c3, type: 2}

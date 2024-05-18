@@ -46,4 +46,8 @@ public class TilemapManager : NetworkBehaviour {
     public Vector3 AlignPositionToGridCenter(Vector3 position) {
         return position + new Vector3(0.5f, 0.5f);
     }
+
+    public Vector3Int ConvertVector3ToVerctor3Int(Vector3 vector) {
+        return new Vector3Int((int)vector.x, (int)vector.y, (int)vector.z);
+    }
 }

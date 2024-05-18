@@ -76,15 +76,11 @@ public class Gate : AdjustingObject {
     /// Updates the collider of the gate based on its current state.
     /// </summary>
     private void UpdateCollider() {
-        PolygonCollider2D collider = new() {
-            pathCount = _isOpened ? 2 : 1
-        };
-
-        collider.SetPath(0, GateSO.OpenPolygonColliderPaths[_patternIndex]);
+        int pathCount = _isOpened ? 2 : 1;
+        _visual.SetCollider(pathCount);
+        _visual.SetPath(0, GateSO.OpenPolygonColliderPaths[_patternIndex]);
         if (_isOpened) {
-            collider.SetPath(1, GateSO.OpenPolygonColliderPaths[++_patternIndex]);
+            _visual.SetPath(1, GateSO.OpenPolygonColliderPaths[++_patternIndex]);
         }
-
-        _visual.SetCollider(collider);
     }
 }

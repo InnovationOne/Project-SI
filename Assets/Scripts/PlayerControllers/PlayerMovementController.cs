@@ -41,7 +41,7 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
 
     private void Start() {
         _rigidBody2D = GetComponent<Rigidbody2D>();
-        _animator = GetComponent<Animator>();
+        _animator = GetComponentInChildren<Animator>();
         _inputManager = InputManager.Instance;
 
         _inputManager.OnRunAction += InputManager_OnRunAction;

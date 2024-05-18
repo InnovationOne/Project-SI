@@ -28,11 +28,15 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
         GetComponent<TimeAgent>().onMinuteTimeTick += ItemConverterProcess;
     }
 
+    private void OnDestroy() {
+        GetComponent<TimeAgent>().onMinuteTimeTick -= ItemConverterProcess;
+    }
+
     /// <summary>
     /// Initializes the item producer with a specific item identifier.
     /// </summary>
     /// <param name="itemId">The item identifier used to fetch recipe details.</param>
-    public override void Initialize(int itemId) {
+    public override void InitializePreLoad(int itemId) {
         _itemId = itemId;
         ResetTimer();
         _visual = GetComponentInChildren<ObjectVisual>();

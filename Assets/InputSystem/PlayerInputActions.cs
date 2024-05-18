@@ -891,6 +891,134 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Fishing"",
+            ""id"": ""bc456b33-67c6-4121-bdbb-d44bddab1f78"",
+            ""actions"": [
+                {
+                    ""name"": ""Button 1"",
+                    ""type"": ""Button"",
+                    ""id"": ""800d371a-9cbb-4a97-a55c-f1a4c39ed69f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Button 2"",
+                    ""type"": ""Button"",
+                    ""id"": ""b95f1e84-2234-469d-854e-7843920475a6"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Button 3"",
+                    ""type"": ""Button"",
+                    ""id"": ""a9032242-f9a3-40f5-b65e-25cd69e40e14"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Button 4"",
+                    ""type"": ""Button"",
+                    ""id"": ""f483e85a-7adf-47f9-8174-c8fb9ff4c2f0"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Button 5"",
+                    ""type"": ""Button"",
+                    ""id"": ""89687085-c0cd-44fe-baa0-e7db107678c2"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Button 6"",
+                    ""type"": ""Button"",
+                    ""id"": ""7bf9699a-a169-4bd6-aeff-9933e1424725"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""d0aaed6d-8005-4a97-8995-92be289ec175"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""Button 1"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2fd97dda-1560-42c9-bdb1-73827dea8f06"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""Button 2"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""31533785-5c46-43cd-bd20-c2d1072e9dc9"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""Button 3"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""38f2b934-288d-4745-b12d-338eb0100458"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""Button 4"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5e317316-2c00-43ae-be16-8bead86e24e0"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""Button 5"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4cf53f94-3969-4310-9336-850b6668b235"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""Button 6"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -946,11 +1074,20 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_ArrowUp = m_Player.FindAction("ArrowUp", throwIfNotFound: true);
         m_Player_ArrowDown = m_Player.FindAction("ArrowDown", throwIfNotFound: true);
         m_Player_LeftControl = m_Player.FindAction("LeftControl", throwIfNotFound: true);
+        // Fishing
+        m_Fishing = asset.FindActionMap("Fishing", throwIfNotFound: true);
+        m_Fishing_Button1 = m_Fishing.FindAction("Button 1", throwIfNotFound: true);
+        m_Fishing_Button2 = m_Fishing.FindAction("Button 2", throwIfNotFound: true);
+        m_Fishing_Button3 = m_Fishing.FindAction("Button 3", throwIfNotFound: true);
+        m_Fishing_Button4 = m_Fishing.FindAction("Button 4", throwIfNotFound: true);
+        m_Fishing_Button5 = m_Fishing.FindAction("Button 5", throwIfNotFound: true);
+        m_Fishing_Button6 = m_Fishing.FindAction("Button 6", throwIfNotFound: true);
     }
 
     ~@PlayerInputActions()
     {
         Debug.Assert(!m_Player.enabled, "This will cause a leak and performance issues, PlayerInputActions.Player.Disable() has not been called.");
+        Debug.Assert(!m_Fishing.enabled, "This will cause a leak and performance issues, PlayerInputActions.Fishing.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -1302,6 +1439,92 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         }
     }
     public PlayerActions @Player => new PlayerActions(this);
+
+    // Fishing
+    private readonly InputActionMap m_Fishing;
+    private List<IFishingActions> m_FishingActionsCallbackInterfaces = new List<IFishingActions>();
+    private readonly InputAction m_Fishing_Button1;
+    private readonly InputAction m_Fishing_Button2;
+    private readonly InputAction m_Fishing_Button3;
+    private readonly InputAction m_Fishing_Button4;
+    private readonly InputAction m_Fishing_Button5;
+    private readonly InputAction m_Fishing_Button6;
+    public struct FishingActions
+    {
+        private @PlayerInputActions m_Wrapper;
+        public FishingActions(@PlayerInputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Button1 => m_Wrapper.m_Fishing_Button1;
+        public InputAction @Button2 => m_Wrapper.m_Fishing_Button2;
+        public InputAction @Button3 => m_Wrapper.m_Fishing_Button3;
+        public InputAction @Button4 => m_Wrapper.m_Fishing_Button4;
+        public InputAction @Button5 => m_Wrapper.m_Fishing_Button5;
+        public InputAction @Button6 => m_Wrapper.m_Fishing_Button6;
+        public InputActionMap Get() { return m_Wrapper.m_Fishing; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(FishingActions set) { return set.Get(); }
+        public void AddCallbacks(IFishingActions instance)
+        {
+            if (instance == null || m_Wrapper.m_FishingActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_FishingActionsCallbackInterfaces.Add(instance);
+            @Button1.started += instance.OnButton1;
+            @Button1.performed += instance.OnButton1;
+            @Button1.canceled += instance.OnButton1;
+            @Button2.started += instance.OnButton2;
+            @Button2.performed += instance.OnButton2;
+            @Button2.canceled += instance.OnButton2;
+            @Button3.started += instance.OnButton3;
+            @Button3.performed += instance.OnButton3;
+            @Button3.canceled += instance.OnButton3;
+            @Button4.started += instance.OnButton4;
+            @Button4.performed += instance.OnButton4;
+            @Button4.canceled += instance.OnButton4;
+            @Button5.started += instance.OnButton5;
+            @Button5.performed += instance.OnButton5;
+            @Button5.canceled += instance.OnButton5;
+            @Button6.started += instance.OnButton6;
+            @Button6.performed += instance.OnButton6;
+            @Button6.canceled += instance.OnButton6;
+        }
+
+        private void UnregisterCallbacks(IFishingActions instance)
+        {
+            @Button1.started -= instance.OnButton1;
+            @Button1.performed -= instance.OnButton1;
+            @Button1.canceled -= instance.OnButton1;
+            @Button2.started -= instance.OnButton2;
+            @Button2.performed -= instance.OnButton2;
+            @Button2.canceled -= instance.OnButton2;
+            @Button3.started -= instance.OnButton3;
+            @Button3.performed -= instance.OnButton3;
+            @Button3.canceled -= instance.OnButton3;
+            @Button4.started -= instance.OnButton4;
+            @Button4.performed -= instance.OnButton4;
+            @Button4.canceled -= instance.OnButton4;
+            @Button5.started -= instance.OnButton5;
+            @Button5.performed -= instance.OnButton5;
+            @Button5.canceled -= instance.OnButton5;
+            @Button6.started -= instance.OnButton6;
+            @Button6.performed -= instance.OnButton6;
+            @Button6.canceled -= instance.OnButton6;
+        }
+
+        public void RemoveCallbacks(IFishingActions instance)
+        {
+            if (m_Wrapper.m_FishingActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IFishingActions instance)
+        {
+            foreach (var item in m_Wrapper.m_FishingActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_FishingActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public FishingActions @Fishing => new FishingActions(this);
     private int m_KeyboardSchemeIndex = -1;
     public InputControlScheme KeyboardScheme
     {
@@ -1354,5 +1577,14 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnArrowUp(InputAction.CallbackContext context);
         void OnArrowDown(InputAction.CallbackContext context);
         void OnLeftControl(InputAction.CallbackContext context);
+    }
+    public interface IFishingActions
+    {
+        void OnButton1(InputAction.CallbackContext context);
+        void OnButton2(InputAction.CallbackContext context);
+        void OnButton3(InputAction.CallbackContext context);
+        void OnButton4(InputAction.CallbackContext context);
+        void OnButton5(InputAction.CallbackContext context);
+        void OnButton6(InputAction.CallbackContext context);
     }
 }

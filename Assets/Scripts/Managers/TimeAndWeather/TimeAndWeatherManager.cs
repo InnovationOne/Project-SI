@@ -18,6 +18,10 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
         Spring, Summer, Autumn, Winter,
     }
 
+    public enum TimeOfDay {
+        Morning, Noon, Afternoon, Evening, Night,
+    }
+
     public static TimeAndWeatherManager Instance { get; private set; }
 
     public event Action OnNextDayStarted;
@@ -54,11 +58,20 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     private bool _nextDayAvailable = false;
     private bool _updatedTime = false;
 
+    public TimeOfDay CurrentTimeOfDay {
+        get {
+            if (_currentTime >= 21600f && _currentTime < 36000f) return TimeOfDay.Morning;
+            if (_currentTime >= 36000f && _currentTime < 50400f) return TimeOfDay.Noon;
+            if (_currentTime >= 50400f && _currentTime < 64800f) return TimeOfDay.Afternoon;
+            if (_currentTime >= 64800f && _currentTime < 79200f) return TimeOfDay.Evening;
+            return TimeOfDay.Night;
+        }
+    }
 
     [Header("Time agents")]
     private const int MINUTES_TO_INVOKE_TIMEAGENTS = 10;
     private const int TIMEAGENT_INVOKES_IN_A_DAY = 144;
-    private int _totalTimeAgentInvokesThisDay = 0;
+    public int TotalTimeAgentInvokesThisDay { get; private set; } = 0;
     private bool _updatedTimeAgent = false;
     private List<TimeAgent> _timeAgents;
 
@@ -129,8 +142,13 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     #endregion
 
     private void Update() {
+        if (Input.GetKeyDown(KeyCode.LeftAlt)) {
+            StartNextDay();
+        }
+
         // Update the time
         _currentTime += Time.deltaTime * _timeScale;
+
         // Check if the current time is past the time to sleep
         if (_currentTime >= TOTAL_SECONDS_IN_A_DAY) {
             _currentTime = 0f;
@@ -175,7 +193,7 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
 
     #region Time
     private void InvokeTimeMinuteAgents() {
-        _totalTimeAgentInvokesThisDay++;
+        TotalTimeAgentInvokesThisDay++;
         // Call all TimeAgents in the game
         for (int i = 0; i < _timeAgents.Count; i++) {
             _timeAgents[i].InvokeMinute();
@@ -221,8 +239,8 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
 
 
     private void InvokeTimeAgentsIfNeeded() {
-        InvokeTimeAgentsIfNeededClientRpc(TIMEAGENT_INVOKES_IN_A_DAY - _totalTimeAgentInvokesThisDay);
-        _totalTimeAgentInvokesThisDay = 0;
+        InvokeTimeAgentsIfNeededClientRpc(TIMEAGENT_INVOKES_IN_A_DAY - TotalTimeAgentInvokesThisDay);
+        TotalTimeAgentInvokesThisDay = 0;
     }
 
     [ClientRpc]

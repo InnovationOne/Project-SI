@@ -102,10 +102,11 @@ public class ItemContainerSO : ScriptableObject {
     /// <returns>True if the item can be added, false otherwise.</returns>
     public bool CanAddItem(ItemSlot itemSlot, bool skipToolbelt = false) {
         ValidateItemParameters(itemSlot.ItemId, itemSlot.Amount);
-        int remaining = ItemManager.Instance.ItemDatabase[itemSlot.ItemId].IsStackable ?
+        int remainingAmount = ItemManager.Instance.ItemDatabase[itemSlot.ItemId].IsStackable ?
             CheckExisting(itemSlot, skipToolbelt) :
-            CheckEmpty(itemSlot.Amount, skipToolbelt);
-        return remaining <= 0;
+            CheckEmpty(itemSlot, skipToolbelt);
+
+        return remainingAmount <= 0;
     }
 
     /// <summary>
@@ -117,16 +118,18 @@ public class ItemContainerSO : ScriptableObject {
     /// <param name="skipToolbelt">Flag indicating whether to skip the toolbelt slots.</param>
     /// <returns>The remaining amount needed after checking the container.</returns>
     private int CheckExisting(ItemSlot itemSlot, bool skipToolbelt = false) {
+        int remainingAmount = itemSlot.Amount;
         var relevantSlots = GetRelevantSlots(skipToolbelt).ToList();
         foreach (var slot in relevantSlots) {
             if (slot.ItemId == itemSlot.ItemId && slot.Amount < ItemManager.Instance.ItemDatabase[itemSlot.ItemId].MaxStackableAmount && slot.RarityId == itemSlot.RarityId) {
-                itemSlot.Amount -= ItemManager.Instance.ItemDatabase[itemSlot.ItemId].MaxStackableAmount - slot.Amount;
-                if (itemSlot.Amount <= 0) {
-                    break;
+                int addable = Math.Min(ItemManager.Instance.ItemDatabase[itemSlot.ItemId].MaxStackableAmount - slot.Amount, itemSlot.Amount);
+                remainingAmount -= addable;
+                if (remainingAmount == 0) {
+                    return 0;
                 }
             }
         }
-        return itemSlot.Amount;
+        return CheckEmpty(new ItemSlot(itemSlot.ItemId, remainingAmount, itemSlot.RarityId), skipToolbelt);
     }
 
     /// <summary>
@@ -135,7 +138,20 @@ public class ItemContainerSO : ScriptableObject {
     /// <param name="amount">The amount to check.</param>
     /// <param name="skipToolbelt">Whether to skip checking the toolbelt slots.</param>
     /// <returns>Zero if there are empty slots, otherwise the specified amount.</returns>
-    private int CheckEmpty(int amount, bool skipToolbelt = false) => GetRelevantSlots(skipToolbelt).Any(x => x.ItemId == -1) ? 0 : amount;
+    private int CheckEmpty(ItemSlot itemSlot, bool skipToolbelt = false) {
+        int remainingAmount = itemSlot.Amount;
+        var relevantSlots = GetRelevantSlots(skipToolbelt).ToList();
+        foreach (var slot in relevantSlots.Where(x => x.ItemId == -1)) {
+            int addable = Math.Min(ItemManager.Instance.ItemDatabase[itemSlot.ItemId].MaxStackableAmount, itemSlot.Amount);
+            remainingAmount -= addable;
+
+            if (remainingAmount == 0) {
+                return 0;
+            }
+        }
+
+        return remainingAmount;
+    }
     #endregion
 
 

@@ -25,12 +25,6 @@ public class ItemSlot : INetworkSerializable {
     /// </summary>
     /// <param name="itemSlot">The item slot to set.</param>
     public void Set(ItemSlot itemSlot) => InitializeSlot(itemSlot);
-
-    /// <summary>
-    /// Copies the contents of the specified <see cref="ItemSlot"/> to this item slot.
-    /// </summary>
-    /// <param name="itemSlot">The item slot to copy from.</param>
-    public void Copy(ItemSlot itemSlot) => InitializeSlot(itemSlot);
     
     /// <summary>
     /// Initializes the item slot with the provided values.

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a7c456eee894c46a1980adefc977d4, type: 3}
+  m_Name: Pearlescent Rose
+  m_EditorClassIdentifier: 
+  Roses:
+  - {fileID: 11400000, guid: e0b0f669433bf2d4cb223c86c4bde1dd, type: 2}
+  - {fileID: 11400000, guid: d1808233e2fb00d4d8f828dce8b97a45, type: 2}
+  Time: 15
+  NewRose: {fileID: 11400000, guid: df381fc07d044ed4293ae241e3720d67, type: 2}

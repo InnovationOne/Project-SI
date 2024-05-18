@@ -21,13 +21,14 @@ public class ItemProducer : Interactable, IObjectDataPersistence {
     /// Initializes the item producer with a specific item identifier.
     /// </summary>
     /// <param name="itemId">The item identifier used to fetch recipe details.</param>
-    public override void Initialize(int itemId) {
+    public override void InitializePreLoad(int itemId) {
         _itemId = itemId;
         _recipeId = ProducerSO.Recipe != null ? ProducerSO.Recipe.RecipeId : throw new NotImplementedException("Recipe is not set for this item producer");
         ResetTimer();
         _visual = GetComponentInChildren<ObjectVisual>();
         _visual.SetSprite(ProducerSO.InactiveSprite);
     }
+
 
     /// <summary>
     /// Processes the conversion of items based on the recipe timer.

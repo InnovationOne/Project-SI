@@ -5,17 +5,14 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Scriptable Objects/ItemSO/FoodSO")]
 public class FoodSO : ItemSO {
     // The player uses a item to heal
-    [Header("Use Settings")]
-    public bool CanRestoreHpOrEnergy;
-    [ConditionalHide("CanRestoreHpOrEnergy", true)]
-    public int LowestRarityRestoringHpAmount;
-    [ConditionalHide("CanRestoreHpOrEnergy", true)]
-    public int LowestRarityRestoringEnergyAmount;
+    [Header("Eat Settings")]
+    public bool CanRestoreHp;
+    [ConditionalHide("CanRestoreHp", true)]
+    public int LowestHpAmount;
 
-    /* For Fish
-    [TextArea(6, 6)]
-    public string FunnyText;
-    */
+    public bool CanRestoreEnergy;
+    [ConditionalHide("CanRestoreEnergy", true)]
+    public int LowestEnergyAmount;
 
     /* For Museum Objects
      [Header("Museum Settings")]

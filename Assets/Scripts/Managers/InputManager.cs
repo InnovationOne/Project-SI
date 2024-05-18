@@ -1,5 +1,6 @@
 using System;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -43,7 +44,6 @@ public class InputManager : NetworkBehaviour {
 
     public event Action OnLeftControlAction;
 
-
     private PlayerInputActions playerInputActions;
 
     public const int SHIFT_KEY_AMOUNT = 10;
@@ -62,6 +62,7 @@ public class InputManager : NetworkBehaviour {
 
     private void Start() {
         playerInputActions.Player.Enable();
+        playerInputActions.Fishing.Disable();
 
         playerInputActions.Player.Run.performed += Run_performed;
         playerInputActions.Player.DropItem.performed += DropItem_performed;
@@ -259,6 +260,16 @@ public class InputManager : NetworkBehaviour {
         if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return false; }
         return playerInputActions.Player.LeftControl.ReadValue<float>() > 0;
     }
+
+
+    #region Fishing
+    public bool GetButton1Pressed() => playerInputActions.Fishing.Button1.ReadValue<float>() > 0;
+    public bool GetButton2Pressed() => playerInputActions.Fishing.Button2.ReadValue<float>() > 0;
+    public bool GetButton3Pressed() => playerInputActions.Fishing.Button3.ReadValue<float>() > 0;
+    public bool GetButton4Pressed() => playerInputActions.Fishing.Button4.ReadValue<float>() > 0;
+    public bool GetButton5Pressed() => playerInputActions.Fishing.Button5.ReadValue<float>() > 0;
+    public bool GetButton6Pressed() => playerInputActions.Fishing.Button6.ReadValue<float>() > 0;    
+    #endregion
 
 
     private new void OnDestroy() {

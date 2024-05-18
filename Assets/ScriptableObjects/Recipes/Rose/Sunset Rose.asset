@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17a7c456eee894c46a1980adefc977d4, type: 3}
+  m_Name: Sunset Rose
+  m_EditorClassIdentifier: 
+  Roses:
+  - {fileID: 11400000, guid: e33f15eb4d0092b4da94d0f8181e179e, type: 2}
+  - {fileID: 11400000, guid: 5948f15954b0c0e44ac2d22b632669d0, type: 2}
+  Time: 5
+  NewRose: {fileID: 11400000, guid: e4880499fefd000418d96dbeb1f5a5ae, type: 2}

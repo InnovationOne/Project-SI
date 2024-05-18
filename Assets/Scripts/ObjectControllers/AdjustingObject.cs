@@ -44,7 +44,7 @@ public abstract class AdjustingObject : Interactable {
     /// Initializes the AdjustingObject with the specified item ID.
     /// </summary>
     /// <param name="itemId">The ID of the item.</param>
-    public override void Initialize(int itemId) {
+    public override void InitializePreLoad(int itemId) {
         _itemId = itemId;
         _fencePosition = _grid.WorldToCell(transform.position);
         InitializeAdjacentPositions();

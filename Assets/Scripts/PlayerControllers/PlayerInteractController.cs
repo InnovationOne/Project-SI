@@ -45,11 +45,11 @@ public class PlayerInteractController : NetworkBehaviour {
     /// Handles the interaction action triggered by the input manager.
     /// </summary>
     private void InputManager_OnInteractAction() {
-        if (_interactable == null) {
-            DiscoverInteractables();
-        }
+        DiscoverInteractables();
 
-        _interactable.Interact(_player);
+        if (_interactable != null) {
+            _interactable.Interact(_player);
+        }
     }
 
     /// <summary>
@@ -69,33 +69,22 @@ public class PlayerInteractController : NetworkBehaviour {
     /// Discovers interactable objects within a certain distance from the player.
     /// </summary>
     private void DiscoverInteractables() {
-        var closestCollider = FindClosestInteractable(Physics2D.OverlapCircleAll(_playerCollider.bounds.center, MAX_INTERACT_DISTANCE));
-
-        if (closestCollider != null) {
-            _interactable = closestCollider.GetComponent<Interactable>();
-        } else {
-            _interactable = null;
-        }
-    }
-
-    /// <summary>
-    /// Represents a 2D collider component attached to a game object.
-    /// </summary>
-    private Collider2D FindClosestInteractable(Collider2D[] colliders) {
-        Collider2D closestCollider = null;
+        var colliders = Physics2D.OverlapCircleAll(_playerCollider.bounds.center, MAX_INTERACT_DISTANCE);
+        Interactable interactable = null;
         float closestDistance = float.MaxValue;
-
         foreach (Collider2D collider in colliders) {
-            if (collider.TryGetComponent<Interactable>(out var interactable)) {
+            if (!collider.TryGetComponent(out interactable)) {
+                interactable = collider.GetComponentInParent<Interactable>();
+            }
+            if (interactable != null) {
                 float distance = Vector2.Distance(transform.position, collider.transform.position);
                 if (distance < closestDistance) {
                     closestDistance = distance;
-                    closestCollider = collider;
                 }
             }
         }
 
-        return closestCollider;
+        _interactable = interactable;
     }
 }
 

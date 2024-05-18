@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88886aa4db4d9224bb5947fdcc3b9d08, type: 3}
+  m_Name: Red Rose
+  m_EditorClassIdentifier: 
+  ItemId: 280
+  ItemType: 3
+  ItemName: Red Rose
+  ItemIcon: {fileID: 21300000, guid: b2a46ee53b7e968428fe815cbfd35d9f, type: 3}
+  IsStackable: 1
+  MaxStackableAmount: 99
+  CanBeBought: 1
+  BuyPrice: 0
+  CanBeSold: 1
+  LowestRaritySellPrice: 0
+  ItemInfoHoverText: "Symbol der Liebe, perfekt f\xFCr romantische Gesten. "
+  LeftClickAction:
+  - {fileID: 11400000, guid: e5b4043eabb4dba4b9bd42c80b78d631, type: 2}
+  ObjectType: 7
+  ItemsToCraftList: []
+  ItemToPickUpObject: {fileID: 11400000, guid: 0455e7dd00e1df9479f2289b436f95bf, type: 2}
+  InactiveSprite: {fileID: 21300000, guid: 1a1e69786a7a8b547bb7c7dc0f37b34e, type: 3}
+  ActiveSprite: {fileID: 0}
+  PolygonColliderPath:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  RoseRecipes:
+  - {fileID: 11400000, guid: 12c44e39a64c36545bc01a356955e0d8, type: 2}
+  - {fileID: 11400000, guid: ebb1b5716dd6a7a44aee745947b4e56e, type: 2}
+  - {fileID: 11400000, guid: de32d156ba624df498d705a8448c2792, type: 2}
+  - {fileID: 11400000, guid: c8b2fbc6524004e4fb4e6c4b63e752a9, type: 2}
+  ItemForGalaxyRose: {fileID: 11400000, guid: 2189bb5d57a675342979ab5a9433f7c3, type: 2}

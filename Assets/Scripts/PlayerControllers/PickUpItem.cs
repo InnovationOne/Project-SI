@@ -22,22 +22,19 @@ public class PickUpItem : NetworkBehaviour {
     private ItemSlot _itemSlot;
     private Player _closestPlayer;
     private float _distanceToPlayer;
+    private SpriteRenderer _itemRenderer;
 
-    [Header("Renderer Settings")]
-    [SerializeField] private SpriteRenderer _itemRenderer;
-    [SerializeField] private SpriteRenderer _itemToolRarityRenderer;
-
-    private void Awake()
-    {
+    private void Awake() {
+        _itemRenderer = GetComponentInChildren<SpriteRenderer>();
         _parabolaAnimationTime = _maxParabolaAnimationTime;
         _itemSlot = new ItemSlot();
     }
 
     private void Start() => TimeAndWeatherManager.Instance.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
-    
+
 
     private new void OnDestroy() => TimeAndWeatherManager.Instance.OnNextDayStarted -= TimeAndWeatherManager_OnNextDayStarted;
-    
+
 
     /// <summary>
     /// Event handler for when the next day starts in the TimeAndWeatherManager.
@@ -70,7 +67,7 @@ public class PickUpItem : NetworkBehaviour {
     /// </summary>
     [ServerRpc(RequireOwnership = false)]
     private void MoveItemTowardsPlayerServerRpc() => MoveItemTowardsPlayerClientRpc();
-    
+
 
     /// <summary>
     /// Moves the item towards the closest player's position using a client RPC (Remote Procedure Call).
@@ -180,7 +177,7 @@ public class PickUpItem : NetworkBehaviour {
     /// </summary>
     [ServerRpc(RequireOwnership = false)]
     private void DespawnItemServerRpc() => GetComponent<NetworkObject>().Despawn(true);
-    
+
 
     /// <summary>
     /// Finds the closest player to the current object.
@@ -202,11 +199,8 @@ public class PickUpItem : NetworkBehaviour {
     /// </summary>
     /// <param name="itemSlot">The item slot data to initialize with.</param>
     public void InitializeItem(ItemSlot itemSlot) {
-        _itemSlot.Copy(itemSlot);
+        _itemSlot.Set(itemSlot);
         _itemRenderer.sprite = ItemManager.Instance.ItemDatabase[_itemSlot.ItemId].ItemIcon;
-        if (ItemManager.Instance.ItemDatabase[_itemSlot.ItemId].ItemType == ItemSO.ItemTypes.Tools) {
-            _itemToolRarityRenderer.sprite = (ItemManager.Instance.ItemDatabase[_itemSlot.ItemId] as ToolSO).ToolItemRarity[_itemSlot.RarityId - 1];
-        }
     }
 
     /// <summary>

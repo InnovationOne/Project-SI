@@ -19,11 +19,8 @@ public class Fence : AdjustingObject {
             return;
         }
 
-        _visual.SetSprite(FenceSO.Sprites[_patternIndex]);
-
-        PolygonCollider2D collider = new PolygonCollider2D();
-        collider.SetPath(0, FenceSO.PolygonColliderPaths[colliderPatternIndex]);
-        _visual.SetCollider(collider);
+        _visual.SetCollider(1);
+        _visual.SetPath(0, FenceSO.PolygonColliderPaths[colliderPatternIndex]);
     }
 
     /// <summary>
