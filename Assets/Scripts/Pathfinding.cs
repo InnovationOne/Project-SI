@@ -1,239 +1,137 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.Burst;
-using Unity.Collections;
-using Unity.Jobs;
-using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
+/// <summary>
+/// Handles pathfinding logic using the A* algorithm.
+/// </summary>
+[RequireComponent(typeof(PathfindingGrid))]
 public class Pathfinding : MonoBehaviour {
-    /*
-    private const int MOVE_DIAGONAL_COST = 14;
-    private const int MOVE_STRAIGHT_COST = 10;
+    private const int DIAGONAL_MOVE_COST = 14;
+    private const int STRAIGHT_MOVE_COST = 10;
 
-    public Tilemap Tilemap;
-    private List<Vector3> _pathPoints = new();
-    public Vector3 test;
-    
-    private void Update() {
-        
-        if (Input.GetKeyDown(KeyCode.LeftAlt)) {
-            MoveTo(1f, test);
-        }
+    private PathfindingGrid _pathfindingGrid;
+
+    /// <summary>
+    /// Initializes the Pathfinding component.
+    /// </summary>
+    private void Awake() {
+        _pathfindingGrid = GetComponent<PathfindingGrid>();
     }
 
-    public void MoveTo(float moveSpeed, Vector3 endWorldPosition) {
-        _pathPoints.Clear();
-        Vector3Int startGridPosition = Tilemap.WorldToCell(transform.position);
-        Vector3Int endGridPosition = Tilemap.WorldToCell(endWorldPosition);
+    /// <summary>
+    /// Finds a path between the start and end points in the path request.
+    /// </summary>
+    /// <param name="pathRequest">The pathfinding request containing start and end points and a callback.</param>
+    /// <param name="callback">The callback to be invoked with the pathfinding result.</param>
+    public void FindPath(PathRequest pathRequest, Action<PathResult> callback) {
+        Vector3[] waypoints = new Vector3[0];
+        bool pathSuccess = false;
 
-        bool[] walkabilityMap = new bool[Tilemap.cellBounds.size.x * Tilemap.cellBounds.size.y];
-        for (int x = 0; x < Tilemap.cellBounds.size.x; x++) {
-            for (int y = 0; y < Tilemap.cellBounds.size.y; y++) {
-                Vector3Int cellPosition = new Vector3Int(x + Tilemap.cellBounds.xMin, y + Tilemap.cellBounds.yMin, 0);
-                Vector3 worldPosition = Tilemap.CellToWorld(cellPosition);
-                Collider2D collider = Physics2D.OverlapBox(worldPosition, new Vector2(1f, 1f), 0);
-                walkabilityMap[x + y * Tilemap.cellBounds.size.x] = collider == null;
-            }
-        }
-        NativeArray<bool> nativeWalkabilityMap = new NativeArray<bool>(walkabilityMap, Allocator.TempJob);
-        var findPathJob = new FindPathJob {
-            startPosition = new int2(startGridPosition.x, startGridPosition.y),
-            endPosition = new int2(endGridPosition.x, endGridPosition.y),
-            size = new int2(Tilemap.cellBounds.size.x, Tilemap.cellBounds.size.y),
-            pathResult = new NativeList<int2>(Allocator.TempJob),
-            walkabilityMap = nativeWalkabilityMap,
-        };
+        Node startNode = _pathfindingGrid.GetNodeFromWorldPoint(pathRequest.PathStart);
+        Node endNode = _pathfindingGrid.GetNodeFromWorldPoint(pathRequest.PathEnd);
 
-        JobHandle jobHandle = findPathJob.Schedule();
-        jobHandle.Complete();
+        if (startNode.Walkable && endNode.Walkable) {
+            Heap<Node> openSet = new Heap<Node>(_pathfindingGrid.MaxSize);
+            HashSet<Node> closedSet = new HashSet<Node>();
+            openSet.Add(startNode);
 
-        _pathPoints.Add(endWorldPosition);
-        for (int i = 1; i < findPathJob.pathResult.Length; i++) {
-            Vector3 worldPos = Tilemap.CellToWorld(new Vector3Int(findPathJob.pathResult[i].x, findPathJob.pathResult[i].y, 0));
-            worldPos += new Vector3(0.5f, 0.5f);
-            worldPos.z = 0;
-            _pathPoints.Add(worldPos);
-        }
+            while (openSet.Count > 0) {
+                Node currentNode = openSet.RemoveFirst();
+                closedSet.Add(currentNode);
 
-        nativeWalkabilityMap.Dispose();
-        //findPathJob.walkabilityMap.Dispose();
-        findPathJob.pathResult.Dispose();
-        _pathPoints.Reverse();
-
-        StartCoroutine(FollowPath(moveSpeed));
-    }
-
-    private IEnumerator FollowPath(float moveSpeed) {
-        foreach (var point in _pathPoints) {
-            while (Vector3.Distance(transform.position, point) > 0.1f) {
-                transform.position = Vector3.MoveTowards(transform.position, point, moveSpeed * Time.deltaTime);
-                yield return null;
-            }
-        }
-        _pathPoints.Clear();
-    }
-
-    [BurstCompile]
-    private struct FindPathJob : IJob {
-        public int2 startPosition;
-        public int2 endPosition;
-        public int2 size;
-        public NativeList<int2> pathResult;
-        public NativeArray<bool> walkabilityMap;
-
-        public void Execute() {
-            NativeArray<PathNode> pathNodeArray = new NativeArray<PathNode>(size.x * size.y, Allocator.Temp);
-
-            for (int x = 0; x < size.x; x++) {
-                for (int y = 0; y < size.y; y++) {
-                    PathNode pathNode = new() {
-                        X = x,
-                        Y = y,
-                        Index = CalculateIndex(x, y, size.x),
-                        CameFromNodeIndex = -1,
-                        GCost = int.MaxValue,
-                        HCost = CalculateDistanceCost(new int2(x, y), endPosition),
-                    };
-                    pathNode.IsWalkable = walkabilityMap[pathNode.Index];
-                    pathNode.CalculateFCost();
-                    pathNodeArray[pathNode.Index] = pathNode;
-                }
-            }
-
-            NativeArray<int2> neighbourOffsetArray = new NativeArray<int2>(8, Allocator.Temp) {
-                [0] = new int2(-1, 0), // Left
-                [1] = new int2(+1, 0), // Right
-                [2] = new int2(0, +1), // Up
-                [3] = new int2(0, -1), // Down
-                [4] = new int2(-1, -1), // Left Down
-                [5] = new int2(-1, +1), // Left Up
-                [6] = new int2(+1, -1), // Right Down
-                [7] = new int2(+1, +1), // Right Up
-            };
-
-            int endNodeIndex = CalculateIndex(endPosition.x, endPosition.y, size.x);
-
-            PathNode startNode = pathNodeArray[CalculateIndex(startPosition.x, startPosition.y, size.x)];
-            startNode.GCost = 0;
-            startNode.CalculateFCost();
-            pathNodeArray[startNode.Index] = startNode;
-
-            NativeList<int> openList = new NativeList<int>(Allocator.Temp);
-            NativeList<int> closedList = new NativeList<int>(Allocator.Temp);
-
-            openList.Add(startNode.Index);
-
-            while (openList.Length > 0) {
-                int currentNodeIndex = GetLowestCostFNodeIndex(openList, pathNodeArray);
-                var currentNode = pathNodeArray[currentNodeIndex];
-
-                if (currentNodeIndex == endNodeIndex) {
-                    // Reached our destination
-                    ReconstructPath(currentNode, pathNodeArray, pathResult);
+                // Found the path
+                if (currentNode == endNode) {
+                    pathSuccess = true;
                     break;
                 }
 
-                for (int i = 0; i < openList.Length; i++) {
-                    if (openList[i] == currentNodeIndex) {
-                        openList.RemoveAtSwapBack(i);
-                        break;
-                    }
-                }
-                closedList.Add(currentNodeIndex);
 
-                for (int i = 0; i < neighbourOffsetArray.Length; i++) {
-                    int2 neighbourOffset = neighbourOffsetArray[i];
-                    int2 neighbourPosition = new int2(currentNode.X + neighbourOffset.x, currentNode.Y + neighbourOffset.y);
-
-                    if (!IsPositionInsideGrid(neighbourPosition, size)) {
-                        // Neighbour not inside the grid
+                foreach (Node neighbour in _pathfindingGrid.GetNeighbours(currentNode)) {
+                    if (!neighbour.Walkable ||
+                        closedSet.Contains(neighbour)) {
                         continue;
                     }
 
-                    int neighbourIndex = CalculateIndex(neighbourPosition.x, neighbourPosition.y, size.x);
-                    if (closedList.Contains(neighbourIndex)) {
-                        // Node already processed
-                        continue;
-                    }
+                    int newMovementCostToNeighbour = currentNode.GCost + GetDistance(currentNode, neighbour) + neighbour.MovementPenalty;
+                    if (newMovementCostToNeighbour < neighbour.GCost || !openSet.Contains(neighbour)) {
+                        neighbour.GCost = newMovementCostToNeighbour;
+                        neighbour.HCost = GetDistance(neighbour, endNode);
+                        neighbour.Parent = currentNode;
 
-                    PathNode neighbourNode = pathNodeArray[neighbourIndex];
-                    if (!neighbourNode.IsWalkable) {
-                        Debug.Log("Knoten bei " + neighbourPosition + " ist nicht begehbar.");
-                        continue;
-                    }
-
-                    int2 currentNodePosition = new int2(currentNode.X, currentNode.Y);
-                    int tentativeGCost = currentNode.GCost + CalculateDistanceCost(currentNodePosition, neighbourPosition);
-                    if (tentativeGCost < neighbourNode.GCost) {
-                        neighbourNode.CameFromNodeIndex = currentNodeIndex;
-                        neighbourNode.GCost = tentativeGCost;
-                        neighbourNode.CalculateFCost();
-                        pathNodeArray[neighbourIndex] = neighbourNode;
-
-                        if (!openList.Contains(neighbourIndex)) {
-                            openList.Add(neighbourIndex);
+                        if (!openSet.Contains(neighbour)) {
+                            openSet.Add(neighbour);
+                        } else {
+                            openSet.UpdateItem(neighbour);
                         }
                     }
                 }
             }
-
-            neighbourOffsetArray.Dispose();
-            pathNodeArray.Dispose();
-            openList.Dispose();
-            closedList.Dispose();
         }
 
-        private void ReconstructPath(PathNode endNode, NativeArray<PathNode> pathNodeArray, NativeList<int2> pathResult) {
-            PathNode currentNode = endNode;
-            while (currentNode.CameFromNodeIndex != -1) {
-                pathResult.Add(new int2(currentNode.X, currentNode.Y));
-                currentNode = pathNodeArray[currentNode.CameFromNodeIndex];
-            }
-            pathResult.Add(new int2(currentNode.X, currentNode.Y));
+        if (pathSuccess) {
+            waypoints = RetracePath(startNode, endNode);
+            pathSuccess = waypoints.Length > 0;
         }
-
-        private bool IsPositionInsideGrid(int2 gridPos, int2 size) {
-            return
-                gridPos.x >= 0 &&
-                gridPos.y >= 0 &&
-                gridPos.x < size.x &&
-                gridPos.y < size.y;
-        }
-
-        private int CalculateIndex(int x, int y, int gridWidth) {
-            return x + y * gridWidth;
-        }
-
-        private int CalculateDistanceCost(int2 a, int2 b) {
-            int xDistance = math.abs(a.x - b.x);
-            int yDistance = math.abs(a.y - b.y);
-            int remaining = math.abs(xDistance - yDistance);
-            return MOVE_DIAGONAL_COST * math.min(xDistance, yDistance) + MOVE_STRAIGHT_COST * remaining;
-        }
-
-        private int GetLowestCostFNodeIndex(NativeList<int> openList, NativeArray<PathNode> pathNodeArray) {
-            PathNode lowestCostPathNode = pathNodeArray[openList[0]];
-            for (int i = 1; i < openList.Length; i++) {
-                PathNode testPathNode = pathNodeArray[openList[i]];
-                if (testPathNode.FCost < lowestCostPathNode.FCost) {
-                    lowestCostPathNode = testPathNode;
-                }
-            }
-            return lowestCostPathNode.Index;
-        }
+        callback(new PathResult(waypoints, pathSuccess, pathRequest.Callback));
     }
 
-    private struct PathNode {
-        public int X, Y, Index, CameFromNodeIndex, GCost, HCost, FCost;
-        public bool IsWalkable;
+    /// <summary>
+    /// Retraces the path from the end node to the start node.
+    /// </summary>
+    /// <param name="startNode">The starting node of the path.</param>
+    /// <param name="endNode">The ending node of the path.</param>
+    /// <returns>An array of waypoints representing the path.</returns>
+    private Vector3[] RetracePath(Node startNode, Node endNode) {
+        List<Node> path = new List<Node>();
+        Node currentNode = endNode;
 
-        public void CalculateFCost() {
-            FCost = GCost + HCost;
+        while (currentNode != startNode) {
+            path.Add(currentNode);
+            currentNode = currentNode.Parent;
         }
+
+        Vector3[] waypoints = SimplifyPath(path);
+        Array.Reverse(waypoints);
+
+        return waypoints;
     }
-*/
+
+    /// <summary>
+    /// Simplifies the path by removing unnecessary nodes.
+    /// </summary>
+    /// <param name="path">The original path as a list of nodes.</param>
+    /// <returns>An array of waypoints representing the simplified path.</returns>
+    private Vector3[] SimplifyPath(List<Node> path) {
+        List<Vector3> waypoints = new List<Vector3>();
+        Vector2 directionOld = Vector2.zero;
+
+        for (int i = 1; i < path.Count; i++) {
+            Vector2 directionNew = new Vector2(path[i - 1].GridX - path[i].GridX, path[i - 1].GridY - path[i].GridY);
+            if (directionNew != directionOld) {
+                waypoints.Add(path[i].WorldPosition);
+            }
+            directionOld = directionNew;
+        }
+
+        return waypoints.ToArray();
+    }
+
+    /// <summary>
+    /// Calculates the distance between two nodes.
+    /// </summary>
+    /// <param name="nodeA">The first node.</param>
+    /// <param name="nodeB">The second node.</param>
+    /// <returns>The distance between the two nodes.</returns>
+    private int GetDistance(Node nodeA, Node nodeB) {
+        int dstX = Mathf.Abs(nodeA.GridX - nodeB.GridX);
+        int dstY = Mathf.Abs(nodeA.GridY - nodeB.GridY);
+
+        if (dstX > dstY) {
+            return DIAGONAL_MOVE_COST * dstY + STRAIGHT_MOVE_COST * (dstX - dstY);
+        }
+
+        return DIAGONAL_MOVE_COST * dstX + STRAIGHT_MOVE_COST * (dstY - dstX);
+    }
 }

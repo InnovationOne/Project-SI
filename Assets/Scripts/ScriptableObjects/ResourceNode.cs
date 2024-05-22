@@ -7,7 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider2D))]
 public class ResourceNode : NetworkBehaviour {
     [Header("Node Settings")]
-    [SerializeField] private ResourceNodeType _nodeType;
+    [SerializeField] private GatherResourceNodeSO.ResourceNodeType _nodeType;
     [SerializeField] private ItemSpawnManager.SpreadType _spreadType;
     [SerializeField] private int _startingHP;
     [SerializeField] private int _minimumToolRarity;
@@ -90,7 +90,7 @@ public class ResourceNode : NetworkBehaviour {
         if (_currentHp > 0) {
             StartCoroutine(ShakeAfterHit());
 
-            if (_nodeType == ResourceNodeType.Tree) {
+            if (_nodeType == GatherResourceNodeSO.ResourceNodeType.Tree) {
                 // ITEM OBEN AM BAUM SPAWNEN UND AUF DEN BODEN FALLEN LASSEN, DABEI SOLL DAS ITEM NOCH EINMAL HOCHSPRINGEN
                 // Z.B. AUCH BIENENNEST
             }
@@ -116,7 +116,7 @@ public class ResourceNode : NetworkBehaviour {
         }
     }
 
-    public bool CanHitResourceNodeType(List<ResourceNodeType> canBeHit) {
+    public bool CanHitResourceNodeType(List<GatherResourceNodeSO.ResourceNodeType> canBeHit) {
         return canBeHit.Contains(_nodeType);
     }
 
@@ -126,10 +126,10 @@ public class ResourceNode : NetworkBehaviour {
 
     private void PlaySound() {
         switch (_nodeType) {
-            case ResourceNodeType.Tree:
+            case GatherResourceNodeSO.ResourceNodeType.Tree:
                 AudioManager.Instance.PlayOneShot(FMODEvents.Instance.HitTreeSFX, transform.position);
                 break;
-            case ResourceNodeType.Ore:
+            case GatherResourceNodeSO.ResourceNodeType.Ore:
                 // Play ore sound
                 break;
             default:

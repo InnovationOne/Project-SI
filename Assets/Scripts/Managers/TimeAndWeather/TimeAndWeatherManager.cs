@@ -142,10 +142,6 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     #endregion
 
     private void Update() {
-        if (Input.GetKeyDown(KeyCode.LeftAlt)) {
-            StartNextDay();
-        }
-
         // Update the time
         _currentTime += Time.deltaTime * _timeScale;
 

@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 
 [RequireComponent(typeof(TimeAgent))]
-[RequireComponent(typeof(Pathfinding))]
 public class NPC : Interactable {
     public NPCDailyRoutine[] DailyRoutines;
 

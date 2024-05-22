@@ -59,21 +59,6 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         if (IsServer) {
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_OnClientConnected;
         }
-
-        RoseTest();
-    }
-
-    private void RoseTest() {
-        Vector3Int localpos = new Vector3Int(5, 0, 0);
-        int i = 264;
-        for (int x = -2; x <= 2; x++) {
-            for (int y = -2; y <= 2; y++) {
-                Vector3Int pos = new Vector3Int(localpos.x + x, localpos.y + y);
-                PlaceObjectOnMapServerRpc(i, pos);
-                i++;
-                if (i == 268) i++;
-            }
-        }
     }
 
     #region Client Late Join & Network Sync    
@@ -198,10 +183,20 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
+    /// <summary>
+    /// Places an object on the map with a delay.
+    /// </summary>
+    /// <param name="position">The position where the object should be placed.</param>
+    /// <param name="delay">The delay in seconds before placing the object.</param>
     public void PlaceObjectOnMapDelayed(Vector3Int position, float delay) {
         StartCoroutine(PlaceObjectOnMapDelayedCoroutine(position, delay));
     }
 
+    /// <summary>
+    /// Coroutine that delays the placement of an object on the map.
+    /// </summary>
+    /// <param name="position">The position where the object will be placed.</param>
+    /// <param name="delay">The delay in seconds before placing the object.</param>
     private IEnumerator PlaceObjectOnMapDelayedCoroutine(Vector3Int position, float delay) {
         yield return new WaitForSeconds(delay);
         PlaceObjectOnMapServerRpc(_galaxyRose.ItemId, position);
@@ -287,6 +282,11 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
+    /// <summary>
+    /// Destroys the placeable object at the specified grid position on the server.
+    /// </summary>
+    /// <param name="gridPosition">The grid position of the placeable object to destroy.</param>
+    /// <param name="serverRpcParams">Optional parameters for the server RPC.</param>
     [ServerRpc(RequireOwnership = false)]
     public void DestroyObjectServerRPC(Vector3Int gridPosition, ServerRpcParams serverRpcParams = default) {
         if (!_poContainer.PlaceableObjects.ContainsKey(gridPosition)) {
@@ -299,11 +299,20 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
+    /// <summary>
+    /// Coroutine that destroys an object after its animation finishes.
+    /// </summary>
+    /// <param name="roseComponent">The Rose component of the object.</param>
+    /// <param name="gridPosition">The grid position of the object.</param>
     private IEnumerator DestroyAfterAnimation(Rose roseComponent, Vector3Int gridPosition) {
         yield return new WaitForSeconds(roseComponent.GetComponentInChildren<Animator>().GetCurrentAnimatorStateInfo(0).length);
         DestroyObjectClientRPC(gridPosition);
     }
 
+    /// <summary>
+    /// Destroys the object on the client side using a Remote Procedure Call (RPC).
+    /// </summary>
+    /// <param name="gridPosition">The grid position of the object to be destroyed.</param>
     [ClientRpc]
     private void DestroyObjectClientRPC(Vector3Int gridPosition) {
         CleanUpPlacedObject(gridPosition, _poContainer[gridPosition]);
