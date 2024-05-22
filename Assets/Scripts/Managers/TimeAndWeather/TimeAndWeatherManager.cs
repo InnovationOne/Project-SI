@@ -57,6 +57,7 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     private int _currentYear = 0;
     private bool _nextDayAvailable = false;
     private bool _updatedTime = false;
+    public string GetDateTime => $"{_currentYear}-{CurrentSeason + 1}-{(ShortDayName)CurrentDay} {(int)GetHours()}:{(int)GetMinutes()}";
 
     public TimeOfDay CurrentTimeOfDay {
         get {
@@ -83,6 +84,7 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     private readonly int[] _weatherProbability = { 40, 60, 85 };
     private readonly float[] _daytimeColors = { 0.9f, 0.8f, 0.5f };
     private WeatherName[] _weatherForecast = { WeatherName.Rain, WeatherName.Thunder, WeatherName.Sun };
+    public string GetWeather => _weatherForecast[0].ToString();
 
     [Header("Thunder Settings")]
     private const float MIN_TIME_BETWEEN_THUNDER = 10f;

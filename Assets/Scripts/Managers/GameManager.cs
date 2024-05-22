@@ -12,7 +12,6 @@ public class GameManager : NetworkBehaviour {
 
     private Dictionary<ulong, bool> _playerSleepingDict;
 
-
     private void Awake() {
         if (Instance != null) {
             Debug.LogError("There is more than one instance of GameManager in the scene!");

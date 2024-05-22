@@ -36,7 +36,7 @@ public class InputManager : NetworkBehaviour {
     public event Action OnLeftClickAction;
     public event Action OnRightClickAction;
 
-    public event Action OnDebugConsoleAction;
+    public event Action OnCheatConsoleAction;
     public event Action OnEnterAction;
 
     public event Action OnArrowUpAction;
@@ -93,7 +93,7 @@ public class InputManager : NetworkBehaviour {
         playerInputActions.Player.LeftClick.performed += LeftClick_performed;
         playerInputActions.Player.RightClick.performed += RightClick_performed;
 
-        playerInputActions.Player.DebugConsole.performed += DebugConsole_performed;
+        playerInputActions.Player.CheatConsole.performed += CheatConsole_performed;
         playerInputActions.Player.Enter.performed += Enter_performed;
         playerInputActions.Player.Escape.performed += Escape_performed;
 
@@ -220,8 +220,8 @@ public class InputManager : NetworkBehaviour {
         OnRightClickAction?.Invoke();
     }
 
-    public void DebugConsole_performed(InputAction.CallbackContext obj) {
-        OnDebugConsoleAction?.Invoke();
+    public void CheatConsole_performed(InputAction.CallbackContext obj) {
+        OnCheatConsoleAction?.Invoke();
     }
 
     public void Enter_performed(InputAction.CallbackContext obj) {
@@ -285,7 +285,7 @@ public class InputManager : NetworkBehaviour {
         playerInputActions.Player.Map.performed -= Map_performed;
         playerInputActions.Player.Escape.performed -= Escape_performed;
         playerInputActions.Player.Pause.performed -= Pause_performed;
-        playerInputActions.Player.DebugConsole.performed -= DebugConsole_performed;
+        playerInputActions.Player.CheatConsole.performed -= CheatConsole_performed;
         playerInputActions.Player.Enter.performed -= Enter_performed;
 
         playerInputActions.Player.ToolbeltSlot1.performed -= ToolbeltSlot1_performed;

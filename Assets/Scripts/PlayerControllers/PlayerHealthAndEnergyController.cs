@@ -13,13 +13,17 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
     [Header("Health Parameters")]
     [SerializeField] private float _maxHealth = 100;
+    public float MaxHealth => _maxHealth;
     [SerializeField] private float _currentHealth = 100;
+    public float CurrentHealth => _currentHealth;
     [SerializeField] private float _hpAtRespawn = 10;
     [SerializeField] private float _regenHpAmountInBed = 0.5f;
 
     [Header("Energy Parameters")]
     [SerializeField] private float _maxEnergy = 100;
+    public float MaxEnergy => _maxEnergy;
     [SerializeField] private float _currentEnergy = 100;
+    public float CurrentEnergy => _currentEnergy;
     [SerializeField] private float _energyAtRespawn = 10;
     [SerializeField] private float _minimumEnergyMultiplierForFullReset = 0.25f; // Energy is set to max, when rest energy is above 25%
     [SerializeField] private float _energyMultiplierForNoneFullReset = 0.5f; // Energy is set to 50% of max, when rest energy is below 25%

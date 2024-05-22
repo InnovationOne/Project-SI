@@ -272,10 +272,10 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""DebugConsole"",
+                    ""name"": ""CheatConsole"",
                     ""type"": ""Button"",
                     ""id"": ""144c53cb-25c0-41e5-b659-9370647ee1a8"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -830,8 +830,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""path"": ""<Keyboard>/f1"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""DebugConsole"",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""CheatConsole"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1069,7 +1069,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_LeftClick = m_Player.FindAction("LeftClick", throwIfNotFound: true);
         m_Player_RightClick = m_Player.FindAction("RightClick", throwIfNotFound: true);
         m_Player_PointerPosition = m_Player.FindAction("PointerPosition", throwIfNotFound: true);
-        m_Player_DebugConsole = m_Player.FindAction("DebugConsole", throwIfNotFound: true);
+        m_Player_CheatConsole = m_Player.FindAction("CheatConsole", throwIfNotFound: true);
         m_Player_Enter = m_Player.FindAction("Enter", throwIfNotFound: true);
         m_Player_ArrowUp = m_Player.FindAction("ArrowUp", throwIfNotFound: true);
         m_Player_ArrowDown = m_Player.FindAction("ArrowDown", throwIfNotFound: true);
@@ -1176,7 +1176,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_LeftClick;
     private readonly InputAction m_Player_RightClick;
     private readonly InputAction m_Player_PointerPosition;
-    private readonly InputAction m_Player_DebugConsole;
+    private readonly InputAction m_Player_CheatConsole;
     private readonly InputAction m_Player_Enter;
     private readonly InputAction m_Player_ArrowUp;
     private readonly InputAction m_Player_ArrowDown;
@@ -1212,7 +1212,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @LeftClick => m_Wrapper.m_Player_LeftClick;
         public InputAction @RightClick => m_Wrapper.m_Player_RightClick;
         public InputAction @PointerPosition => m_Wrapper.m_Player_PointerPosition;
-        public InputAction @DebugConsole => m_Wrapper.m_Player_DebugConsole;
+        public InputAction @CheatConsole => m_Wrapper.m_Player_CheatConsole;
         public InputAction @Enter => m_Wrapper.m_Player_Enter;
         public InputAction @ArrowUp => m_Wrapper.m_Player_ArrowUp;
         public InputAction @ArrowDown => m_Wrapper.m_Player_ArrowDown;
@@ -1307,9 +1307,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @PointerPosition.started += instance.OnPointerPosition;
             @PointerPosition.performed += instance.OnPointerPosition;
             @PointerPosition.canceled += instance.OnPointerPosition;
-            @DebugConsole.started += instance.OnDebugConsole;
-            @DebugConsole.performed += instance.OnDebugConsole;
-            @DebugConsole.canceled += instance.OnDebugConsole;
+            @CheatConsole.started += instance.OnCheatConsole;
+            @CheatConsole.performed += instance.OnCheatConsole;
+            @CheatConsole.canceled += instance.OnCheatConsole;
             @Enter.started += instance.OnEnter;
             @Enter.performed += instance.OnEnter;
             @Enter.canceled += instance.OnEnter;
@@ -1407,9 +1407,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @PointerPosition.started -= instance.OnPointerPosition;
             @PointerPosition.performed -= instance.OnPointerPosition;
             @PointerPosition.canceled -= instance.OnPointerPosition;
-            @DebugConsole.started -= instance.OnDebugConsole;
-            @DebugConsole.performed -= instance.OnDebugConsole;
-            @DebugConsole.canceled -= instance.OnDebugConsole;
+            @CheatConsole.started -= instance.OnCheatConsole;
+            @CheatConsole.performed -= instance.OnCheatConsole;
+            @CheatConsole.canceled -= instance.OnCheatConsole;
             @Enter.started -= instance.OnEnter;
             @Enter.performed -= instance.OnEnter;
             @Enter.canceled -= instance.OnEnter;
@@ -1572,7 +1572,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnLeftClick(InputAction.CallbackContext context);
         void OnRightClick(InputAction.CallbackContext context);
         void OnPointerPosition(InputAction.CallbackContext context);
-        void OnDebugConsole(InputAction.CallbackContext context);
+        void OnCheatConsole(InputAction.CallbackContext context);
         void OnEnter(InputAction.CallbackContext context);
         void OnArrowUp(InputAction.CallbackContext context);
         void OnArrowDown(InputAction.CallbackContext context);

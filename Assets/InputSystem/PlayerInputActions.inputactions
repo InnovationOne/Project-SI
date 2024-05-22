@@ -249,10 +249,10 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "DebugConsole",
+                    "name": "CheatConsole",
                     "type": "Button",
                     "id": "144c53cb-25c0-41e5-b659-9370647ee1a8",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -807,8 +807,8 @@
                     "path": "<Keyboard>/f1",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
-                    "action": "DebugConsole",
+                    "groups": ";Keyboard",
+                    "action": "CheatConsole",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

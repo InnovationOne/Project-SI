@@ -10,6 +10,7 @@ public class FinanceManager : NetworkBehaviour, IDataPersistance {
 
     [Header("Debug: Finance")]
     [SerializeField] private int _moneyOfFarm;
+    public int GetMoney => _moneyOfFarm;
     private const int MAX_MONEY_OF_FARM = 99999999;
 
     [Header("Debug: Save and Load")]

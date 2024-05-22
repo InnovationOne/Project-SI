@@ -85,7 +85,7 @@ public class PlayerDebugController : NetworkBehaviour {
     }
 
     private void Start() {
-        InputManager.Instance.OnDebugConsoleAction += ToggleDebugConsole;
+        InputManager.Instance.OnCheatConsoleAction += ToggleDebugConsole;
         InputManager.Instance.OnEnterAction += OnEnter;
         InputManager.Instance.OnEscapeAction += OnEscape;
         InputManager.Instance.OnArrowUpAction += OnArrowUp;
