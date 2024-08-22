@@ -8,6 +8,9 @@ using UnityEngine.InputSystem;
 public class InputManager : NetworkBehaviour {
     public static InputManager Instance { get; private set; }
 
+    private PlayerInputActions playerInputActions;
+
+    // Player
     public event Action OnRunAction;
     public event Action OnDropItemAction;
     public event Action OnInteractAction;
@@ -36,20 +39,19 @@ public class InputManager : NetworkBehaviour {
     public event Action OnLeftClickAction;
     public event Action OnRightClickAction;
 
-    public event Action OnCheatConsoleAction;
-    public event Action OnEnterAction;
-
-    public event Action OnArrowUpAction;
-    public event Action OnArrowDownAction;
-
     public event Action OnLeftControlAction;
-
-    private PlayerInputActions playerInputActions;
 
     public const int SHIFT_KEY_AMOUNT = 10;
 
 
-    // This functions is called when the script is loaded
+    // Debug Console
+    public event Action DebugConsole_OnDebugConsoleAction;
+    public event Action DebugConsole_OnCheatConsoleAction;
+    public event Action DebugConsole_OnEnterAction;
+    public event Action DebugConsole_OnArrowUpAction;
+    public event Action DebugConsole_OnArrowDownAction;
+
+
     private void Awake() {
         if (Instance != null) {
             throw new Exception("Found more than one Input Manager in the scene.");
@@ -93,61 +95,56 @@ public class InputManager : NetworkBehaviour {
         playerInputActions.Player.LeftClick.performed += LeftClick_performed;
         playerInputActions.Player.RightClick.performed += RightClick_performed;
 
-        playerInputActions.Player.CheatConsole.performed += CheatConsole_performed;
-        playerInputActions.Player.Enter.performed += Enter_performed;
         playerInputActions.Player.Escape.performed += Escape_performed;
+        playerInputActions.Player.DebugConsole.performed += DebugConsole_DebugConsole_performed;
 
-        playerInputActions.Player.ArrowUp.performed += ArrowUp_performed;
-        playerInputActions.Player.ArrowDown.performed += ArrowDown_performed;
+
+        // Debug Console
+        playerInputActions.DebugConsole.DebugConsole.performed += DebugConsole_DebugConsole_performed;
+        playerInputActions.DebugConsole.CheatConsole.performed += DebugConsole_CheatConsole_performed;
+        playerInputActions.DebugConsole.Enter.performed += DebugConsoleEnter_performed;
+        playerInputActions.DebugConsole.ArrowUp.performed += DebugConsoleArrowUp_performed;
+        playerInputActions.DebugConsole.ArrowDown.performed += DebugConsoleArrowDown_performed;
     }
 
+    #region Player
     private void Run_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnRunAction?.Invoke();
     }
 
     private void DropItem_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnDropItemAction?.Invoke();
     }
 
     private void Interact_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnInteractAction?.Invoke();
     }
 
     private void Inventory_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnInventoryAction?.Invoke();
     }
 
     private void Craft_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnCraftAction?.Invoke();
     }
 
     private void Relation_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnRelationAction?.Invoke();
     }
 
     private void Wiki_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnCollectionAction?.Invoke();
     }
 
     private void Character_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnCharacterAction?.Invoke();
     }
 
     private void Mission_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnMissionAction?.Invoke();
     }
 
     private void Map_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnMapAction?.Invoke();
     }
 
@@ -156,110 +153,77 @@ public class InputManager : NetworkBehaviour {
     }
 
     private void Pause_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnPauseAction?.Invoke();
     }
 
     private void ToolbeltSlot1_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot1Action?.Invoke();
     }
 
     private void ToolbeltSlot2_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot2Action?.Invoke();
     }
 
     private void ToolbeltSlot3_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot3Action?.Invoke();
     }
 
     private void ToolbeltSlot4_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot4Action?.Invoke();
     }
 
     private void ToolbeltSlot5_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot5Action?.Invoke();
     }
 
     private void ToolbeltSlot6_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot6Action?.Invoke();
     }
 
     private void ToolbeltSlot7_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot7Action?.Invoke();
     }
 
     private void ToolbeltSlot8_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot8Action?.Invoke();
     }
 
     private void ToolbeltSlot9_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot9Action?.Invoke();
     }
 
     private void ToolbeltSlot10_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnToolbeltSlot10Action?.Invoke();
     }
 
     private void LeftClick_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnLeftClickAction?.Invoke();
     }
 
     private void RightClick_performed(InputAction.CallbackContext obj) {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return; }
         OnRightClickAction?.Invoke();
     }
 
-    public void CheatConsole_performed(InputAction.CallbackContext obj) {
-        OnCheatConsoleAction?.Invoke();
-    }
-
-    public void Enter_performed(InputAction.CallbackContext obj) {
-        OnEnterAction?.Invoke();
-    }
-
-    public void ArrowUp_performed(InputAction.CallbackContext obj) {
-        OnArrowUpAction?.Invoke();
-    }
-
-    public void ArrowDown_performed(InputAction.CallbackContext obj) {
-        OnArrowDownAction?.Invoke();
-    }
-
     public Vector2 GetMovementVectorNormalized() {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return Vector2.zero; }
         return playerInputActions.Player.Movement.ReadValue<Vector2>().normalized;
     }
 
     public Vector2 GetMouseWheelVector() {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return Vector2.zero; }
         return playerInputActions.Player.ToolbeltSlotSelect.ReadValue<Vector2>();
     }
 
     public Vector2 GetPointerPosition() {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return Vector2.zero; }
         return playerInputActions.Player.PointerPosition.ReadValue<Vector2>();
     }
 
     public bool GetShiftPressed() {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return false; }
         return playerInputActions.Player.Run.ReadValue<float>() > 0;
     }
 
     public bool GetLeftControlPressed() {
-        if (PlayerDebugController.LocalInstance.ShowDebugConsole) { return false; }
         return playerInputActions.Player.LeftControl.ReadValue<float>() > 0;
     }
+    #endregion
 
 
     #region Fishing
@@ -268,8 +232,44 @@ public class InputManager : NetworkBehaviour {
     public bool GetButton3Pressed() => playerInputActions.Fishing.Button3.ReadValue<float>() > 0;
     public bool GetButton4Pressed() => playerInputActions.Fishing.Button4.ReadValue<float>() > 0;
     public bool GetButton5Pressed() => playerInputActions.Fishing.Button5.ReadValue<float>() > 0;
-    public bool GetButton6Pressed() => playerInputActions.Fishing.Button6.ReadValue<float>() > 0;    
+    public bool GetButton6Pressed() => playerInputActions.Fishing.Button6.ReadValue<float>() > 0;
     #endregion
+
+
+    #region Debug Console
+    public void DebugConsole_DebugConsole_performed(InputAction.CallbackContext obj) {
+        DebugConsole_OnDebugConsoleAction?.Invoke();
+    }
+
+    public void DebugConsole_CheatConsole_performed(InputAction.CallbackContext obj) {
+        DebugConsole_OnCheatConsoleAction?.Invoke();
+    }
+
+    public void DebugConsoleEnter_performed(InputAction.CallbackContext obj) {
+        DebugConsole_OnEnterAction?.Invoke();
+    }
+
+    public void DebugConsoleArrowUp_performed(InputAction.CallbackContext obj) {
+        DebugConsole_OnArrowUpAction?.Invoke();
+    }
+
+    public void DebugConsoleArrowDown_performed(InputAction.CallbackContext obj) {
+        DebugConsole_OnArrowDownAction?.Invoke();
+    }
+    #endregion
+
+    
+    public void EnableDebugConsoleActionMap() {
+        playerInputActions.DebugConsole.Enable();
+        playerInputActions.Player.Disable();
+        playerInputActions.Fishing.Disable();
+    }
+
+    public void EnablePlayerActionMap() {
+        playerInputActions.DebugConsole.Disable();
+        playerInputActions.Player.Enable();
+        playerInputActions.Fishing.Disable();
+    }
 
 
     private new void OnDestroy() {
@@ -285,8 +285,6 @@ public class InputManager : NetworkBehaviour {
         playerInputActions.Player.Map.performed -= Map_performed;
         playerInputActions.Player.Escape.performed -= Escape_performed;
         playerInputActions.Player.Pause.performed -= Pause_performed;
-        playerInputActions.Player.CheatConsole.performed -= CheatConsole_performed;
-        playerInputActions.Player.Enter.performed -= Enter_performed;
 
         playerInputActions.Player.ToolbeltSlot1.performed -= ToolbeltSlot1_performed;
         playerInputActions.Player.ToolbeltSlot2.performed -= ToolbeltSlot2_performed;
@@ -301,8 +299,15 @@ public class InputManager : NetworkBehaviour {
 
         playerInputActions.Player.LeftClick.performed -= LeftClick_performed;
         playerInputActions.Player.RightClick.performed -= RightClick_performed;
-        
-        playerInputActions.Player.ArrowUp.performed -= ArrowUp_performed;
-        playerInputActions.Player.ArrowDown.performed -= ArrowDown_performed;
+
+        playerInputActions.Player.Escape.performed -= Escape_performed;
+        playerInputActions.Player.DebugConsole.performed -= DebugConsole_DebugConsole_performed;
+
+        // Debug Console
+        playerInputActions.DebugConsole.DebugConsole.performed -= DebugConsole_DebugConsole_performed;
+        playerInputActions.DebugConsole.CheatConsole.performed -= DebugConsole_CheatConsole_performed;
+        playerInputActions.DebugConsole.Enter.performed -= DebugConsoleEnter_performed;
+        playerInputActions.DebugConsole.ArrowUp.performed -= DebugConsoleArrowUp_performed;
+        playerInputActions.DebugConsole.ArrowDown.performed -= DebugConsoleArrowDown_performed;
     }
 }

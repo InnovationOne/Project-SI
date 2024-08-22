@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Romaine Lettuce
   m_EditorClassIdentifier: 
-  ItemID: 77
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Romaine Lettuce
   ItemIcon: {fileID: 21300000, guid: 1d69671aa7024df4d87a6999814f8b3a, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 35
-  CanRestoreHpOrEnergy: 1
-  LowestRarityRestoringHpAmount: 7
-  LowestRarityRestoringEnergyAmount: 15
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

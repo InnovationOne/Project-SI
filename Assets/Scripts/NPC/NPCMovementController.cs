@@ -8,38 +8,14 @@ public class NPCMovementController : MonoBehaviour {
     [SerializeField] private float _turnDst = 0f;
     [SerializeField] private float _stoppingDst = 0f;
 
-    private const string MOVING = "Moving";
-    private const string RUNNING = "Running";
-    private const string HORIZONTAL = "Horizontal";
-    private const string VERTICAL = "Vertical";
-    private const string LAST_HORIZONTAL = "LastHorizontal";
-    private const string LAST_VERTICAL = "LastVertical";
-    private const float MAX_DELAY_FOR_ROTATION = 0.2f;
-    private float _currentTimeForPlayerRotation;
-
     private const float PATH_UPDATE_MOVE_THRESHOLD = 0.5f;
     private const float MIN_PATH_UPDATE_TIME = 0.2f;
 
     private PathfinderPath _path;
     private Rigidbody2D _rigidBody2D;
-    private Animator _animator;
-    private Vector2 _lastMotionDirection;
-
-    
 
     private void Awake() {
         _rigidBody2D = GetComponent<Rigidbody2D>();
-        _animator = GetComponentInChildren<Animator>();
-    }
-
-    private void Start() {
-        //StartCoroutine(UpdatePath());
-    }
-
-    private void Update() {
-        if (Input.GetKeyDown(KeyCode.LeftAlt)) {
-            StartCoroutine(UpdatePath());
-        }
     }
 
     /// <summary>
@@ -111,7 +87,6 @@ public class NPCMovementController : MonoBehaviour {
 
                 Vector2 direction = ((Vector2)_path.LookPoints[pathIndex] - pos2D).normalized;
                 _rigidBody2D.velocity = _speed * speedPercent * direction;
-                UpdateAnimatorParameters(direction);
             }
 
 
@@ -119,38 +94,6 @@ public class NPCMovementController : MonoBehaviour {
         }
 
         _rigidBody2D.velocity = Vector2.zero;
-        UpdateAnimatorParameters(Vector2.zero);
-    }
-
-    /// <summary>
-    /// Updates the animator parameters based on the input direction.
-    /// </summary>
-    /// <param name="direction">The direction the NPC is moving towards.</param>
-    private void UpdateAnimatorParameters(Vector2 direction) {
-        // Set the input direction in the animator
-        _animator.SetFloat(HORIZONTAL, direction.x);
-        _animator.SetFloat(VERTICAL, direction.y);
-
-        // Save last motion to apply idle rotation
-        if (_animator.GetBool(MOVING)) {
-            _lastMotionDirection = direction;
-            _animator.SetFloat(LAST_HORIZONTAL, direction.x);
-            _animator.SetFloat(LAST_VERTICAL, direction.y);
-
-            // Reset the delayForPlayerRotation timer when the player starts moving
-            _currentTimeForPlayerRotation = 0;
-        } else {
-            // Increment the timer when the player is not moving
-            _currentTimeForPlayerRotation += Time.deltaTime;
-
-            // Update the rotation after a short delay
-            if (_currentTimeForPlayerRotation >= MAX_DELAY_FOR_ROTATION &&
-                !(_lastMotionDirection.x == 0 && _lastMotionDirection.y == 0)) {
-
-                _animator.SetFloat(LAST_HORIZONTAL, _lastMotionDirection.x);
-                _animator.SetFloat(LAST_VERTICAL, _lastMotionDirection.y);
-            }
-        }
     }
 
     /// <summary>

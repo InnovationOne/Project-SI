@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Ginger
   m_EditorClassIdentifier: 
-  ItemID: 35
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Ginger
   ItemIcon: {fileID: 21300000, guid: 1dda756ae081d994fb6c9bf77e527651, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 760
-  CanRestoreHpOrEnergy: 1
-  LowestRarityRestoringHpAmount: 32
-  LowestRarityRestoringEnergyAmount: 70
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

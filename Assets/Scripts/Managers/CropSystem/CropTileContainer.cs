@@ -106,6 +106,7 @@ public class CropTileContainer {
                 Damage = cropTile.Damage,
                 SpriteRendererXPosition = cropTile.SpriteRendererOffset.x,
                 SpriteRendererYPosition = cropTile.SpriteRendererOffset.y,
+                InGreenhouse = cropTile.InGreenhouse,
                 SpriteRendererXScale = cropTile.SpriteRendererXScale,
                 GrowthTimeScaler = cropTile.GrowthTimeScaler,
                 RegrowthTimeScaler = cropTile.RegrowthTimeScaler,
@@ -140,6 +141,7 @@ public class CropTileContainer {
                 SpriteRendererOffset = new Vector2(
                     cropTileData.SpriteRendererXPosition, 
                     cropTileData.SpriteRendererYPosition),
+                InGreenhouse = cropTileData.InGreenhouse,
                 SpriteRendererXScale = cropTileData.SpriteRendererXScale,
                 GrowthTimeScaler = cropTileData.GrowthTimeScaler,
                 RegrowthTimeScaler = cropTileData.RegrowthTimeScaler,

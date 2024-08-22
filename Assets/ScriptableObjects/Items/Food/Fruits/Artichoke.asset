@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Artichoke
   m_EditorClassIdentifier: 
-  ItemID: 9
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Artichoke
   ItemIcon: {fileID: 21300000, guid: 7b88818d89019994b9788273ed1561c0, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 100
-  CanRestoreHpOrEnergy: 1
-  LowestRarityRestoringHpAmount: 14
-  LowestRarityRestoringEnergyAmount: 30
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

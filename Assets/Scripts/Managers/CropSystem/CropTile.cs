@@ -1,26 +1,25 @@
 using System;
 using UnityEngine;
-using Unity.Netcode;
 
 [Serializable]
 public class CropTile {
-    public int CropId { get; set; } = -1;
-    public Vector3Int CropPosition { get; set; }
-    public float CurrentGrowthTimer { get; set; } = 0;
-    public bool IsRegrowing { get; set; } = false;
-    public bool IsWatered { get; set; } = false;
-    public int Damage { get; set; } = 0;
-    public HarvestCrop Prefab { get; set; }
-    public Vector2 SpriteRendererOffset { get; set; }
-    public int SpriteRendererXScale { get; set; } = 1;
-    public bool InGreenhouse { get; set; } = false;
+    public int CropId = -1;
+    public Vector3Int CropPosition;
+    public float CurrentGrowthTimer = 0;
+    public bool IsRegrowing = false;
+    public bool IsWatered = false;
+    public int Damage = 0;
+    public HarvestCrop Prefab;
+    public Vector2 SpriteRendererOffset;
+    public int SpriteRendererXScale = 1;
+    public bool InGreenhouse = false;
 
     // Fertilizer
-    public float GrowthTimeScaler { get; set; } = 1f;
-    public float RegrowthTimeScaler { get; set; } = 1f;
-    public float QualityScaler { get; set; } = 1f;
-    public float QuantityScaler { get; set; } = 1f;
-    public float WaterScaler { get; set; } = 0f;
+    public float GrowthTimeScaler = 1f;
+    public float RegrowthTimeScaler = 1f;
+    public float QualityScaler = 1f;
+    public float QuantityScaler = 1f;
+    public float WaterScaler = 0f;
 
     public enum CropStage {
         Seeded,         // Seeds are planted
@@ -103,6 +102,7 @@ public class CropTileData {
     public int Damage;
     public float SpriteRendererXPosition;
     public float SpriteRendererYPosition;
+    public bool InGreenhouse;
     public int SpriteRendererXScale;
     public float GrowthTimeScaler;
     public float RegrowthTimeScaler;

@@ -137,7 +137,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     /// Changes the maximum energy value for the player.
     /// </summary>
     /// <param name="newMaxEnergy">The new maximum energy value.</param>
-    public void ChangeMaxEnergy(int newMaxEnergy) {
+    public void AdjustMaxEnergy(int newMaxEnergy) {
         _maxEnergy = newMaxEnergy;
         OnUpdateMaxEnergy?.Invoke(_maxEnergy);
     }

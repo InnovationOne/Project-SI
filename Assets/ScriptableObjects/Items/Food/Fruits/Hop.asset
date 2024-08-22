@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Hop
   m_EditorClassIdentifier: 
-  ItemID: 44
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Hop
   ItemIcon: {fileID: 21300000, guid: cef92afc0e302594a97135d7957409a0, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 205
-  CanRestoreHpOrEnergy: 0
-  LowestRarityRestoringHpAmount: 0
-  LowestRarityRestoringEnergyAmount: 0
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

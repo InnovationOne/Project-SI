@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Papaya
   m_EditorClassIdentifier: 
-  ItemID: 59
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Papaya
   ItemIcon: {fileID: 21300000, guid: 3448d2825a4df9f4ca9b2748f9a2991c, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 175
-  CanRestoreHpOrEnergy: 1
-  LowestRarityRestoringHpAmount: 20
-  LowestRarityRestoringEnergyAmount: 45
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

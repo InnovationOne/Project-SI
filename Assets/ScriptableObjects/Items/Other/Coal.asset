@@ -12,15 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1423fbcaa3a542146985cffb183c8303, type: 3}
   m_Name: Coal
   m_EditorClassIdentifier: 
-  ItemID: 0
-  ItemType: 1
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 2
   ItemName: 
   ItemIcon: {fileID: 0}
-  ItemInfoHoverText: 
   IsStackable: 0
   MaxStackableAmount: 1
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 0
   LowestRaritySellPrice: 0
+  ItemInfoHoverText: 
+  LeftClickAction: []

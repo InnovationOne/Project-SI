@@ -76,48 +76,8 @@ public class FinanceManager : NetworkBehaviour, IDataPersistance {
 
 
     #region Remove money
-    public IEnumerator PerformRemoveMoney(int money, ItemSlot itemSlot) {
-        _callbackSuccessful = false;
-        _success = false;
-
-        // Execute remove money
-        TryRemoveMoneyFromFarmServerRpc(money);
-
-        yield return WaitForServerResponse();
-
-        ProcessRemoveMoneyResult(money, itemSlot);
-    }
-
-    private IEnumerator WaitForServerResponse() {
-        float startTime = Time.time;
-        while (!_callbackSuccessful && (Time.time - startTime) < MAX_TIMEOUT) {
-            yield return null;
-        }
-
-        if (!_callbackSuccessful && (Time.time - startTime) >= MAX_TIMEOUT) {
-            Debug.LogError("Remove money TIMEOUT!");
-        }
-    }
-
-    private void ProcessRemoveMoneyResult(int money, ItemSlot itemSlot) {
-        if (!_success) {
-            Debug.Log($"Not enough money available. Money needed: {money}, money available: {_moneyOfFarm}. {money - _moneyOfFarm} more needed.");
-        } else {
-            ManageItemAddition(money, itemSlot);
-        }
-    }
-
-    private void ManageItemAddition(int money, ItemSlot itemSlot) {
-        if (itemSlot.ItemId == -1) {
-            Debug.Log("No item to add.");
-        } else {
-            Debug.Log($"{ItemManager.Instance.ItemDatabase[itemSlot.ItemId].ItemName} added for {money} money");
-            PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(itemSlot, false);
-        }
-    }
-
     [ServerRpc(RequireOwnership = false)]
-    private void TryRemoveMoneyFromFarmServerRpc(int money, ServerRpcParams serverRpcParams = default) {
+    public void RemoveMoneyFromFarmServerRpc(int money, ServerRpcParams serverRpcParams = default) {
         var clientId = serverRpcParams.Receive.SenderClientId;
         if (_moneyOfFarm >= money) {
             _moneyOfFarm -= money;

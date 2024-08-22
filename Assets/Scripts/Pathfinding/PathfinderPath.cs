@@ -13,7 +13,7 @@ public class PathfinderPath {
     /// <param name="startPos">The starting position of the path.</param>
     /// <param name="turnDst">The distance from the path to create the turn boundaries.</param>
     /// <param name="stoppingDst">The distance from the end of the path to start slowing down.</param>
-    public PathfinderPath(Vector3[] waypoints, Vector3 startPos, float turnDst, float stoppingDst) {
+    public PathfinderPath(Vector3[] waypoints, Vector3 startPos, float turnDst = 0, float stoppingDst = 0) {
         LookPoints = waypoints;
         TurnBoundaries = new Line[LookPoints.Length];
         FinishLineIndex = TurnBoundaries.Length - 1;

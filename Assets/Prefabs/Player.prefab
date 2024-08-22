@@ -5088,7 +5088,6 @@ GameObject:
   - component: {fileID: -8145328593073467161}
   - component: {fileID: 7164545375168379348}
   - component: {fileID: 7538093593932798205}
-  - component: {fileID: -6765276601428658895}
   - component: {fileID: 8828609184466402328}
   - component: {fileID: 2532303169848316385}
   m_Layer: 11
@@ -5216,7 +5215,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1116820046
+  GlobalObjectIdHash: 675153879
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -5390,18 +5389,6 @@ MonoBehaviour:
   maxLineLength: 5
   curveHeight: 2.5
   resolution: 20
---- !u!114 &-6765276601428658895
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6615988121713394588}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb68d80f2cce75745887ff42ad47f25c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &8828609184466402328
 MonoBehaviour:
   m_ObjectHideFlags: 0

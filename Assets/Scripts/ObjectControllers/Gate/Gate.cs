@@ -1,7 +1,3 @@
-using System;
-using UnityEditor.Overlays;
-using UnityEngine;
-
 /// <summary>
 /// Represents a gate object that can be opened and closed.
 /// </summary>

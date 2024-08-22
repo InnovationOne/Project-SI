@@ -35,7 +35,7 @@ public class ItemSpawnManager : NetworkBehaviour {
     /// <param name="useInventoryPosition">Whether to use the inventory position for spawning.</param>
     /// <param name="spreadType">The type of spread for the spawned items.</param>
     [ServerRpc(RequireOwnership = false)]
-    public void SpawnItemServerRpc(ItemSlot itemSlot, Vector3 initialPosition, Vector3 motionDirection, bool useInventoryPosition = false, SpreadType spreadType = SpreadType.None) {
+    public void SpawnItemServerRpc(ItemSlot itemSlot, Vector2 initialPosition, Vector2 motionDirection, bool useInventoryPosition = false, SpreadType spreadType = SpreadType.None) {
         Vector3 spawnPosition = useInventoryPosition ? new Vector3(initialPosition.x, initialPosition.y, -5f) : TilemapManager.Instance.AlignPositionToGridCenter(initialPosition);
 
         for (int i = 0; i < itemSlot.Amount; i++) {

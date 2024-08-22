@@ -1,8 +1,5 @@
-// This interface defines things that can be damaged
+using UnityEngine;
+
 public interface IDamageable {
-    public void CalculateDamage(ref int damage);
-
-    public void ApplyDamage(int damage);
-
-    public void CheckState();
+    public void TakeDamage(Vector2 attackerPosition, int amount, WeaponSO.DamageTypes type);
 }

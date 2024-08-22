@@ -243,6 +243,21 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
     private void PauseMenuController_OnTogglePauseMenu() => OnToggleToolbelt?.Invoke();
 
 
+    /// <summary>
+    /// Sets the toolbelt size.
+    /// </summary>
+    /// <param name="toolbeltSizeId">The new inventory size.</param>
+    public void SetToolbeltSize(int toolbeltSizeId) {
+        if (toolbeltSizeId > ToolbeltSizes.Length - 1) {
+            Debug.LogError("Can't set inventorySize higher than MAX_INVENTORY_SIZE");
+            return;
+        }
+
+        _toolbeltSize = ToolbeltSizes[toolbeltSizeId];
+        InventoryUI.Instance.InventoryOrToolbeltSizeChanged();
+    }
+
+
     #region Save & Load
     public void SavePlayer(PlayerData playerData) {
         playerData.LastSelectedToolbeltSlot = _selectedToolSlot;

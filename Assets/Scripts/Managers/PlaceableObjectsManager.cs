@@ -288,14 +288,16 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="gridPosition">The grid position of the placeable object to destroy.</param>
     /// <param name="serverRpcParams">Optional parameters for the server RPC.</param>
     [ServerRpc(RequireOwnership = false)]
-    public void DestroyObjectServerRPC(Vector3Int gridPosition, ServerRpcParams serverRpcParams = default) {
+    public void DestroyObjectServerRPC(Vector3Int gridPosition, bool playAnimation = true) {
         if (!_poContainer.PlaceableObjects.ContainsKey(gridPosition)) {
             return;
         }
 
-        if (POContainer[gridPosition].Prefab.TryGetComponent<Rose>(out var roseComponent)) {
+        if (playAnimation && POContainer[gridPosition].Prefab.TryGetComponent<Rose>(out var roseComponent)) {
             roseComponent.OnObjectDestroyed();
             StartCoroutine(DestroyAfterAnimation(roseComponent, gridPosition));
+        } else {
+            DestroyObjectClientRPC(gridPosition);
         }
     }
 

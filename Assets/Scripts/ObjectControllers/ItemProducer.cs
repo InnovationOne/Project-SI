@@ -40,6 +40,8 @@ public class ItemProducer : Interactable, IObjectDataPersistence {
             if (_timer == 0f) {
                 GetComponent<ObjectVisual>().SetSprite(ProducerSO.InactiveSprite);
             }
+        } else {
+            ResetTimer();
         }
     }
 

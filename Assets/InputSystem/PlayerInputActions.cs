@@ -272,45 +272,18 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""CheatConsole"",
+                    ""name"": ""LeftControl"",
                     ""type"": ""Button"",
-                    ""id"": ""144c53cb-25c0-41e5-b659-9370647ee1a8"",
+                    ""id"": ""d93ef8b4-c964-426a-90ec-bb43fd2db688"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Enter"",
+                    ""name"": ""DebugConsole"",
                     ""type"": ""Button"",
-                    ""id"": ""36414c15-293e-447c-95fd-e437a0419b66"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""ArrowUp"",
-                    ""type"": ""Button"",
-                    ""id"": ""0c25133c-de17-4393-ba79-efbe1d797c67"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""ArrowDown"",
-                    ""type"": ""Button"",
-                    ""id"": ""4cfaa4ec-18d0-41e4-9575-0a3fe13babce"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""LeftControl"",
-                    ""type"": ""Button"",
-                    ""id"": ""d93ef8b4-c964-426a-90ec-bb43fd2db688"",
+                    ""id"": ""fa7bc24b-df2f-4787-9f84-f5df46b615f0"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -826,67 +799,23 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""9c4768ac-be2c-4a44-a7af-8273b305032c"",
-                    ""path"": ""<Keyboard>/f1"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard"",
-                    ""action"": ""CheatConsole"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""3e9ff987-fa3c-42ca-99cf-9e948117210e"",
-                    ""path"": ""<Keyboard>/enter"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Enter"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""4539feef-074e-44f5-8a22-f2b94466b3d1"",
-                    ""path"": ""<Keyboard>/numpadEnter"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Enter"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""26b4e2dd-9fb6-4ae9-a46f-87a885e918a9"",
-                    ""path"": ""<Keyboard>/upArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ArrowUp"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""0815ba96-83e5-4d9d-b48b-6c6e005884f6"",
-                    ""path"": ""<Keyboard>/downArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""ArrowDown"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""130ea143-6e6f-49d3-bc27-4e27e3925ffb"",
                     ""path"": ""<Keyboard>/leftCtrl"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""LeftControl"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6c921e44-032d-44db-a529-aecc75b26d08"",
+                    ""path"": ""<Keyboard>/f3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""DebugConsole"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1019,6 +948,125 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""DebugConsole"",
+            ""id"": ""3d5c2138-c042-4ac6-8499-a2d8daa8ff2e"",
+            ""actions"": [
+                {
+                    ""name"": ""CheatConsole"",
+                    ""type"": ""Button"",
+                    ""id"": ""98a53db1-5eff-4c6d-b635-328af30bdfbb"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Enter"",
+                    ""type"": ""Button"",
+                    ""id"": ""f28a399c-567f-4906-8f97-a3c6e75d2a9a"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ArrowUp"",
+                    ""type"": ""Button"",
+                    ""id"": ""dcce0a54-542b-447e-9956-b85711eca21f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ArrowDown"",
+                    ""type"": ""Button"",
+                    ""id"": ""81df1828-c897-414d-8906-f62d72132215"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DebugConsole"",
+                    ""type"": ""Button"",
+                    ""id"": ""68cd84e7-6300-428a-8b16-d35fe3ffd76b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""afc21a31-93f0-48fe-b864-76926f6c331a"",
+                    ""path"": ""<Keyboard>/f1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""CheatConsole"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""eaef7a3c-fe24-4826-be4b-d2feff50ecc3"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""ArrowUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""e8843d09-01a2-4c84-ad63-07326290dfa0"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""ArrowDown"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4b1bb6e8-453d-4b55-952b-fd8e1606e448"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""Enter"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""5b806d2b-0266-4d4f-81d0-954fef3ed10c"",
+                    ""path"": ""<Keyboard>/numpadEnter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""Enter"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9f11999f-1ad4-47ee-a41b-7eed675a897f"",
+                    ""path"": ""<Keyboard>/f3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""DebugConsole"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -1069,11 +1117,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_LeftClick = m_Player.FindAction("LeftClick", throwIfNotFound: true);
         m_Player_RightClick = m_Player.FindAction("RightClick", throwIfNotFound: true);
         m_Player_PointerPosition = m_Player.FindAction("PointerPosition", throwIfNotFound: true);
-        m_Player_CheatConsole = m_Player.FindAction("CheatConsole", throwIfNotFound: true);
-        m_Player_Enter = m_Player.FindAction("Enter", throwIfNotFound: true);
-        m_Player_ArrowUp = m_Player.FindAction("ArrowUp", throwIfNotFound: true);
-        m_Player_ArrowDown = m_Player.FindAction("ArrowDown", throwIfNotFound: true);
         m_Player_LeftControl = m_Player.FindAction("LeftControl", throwIfNotFound: true);
+        m_Player_DebugConsole = m_Player.FindAction("DebugConsole", throwIfNotFound: true);
         // Fishing
         m_Fishing = asset.FindActionMap("Fishing", throwIfNotFound: true);
         m_Fishing_Button1 = m_Fishing.FindAction("Button 1", throwIfNotFound: true);
@@ -1082,12 +1127,20 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Fishing_Button4 = m_Fishing.FindAction("Button 4", throwIfNotFound: true);
         m_Fishing_Button5 = m_Fishing.FindAction("Button 5", throwIfNotFound: true);
         m_Fishing_Button6 = m_Fishing.FindAction("Button 6", throwIfNotFound: true);
+        // DebugConsole
+        m_DebugConsole = asset.FindActionMap("DebugConsole", throwIfNotFound: true);
+        m_DebugConsole_CheatConsole = m_DebugConsole.FindAction("CheatConsole", throwIfNotFound: true);
+        m_DebugConsole_Enter = m_DebugConsole.FindAction("Enter", throwIfNotFound: true);
+        m_DebugConsole_ArrowUp = m_DebugConsole.FindAction("ArrowUp", throwIfNotFound: true);
+        m_DebugConsole_ArrowDown = m_DebugConsole.FindAction("ArrowDown", throwIfNotFound: true);
+        m_DebugConsole_DebugConsole = m_DebugConsole.FindAction("DebugConsole", throwIfNotFound: true);
     }
 
     ~@PlayerInputActions()
     {
         Debug.Assert(!m_Player.enabled, "This will cause a leak and performance issues, PlayerInputActions.Player.Disable() has not been called.");
         Debug.Assert(!m_Fishing.enabled, "This will cause a leak and performance issues, PlayerInputActions.Fishing.Disable() has not been called.");
+        Debug.Assert(!m_DebugConsole.enabled, "This will cause a leak and performance issues, PlayerInputActions.DebugConsole.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -1176,11 +1229,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_LeftClick;
     private readonly InputAction m_Player_RightClick;
     private readonly InputAction m_Player_PointerPosition;
-    private readonly InputAction m_Player_CheatConsole;
-    private readonly InputAction m_Player_Enter;
-    private readonly InputAction m_Player_ArrowUp;
-    private readonly InputAction m_Player_ArrowDown;
     private readonly InputAction m_Player_LeftControl;
+    private readonly InputAction m_Player_DebugConsole;
     public struct PlayerActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -1212,11 +1262,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @LeftClick => m_Wrapper.m_Player_LeftClick;
         public InputAction @RightClick => m_Wrapper.m_Player_RightClick;
         public InputAction @PointerPosition => m_Wrapper.m_Player_PointerPosition;
-        public InputAction @CheatConsole => m_Wrapper.m_Player_CheatConsole;
-        public InputAction @Enter => m_Wrapper.m_Player_Enter;
-        public InputAction @ArrowUp => m_Wrapper.m_Player_ArrowUp;
-        public InputAction @ArrowDown => m_Wrapper.m_Player_ArrowDown;
         public InputAction @LeftControl => m_Wrapper.m_Player_LeftControl;
+        public InputAction @DebugConsole => m_Wrapper.m_Player_DebugConsole;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1307,21 +1354,12 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @PointerPosition.started += instance.OnPointerPosition;
             @PointerPosition.performed += instance.OnPointerPosition;
             @PointerPosition.canceled += instance.OnPointerPosition;
-            @CheatConsole.started += instance.OnCheatConsole;
-            @CheatConsole.performed += instance.OnCheatConsole;
-            @CheatConsole.canceled += instance.OnCheatConsole;
-            @Enter.started += instance.OnEnter;
-            @Enter.performed += instance.OnEnter;
-            @Enter.canceled += instance.OnEnter;
-            @ArrowUp.started += instance.OnArrowUp;
-            @ArrowUp.performed += instance.OnArrowUp;
-            @ArrowUp.canceled += instance.OnArrowUp;
-            @ArrowDown.started += instance.OnArrowDown;
-            @ArrowDown.performed += instance.OnArrowDown;
-            @ArrowDown.canceled += instance.OnArrowDown;
             @LeftControl.started += instance.OnLeftControl;
             @LeftControl.performed += instance.OnLeftControl;
             @LeftControl.canceled += instance.OnLeftControl;
+            @DebugConsole.started += instance.OnDebugConsole;
+            @DebugConsole.performed += instance.OnDebugConsole;
+            @DebugConsole.canceled += instance.OnDebugConsole;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -1407,21 +1445,12 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @PointerPosition.started -= instance.OnPointerPosition;
             @PointerPosition.performed -= instance.OnPointerPosition;
             @PointerPosition.canceled -= instance.OnPointerPosition;
-            @CheatConsole.started -= instance.OnCheatConsole;
-            @CheatConsole.performed -= instance.OnCheatConsole;
-            @CheatConsole.canceled -= instance.OnCheatConsole;
-            @Enter.started -= instance.OnEnter;
-            @Enter.performed -= instance.OnEnter;
-            @Enter.canceled -= instance.OnEnter;
-            @ArrowUp.started -= instance.OnArrowUp;
-            @ArrowUp.performed -= instance.OnArrowUp;
-            @ArrowUp.canceled -= instance.OnArrowUp;
-            @ArrowDown.started -= instance.OnArrowDown;
-            @ArrowDown.performed -= instance.OnArrowDown;
-            @ArrowDown.canceled -= instance.OnArrowDown;
             @LeftControl.started -= instance.OnLeftControl;
             @LeftControl.performed -= instance.OnLeftControl;
             @LeftControl.canceled -= instance.OnLeftControl;
+            @DebugConsole.started -= instance.OnDebugConsole;
+            @DebugConsole.performed -= instance.OnDebugConsole;
+            @DebugConsole.canceled -= instance.OnDebugConsole;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -1525,6 +1554,84 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         }
     }
     public FishingActions @Fishing => new FishingActions(this);
+
+    // DebugConsole
+    private readonly InputActionMap m_DebugConsole;
+    private List<IDebugConsoleActions> m_DebugConsoleActionsCallbackInterfaces = new List<IDebugConsoleActions>();
+    private readonly InputAction m_DebugConsole_CheatConsole;
+    private readonly InputAction m_DebugConsole_Enter;
+    private readonly InputAction m_DebugConsole_ArrowUp;
+    private readonly InputAction m_DebugConsole_ArrowDown;
+    private readonly InputAction m_DebugConsole_DebugConsole;
+    public struct DebugConsoleActions
+    {
+        private @PlayerInputActions m_Wrapper;
+        public DebugConsoleActions(@PlayerInputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @CheatConsole => m_Wrapper.m_DebugConsole_CheatConsole;
+        public InputAction @Enter => m_Wrapper.m_DebugConsole_Enter;
+        public InputAction @ArrowUp => m_Wrapper.m_DebugConsole_ArrowUp;
+        public InputAction @ArrowDown => m_Wrapper.m_DebugConsole_ArrowDown;
+        public InputAction @DebugConsole => m_Wrapper.m_DebugConsole_DebugConsole;
+        public InputActionMap Get() { return m_Wrapper.m_DebugConsole; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(DebugConsoleActions set) { return set.Get(); }
+        public void AddCallbacks(IDebugConsoleActions instance)
+        {
+            if (instance == null || m_Wrapper.m_DebugConsoleActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_DebugConsoleActionsCallbackInterfaces.Add(instance);
+            @CheatConsole.started += instance.OnCheatConsole;
+            @CheatConsole.performed += instance.OnCheatConsole;
+            @CheatConsole.canceled += instance.OnCheatConsole;
+            @Enter.started += instance.OnEnter;
+            @Enter.performed += instance.OnEnter;
+            @Enter.canceled += instance.OnEnter;
+            @ArrowUp.started += instance.OnArrowUp;
+            @ArrowUp.performed += instance.OnArrowUp;
+            @ArrowUp.canceled += instance.OnArrowUp;
+            @ArrowDown.started += instance.OnArrowDown;
+            @ArrowDown.performed += instance.OnArrowDown;
+            @ArrowDown.canceled += instance.OnArrowDown;
+            @DebugConsole.started += instance.OnDebugConsole;
+            @DebugConsole.performed += instance.OnDebugConsole;
+            @DebugConsole.canceled += instance.OnDebugConsole;
+        }
+
+        private void UnregisterCallbacks(IDebugConsoleActions instance)
+        {
+            @CheatConsole.started -= instance.OnCheatConsole;
+            @CheatConsole.performed -= instance.OnCheatConsole;
+            @CheatConsole.canceled -= instance.OnCheatConsole;
+            @Enter.started -= instance.OnEnter;
+            @Enter.performed -= instance.OnEnter;
+            @Enter.canceled -= instance.OnEnter;
+            @ArrowUp.started -= instance.OnArrowUp;
+            @ArrowUp.performed -= instance.OnArrowUp;
+            @ArrowUp.canceled -= instance.OnArrowUp;
+            @ArrowDown.started -= instance.OnArrowDown;
+            @ArrowDown.performed -= instance.OnArrowDown;
+            @ArrowDown.canceled -= instance.OnArrowDown;
+            @DebugConsole.started -= instance.OnDebugConsole;
+            @DebugConsole.performed -= instance.OnDebugConsole;
+            @DebugConsole.canceled -= instance.OnDebugConsole;
+        }
+
+        public void RemoveCallbacks(IDebugConsoleActions instance)
+        {
+            if (m_Wrapper.m_DebugConsoleActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IDebugConsoleActions instance)
+        {
+            foreach (var item in m_Wrapper.m_DebugConsoleActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_DebugConsoleActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public DebugConsoleActions @DebugConsole => new DebugConsoleActions(this);
     private int m_KeyboardSchemeIndex = -1;
     public InputControlScheme KeyboardScheme
     {
@@ -1572,11 +1679,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnLeftClick(InputAction.CallbackContext context);
         void OnRightClick(InputAction.CallbackContext context);
         void OnPointerPosition(InputAction.CallbackContext context);
-        void OnCheatConsole(InputAction.CallbackContext context);
-        void OnEnter(InputAction.CallbackContext context);
-        void OnArrowUp(InputAction.CallbackContext context);
-        void OnArrowDown(InputAction.CallbackContext context);
         void OnLeftControl(InputAction.CallbackContext context);
+        void OnDebugConsole(InputAction.CallbackContext context);
     }
     public interface IFishingActions
     {
@@ -1586,5 +1690,13 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnButton4(InputAction.CallbackContext context);
         void OnButton5(InputAction.CallbackContext context);
         void OnButton6(InputAction.CallbackContext context);
+    }
+    public interface IDebugConsoleActions
+    {
+        void OnCheatConsole(InputAction.CallbackContext context);
+        void OnEnter(InputAction.CallbackContext context);
+        void OnArrowUp(InputAction.CallbackContext context);
+        void OnArrowDown(InputAction.CallbackContext context);
+        void OnDebugConsole(InputAction.CallbackContext context);
     }
 }

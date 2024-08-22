@@ -628,13 +628,20 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     #region Seed Crop Tile
     [ServerRpc(RequireOwnership = false)]
     public void SeedTileServerRpc(Vector3Int wantToSeedTilePosition, int itemId, ServerRpcParams serverRpcParams = default) {
-        // Check if the position is not plowed or is already seeded
-        if (!CropTileContainer.IsPositionPlowed(wantToSeedTilePosition) ||
-            CropTileContainer.IsPositionSeeded(wantToSeedTilePosition) ||
-            !(ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason)) {
-            // If it is, handle the client callback and return
-            HandleClientCallback(serverRpcParams, false);
-            return;
+        // Tree
+        if (!CropTileContainer.IsPositionPlowed(wantToSeedTilePosition) &&
+            !CropTileContainer.IsPositionSeeded(wantToSeedTilePosition) &&
+            (ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.IsTree) {
+            // Plant the tree
+        } else {
+            // Check if the position is not plowed or is already seeded
+            if (!CropTileContainer.IsPositionPlowed(wantToSeedTilePosition) ||
+                CropTileContainer.IsPositionSeeded(wantToSeedTilePosition) ||
+                !(ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason)) {
+                // If it is, handle the client callback and return
+                HandleClientCallback(serverRpcParams, false);
+                return;
+            }
         }
 
         // Handle the reduction of the item from the sender's inventory
@@ -1084,7 +1091,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
 
     #region Destroy Crop
-    
+
     [ServerRpc(RequireOwnership = false)]
     public void DestroyCropTileServerRpc(Vector3Int position, int usedEnergy, ToolSO.ToolTypes toolTypes, ServerRpcParams serverRpcParams = default) {
         bool success = HandleToolAction(position, toolTypes);
@@ -1240,4 +1247,22 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     }
     #endregion
 
+    #region Test
+    private void TestAliveCrops() {
+        int XCoordinate = 34, YCoordinate = -4;
+
+        for (int y = 0; y < 30; y++) { // Crop amount
+            for (int x = 0; x < 4; x++) { // Sprite amount
+                List<Vector3Int> position = new List<Vector3Int> {
+                    new Vector3Int(x + XCoordinate, y + YCoordinate)
+                };
+                PlowTilesServerRpc(JsonConvert.SerializeObject(position), 0);
+                SeedTileServerRpc(new Vector3Int(x + XCoordinate, y + YCoordinate), 0);
+            }
+        }
+
+
+
+    }
+    #endregion
 }

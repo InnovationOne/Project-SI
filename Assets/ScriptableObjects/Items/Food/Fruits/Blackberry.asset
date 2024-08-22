@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Blackberry
   m_EditorClassIdentifier: 
-  ItemID: 16
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Blackberry
   ItemIcon: {fileID: 21300000, guid: 552c720af5d15f642addcd0229d0bb03, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 105
-  CanRestoreHpOrEnergy: 1
-  LowestRarityRestoringHpAmount: 20
-  LowestRarityRestoringEnergyAmount: 45
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

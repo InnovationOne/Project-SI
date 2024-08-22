@@ -7,6 +7,7 @@ public class CropSO : ScriptableObject {
     [HideInInspector] public int CropID;
 
     [Header("Params")]
+    public bool IsTree;
     public int DaysToGrow;
     public ItemSO ItemToGrowAndSpawn;
     public bool IsHarvestedByScythe;
