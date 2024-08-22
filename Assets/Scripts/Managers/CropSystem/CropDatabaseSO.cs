@@ -1,26 +1,33 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(menuName = "Database/Crop Database")]
 public class CropDatabaseSO : ScriptableObject {
-    // Use a private field with a public property to encapsulate the list of crops.
-    [SerializeField] private List<CropSO> _crops = new List<CropSO>();
-    public IReadOnlyList<CropSO> Crops => _crops;
+    // List of crops in the database
+    [SerializeField] private List<CropSO> _crops = new();
+    // Cache to store crops by their IDs for fast lookup
+    private Dictionary<int, CropSO> _cache = new();
 
-    // This method assigns unique crop IDs to each crop in the list.
-    public void AssignCropIds() {
-        for (int i = 0; i < Crops.Count; i++) {
-            Crops[i].CropID = i;
+    /// <summary>
+    /// Initializes the crops in the crop database on Start() and cache all crops.
+    /// </summary>
+    public void InitializeCrops() {
+        for (int i = 0; i < _crops.Count; i++) {
+            _crops[i].CropID = i;
+            _cache[i] = _crops[i]; // Populate the cache
         }
     }
 
-    public CropSO GetCropSOFromCropId(int cropId) {
-        var crop = _crops.FirstOrDefault(c => c.CropID == cropId);
-        if (crop == null) {
-            Debug.LogError($"Crop with ID {cropId} does not exist!");
+    /// <summary>
+    /// Indexer to access crops by their IDs from the cache
+    /// </summary>
+    public CropSO this[int cropId] {
+        get {
+            if (_cache.TryGetValue(cropId, out var crop)) {
+                return crop;
+            } else {
+                throw new KeyNotFoundException($"Crop with ID {cropId} does not exist in the cache.");
+            }
         }
-        return crop;
     }
 }
-

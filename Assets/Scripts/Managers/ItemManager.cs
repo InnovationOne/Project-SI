@@ -6,7 +6,8 @@ using UnityEngine;
 public class ItemManager : NetworkBehaviour {
     public static ItemManager Instance { get; private set; }
 
-    public ItemDatabaseSO ItemDatabase;
+    [SerializeField] private ItemDatabaseSO _itemDatabase;
+    public ItemDatabaseSO ItemDatabase => _itemDatabase;
 
 
     private void Awake() {
@@ -16,7 +17,6 @@ public class ItemManager : NetworkBehaviour {
             Instance = this;
         }
 
-        ItemDatabase.SetItemID();
-        ItemDatabase.SetItemTypeID();
+        ItemDatabase.InitializeItems();
     }
 }

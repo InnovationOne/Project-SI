@@ -31,7 +31,7 @@ public class CollectWoodQuestStep : QuestStep {
     }
 
     private bool WoodCollected(int id) {
-        return id.Equals(_woodItem.ItemID);
+        return id.Equals(_woodItem.ItemId);
     }
 
     private void UpdateState() {

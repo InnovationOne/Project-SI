@@ -9,21 +9,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97d242d0e1c3aab48a10c6687bb45a21, type: 3}
+  m_Script: {fileID: 11500000, guid: 94572b29292d8ae458da9605807128f4, type: 3}
   m_Name: Sprinkler
   m_EditorClassIdentifier: 
-  ItemID: 0
-  ItemType: 3
-  ItemTypeID: 0
-  ItemName: 
+  ItemId: 0
+  ItemType: 4
+  ItemName: Sprinkler
   ItemIcon: {fileID: 0}
-  ItemInfoHoverText: 
-  IsStackable: 0
-  MaxStackableAmount: 1
+  IsStackable: 1
+  MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
-  CanBeSold: 0
+  CanBeSold: 1
   LowestRaritySellPrice: 0
-  IsPlaceableObject: 0
-  ObjectPrefabToPlace: {fileID: 0}
-  ItemSOToPickUpObject: {fileID: 0}
+  ItemInfoHoverText: 
+  LeftClickAction:
+  - {fileID: 11400000, guid: e5b4043eabb4dba4b9bd42c80b78d631, type: 2}
+  ObjectType: 6
+  ItemsToCraftList: []
+  ItemToPickUpObject: {fileID: 11400000, guid: 0455e7dd00e1df9479f2289b436f95bf, type: 2}
+  InactiveSprite: {fileID: 0}
+  ActiveSprite: {fileID: 0}
+  PolygonColliderPath:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  Area: 1

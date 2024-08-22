@@ -6,6 +6,7 @@ public class Store : Interactable {
 
     [SerializeField] public StoreVisual _storeVisual;
 
+    /*
     public void OnLeftClick(ItemSO itemSO) {
         for (int i = 0; i < _storeContainer.Items.Count; i++) {
             if (itemSO.ItemID == _storeContainer.Items[i].ItemID) {
@@ -25,7 +26,7 @@ public class Store : Interactable {
             }
         }
     }
-
+    */
     public override void Interact(Player player) {
         // Call the store UI
     }

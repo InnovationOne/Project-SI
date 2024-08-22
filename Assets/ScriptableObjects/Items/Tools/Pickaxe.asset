@@ -12,9 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bba8e0c7705831442842ff6a46903f08, type: 3}
   m_Name: Pickaxe
   m_EditorClassIdentifier: 
-  ItemID: 3
-  ItemType: 0
-  ItemTypeID: 3
+  ItemId: 0
+  ItemType: 1
   ItemName: Pickaxe
   ItemIcon: {fileID: 21300000, guid: 98cb2e1736b7d6c4fa9309f826c64ac4, type: 3}
   IsStackable: 0
@@ -35,8 +34,6 @@ MonoBehaviour:
   - {fileID: -586766198, guid: 593c87a9de97e254fab6e74c45fd4ef9, type: 3}
   - {fileID: 1491022199, guid: 593c87a9de97e254fab6e74c45fd4ef9, type: 3}
   - {fileID: -2112519248, guid: 593c87a9de97e254fab6e74c45fd4ef9, type: 3}
-  IsWeapon: 0
-  Damage: 0
   UsageOrDamageOnAction: 
   VolumeOrBiteRate: 
   CatchChance: 

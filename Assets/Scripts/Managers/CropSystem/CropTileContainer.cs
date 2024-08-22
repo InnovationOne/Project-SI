@@ -1,79 +1,103 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class CropTileContainer {
-    public List<CropTile> CropTiles { get; private set; }
+    private Dictionary<Vector3Int, CropTile> _cropTileMap = new Dictionary<Vector3Int, CropTile>();
+    public Dictionary<Vector3Int, CropTile> CropTileMap { get { return _cropTileMap; } }
 
-    public CropTileContainer() {
-        CropTiles = new List<CropTile>();
-    }
-
-    // Find a CropTile at a specific position.
+    
+    /// <summary>
+    /// Retrieves the CropTile at the specified position.
+    /// </summary>
+    /// <param name="position">The position of the CropTile.</param>
+    /// <returns>The CropTile at the specified position, or null if no CropTile exists at that position.</returns>
     public CropTile GetCropTileAtPosition(Vector3Int position) {
-        return CropTiles.Find(tile => tile.CropPosition == position);
+        _cropTileMap.TryGetValue(position, out CropTile tile);
+        return tile;
     }
+        
+    /// <summary>
+    /// Checks if a position is plowed in the crop tile map.
+    /// </summary>
+    /// <param name="position">The position to check.</param>
+    /// <returns>True if the position is plowed, false otherwise.</returns>
+    public bool IsPositionPlowed(Vector3Int position) => _cropTileMap.ContainsKey(position);
 
-    // Check if a position is plowed (a CropTile exists at that position).
-    public bool IsPositionPlowed(Vector3Int position) {
-        return GetCropTileAtPosition(position) != null;
-    }
-
-    // Check if a position is seeded (a CropTile exists with a growing crop at that position).
-    public bool IsPositionSeeded(Vector3Int position) {
-        return CropTiles.Any(tile => tile.CropPosition == position && tile.CropId >= 0);
-    }
-
-    // Checks if the position is fertilized with a specific fertilizer type.
+    /// <summary>
+    /// Checks if a given position is seeded with a crop.
+    /// </summary>
+    /// <param name="position">The position to check.</param>
+    /// <returns>True if the position is seeded with a crop, false otherwise.</returns>
+    public bool IsPositionSeeded(Vector3Int position) => _cropTileMap.TryGetValue(position, out CropTile tile) && tile.CropId >= 0;
+    
+    /// <summary>
+    /// Checks if a position can be fertilized with a specific item.
+    /// </summary>
+    /// <param name="position">The position to check.</param>
+    /// <param name="itemId">The ID of the fertilizer item.</param>
+    /// <returns>True if the position can be fertilized, false otherwise.</returns>
     public bool CanPositionBeFertilized(Vector3Int position, int itemId) {
-        FertilizerSO fertilizerSO = ItemManager.Instance.ItemDatabase.Items[itemId] as FertilizerSO;
-
-        // Check if the position can be fertilized
-        if (fertilizerSO.FertilizerType == FertilizerSO.FertilizerTypes.Water || CropTiles.Any(tile => tile.CropPosition == position && tile.CurrentGrowthTimer == 0f)) {
-            return fertilizerSO.FertilizerType switch {
-                FertilizerSO.FertilizerTypes.GrowthTime => CropTiles.Any(tile => tile.CropPosition == position && tile.GrowthTimeScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1),
-                FertilizerSO.FertilizerTypes.RegrowthTime => CropTiles.Any(tile => tile.CropPosition == position && tile.RegrowthTimeScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1),
-                FertilizerSO.FertilizerTypes.Quality => CropTiles.Any(tile => tile.CropPosition == position && tile.QualityScaler < fertilizerSO.FertilizerBonusValue),
-                FertilizerSO.FertilizerTypes.Quantity => CropTiles.Any(tile => tile.CropPosition == position && tile.QuantityScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1),
-                FertilizerSO.FertilizerTypes.Water => CropTiles.Any(tile => tile.CropPosition == position && tile.WaterScaler < (fertilizerSO.FertilizerBonusValue / 100)),
-                _ => throw new ArgumentOutOfRangeException(nameof(fertilizerSO.FertilizerType), "Unsupported fertilizer type"),
-            };
-        }
-
-        return false;
-    }
-
-    // Try to add a CropTile to the container. Returns true if added, false otherwise.
-    public bool TryAddCropTileToContainer(CropTile crop) {
-        if (IsPositionPlowed(crop.CropPosition)) {
-            Debug.LogError("Cannot add a cropTile that has already been added to the crop tile container!");
+        if (!_cropTileMap.TryGetValue(position, out CropTile cropTile)) {
             return false;
         }
 
-        CropTiles.Add(crop);
+        if (ItemManager.Instance.ItemDatabase[itemId] is not FertilizerSO fertilizerSO) {
+            throw new ArgumentException("Invalid item ID for fertilizer.", nameof(itemId));
+        }
+
+        return fertilizerSO.FertilizerType switch {
+            FertilizerSO.FertilizerTypes.GrowthTime => cropTile.GrowthTimeScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1,
+            FertilizerSO.FertilizerTypes.RegrowthTime => cropTile.RegrowthTimeScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1 && cropTile.IsRegrowing,
+            FertilizerSO.FertilizerTypes.Quality => cropTile.QualityScaler < fertilizerSO.FertilizerBonusValue,
+            FertilizerSO.FertilizerTypes.Quantity => cropTile.QuantityScaler < (fertilizerSO.FertilizerBonusValue / 100) + 1,
+            FertilizerSO.FertilizerTypes.Water => cropTile.WaterScaler < (fertilizerSO.FertilizerBonusValue / 100),
+            _ => throw new NotSupportedException("Unsupported fertilizer type"),
+        };
+    }
+
+    /// <summary>
+    /// Adds a CropTile to the container.
+    /// </summary>
+    /// <param name="crop">The CropTile to add.</param>
+    /// <returns>True if the CropTile was successfully added, false otherwise.</returns>
+    public bool AddCropTileToContainer(CropTile crop) {
+        if (IsPositionPlowed(crop.CropPosition)) {
+            throw new InvalidOperationException("A CropTile at this position has already been added to the container.");
+        }
+
+        _cropTileMap.Add(crop.CropPosition, crop);
         return true;
     }
 
-    // Remove a CropTile from the container.
+    /// <summary>
+    /// Removes a crop tile from the container.
+    /// </summary>
+    /// <param name="crop">The crop tile to remove.</param>
+    /// <exception cref="KeyNotFoundException">Thrown if the crop tile is not found in the container.</exception>
     public void RemoveCropTileFromContainer(CropTile crop) {
         if (!IsPositionPlowed(crop.CropPosition)) {
-            Debug.LogError("The crop you want to remove isn't in the CropTileContainer");
-            return;
+            throw new KeyNotFoundException("The crop you want to remove isn't in the CropTileContainer.");
         }
 
-        CropTiles.Remove(crop);
+        _cropTileMap.Remove(crop.CropPosition);
     }
 
-    // Clear all CropTiles from the container.
+    /// <summary>
+    /// Clears the crop tile container by removing all crop tiles from the map.
+    /// </summary>
     public void ClearCropTileContainer() {
-        CropTiles.Clear();
+        _cropTileMap.Clear();
     }
 
-    public List<string> SerializeCropTileContainer(List<CropTile> cropTiles) {
+    /// <summary>
+    /// Serializes the crop tile container into a list of JSON strings.
+    /// </summary>
+    /// <returns>A list of JSON strings representing the crop tile container.</returns>
+    public List<string> SerializeCropTileContainer() {
         var cropsContainerJSON = new List<string>();
-        foreach (var cropTile in cropTiles) {
+        foreach (var cropTile in _cropTileMap.Values) {
             var cropTileData = new CropTileData {
                 CropId = cropTile.CropId,
                 CropPosition = cropTile.CropPosition,
@@ -82,14 +106,24 @@ public class CropTileContainer {
                 Damage = cropTile.Damage,
                 SpriteRendererXPosition = cropTile.SpriteRendererOffset.x,
                 SpriteRendererYPosition = cropTile.SpriteRendererOffset.y,
+                InGreenhouse = cropTile.InGreenhouse,
                 SpriteRendererXScale = cropTile.SpriteRendererXScale,
+                GrowthTimeScaler = cropTile.GrowthTimeScaler,
+                RegrowthTimeScaler = cropTile.RegrowthTimeScaler,
+                QualityScaler = cropTile.QualityScaler,
+                QuantityScaler = cropTile.QuantityScaler,
+                WaterScaler = cropTile.WaterScaler,
             };
-            var cropTileJSON = JsonConvert.SerializeObject(cropTileData);
-            cropsContainerJSON.Add(cropTileJSON);
+            cropsContainerJSON.Add(JsonConvert.SerializeObject(cropTileData));
         }
         return cropsContainerJSON;
     }
 
+    /// <summary>
+    /// Deserializes a JSON string into a list of CropTile objects.
+    /// </summary>
+    /// <param name="json">The JSON string to deserialize.</param>
+    /// <returns>A list of CropTile objects.</returns>
     public List<CropTile> DeserializeCropTileContainer(string json) {
         var cropTiles = new List<CropTile>();
         var cropTileContainerJSON = JsonConvert.DeserializeObject<List<string>>(json);
@@ -97,14 +131,26 @@ public class CropTileContainer {
             var cropTileData = JsonConvert.DeserializeObject<CropTileData>(cropTilesJSON);
             cropTiles.Add(new CropTile {
                 CropId = cropTileData.CropId,
-                CropPosition = cropTileData.CropPosition,
+                CropPosition = new Vector3Int(
+                    (int)cropTileData.CropPosition.x, 
+                    (int)cropTileData.CropPosition.y, 
+                    (int)cropTileData.CropPosition.z),
                 CurrentGrowthTimer = cropTileData.CurrentGrowTimer,
                 IsRegrowing = cropTileData.IsRegrowing,
                 Damage = cropTileData.Damage,
-                SpriteRendererOffset = new Vector3(cropTileData.SpriteRendererXPosition, cropTileData.SpriteRendererYPosition, -5),
+                SpriteRendererOffset = new Vector2(
+                    cropTileData.SpriteRendererXPosition, 
+                    cropTileData.SpriteRendererYPosition),
+                InGreenhouse = cropTileData.InGreenhouse,
                 SpriteRendererXScale = cropTileData.SpriteRendererXScale,
+                GrowthTimeScaler = cropTileData.GrowthTimeScaler,
+                RegrowthTimeScaler = cropTileData.RegrowthTimeScaler,
+                QualityScaler = cropTileData.QualityScaler,
+                QuantityScaler = cropTileData.QuantityScaler,
+                WaterScaler = cropTileData.WaterScaler,
             });
         }
+
         return cropTiles;
     }
 }

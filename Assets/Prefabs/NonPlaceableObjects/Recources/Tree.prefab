@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4948398707952232945}
   - component: {fileID: 4948398707952232947}
+  - component: {fileID: -3642706895242882101}
   - component: {fileID: 4948398707952232944}
   - component: {fileID: 194746138}
-  - component: {fileID: -3642706895242882101}
   m_Layer: 0
   m_Name: Tree
   m_TagString: Untagged
@@ -83,6 +83,27 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.8, y: 0.8}
   m_EdgeRadius: 0
+--- !u!114 &-3642706895242882101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4948398707952232940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 4222999195
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!114 &4948398707952232944
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -107,13 +128,6 @@ MonoBehaviour:
   _shakeAmountY: 0.01
   _timeBetweenShakes: 0.03
   _resourceNodeHighlight: {fileID: 2489229548638475500}
-  _hitSound:
-    Guid:
-      Data1: -1447766655
-      Data2: 1128049754
-      Data3: 1992628630
-      Data4: -418733698
-    Path: event:/Cut Tree
 --- !u!114 &194746138
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -128,26 +142,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _isObjectStationary: 1
   _objectCollider2D: {fileID: 0}
---- !u!114 &-3642706895242882101
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4948398707952232940}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 951099334
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
 --- !u!1 &5582565660942259448
 GameObject:
   m_ObjectHideFlags: 0
@@ -197,6 +191,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -281,6 +278,9 @@ SpriteRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 0
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

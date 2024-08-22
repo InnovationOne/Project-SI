@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Red Bell Pepper
   m_EditorClassIdentifier: 
-  ItemID: 71
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Red Bell Pepper
   ItemIcon: {fileID: 21300000, guid: f381a358a2d43d7498d14006f0713741, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 105
-  CanRestoreHpOrEnergy: 1
-  LowestRarityRestoringHpAmount: 11
-  LowestRarityRestoringEnergyAmount: 25
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

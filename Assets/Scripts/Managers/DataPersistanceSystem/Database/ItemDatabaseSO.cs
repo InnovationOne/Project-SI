@@ -1,52 +1,36 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 // This script is for a database of items
 [CreateAssetMenu(menuName = "Database/Item Database")]
 public class ItemDatabaseSO : ScriptableObject {
-    [Header("All items in the game, item id = place in list")]
-    public List<ItemSO> Items;
+    // List of items in the database
+    [SerializeField] private List<ItemSO> _items = new();
+    // Cache to store items by their IDs for fast lookup
+    private Dictionary<int, ItemSO> _cache = new();
 
-    public void SetItemID() {
-        Items = Items.Select((item, index) => {
-            item.ItemID = index;
-            return item;
-        }).ToList();
-    }
-
-    public void SetItemTypeID() {
-        var sortedItems = Items
-            .OrderBy(x => x.ItemType)
-            .ThenBy(x => x.ItemName)
-            .ToList();
-
-        // Set the itemTypeId for each item
-        int runningCount = 0;
-        ItemTypes currentItemType = sortedItems[0].ItemType;
-        string currentItemName = sortedItems[0].ItemName;
-
-        for (int i = 0; i < sortedItems.Count; i++) {
-            // If the item names no longer match, set the new item name and up the running count
-            if (sortedItems[i].ItemName != currentItemName) {
-                currentItemName = sortedItems[i].ItemName;
-                runningCount++;
-            }
-
-            // If the item type no longer match, set the new item type and reset the running count
-            if (sortedItems[i].ItemType != currentItemType) {
-                currentItemType = sortedItems[i].ItemType;
-                runningCount = 0;
-            }
-
-            // Set the item type id to the item where the item id matches
-            Items.Where(x => x.ItemID == sortedItems[i].ItemID)
-                .FirstOrDefault()
-                .ItemTypeID = runningCount;
+    /// <summary>
+    /// Initializes the items in the items database on Start() and cache all items.
+    /// </summary>
+    public void InitializeItems() {
+        for (int i = 0; i < _items.Count; i++) {
+            _items[i].ItemId = i;
+            _cache[i] = _items[i]; // Populate the cache
         }
     }
 
-    public ItemSO GetItemFromItemId(int itemID) {
-        return Items.Find(itemSO => itemSO.ItemID == itemID);
+    /// <summary>
+    /// Indexer to access items by their IDs from the cache
+    /// </summary>
+    public ItemSO this[int itemId] {
+        get {
+            if (_cache.TryGetValue(itemId, out var item)) {
+                return item;
+            } else if (itemId == -1) {
+                return null;            
+            } else {
+                throw new KeyNotFoundException($"Item with ID {itemId} does not exist in the cache.");
+            }
+        }
     }
 }

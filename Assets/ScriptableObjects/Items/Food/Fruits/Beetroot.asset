@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Beetroot
   m_EditorClassIdentifier: 
-  ItemID: 13
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Beetroot
   ItemIcon: {fileID: 21300000, guid: 56a1d636f1db5ef4ea16456fc5b40698, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 365
-  CanRestoreHpOrEnergy: 1
-  LowestRarityRestoringHpAmount: 16
-  LowestRarityRestoringEnergyAmount: 35
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

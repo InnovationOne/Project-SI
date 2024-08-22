@@ -1,15 +1,14 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 // This script defines a resource and how it can be hit
-public enum ResourceNodeType {
-    Tree, 
-    Ore,
-}
-
 [CreateAssetMenu(menuName = "Tool Action/Gather Resource Node")]
 public class GatherResourceNodeSO : ToolActionSO {
+    public enum ResourceNodeType {
+        Tree,
+        Ore,
+    }
+
     [Header("Nodes the tool can hit")]
     [SerializeField] private List<ResourceNodeType> canHitNodesOfType;
 
@@ -19,13 +18,8 @@ public class GatherResourceNodeSO : ToolActionSO {
             ResourceNode resourceNode = collider2D.GetComponent<ResourceNode>();
             
             if (resourceNode != null && resourceNode.CanHitResourceNodeType(canHitNodesOfType)) {
-                resourceNode.HitResourceNode((itemSlot.Item as ToolSO).UsageOrDamageOnAction[itemSlot.RarityID - 1]);
-
-                //return true;
+                resourceNode.HitResourceNode((ItemManager.Instance.ItemDatabase[itemSlot.ItemId] as ToolSO).UsageOrDamageOnAction[itemSlot.RarityId - 1]);
             }
-            
         }
-
-        //return false;
     }
 }

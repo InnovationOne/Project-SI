@@ -10,7 +10,7 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
 
     public Vector2 LastMotionDirection { get; private set; } = Vector2.right;
 
-    [Header("Debug: Params")]
+    [Header("Movement Settings")]
     [SerializeField] private float _maxWalkSpeed = 1f;
     [SerializeField] private float _minWalkSpeed = 0.2f;
     [SerializeField] private float _maxRunSpeed = 3f;
@@ -41,7 +41,7 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
 
     private void Start() {
         _rigidBody2D = GetComponent<Rigidbody2D>();
-        _animator = GetComponent<Animator>();
+        _animator = GetComponentInChildren<Animator>();
         _inputManager = InputManager.Instance;
 
         _inputManager.OnRunAction += InputManager_OnRunAction;
@@ -141,9 +141,9 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
         _canMoveAndTurn = canMoveAndTurn;
     }
 
-    public void SetMoveAndRunSpeed(bool walkFast) {
-        _ = walkFast ? _currentWalkSpeed = _maxWalkSpeed : _currentWalkSpeed = _minWalkSpeed;
-        _ = walkFast ? _currentRunSpeed = _maxRunSpeed : _currentRunSpeed = _minRunSpeed;
+    public void ChangeMoveSpeed(bool s) {
+        _ = s ? _currentWalkSpeed = _maxWalkSpeed : _currentWalkSpeed = _minWalkSpeed;
+        _ = s ? _currentRunSpeed = _maxRunSpeed : _currentRunSpeed = _minRunSpeed;
     }
 
     private void UpdateSound() {

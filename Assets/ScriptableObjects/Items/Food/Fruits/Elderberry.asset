@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Elderberry
   m_EditorClassIdentifier: 
-  ItemID: 31
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Elderberry
   ItemIcon: {fileID: 21300000, guid: b8c1721458a58d34fb8bc716289b9d8b, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 160
-  CanRestoreHpOrEnergy: 1
-  LowestRarityRestoringHpAmount: 20
-  LowestRarityRestoringEnergyAmount: 45
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

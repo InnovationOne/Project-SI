@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Chicory
   m_EditorClassIdentifier: 
-  ItemID: 24
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Chicory
   ItemIcon: {fileID: 21300000, guid: 62e7573ff2de83a42abb5f90c63c3a2f, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 170
-  CanRestoreHpOrEnergy: 1
-  LowestRarityRestoringHpAmount: 7
-  LowestRarityRestoringEnergyAmount: 15
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

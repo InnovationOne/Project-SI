@@ -7,8 +7,8 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider2D))]
 public class ResourceNode : NetworkBehaviour {
     [Header("Node Settings")]
-    [SerializeField] private ResourceNodeType _nodeType;
-    [SerializeField] private SpreadType _spreadType;
+    [SerializeField] private GatherResourceNodeSO.ResourceNodeType _nodeType;
+    [SerializeField] private ItemSpawnManager.SpreadType _spreadType;
     [SerializeField] private int _startingHP;
     [SerializeField] private int _minimumToolRarity;
 
@@ -25,7 +25,6 @@ public class ResourceNode : NetworkBehaviour {
 
     [Header("Visual Settings")]
     [SerializeField] private SpriteRenderer _resourceNodeHighlight;
-
 
     private int _currentHp;
     private BoxCollider2D _boxCollider2D;
@@ -47,7 +46,7 @@ public class ResourceNode : NetworkBehaviour {
     }
 
     public void HitResourceNode(int damage) {
-        if (PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().RarityID > _minimumToolRarity) {
+        if (PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().RarityId > _minimumToolRarity) {
             Debug.Log("Tool Rarity to low");
             // Play bounce back animation
 
@@ -65,7 +64,12 @@ public class ResourceNode : NetworkBehaviour {
 
         int dropCount = Random.Range(_minDropCount, _maxDropCount);
         Vector3 position = new(transform.position.x + _boxCollider2D.offset.x, transform.position.y + _boxCollider2D.offset.y);
-        ItemSpawnManager.Instance.SpawnItemAtPosition(position, PlayerMovementController.LocalInstance.LastMotionDirection, _itemSO, dropCount, _rarityID, _spreadType);
+        ItemSpawnManager.Instance.SpawnItemServerRpc(
+            itemSlot: new ItemSlot(_itemSO.ItemId, dropCount, _rarityID),
+            initialPosition: position, 
+            motionDirection: PlayerMovementController.LocalInstance.LastMotionDirection, 
+            spreadType: _spreadType);
+
 
         DestroyGameObjectServerRpc();
     }
@@ -86,7 +90,7 @@ public class ResourceNode : NetworkBehaviour {
         if (_currentHp > 0) {
             StartCoroutine(ShakeAfterHit());
 
-            if (_nodeType == ResourceNodeType.Tree) {
+            if (_nodeType == GatherResourceNodeSO.ResourceNodeType.Tree) {
                 // ITEM OBEN AM BAUM SPAWNEN UND AUF DEN BODEN FALLEN LASSEN, DABEI SOLL DAS ITEM NOCH EINMAL HOCHSPRINGEN
                 // Z.B. AUCH BIENENNEST
             }
@@ -112,7 +116,7 @@ public class ResourceNode : NetworkBehaviour {
         }
     }
 
-    public bool CanHitResourceNodeType(List<ResourceNodeType> canBeHit) {
+    public bool CanHitResourceNodeType(List<GatherResourceNodeSO.ResourceNodeType> canBeHit) {
         return canBeHit.Contains(_nodeType);
     }
 
@@ -122,10 +126,10 @@ public class ResourceNode : NetworkBehaviour {
 
     private void PlaySound() {
         switch (_nodeType) {
-            case ResourceNodeType.Tree:
+            case GatherResourceNodeSO.ResourceNodeType.Tree:
                 AudioManager.Instance.PlayOneShot(FMODEvents.Instance.HitTreeSFX, transform.position);
                 break;
-            case ResourceNodeType.Ore:
+            case GatherResourceNodeSO.ResourceNodeType.Ore:
                 // Play ore sound
                 break;
             default:

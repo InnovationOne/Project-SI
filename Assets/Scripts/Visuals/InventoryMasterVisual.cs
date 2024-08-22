@@ -30,7 +30,7 @@ public class InventoryMasterVisual : MonoBehaviour {
     public InventorySubPanels LastOpenPanel { get; private set; } = InventorySubPanels.none;
 
     [Header("Chest Panel")]
-    [SerializeField] private ChestPanel _chestPanel;
+    [SerializeField] private ChestUI _chestPanel;
 
     [Header("Store Panel")]
     [SerializeField] private StoreVisual _storePanel;
@@ -52,7 +52,7 @@ public class InventoryMasterVisual : MonoBehaviour {
                 CloseChestWithButton();
             } else if (_storePanel.gameObject.activeSelf) {
                 // Store
-                PlayerInteractController.LocalInstance.InteractAction();
+                //PlayerInteractController.LocalInstance.InteractAction();
             } else {
                 // Other
                 ToggleMasterPanel();
@@ -73,7 +73,7 @@ public class InventoryMasterVisual : MonoBehaviour {
         for (int i = 1; i < _subPanels.Length; i++) {
             _subPanels[i].SetActive(false);
         }
-        _chestPanel.gameObject.SetActive(false);
+        //_chestPanel.gameObject.SetActive(false);
         _storePanel.gameObject.SetActive(false);
         gameObject.SetActive(false);
     }
@@ -147,10 +147,10 @@ public class InventoryMasterVisual : MonoBehaviour {
 
     private void ToggleMasterPanel() {
         gameObject.SetActive(!gameObject.activeSelf);
-        ToolbeltPanel.Instance.ToggleToolbelt();
+        ToolbeltUI.Instance.ToggleToolbelt();
 
-        if (DragItemPanel.Instance.gameObject.activeSelf) {
-            PlayerItemDragAndDropController.LocalInstance.AddDragItemBackIntoBackpack(_subPanels[(int)InventorySubPanels.Inventory].GetComponent<InventoryPanel>().LastSlotId);
+        if (DragItemUI.Instance.gameObject.activeSelf) {
+            PlayerItemDragAndDropController.LocalInstance.AddDragItemBackIntoBackpack(_subPanels[(int)InventorySubPanels.Inventory].GetComponent<InventoryUI>().LastSlotId);
         }
     }
 

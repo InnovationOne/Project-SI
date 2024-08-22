@@ -11,16 +11,13 @@ public class SellChest : Interactable {
 
     public override void Interact(Player character) {
 
-        if (character.GetComponent<PlayerToolbeltController>().GetCurrentlySelectedToolbeltItemSlot().Item != null 
-            && character.GetComponent<PlayerToolbeltController>().GetCurrentlySelectedToolbeltItemSlot().Item.CanBeSold) {
+        if (ItemManager.Instance.ItemDatabase[PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId] != null 
+            && ItemManager.Instance.ItemDatabase[PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId].CanBeSold) {
 
-            _sellBoxContainer.ItemSlots.Add(character.GetComponent<PlayerToolbeltController>().GetCurrentlySelectedToolbeltItemSlot());
+            var itemSlot = character.GetComponent<PlayerToolbeltController>().GetCurrentlySelectedToolbeltItemSlot();
+            _sellBoxContainer.AddItem(itemSlot, false);
 
             character.GetComponent<PlayerToolbeltController>().ClearCurrentItemSlot();
         }
-    }
-
-    public override void ShowPossibleInteraction(bool show) {
-        _sellBoxHighlight.gameObject.SetActive(show);
     }
 }

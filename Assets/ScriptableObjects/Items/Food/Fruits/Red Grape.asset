@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Red Grape
   m_EditorClassIdentifier: 
-  ItemID: 73
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Red Grape
   ItemIcon: {fileID: 21300000, guid: 0b4a6aadf4ebeae468fd14b4349cea94, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 105
-  CanRestoreHpOrEnergy: 1
-  LowestRarityRestoringHpAmount: 18
-  LowestRarityRestoringEnergyAmount: 40
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

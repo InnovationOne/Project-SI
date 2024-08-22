@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using Unity.Netcode;
-using Unity.Services.Lobbies.Models;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class GameManager : NetworkBehaviour {
@@ -13,7 +11,6 @@ public class GameManager : NetworkBehaviour {
     [SerializeField] private Transform _playerPrefab;
 
     private Dictionary<ulong, bool> _playerSleepingDict;
-
 
     private void Awake() {
         if (Instance != null) {

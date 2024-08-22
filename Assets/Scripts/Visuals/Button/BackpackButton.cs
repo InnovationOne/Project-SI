@@ -15,7 +15,7 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
     [SerializeField] private TextMeshProUGUI _itemAmountText;
 
     private int _buttonIndex;
-    private ItemContainerPanel _itemPanel;
+    private ItemContainerUI _itemPanel;
     private ItemSlot _itemSlot;
 
 
@@ -34,15 +34,15 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
     public void SetButtonIndex(int buttonIndex) {
         _buttonIndex = buttonIndex;
 
-        _itemPanel = transform.GetComponentInParent<ItemContainerPanel>();
+        _itemPanel = transform.GetComponentInParent<ItemContainerUI>();
     }
 
     public void SetItemSlot(ItemSlot itemSlot, Sprite raritySprite) {
         _itemSlot = itemSlot;
         _itemIconImage.gameObject.SetActive(true);
-        _itemIconImage.sprite = _itemSlot.Item.ItemIcon;
+        _itemIconImage.sprite = ItemManager.Instance.ItemDatabase[_itemSlot.ItemId].ItemIcon;
 
-        if (_itemSlot.Item.IsStackable) {
+        if (ItemManager.Instance.ItemDatabase[_itemSlot.ItemId].IsStackable) {
             _itemAmountBackgroundImage.gameObject.SetActive(true);
             _itemAmountText.text = _itemSlot.Amount.ToString();
         } else {
@@ -51,7 +51,7 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
         }
 
         if (raritySprite != null) {
-            if (_itemSlot.Item.ItemType == ItemTypes.Tools) {
+            if (ItemManager.Instance.ItemDatabase[_itemSlot.ItemId].ItemType == ItemSO.ItemTypes.Tools) {
                 _itemRarityImage.gameObject.SetActive(false);
                 _toolRarityImage.gameObject.SetActive(true);
                 _toolRarityImage.sprite = raritySprite;
@@ -79,7 +79,7 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
 
     public void OnPointerClick(PointerEventData eventData) {
         if (eventData.button == PointerEventData.InputButton.Right) { // Right click
-            if (DragItemPanel.Instance.gameObject.activeSelf) {
+            if (DragItemUI.Instance.gameObject.activeSelf) {
                 _itemPanel.OnPlayerRightClick(_buttonIndex);
             } else {
                 _itemPanel.ShowRightClickMenu(_buttonIndex, transform.position);
@@ -97,14 +97,14 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
 
     public void OnBeginDrag(PointerEventData eventData) {
         //Dragged item cannot block the button to trigger events
-        DragItemPanel.Instance.GetComponent<CanvasGroup>().blocksRaycasts = false;
+        DragItemUI.Instance.GetComponent<CanvasGroup>().blocksRaycasts = false;
     }
 
     public void OnDrag(PointerEventData eventData) { }
 
     public void OnEndDrag(PointerEventData eventData) {
         //Dragged item can be clicked again
-        DragItemPanel.Instance.GetComponent<CanvasGroup>().blocksRaycasts = true;
+        DragItemUI.Instance.GetComponent<CanvasGroup>().blocksRaycasts = true;
     }
 
     public void OnDrop(PointerEventData eventData) {

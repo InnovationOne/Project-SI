@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Honeydew Melon
   m_EditorClassIdentifier: 
-  ItemID: 43
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Honeydew Melon
   ItemIcon: {fileID: 21300000, guid: 97a7bfb7069d4a44f8e2f51f7e48a6b9, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 295
-  CanRestoreHpOrEnergy: 1
-  LowestRarityRestoringHpAmount: 16
-  LowestRarityRestoringEnergyAmount: 35
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

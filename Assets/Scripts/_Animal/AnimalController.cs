@@ -19,7 +19,7 @@ public class AnimalController : Interactable {
 
 
     public override void Interact(Player player) {
-        if (player.GetComponent<PlayerToolbeltController>().GetCurrentlySelectedToolbeltItemSlot().Item == _animal.ItemToFeed.Item && !_wasFed) {
+        if (PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId == _animal.ItemToFeed.ItemId && !_wasFed) {
             ShowLove();
             _wasFed = true;
             Debug.Log("Animal was fed");
@@ -32,11 +32,6 @@ public class AnimalController : Interactable {
             _gaveItem = true;
             Debug.Log("Animal gave item");
         }
-    }
-
-    public override void ShowPossibleInteraction(bool show) {
-        _animalVisual.ShowFPGIcon(_wasFed, _wasPetted, _gaveItem, show);
-        _animalVisual.ShowHighlight(show);
     }
 
     private void ShowLove() {

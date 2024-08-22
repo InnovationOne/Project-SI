@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Coffee Bean
   m_EditorClassIdentifier: 
-  ItemID: 25
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Coffee Bean
   ItemIcon: {fileID: 21300000, guid: 22b9cc6502ec18e4f9e2f2da704de947, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 200
-  CanRestoreHpOrEnergy: 0
-  LowestRarityRestoringHpAmount: 0
-  LowestRarityRestoringEnergyAmount: 0
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

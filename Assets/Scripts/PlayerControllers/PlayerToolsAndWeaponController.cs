@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 // This class represents the character useing an item
 public class PlayerToolsAndWeaponController : NetworkBehaviour {
@@ -42,6 +43,8 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
             return;
         }
 
+        _attackCooldown -= Time.deltaTime;
+
         // Show the ResourceNode Highlight
         Vector2 gridPosition = new(_playerMarkerController.MarkedCellPosition.x + 0.5f, _playerMarkerController.MarkedCellPosition.y + 0.5f);
         Collider2D collider2D = Physics2D.OverlapPoint(gridPosition);
@@ -65,24 +68,86 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
             return;
         }
 
-        ItemSO itemSO = _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().Item;
+        ItemSO itemSO = ItemManager.Instance.ItemDatabase[_playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId];
         if (itemSO == null) {
             return;
         }
 
         if (Input.GetMouseButtonDown(0)) {
             // Use weapon
-            if (itemSO is ToolSO tool && tool.IsWeapon) {
-                WeaponAction(tool);
+            if (itemSO is WeaponSO weapon) {
+                WeaponAction(weapon);
             }
 
             ToolAction(itemSO);
         }
     }
 
-    private void WeaponAction(ItemSO itemSO) {
-        _playerAttackController.Attack((itemSO as ToolSO).Damage, new Vector2(_playerMarkerController.MarkedCellPosition.x + 0.5f, _playerMarkerController.MarkedCellPosition.y + 0.5f));
+    #region Weapon Actions
+    private float _attackCooldown = 0f;
+    private void WeaponAction(WeaponSO weaponSO) {
+        if (_attackCooldown > 0f) {
+            return;
+        }
+
+        _attackCooldown = 1f / weaponSO.AttackSpeed;
+        switch (weaponSO.AttackType) {
+            case WeaponSO.AttackTypes.Melee:
+                PerformMeleeAttack(weaponSO);
+                
+                break;
+            case WeaponSO.AttackTypes.Ranged:
+            case WeaponSO.AttackTypes.Magic:
+                PerformRangedAttack(weaponSO);
+                break;
+        }
     }
+
+    private void PerformMeleeAttack(WeaponSO weaponSO) {
+        float attackRange = weaponSO.Range;
+        float angleIncrement = 10f; // Adjust as needed for precision
+
+        List<Collider2D> targets = new List<Collider2D>();
+        Vector2 playerPosition = transform.position;
+        Vector2 forwardDirection = transform.up;
+
+        for (float angle = -90; angle <= 90; angle += angleIncrement) {
+            float radian = angle * Mathf.Deg2Rad;
+            Vector2 direction = new Vector2(Mathf.Cos(radian), Mathf.Sin(radian)) * forwardDirection;
+            Vector2 attackPosition = playerPosition + direction * attackRange;
+
+            Collider2D[] hitTargets = Physics2D.OverlapCircleAll(attackPosition, attackRange / 10f);
+            foreach (var hitTarget in hitTargets) {
+                if (hitTarget.TryGetComponent<IDamageable>(out var damageable) && hitTarget.GetComponent<Player>() == null) {
+                    if (!targets.Contains(hitTarget)) {
+                        targets.Add(hitTarget);
+                    }
+                }
+            }
+        }
+
+        foreach (var target in targets) {
+            if (target.TryGetComponent<IDamageable>(out var damageable)) {
+                damageable.TakeDamage(transform.position, DamageToDeal(weaponSO), weaponSO.DamageType);
+            }
+        }
+    }
+
+    private void PerformRangedAttack(WeaponSO weaponSO) {
+        Vector2 playerPosition = transform.position;
+        Vector2 attackDirection = transform.up;
+
+        RaycastHit2D hit = Physics2D.Raycast(playerPosition, attackDirection, weaponSO.Range);
+        if (hit.collider != null && hit.collider.TryGetComponent<IDamageable>(out var damageable)) {
+            if (hit.collider.GetComponent<Player>() == null) {
+                damageable.TakeDamage(transform.position, DamageToDeal(weaponSO), weaponSO.DamageType);
+            }
+        }
+    }
+
+    private int DamageToDeal(WeaponSO weaponSO) => Random.Range(0, 100) < weaponSO.CritChance ? weaponSO.CritDamage : weaponSO.Damage;
+    #endregion
+
 
     #region Tool Actions
     private void ToolAction(ItemSO itemSO) {

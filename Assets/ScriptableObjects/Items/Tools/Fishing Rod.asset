@@ -12,9 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bba8e0c7705831442842ff6a46903f08, type: 3}
   m_Name: Fishing Rod
   m_EditorClassIdentifier: 
-  ItemID: 1
-  ItemType: 0
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 1
   ItemName: 
   ItemIcon: {fileID: 0}
   IsStackable: 0
@@ -26,8 +25,6 @@ MonoBehaviour:
   ItemInfoHoverText: 
   LeftClickAction: []
   ToolItemRarity: []
-  IsWeapon: 0
-  Damage: 0
   UsageOrDamageOnAction: 
   VolumeOrBiteRate: 
   CatchChance: 

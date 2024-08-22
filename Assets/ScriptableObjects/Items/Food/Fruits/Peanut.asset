@@ -12,18 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c98a3464def8f8f419c654289e72701f, type: 3}
   m_Name: Peanut
   m_EditorClassIdentifier: 
-  ItemID: 62
-  ItemType: 4
-  ItemTypeID: 0
+  ItemId: 0
+  ItemType: 3
   ItemName: Peanut
   ItemIcon: {fileID: 21300000, guid: 99e2b11cd67a9784496ea8957d4ef5f0, type: 3}
-  ItemInfoHoverText: 
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 0
   BuyPrice: 0
   CanBeSold: 1
   LowestRaritySellPrice: 730
-  CanRestoreHpOrEnergy: 1
-  LowestRarityRestoringHpAmount: 25
-  LowestRarityRestoringEnergyAmount: 55
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  CanRestoreHp: 0
+  LowestHpAmount: 0
+  CanRestoreEnergy: 0
+  LowestEnergyAmount: 0

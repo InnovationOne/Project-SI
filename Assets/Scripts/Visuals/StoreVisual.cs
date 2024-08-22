@@ -21,6 +21,6 @@ public class StoreVisual : MonoBehaviour
     }
 
     public void OnLeftClick(ItemSO itemSO) {
-        GroceryStore.Instance.OnLeftClick(itemSO);
+        //GroceryStore.Instance.OnLeftClick(itemSO);
     }
 }

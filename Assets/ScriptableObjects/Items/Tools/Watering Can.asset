@@ -12,9 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bba8e0c7705831442842ff6a46903f08, type: 3}
   m_Name: Watering Can
   m_EditorClassIdentifier: 
-  ItemID: 5
-  ItemType: 0
-  ItemTypeID: 5
+  ItemId: 0
+  ItemType: 1
   ItemName: Watering Can
   ItemIcon: {fileID: 0}
   IsStackable: 0
@@ -33,8 +32,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  IsWeapon: 0
-  Damage: 0
   UsageOrDamageOnAction: 0b0000000d0000000f000000210000002300000037000000
   VolumeOrBiteRate: 
   CatchChance: 

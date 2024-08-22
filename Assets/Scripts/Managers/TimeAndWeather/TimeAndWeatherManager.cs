@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using System;
 using Unity.Netcode;
+using System.Linq;
 
 // This script manages the time and weather
 public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
@@ -16,6 +17,10 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
 
     public enum SeasonName {
         Spring, Summer, Autumn, Winter,
+    }
+
+    public enum TimeOfDay {
+        Morning, Noon, Afternoon, Evening, Night,
     }
 
     public static TimeAndWeatherManager Instance { get; private set; }
@@ -33,7 +38,6 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     [SerializeField] private Color _dayLightColor = Color.white;
     [SerializeField] private AnimationCurve _nightTimeCurve;
     [SerializeField] private Light2D _globalLight;
-
 
     [Header("Time constants")]
     [SerializeField] private float _timeScale = 60f; // Time scale for the ingame time (e.g. 60 means 1 minute ingame is equal to 1 second in real life)
@@ -54,12 +58,23 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     private int _currentYear = 0;
     private bool _nextDayAvailable = false;
     private bool _updatedTime = false;
+    public string GetDateTime => $"{_currentYear + 1:D4}-{CurrentSeason + 1:D2}-{CurrentDay + 1:D2} {(int)GetHours():D2}:{(int)GetMinutes():D2}";
 
+
+    public TimeOfDay CurrentTimeOfDay {
+        get {
+            if (_currentTime >= 21600f && _currentTime < 36000f) return TimeOfDay.Morning;
+            if (_currentTime >= 36000f && _currentTime < 50400f) return TimeOfDay.Noon;
+            if (_currentTime >= 50400f && _currentTime < 64800f) return TimeOfDay.Afternoon;
+            if (_currentTime >= 64800f && _currentTime < 79200f) return TimeOfDay.Evening;
+            return TimeOfDay.Night;
+        }
+    }
 
     [Header("Time agents")]
     private const int MINUTES_TO_INVOKE_TIMEAGENTS = 10;
     private const int TIMEAGENT_INVOKES_IN_A_DAY = 144;
-    private int _totalTimeAgentInvokesThisDay = 0;
+    public int TotalTimeAgentInvokesThisDay { get; private set; } = 0;
     private bool _updatedTimeAgent = false;
     private List<TimeAgent> _timeAgents;
 
@@ -70,7 +85,8 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     [SerializeField] private int _weatherStation = 0;
     private readonly int[] _weatherProbability = { 40, 60, 85 };
     private readonly float[] _daytimeColors = { 0.9f, 0.8f, 0.5f };
-    private WeatherName[] _weatherForecast = { WeatherName.Rain, WeatherName.Thunder, WeatherName.Sun };
+    private Queue<WeatherName> _weatherForecast = new Queue<WeatherName>(new[] { WeatherName.Rain, WeatherName.Thunder, WeatherName.Sun });
+    public string GetWeather => _weatherForecast.Last().ToString();
 
     [Header("Thunder Settings")]
     private const float MIN_TIME_BETWEEN_THUNDER = 10f;
@@ -96,14 +112,14 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
         }
 
         AudioManager.Instance.SetMusicSeason((SeasonName)CurrentSeason);
-        if (_weatherForecast[0] == WeatherName.Rain) {
+        if (_weatherForecast.ElementAt(0) == WeatherName.Rain) {
             AudioManager.Instance.SetAmbienceWeather(WeatherName.Sun);
-        } else if (_weatherForecast[0] == WeatherName.Thunder) {
+        } else if (_weatherForecast.ElementAt(0) == WeatherName.Thunder) {
             AudioManager.Instance.SetAmbienceWeather(WeatherName.Clouds);
         }
 
         OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
-        OnUpdateUIWeather?.Invoke(new int[] { (int)_weatherForecast[0], (int)_weatherForecast[1], (int)_weatherForecast[2] }, _weatherStation);
+        OnUpdateUIWeather?.Invoke(new int[] { (int)_weatherForecast.ElementAt(0), (int)_weatherForecast.ElementAt(1), (int)_weatherForecast.ElementAt(2) }, _weatherStation);
     }
 
     #region Client Connect
@@ -122,7 +138,11 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
 
             OnUpdateUITime?.Invoke((int)GetHours(), (int)GetMinutes());
             OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
-            OnUpdateUIWeather?.Invoke(new int[] { (int)_weatherForecast[0], (int)_weatherForecast[1], (int)_weatherForecast[2] }, _weatherStation);
+            OnUpdateUIWeather?.Invoke(new int[] {
+                (int)_weatherForecast.ElementAt(0),
+                (int)_weatherForecast.ElementAt(1),
+                (int)_weatherForecast.ElementAt(2)
+            }, _weatherStation);
 
             _globalLight.color = Color.HSVToRGB(0, 0, v);
         }
@@ -132,6 +152,7 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     private void Update() {
         // Update the time
         _currentTime += Time.deltaTime * _timeScale;
+
         // Check if the current time is past the time to sleep
         if (_currentTime >= TOTAL_SECONDS_IN_A_DAY) {
             _currentTime = 0f;
@@ -165,7 +186,7 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
 
         // Thunder
         _timeSinceLastThunder += Time.deltaTime;
-        if (_timeSinceLastThunder >= _nextThunder && _weatherForecast[0] == WeatherName.Thunder) {
+        if (_timeSinceLastThunder >= _nextThunder && _weatherForecast.ElementAt(0) == WeatherName.Thunder) {
             _timeSinceLastThunder = 0f;
             AudioManager.Instance.PlayOneShot(FMODEvents.Instance.Thunder, transform.position);
             _nextThunder = UnityEngine.Random.Range(MIN_TIME_BETWEEN_THUNDER, MAX_TIME_BETWEEN_THUNDER);
@@ -176,7 +197,7 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
 
     #region Time
     private void InvokeTimeMinuteAgents() {
-        _totalTimeAgentInvokesThisDay++;
+        TotalTimeAgentInvokesThisDay++;
         // Call all TimeAgents in the game
         for (int i = 0; i < _timeAgents.Count; i++) {
             _timeAgents[i].InvokeMinute();
@@ -222,8 +243,8 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
 
 
     private void InvokeTimeAgentsIfNeeded() {
-        InvokeTimeAgentsIfNeededClientRpc(TIMEAGENT_INVOKES_IN_A_DAY - _totalTimeAgentInvokesThisDay);
-        _totalTimeAgentInvokesThisDay = 0;
+        InvokeTimeAgentsIfNeededClientRpc(TIMEAGENT_INVOKES_IN_A_DAY - TotalTimeAgentInvokesThisDay);
+        TotalTimeAgentInvokesThisDay = 0;
     }
 
     [ClientRpc]
@@ -278,37 +299,46 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     [ClientRpc]
     private void UpdateUIAndInvokeEventsClientRpc(float dayLightColor) {
         OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
-        OnUpdateUIWeather?.Invoke(new int[] { (int)_weatherForecast[0], (int)_weatherForecast[1], (int)_weatherForecast[2] }, _weatherStation);
+        OnUpdateUIWeather?.Invoke(new int[] {
+            (int)_weatherForecast.ElementAt(0),
+            (int)_weatherForecast.ElementAt(1),
+            (int)_weatherForecast.ElementAt(2)
+        }, _weatherStation);
         _globalLight.color = Color.HSVToRGB(0, 0, dayLightColor);
     }
     #endregion
 
     #region Weather
     public void GetWeatherForcast() {
-        _weatherForecast[0] = _weatherForecast[1];
-        _weatherForecast[1] = _weatherForecast[2];
+        // Remove the oldest weather forecast
+        _weatherForecast.Dequeue();
 
+        // Determine and enqueue the new weather forecast
         int probability = UnityEngine.Random.Range(0, 100);
+        WeatherName newWeather;
         if (probability < _weatherProbability[0]) {
             // 40% chance for sun
-            _weatherForecast[2] = WeatherName.Sun;
+            newWeather = WeatherName.Sun;
         } else if (probability < _weatherProbability[1]) {
             // 20% chance for clouds or wind
-            _weatherForecast[2] = UnityEngine.Random.Range(0, 2) == 0 ? WeatherName.Clouds : WeatherName.Wind;
+            newWeather = UnityEngine.Random.Range(0, 2) == 0 ? WeatherName.Clouds : WeatherName.Wind;
         } else if (probability < _weatherProbability[2]) {
             // 25% chance for rain or snow
-            _weatherForecast[2] = CurrentSeason == 3 ? WeatherName.Snow : WeatherName.Rain;
+            newWeather = CurrentSeason == 3 ? WeatherName.Snow : WeatherName.Rain;
         } else {
             // 15% chance for thunder
-            _weatherForecast[2] = WeatherName.Thunder;
+            newWeather = WeatherName.Thunder;
         }
+
+        _weatherForecast.Enqueue(newWeather);
     }
 
+
     private void ApplyWeather() {
-        if (_weatherForecast[0] == WeatherName.Rain) {
+        if (_weatherForecast.ElementAt(0) == WeatherName.Rain) {
             OnChangeRainIntensity?.Invoke(LIGHT_RAN_INTENSITY);
             AudioManager.Instance.SetAmbienceWeather(WeatherName.Sun);
-        } else if (_weatherForecast[0] == WeatherName.Thunder) {
+        } else if (_weatherForecast.ElementAt(0) == WeatherName.Thunder) {
             OnChangeRainIntensity?.Invoke(HEAVY_RAIN_INTENSITY);
             AudioManager.Instance.SetAmbienceWeather(WeatherName.Thunder);
         } else {
@@ -318,7 +348,7 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
 
     private float GetTodaysGlobalLightColor() {
         float _color;
-        switch (_weatherForecast[0]) {
+        switch (_weatherForecast.ElementAt(0)) {
             case WeatherName.Marriage:
             case WeatherName.Event:
             case WeatherName.Sun:
@@ -340,37 +370,45 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
                 return 1;
         }
 
-
         return _color;
     }
     #endregion
 
-    #region Debug
-    public void DebugStartNextDay() {
+    #region CheatConsole
+    public void CheatStartNextDay() {
         StartNextDay();
     }
-    public void DebugSetTime(int hours, int minutes) {
+    public void CheatSetTime(int hours, int minutes) {
         _currentTime = hours * 3600 + minutes * 60;
         OnUpdateUITime?.Invoke((int)GetHours(), (int)GetMinutes());
     }
 
-    public void DebugSetDay(int day) {
+    public void CheatSetDay(int day) {
         CurrentDay = day;
         OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
     }
 
-    public void DebugSetSeason(int season) {
+    public void CheatSetSeason(int season) {
         CurrentSeason = season;
         OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
     }
 
-    public void DebugSetYear(int year) {
+    public void CheatSetYear(int year) {
         _currentYear = year;
         OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
     }
 
-    public void DebugSetWeather(int weather) {
-        _weatherForecast[0] = (WeatherName)weather;
+    public void CheatSetDate(int day, int season, int year) {
+        CurrentDay = day;
+        CurrentSeason = season;
+        _currentYear = year;
+        OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
+    }
+
+    public void CheatSetWeather(int weather) {
+        var weatherList = _weatherForecast.ToList();
+        weatherList[weatherList.Count - 1] = (WeatherName)weather;
+        _weatherForecast = new Queue<WeatherName>(weatherList);
         ApplyWeather();
         UpdateUIAndInvokeEventsClientRpc(GetTodaysGlobalLightColor());
     }
@@ -381,14 +419,14 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
         data.CurrentDay = CurrentDay;
         data.CurrentSeason = CurrentSeason;
         data.CurrentYear = _currentYear;
-        data.WeatherForecast = new int[] { (int)_weatherForecast[0], (int)_weatherForecast[1], (int)_weatherForecast[2] };
+        data.WeatherForecast = _weatherForecast.ToArray().Select(w => (int)w).ToArray();
     }
 
     public void LoadData(GameData data) {
         CurrentDay = data.CurrentDay;
         CurrentSeason = data.CurrentSeason;
         _currentYear = data.CurrentYear;
-        _weatherForecast = new WeatherName[] { (WeatherName)data.WeatherForecast[0], (WeatherName)data.WeatherForecast[1], (WeatherName)data.WeatherForecast[2] };
+        _weatherForecast = new Queue<WeatherName>(data.WeatherForecast.Select(i => (WeatherName)i));
     }
     #endregion
 }

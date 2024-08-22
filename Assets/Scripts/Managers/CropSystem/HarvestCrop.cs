@@ -1,51 +1,86 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class HarvestCrop : Interactable {
-    private Vector3Int _cropPosition;
-    private SpriteRenderer _growthTimeFertilizerSpriteRenderer;
-    private SpriteRenderer _qualityFertilizerSpriteRenderer;
-    private SpriteRenderer _quantityFertilizerSpriteRenderer;
-    private SpriteRenderer _regrowthTimeFertilizerSpriteRenderer;
-    private SpriteRenderer _waterFertilizerSpriteRenderer;
+    // A list of fertilizer types and their corresponding sprite renderers to be converted into a dictionary.
+    [SerializeField] private List<FertilizerSpriteRendererPair> _fertilizerSpriteRenderersList = new(); 
+    // A dictionary of fertilizer types and their corresponding sprite renderers.
+    private Dictionary<FertilizerSO.FertilizerTypes, SpriteRenderer> _fertilizerSpriteRenderers = new(); 
+    private Vector3Int _cropPosition; // The position of the crop in the grid.
+    private bool _initialized = false; // Whether the fertilizer sprite renderers have been initialized.
 
-    private void Start() {
-        _growthTimeFertilizerSpriteRenderer = transform.Find("GrowthTimeFertilizerSprite").GetComponent<SpriteRenderer>();
-        _qualityFertilizerSpriteRenderer = transform.Find("QualityFertilizerSprite").GetComponent<SpriteRenderer>();
-        _quantityFertilizerSpriteRenderer = transform.Find("QuantityFertilizerSprite").GetComponent<SpriteRenderer>();
-        _regrowthTimeFertilizerSpriteRenderer = transform.Find("RegrowthTimeFertilizerSprite").GetComponent<SpriteRenderer>();
-        _waterFertilizerSpriteRenderer = transform.Find("WaterFertilizerSprite").GetComponent<SpriteRenderer>();
+    /// <summary>
+    /// Initializes the fertilizer sprite renderers dictionary based on the fertilizer sprite renderers list.
+    /// </summary>
+    private void InitializeFertilizerRenderers() {
+        if (_fertilizerSpriteRenderersList.Count == 0) {
+            Debug.LogWarning("FertilizerSpriteRendererList is empty. Ensure that it is properly populated in the Unity Editor.");
+            return;
+        }
+
+        _fertilizerSpriteRenderers = new Dictionary<FertilizerSO.FertilizerTypes, SpriteRenderer>(_fertilizerSpriteRenderersList.Count);
+        foreach (var pair in _fertilizerSpriteRenderersList) {
+            if (pair.SpriteRenderer == null) {
+                Debug.LogError($"Missing SpriteRenderer for {pair.FertilizerType}");
+                continue;
+            }
+            _fertilizerSpriteRenderers[pair.FertilizerType] = pair.SpriteRenderer;
+        }
     }
 
+    /// <summary>
+    /// Interacts with the crop by harvesting it.
+    /// </summary>
+    /// <param name="player">The player interacting with the crop.</param>
     public override void Interact(Player player) {
         CropsManager.Instance.HarvestCropServerRpc(_cropPosition);
     }
 
+    /// <summary>
+    /// Sets the position of the crop.
+    /// </summary>
+    /// <param name="position">The position to set.</param>
     public void SetCropPosition(Vector3Int position) {
         _cropPosition = position;
     }
 
-    public void SetGrowthTimeFertilizerSprite(Color? color = null) {
-        _growthTimeFertilizerSpriteRenderer.enabled = !_growthTimeFertilizerSpriteRenderer.enabled;
-        _growthTimeFertilizerSpriteRenderer.color = color ?? Color.white; // Set the color to white if no color value was passed
+    /// <summary>
+    /// Sets the fertilizer sprite for a given fertilizer type.
+    /// </summary>
+    /// <param name="fertilizerType">The type of fertilizer.</param>
+    /// <param name="color">The color of the sprite (optional).</param>
+    public void SetFertilizerSprite(FertilizerSO.FertilizerTypes fertilizerType, Color? color = null) {
+        if (!_initialized) {
+            InitializeFertilizerRenderers();
+            _initialized = true;
+        }
+
+        if (_fertilizerSpriteRenderers.TryGetValue(fertilizerType, out var spriteRenderer)) {
+            ToggleSprite(spriteRenderer, color);
+        }
     }
 
-    public void SetQualityFertilizerSprite(Color? color = null) {
-        _qualityFertilizerSpriteRenderer.enabled = !_qualityFertilizerSpriteRenderer.enabled;
-        _qualityFertilizerSpriteRenderer.color = color ?? Color.white; // Set the color to white if no color value was passed
+    /// <summary>
+    /// Toggles the visibility of a SpriteRenderer and sets its color.
+    /// </summary>
+    /// <param name="spriteRenderer">The SpriteRenderer to toggle.</param>
+    /// <param name="color">The color to set the SpriteRenderer to. If null, the color will be set to white.</param>
+    private void ToggleSprite(SpriteRenderer spriteRenderer, Color? color) {
+        if (spriteRenderer == null) {
+            Debug.LogError("Attempted to toggle a non-existent SpriteRenderer.");
+            return;
+        }
+        spriteRenderer.enabled = !spriteRenderer.enabled;
+        spriteRenderer.color = color ?? Color.white;
     }
 
-    public void SetQuantityFertilizerSprite(Color? color = null) {
-        _quantityFertilizerSpriteRenderer.enabled = !_quantityFertilizerSpriteRenderer.enabled;
-        _quantityFertilizerSpriteRenderer.color = color ?? Color.white; // Set the color to white if no color value was passed
-    }
-
-    public void SetRegrowthTimeFertilizerSprite(Color? color = null) {
-        _regrowthTimeFertilizerSpriteRenderer.enabled = !_regrowthTimeFertilizerSpriteRenderer.enabled;
-        _regrowthTimeFertilizerSpriteRenderer.color = color ?? Color.white; // Set the color to white if no color value was passed
-    }
-
-    public void SetWaterFertilizerSprite(Color? color = null) {
-        _waterFertilizerSpriteRenderer.enabled = !_waterFertilizerSpriteRenderer.enabled;
-        _waterFertilizerSpriteRenderer.color = color ?? Color.white; // Set the color to white if no color value was passed
+    /// <summary>
+    /// Represents a pair of a fertilizer type and a sprite renderer for a list that is converted into a dictionary.
+    /// </summary>
+    [Serializable]
+    public class FertilizerSpriteRendererPair {
+        public FertilizerSO.FertilizerTypes FertilizerType;
+        public SpriteRenderer SpriteRenderer;
     }
 }
