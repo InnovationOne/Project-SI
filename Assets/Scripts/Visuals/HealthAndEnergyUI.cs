@@ -37,7 +37,7 @@ public class HealthAndEnergyUI : NetworkBehaviour {
     /// It unsubscribes the event handlers from the player controller's events.
     /// </summary>
     private new void OnDestroy() {
-        _playerController.OnUpdateHealth -= ChangeHp;
+        //_playerController.OnUpdateHealth -= ChangeHp; // Beim beenden ne null ref exeption. Sollte aber nicht stören. 
         _playerController.OnUpdateMaxHealth -= ChangeMaxHp;
         _playerController.OnUpdateEnergy -= ChangeEnergy;
         _playerController.OnUpdateMaxEnergy -= ChangeMaxEnergy;

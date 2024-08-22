@@ -1,65 +1,119 @@
+using System.Collections;
+using System.Net.NetworkInformation;
 using UnityEngine;
 
 public class PlayerFishingController : MonoBehaviour {
-    public LineRenderer lineRendererPrefab;
-    public float maxLineLength = 5.0f;
-    public float curveHeight = 2.5f;
-    public int resolution = 20; // Anzahl der Punkte auf der Parabel
+    public Vector2 fishingRodTip; // Die Spitze der Angelrute, wo die Schnur erscheint
+    public GameObject bobberPrefab; // Prefab für die Boje
 
-    private LineRenderer[] lineRenderers = new LineRenderer[8];
-    private bool shouldDraw = false;
+    public LineRenderer lineRendererPrefab; // Linie zur Darstellung der Flugbahn
+    public float maxCastingDistance = 2f; // Maximale Wurfweite
+    public float castingSpeed = 2f; // Geschwindigkeit, mit der die Wurfweite zunimmt
+    public float timeToBiteMin = 10f; // Minimale Wartezeit bis ein Fisch anbeißt
+    public float timeToBiteMax = 30f; // Maximale Wartezeit bis ein Fisch anbeißt
 
-    private void Awake() {
-        lineRendererPrefab = GetComponentInChildren<LineRenderer>();
-    }
-
-    void Start() {
-        return;
-        // Initialisiere LineRenderers
-        for (int i = 0; i < lineRenderers.Length; i++) {
-            lineRenderers[i] = Instantiate(lineRendererPrefab, transform.position, Quaternion.identity, transform);
-            lineRenderers[i].positionCount = resolution;
-            lineRenderers[i].enabled = false;
-        }
-    }
+    private GameObject bobber;
+    private LineRenderer lineRenderer;
+    private bool isFishing = false;
+    private bool fishBiting = false;
+    private float currentCastingDistance = 0f;
+    private bool isCasting = false;
 
     void Update() {
-        return;
-        if (Input.GetMouseButtonDown(0)) // Maustaste gedrückt
-        {
-            shouldDraw = true;
-            DrawParabolas();
-        } else if (Input.GetMouseButtonUp(0)) // Maustaste losgelassen
-          {
-            shouldDraw = false;
-            DisableLines();
+        fishingRodTip = transform.position;
+        if (Input.GetKeyDown(KeyCode.Space) && !isFishing) {
+            // Startet den Casting-Prozess
+            isCasting = true;
+            StartPreview();
+        }
+
+        if (Input.GetKey(KeyCode.Space) && isCasting) {
+            // Erhöht die Wurfweite basierend auf der Dauer des Drückens
+            currentCastingDistance += castingSpeed * Time.deltaTime;
+            currentCastingDistance = Mathf.Clamp(currentCastingDistance, 0, maxCastingDistance);
+            UpdatePreview();
+        }
+
+        if (Input.GetKeyUp(KeyCode.Space) && isCasting) {
+            // Sobald Space losgelassen wird, wird die Angel ausgeworfen
+            isCasting = false;
+            StopPreview();
+            StartCoroutine(CastLine());
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && isFishing && !fishBiting) {
+            // Holt die Angel ein, wenn noch kein Fisch angebissen hat
+            ReelInWithoutCatch();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space) && isFishing && fishBiting) {
+            // Holt die Angel ein, wenn ein Fisch angebissen hat
+            ReelInWithCatch();
         }
     }
 
-    void DrawParabolas() {
-        if (!shouldDraw) return;
+    private void StartPreview() {
+        if (bobber == null) {
+            bobber = Instantiate(bobberPrefab, fishingRodTip, Quaternion.identity);
+            bobber.GetComponent<SpriteRenderer>().color -= new Color(0, 0, 0, 0.5f);
+        }
 
-        for (int i = 0; i < lineRenderers.Length; i++) {
-            float angle = i * Mathf.PI / 4; // 45 Grad Schritte
-            DrawParabola(lineRenderers[i], angle);
-            lineRenderers[i].enabled = true;
+        if (lineRenderer == null) {
+            lineRenderer = Instantiate(lineRendererPrefab.gameObject, fishingRodTip, Quaternion.identity).GetComponent<LineRenderer>();
+            lineRenderer.startColor -= new Color(0, 0, 0, 0.5f);
+            lineRenderer.endColor -= new Color(0, 0, 0, 0.5f);
         }
     }
 
-    void DrawParabola(LineRenderer lineRenderer, float angle) {
-        Vector3 startPosition = transform.position;
-        for (int j = 0; j < resolution; j++) {
-            float t = j / (float)(resolution - 1);
-            float dx = t * maxLineLength;
-            float dy = -4 * curveHeight * (t * (1 - t)); // Parabel Formel: y = -4a(x * (1 - x))
-            Vector3 point = new Vector3(dx * Mathf.Cos(angle), dy, dx * Mathf.Sin(angle)) + startPosition;
-            lineRenderer.SetPosition(j, point);
+    private void UpdatePreview() {
+        Vector3 castPosition = fishingRodTip + PlayerMovementController.LocalInstance.LastMotionDirection * currentCastingDistance;
+        bobber.transform.position = castPosition;
+
+        // Zeichnet die Parabel
+        Vector3[] linePositions = new Vector3[2];
+        linePositions[0] = fishingRodTip;
+        linePositions[1] = castPosition;
+        lineRenderer.positionCount = 2;
+        lineRenderer.SetPositions(linePositions);
+    }
+
+    private void StopPreview() {
+        bobber.GetComponent<SpriteRenderer>().color += new Color(0, 0, 0, 0.5f);
+        lineRenderer.startColor += new Color(0, 0, 0, 0.5f);
+        lineRenderer.endColor += new Color(0, 0, 0, 0.5f);
+    }
+
+
+    private IEnumerator CastLine() {
+        isFishing = true;
+
+        // Warten, bis ein Fisch anbeißt
+        float timeToBite = Random.Range(timeToBiteMin, timeToBiteMax);
+        yield return new WaitForSeconds(timeToBite);
+
+        // Simuliere einen Fischbiss
+        fishBiting = true;
+        Debug.Log("Ein Fisch hat angebissen! Drücke SPACE, um ihn einzuholen.");
+    }
+
+    private void ReelInWithoutCatch() {
+        Debug.Log("Du hast die Angel eingeholt, ohne etwas zu fangen.");
+        ResetVariables();
+    }
+
+    private void ReelInWithCatch() {
+        if (fishBiting) {
+            Debug.Log("Du hast den Fisch gefangen!");
+            ResetVariables();
         }
     }
 
-    void DisableLines() {
-        foreach (var lineRenderer in lineRenderers) {
-            lineRenderer.enabled = false;
-        }
+    private void ResetVariables() {
+        Destroy(bobber);
+        Destroy(lineRenderer.gameObject);
+        isFishing = false;
+        fishBiting = false;
+        currentCastingDistance = 0f;
+        isCasting = false;
     }
 }
