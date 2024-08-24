@@ -5385,14 +5385,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fde31ad57bf99cf4c81d27c8b5df6497, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fishingRodTip: {x: 0, y: 0}
-  bobberPrefab: {fileID: 3998897679639624659, guid: 6a5fada544ae5dc4ebd403ce9c5ce9e9, type: 3}
-  transBobberPrefab: {fileID: 3998897679639624659, guid: 32283fbf24bc2f348a8b62a3292cabd2, type: 3}
-  lineRendererPrefab: {fileID: 9017382974603803563, guid: 0a007eec223d8c4418600c54705b95f5, type: 3}
-  maxCastingDistance: 10
-  castingSpeed: 2
-  timeToBiteMin: 2
-  timeToBiteMax: 5
+  FishingRodTip: {x: 0, y: 0}
+  BobberPrefab: {fileID: 3998897679639624659, guid: 6a5fada544ae5dc4ebd403ce9c5ce9e9, type: 3}
+  LineRendererPrefab: {fileID: 9017382974603803563, guid: 0a007eec223d8c4418600c54705b95f5, type: 3}
+  FishDatabaseSO: {fileID: 11400000, guid: aafc625afddacaf45a37c442d7b6dea6, type: 2}
 --- !u!114 &8828609184466402328
 MonoBehaviour:
   m_ObjectHideFlags: 0

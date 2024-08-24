@@ -1,39 +1,40 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Scriptable Objects/ItemSO/FishSO")]
-public class FishSO : FoodSO {
+[CreateAssetMenu(menuName = "Scriptable Objects/FishSO")]
+public class FishSO : ScriptableObject {
     public enum FishLocation {
-        SurfaceLake, SurfaceRiver, Coast, Ocean, DeepOcean, none,
+        Sea, River, Lake,
     }
 
     public enum CatchingMethod {
-        FishingRod, FishTrap, none,
+        FishingRod, FishTrap,
     }
 
     public enum FishType {
-        VerySmall, Small, Medium, Large, VeryLarge, Leviathan, none,
+        VerySmall, Small, Medium, Large, VeryLarge, Leviathan,
     }
 
-
+    [HideInInspector] public int FishId;
     [Header("Fish Params")]
-    public FishLocation Location;
+    public Sprite Sprite;
+    public FishLocation[] Locations;
     public CatchingMethod Method;
     public TimeAndWeatherManager.SeasonName[] Seasons;
     public TimeAndWeatherManager.TimeOfDay[] TimeOfDay;
     [TextArea]
-    public string CatchingText;
+    public string[] CatchText; // funny, pun, normal
 
     public FishType FishSize;
     public int FishSizeMin;
     public int FishSizeMax;
 
-    [Header("Breeding Pond Params")]
-    public ItemSO BreedingPondProduct;
-    public int BreedingPondProductProbability;
+    //[Header("Breeding Pond Params")]
+    //public ItemSO BreedingPondProduct;
+    //public int BreedingPondProductProbability;
 
-    public ItemSlot Quest1;
-    public ItemSlot Quest2;
-    public ItemSlot Quest3;
+    //public ItemSlot Quest1;
+    //public ItemSlot Quest2;
+    //public ItemSlot Quest3;
 
     public float CalculateFishSize() {
         float mean = (FishSizeMin + FishSizeMax) / 2;
@@ -45,6 +46,6 @@ public class FishSO : FoodSO {
         float randStdNormal = Mathf.Sqrt(-2.0f * Mathf.Log(u1)) * Mathf.Sin(2.0f * Mathf.PI * u2);
         float size = mean + stdDev * randStdNormal;
 
-        return Mathf.Clamp(size, FishSizeMin, FishSizeMax);
+        return Mathf.Round(Mathf.Clamp(size, FishSizeMin, FishSizeMax) * 100f) / 100f;
     }
 }
