@@ -28,6 +28,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 0
+--- !u!114 &-3314995203476201572
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music/TitleTheme
+  m_EditorClassIdentifier: 
+  Path: event:/Music/TitleTheme
+  Guid:
+    Data1: -2079989818
+    Data2: 1230313502
+    Data3: -969746801
+    Data4: 2101430498
+  Banks:
+  - {fileID: 8395591284583028889}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 0
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 164075
 --- !u!114 &-2370323374165289132
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79,12 +106,14 @@ MonoBehaviour:
   - {fileID: -7276579673389489145}
   - {fileID: 2104821270189222584}
   - {fileID: -2370323374165289132}
+  - {fileID: 6283796657976788300}
+  - {fileID: -3314995203476201572}
   EditorParameters: []
   MasterBanks:
   - {fileID: 7345430674702038942}
   StringsBanks:
   - {fileID: 8340691130712139901}
-  cacheTime: 638291877465264561
+  cacheTime: 638617378354194964
   cacheVersion: 131617
 --- !u!114 &593936906069675401
 MonoBehaviour:
@@ -262,6 +291,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 8195
+--- !u!114 &6283796657976788300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music/Loading
+  m_EditorClassIdentifier: 
+  Path: event:/Music/Loading
+  Guid:
+    Data1: -1982843576
+    Data2: 1253425051
+    Data3: -490326095
+    Data4: 1004416554
+  Banks:
+  - {fileID: 8395591284583028889}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 0
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 132075
 --- !u!114 &7345430674702038942
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -277,7 +333,7 @@ MonoBehaviour:
   Path: ../../audio_system_fmod_project/Build/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 638291877464999536
+  lastModified: 638617358866919570
   FileSizes:
   - Name: Desktop
     Value: 1486
@@ -297,10 +353,10 @@ MonoBehaviour:
   Path: ../../audio_system_fmod_project/Build/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 638291877465019852
+  lastModified: 638617358866940675
   FileSizes:
   - Name: Desktop
-    Value: 1316
+    Value: 1408
   Exists: 1
 --- !u!114 &8395591284583028889
 MonoBehaviour:
@@ -317,8 +373,8 @@ MonoBehaviour:
   Path: ../../audio_system_fmod_project/Build/Desktop/Music.bank
   Name: Music
   StudioPath: bank:/Music
-  lastModified: 638291821767385918
+  lastModified: 638617378354194964
   FileSizes:
   - Name: Desktop
-    Value: 10691904
+    Value: 15051168
   Exists: 1

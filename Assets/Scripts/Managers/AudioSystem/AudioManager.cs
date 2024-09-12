@@ -25,8 +25,8 @@ public class AudioManager : MonoBehaviour {
     private const string AMBIENCE_PARAMETER_NAME = "Weather";
 
     private List<EventInstance> _eventInstances;
-    private EventInstance _weatherAmbience;
-    private EventInstance _seasonsMusic;
+    private EventInstance _ambience;
+    private EventInstance _music;
 
     private void Awake() {
         if (Instance != null) {
@@ -44,8 +44,9 @@ public class AudioManager : MonoBehaviour {
     }
 
     private void Start() {
-        InitializeAmbience(FMODEvents.Instance.WeatherAmbience);
-        InitializeMusic(FMODEvents.Instance.SeasonMusic);
+        //InitializeAmbience(FMODEvents.Instance.WeatherAmbience);
+        //InitializeMusic(FMODEvents.Instance.SeasonMusic);
+        InitializeMusic(FMODEvents.Instance.TitleTheme);
     }
 
     private void Update() {
@@ -56,21 +57,21 @@ public class AudioManager : MonoBehaviour {
     }
 
     private void InitializeAmbience(EventReference eventReference) {
-        _weatherAmbience = CreateEventInstance(eventReference);
-        _weatherAmbience.start();
+        _ambience = CreateEventInstance(eventReference);
+        _ambience.start();
     }
 
     public void InitializeMusic(EventReference eventReference) {
-        _seasonsMusic = CreateEventInstance(eventReference);
-        _seasonsMusic.start();
+        _music = CreateEventInstance(eventReference);
+        _music.start();
     }
 
     public void SetMusicSeason(TimeAndWeatherManager.SeasonName seasonName) {
-        _seasonsMusic.setParameterByName(MUSIC_PARAMETER_NAME, (float)seasonName);
+        _music.setParameterByName(MUSIC_PARAMETER_NAME, (float)seasonName);
     }
 
     public void SetAmbienceWeather(TimeAndWeatherManager.WeatherName weatherName) {
-        _weatherAmbience.setParameterByName(AMBIENCE_PARAMETER_NAME, (float)weatherName);
+        _ambience.setParameterByName(AMBIENCE_PARAMETER_NAME, (float)weatherName);
     }
 
     // Plays a sound once at the given position
