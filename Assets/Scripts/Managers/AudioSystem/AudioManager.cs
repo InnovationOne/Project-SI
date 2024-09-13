@@ -44,9 +44,9 @@ public class AudioManager : MonoBehaviour {
     }
 
     private void Start() {
-        //InitializeAmbience(FMODEvents.Instance.WeatherAmbience);
-        //InitializeMusic(FMODEvents.Instance.SeasonMusic);
-        InitializeMusic(FMODEvents.Instance.TitleTheme);
+        InitializeAmbience(FMODEvents.Instance.WeatherAmbience);
+        InitializeMusic(FMODEvents.Instance.SeasonMusic);
+        //InitializeMusic(FMODEvents.Instance.TitleTheme);
     }
 
     private void Update() {

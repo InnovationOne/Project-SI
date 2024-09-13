@@ -42,7 +42,7 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     public const int DAYS_PER_WEEK = 7;
     public const int DAYS_PER_SEASON = 28;
     private const int SEASONS_PER_YEAR = 4;
-    
+
     // Networked Variables
     private NetworkVariable<float> _currentTime = new NetworkVariable<float>(21600f);
     public NetworkVariable<int> CurrentDay = new NetworkVariable<int>(0);
@@ -368,9 +368,19 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
         StartNextDay();
     }
     public void CheatSetTime(int hours, int minutes) {
-        _currentTime.Value = hours * 3600 + minutes * 60;
+        if (IsServer) {
+            _currentTime.Value = hours * 3600 + minutes * 60;
+        } else {
+            CheatSetTimeServerRpc(hours, minutes);
+        }
         OnUpdateUITime?.Invoke((int)GetHours(), (int)GetMinutes());
     }
+
+    [ServerRpc]
+    private void CheatSetTimeServerRpc(int hours, int minutes) {
+        _currentTime.Value = hours * 3600 + minutes * 60;
+    }
+
 
     public void CheatSetDay(int day) {
         CurrentDay.Value = day;
@@ -410,10 +420,12 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     }
 
     public void LoadData(GameData data) {
-        CurrentDay.Value = data.CurrentDay;
-        CurrentSeason.Value = data.CurrentSeason;
-        _currentYear.Value = data.CurrentYear;
-        _weatherForecast = data.WeatherForecast.Select(i => (WeatherName)i).ToList();
+        if (IsServer) {
+            CurrentDay.Value = data.CurrentDay;
+            CurrentSeason.Value = data.CurrentSeason;
+            _currentYear.Value = data.CurrentYear;
+            _weatherForecast = data.WeatherForecast.Select(i => (WeatherName)i).ToList();
+        }
     }
     #endregion
 }

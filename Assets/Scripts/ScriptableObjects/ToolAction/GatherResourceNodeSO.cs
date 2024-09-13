@@ -13,12 +13,21 @@ public class GatherResourceNodeSO : ToolActionSO {
     [SerializeField] private List<ResourceNodeType> canHitNodesOfType;
 
     public override void OnApplyToTileMap(Vector3Int gridPosition, ItemSlot itemSlot) {
-        Collider2D collider2D = Physics2D.OverlapPoint(new Vector2(gridPosition.x + 0.5f, gridPosition.y + 0.5f));
-        if (collider2D != null) {
-            ResourceNode resourceNode = collider2D.GetComponent<ResourceNode>();
-            
+        // Define the area of the tile
+        Vector2 bottomLeft = new Vector2(gridPosition.x + 0.1f, gridPosition.y + 0.1f);
+        Vector2 topRight = new Vector2(gridPosition.x + 0.9f, gridPosition.y + 0.9f);
+
+        // Get all colliders overlapping the tile area
+        Collider2D[] colliders = Physics2D.OverlapAreaAll(bottomLeft, topRight);
+
+        foreach (Collider2D collider in colliders) {
+            ResourceNode resourceNode = collider.gameObject.GetComponent<ResourceNode>();
             if (resourceNode != null && resourceNode.CanHitResourceNodeType(canHitNodesOfType)) {
-                resourceNode.HitResourceNode((ItemManager.Instance.ItemDatabase[itemSlot.ItemId] as ToolSO).UsageOrDamageOnAction[itemSlot.RarityId - 1]);
+                // Apply damage or usage to the resource node
+                ToolSO tool = ItemManager.Instance.ItemDatabase[itemSlot.ItemId] as ToolSO;
+                int damage = tool.UsageOrDamageOnAction[itemSlot.RarityId - 1];
+                resourceNode.HitResourceNode(damage);
+                break; // Exit after hitting the first valid resource node
             }
         }
     }

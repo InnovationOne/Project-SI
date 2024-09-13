@@ -12,7 +12,6 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     private PlayerMarkerController _playerMarkerController;
     private PlayerToolbeltController _playerToolbeltController;
     private AttackController _playerAttackController;
-    private PlayerMarkerController _playerMakerController;
 
     private bool _success;
     private bool _callbackSuccessfull;
@@ -35,7 +34,6 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         _playerMarkerController = PlayerMarkerController.LocalInstance;
         _playerToolbeltController = PlayerToolbeltController.LocalInstance;
         _playerAttackController = GetComponent<AttackController>();
-        _playerMakerController = PlayerMarkerController.LocalInstance;
     }
 
     private void Update() {
@@ -152,6 +150,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     #region Tool Actions
     private void ToolAction(ItemSO itemSO) {
         // Starte den rekursiven Vorgang
+        Debug.Log("Tool Action");
         StartToolAction(itemSO.LeftClickAction.GetEnumerator());
     }
 
@@ -171,7 +170,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
     private IEnumerator PerformToolAction(ToolActionSO toolAction, IEnumerator<ToolActionSO> enumerator) {
         // Execute the ToolAction
-        toolAction.OnApplyToTileMap(_playerMakerController.MarkedCellPosition, _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot());
+        toolAction.OnApplyToTileMap(_playerMarkerController.MarkedCellPosition, _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot());
 
         // Wait for the ServerRpc response
         while (!_callbackSuccessfull && _elapsedTime < _timeout) {
