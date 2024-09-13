@@ -637,7 +637,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             // Check if the position is not plowed or is already seeded
             if (!CropTileContainer.IsPositionPlowed(wantToSeedTilePosition) ||
                 CropTileContainer.IsPositionSeeded(wantToSeedTilePosition) ||
-                !(ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason)) {
+                !(ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason.Value)) {
                 // If it is, handle the client callback and return
                 HandleClientCallback(serverRpcParams, false);
                 return;

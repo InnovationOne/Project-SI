@@ -28,12 +28,10 @@ public class IntroManager : MonoBehaviour {
     private const float MINIMUM_TIME = 4f;
     private const float FADE_DURATION = 1f;
 
-    private float _remainingTime;
-
     private void Awake() {
         if (_skipIntro) {
             _background.gameObject.SetActive(false);
-            Destroy(this);
+            this.enabled = false;
             return;
         }
 
@@ -56,12 +54,6 @@ public class IntroManager : MonoBehaviour {
         StartCoroutine(FadeSequence());
     }
 
-    private void Update() {
-        if (Input.GetMouseButtonDown(0)) {
-            _remainingTime = 0;
-        }
-    }
-
     private IEnumerator FadeSequence() {
         yield return new WaitForSeconds(STARTUP_TIME);
 
@@ -80,10 +72,12 @@ public class IntroManager : MonoBehaviour {
         // Background
         yield return HideElement(_background);
 
-        Destroy(this);
+        this.enabled = false;
     }
 
     private IEnumerator ShowElement(params Graphic[] graphics) {
+        float remainingTime = MINIMUM_TIME;
+
         // Activate graphics and set initial alpha to 0
         foreach (var graphic in graphics) {
             graphic.gameObject.SetActive(true);
@@ -95,9 +89,11 @@ public class IntroManager : MonoBehaviour {
         yield return new WaitForSeconds(FADE_DURATION);
 
         // Wait for minimum time or until user clicks
-        _remainingTime = MINIMUM_TIME;
-        while (_remainingTime > 0) {
-            _remainingTime -= Time.deltaTime;
+        while (remainingTime > 0) {
+            if (Input.GetMouseButtonDown(0)) {
+                break;
+            }
+            remainingTime -= Time.deltaTime;
             yield return null;
         }
 

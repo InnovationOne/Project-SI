@@ -6,7 +6,7 @@ public class NPC : Interactable {
     public NPCDailyRoutine[] DailyRoutines;
 
     private int _locationId;
-    private int _weekDay => TimeAndWeatherManager.Instance.CurrentDay % TimeAndWeatherManager.DAYS_PER_WEEK;
+    private int _weekDay => TimeAndWeatherManager.Instance.CurrentDay.Value % TimeAndWeatherManager.DAYS_PER_WEEK;
     private float _moveSpeed = 1f;
 
     private void Start() {

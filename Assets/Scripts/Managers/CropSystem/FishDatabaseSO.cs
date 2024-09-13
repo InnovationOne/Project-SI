@@ -40,7 +40,7 @@ public class FishDatabaseSO : ScriptableObject {
         var availableFish = _fish
             .Where(fish => fish.Locations.Contains((FishLocation)tileId) &&
                            fish.Method == catchingMethod &&
-                           fish.Seasons.Contains((TimeAndWeatherManager.SeasonName)currentSeason) &&
+                           fish.Seasons.Contains((TimeAndWeatherManager.SeasonName)currentSeason.Value) &&
                            fish.TimeOfDay.Contains(currentTimeOfDay))
             .ToList();
 

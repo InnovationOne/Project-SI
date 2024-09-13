@@ -7,24 +7,14 @@ using System.Linq;
 
 // This script manages the time and weather
 public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
-    public enum ShortDayName {
-        Mon, Tue, Wed, Thu, Fri, Sat, Sun,
-    }
-
-    public enum WeatherName {
-        Sun, Clouds, Wind, Rain, Thunder, Snow, Event, Marriage,
-    }
-
-    public enum SeasonName {
-        Spring, Summer, Autumn, Winter,
-    }
-
-    public enum TimeOfDay {
-        Morning, Noon, Afternoon, Evening, Night,
-    }
+    public enum ShortDayName { Mon, Tue, Wed, Thu, Fri, Sat, Sun }
+    public enum WeatherName { Sun, Clouds, Wind, Rain, Thunder, Snow, Event, Marriage }
+    public enum SeasonName { Spring, Summer, Autumn, Winter }
+    public enum TimeOfDay { Morning, Noon, Afternoon, Evening, Night }
 
     public static TimeAndWeatherManager Instance { get; private set; }
 
+    // Events
     public event Action OnNextDayStarted;
     public event Action<int> OnNextSeasonStarted;
     public event Action<int, int> OnUpdateUITime;
@@ -32,7 +22,7 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     public event Action<int[], int> OnUpdateUIWeather;
     public event Action<int> OnChangeRainIntensity;
 
-
+    // Serialized Fields
     [Header("Day and night time curve")]
     [SerializeField] private Color _nightLightColor;
     [SerializeField] private Color _dayLightColor = Color.white;
@@ -42,51 +32,54 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     [Header("Time constants")]
     [SerializeField] private float _timeScale = 60f; // Time scale for the ingame time (e.g. 60 means 1 minute ingame is equal to 1 second in real life)
 
+    // Constants
     private const int TOTAL_SECONDS_IN_A_DAY = 86400;
-    public const int DAYS_PER_WEEK = 7;
-    public const int DAYS_PER_SEASON = 28;
-    private const int SEASONS_PER_YEAR = 4;
     private const int TIME_TO_WAKE_UP = 21600;
     private const int TIME_TO_SLEEP = 7200;
     private const int MINUTES_TO_UPDATE_CLOCK = 10;
+    private const int MINUTES_TO_INVOKE_TIMEAGENTS = 10;
 
+    public const int DAYS_PER_WEEK = 7;
+    public const int DAYS_PER_SEASON = 28;
+    private const int SEASONS_PER_YEAR = 4;
+    
+    // Networked Variables
+    private NetworkVariable<float> _currentTime = new NetworkVariable<float>(21600f);
+    public NetworkVariable<int> CurrentDay = new NetworkVariable<int>(0);
+    public NetworkVariable<int> CurrentSeason = new NetworkVariable<int>(0);
+    private NetworkVariable<int> _currentYear = new NetworkVariable<int>(0);
 
-    [Header("Current time and date")]
-    private float _currentTime = 21600f;
-    public int CurrentDay { get; private set; } = 0;
-    public int CurrentSeason { get; private set; } = 0;
-    private int _currentYear = 0;
+    // Other Variables
     private bool _nextDayAvailable = false;
     private bool _updatedTime = false;
-    public string GetDateTime => $"{_currentYear + 1:D4}-{CurrentSeason + 1:D2}-{CurrentDay + 1:D2} {(int)GetHours():D2}:{(int)GetMinutes():D2}";
+    private List<TimeAgent> _timeAgents = new List<TimeAgent>();
+
+    public string GetDateTime => $"{_currentYear.Value + 1:D4}-{CurrentSeason.Value + 1:D2}-{CurrentDay.Value + 1:D2} {(int)GetHours():D2}:{(int)GetMinutes():D2}";
 
 
     public TimeOfDay CurrentTimeOfDay {
         get {
-            if (_currentTime >= 21600f && _currentTime < 36000f) return TimeOfDay.Morning;
-            if (_currentTime >= 36000f && _currentTime < 50400f) return TimeOfDay.Noon;
-            if (_currentTime >= 50400f && _currentTime < 64800f) return TimeOfDay.Afternoon;
-            if (_currentTime >= 64800f && _currentTime < 79200f) return TimeOfDay.Evening;
+            if (_currentTime.Value >= 21600f && _currentTime.Value < 36000f) return TimeOfDay.Morning;
+            if (_currentTime.Value >= 36000f && _currentTime.Value < 50400f) return TimeOfDay.Noon;
+            if (_currentTime.Value >= 50400f && _currentTime.Value < 64800f) return TimeOfDay.Afternoon;
+            if (_currentTime.Value >= 64800f && _currentTime.Value < 79200f) return TimeOfDay.Evening;
             return TimeOfDay.Night;
         }
     }
 
-    [Header("Time agents")]
-    private const int MINUTES_TO_INVOKE_TIMEAGENTS = 10;
+    [Header("Time agents")]    
     private const int TIMEAGENT_INVOKES_IN_A_DAY = 144;
     public int TotalTimeAgentInvokesThisDay { get; private set; } = 0;
     private bool _updatedTimeAgent = false;
-    private List<TimeAgent> _timeAgents;
-
-
+    
     [Header("Weather settings")]
-    private const int LIGHT_RAN_INTENSITY = 60;
+    private const int LIGHT_RAIN_INTENSITY = 60;
     private const int HEAVY_RAIN_INTENSITY = 100;
     [SerializeField] private int _weatherStation = 0;
     private readonly int[] _weatherProbability = { 40, 60, 85 };
     private readonly float[] _daytimeColors = { 0.9f, 0.8f, 0.5f };
-    private Queue<WeatherName> _weatherForecast = new Queue<WeatherName>(new[] { WeatherName.Rain, WeatherName.Thunder, WeatherName.Sun });
-    public string GetWeather => _weatherForecast.Last().ToString();
+    private List<WeatherName> _weatherForecast = new List<WeatherName> { WeatherName.Rain, WeatherName.Thunder, WeatherName.Sun };
+    public string GetWeather => _weatherForecast[_weatherForecast.Count - 1].ToString();
 
     [Header("Thunder Settings")]
     private const float MIN_TIME_BETWEEN_THUNDER = 10f;
@@ -96,13 +89,12 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
 
 
     private void Awake() {
-        if (Instance != null) {
-            throw new Exception("Found more than one Day Time Manager in the scene.");
-        } else {
-            Instance = this;
+        if (Instance != null && Instance != this) {
+            Debug.LogWarning("Multiple instances of TimeAndWeatherManager detected. Destroying duplicate.");
+            Destroy(gameObject);
+            return;
         }
-
-        _timeAgents = new List<TimeAgent>();
+        Instance = this;
         _nextThunder = UnityEngine.Random.Range(MIN_TIME_BETWEEN_THUNDER, MAX_TIME_BETWEEN_THUNDER);
     }
 
@@ -111,33 +103,33 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_OnClientConnected;
         }
 
-        AudioManager.Instance.SetMusicSeason((SeasonName)CurrentSeason);
+        AudioManager.Instance.SetMusicSeason((SeasonName)CurrentSeason.Value);
         if (_weatherForecast.ElementAt(0) == WeatherName.Rain) {
             AudioManager.Instance.SetAmbienceWeather(WeatherName.Sun);
         } else if (_weatherForecast.ElementAt(0) == WeatherName.Thunder) {
             AudioManager.Instance.SetAmbienceWeather(WeatherName.Clouds);
         }
 
-        OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
+        OnUpdateUIDate?.Invoke(CurrentDay.Value, CurrentSeason.Value, _currentYear.Value);
         OnUpdateUIWeather?.Invoke(new int[] { (int)_weatherForecast.ElementAt(0), (int)_weatherForecast.ElementAt(1), (int)_weatherForecast.ElementAt(2) }, _weatherStation);
     }
 
     #region Client Connect
     private void NetworkManager_OnClientConnected(ulong clientId) {
         Color.RGBToHSV(_globalLight.color, out _, out _, out float v);
-        NetworkManager_OnClientConnected_ClientRpc(clientId, CurrentDay, CurrentSeason, _currentYear, v, _currentTime);
+        NetworkManager_OnClientConnected_ClientRpc(clientId, CurrentDay.Value, CurrentSeason.Value, _currentYear.Value, v, _currentTime.Value);
     }
 
     [ClientRpc]
     private void NetworkManager_OnClientConnected_ClientRpc(ulong clientId, int currentDay, int currentSeason, int currentYear, float v, float currentTime) {
         if (clientId == NetworkManager.Singleton.LocalClientId) {
-            _currentTime = currentTime;
-            CurrentDay = currentDay;
-            CurrentSeason = currentSeason;
-            _currentYear = currentYear;
+            _currentTime.Value = currentTime;
+            CurrentDay.Value = currentDay;
+            CurrentSeason.Value = currentSeason;
+            _currentYear.Value = currentYear;
 
             OnUpdateUITime?.Invoke((int)GetHours(), (int)GetMinutes());
-            OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
+            OnUpdateUIDate?.Invoke(CurrentDay.Value, CurrentSeason.Value, _currentYear.Value);
             OnUpdateUIWeather?.Invoke(new int[] {
                 (int)_weatherForecast.ElementAt(0),
                 (int)_weatherForecast.ElementAt(1),
@@ -150,50 +142,57 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     #endregion
 
     private void Update() {
-        // Update the time
-        _currentTime += Time.deltaTime * _timeScale;
+        if (IsServer) {
+            _currentTime.Value += Time.deltaTime * _timeScale;
 
-        // Check if the current time is past the time to sleep
-        if (_currentTime >= TOTAL_SECONDS_IN_A_DAY) {
-            _currentTime = 0f;
-            _nextDayAvailable = true;
-        }
+            // Check if the current time is past the time to sleep
+            if (_currentTime.Value >= TOTAL_SECONDS_IN_A_DAY) {
+                _currentTime.Value = 0f;
+                _nextDayAvailable = true;
+            }
 
-        if (_currentTime >= TIME_TO_SLEEP && _nextDayAvailable) {
-            // If the next day is available, start the next day
-            if (IsServer) {
-                //### Play sleep animation
-                //### Respawn at House
+            if (_currentTime.Value >= TIME_TO_SLEEP && _nextDayAvailable) {
                 StartNextDay();
             }
+
+            // Thunder logic
+            UpdateThunder();
         }
 
-        // Update the time
-        if (((int)GetMinutes()) % MINUTES_TO_UPDATE_CLOCK == 0 && !_updatedTime) {
-            _updatedTime = true;
-            OnUpdateUITime?.Invoke((int)GetHours(), (int)GetMinutes());
-        } else if (((int)GetMinutes()) % MINUTES_TO_UPDATE_CLOCK != 0 && _updatedTime) {
-            _updatedTime = false;
-        }
-
-        // Call Time Agents
-        if (((int)GetMinutes()) % MINUTES_TO_INVOKE_TIMEAGENTS == 0 && !_updatedTimeAgent) {
-            _updatedTimeAgent = true;
-            InvokeTimeMinuteAgents();
-        } else if (((int)GetMinutes()) % MINUTES_TO_INVOKE_TIMEAGENTS != 0 && _updatedTimeAgent) {
-            _updatedTimeAgent = false;
-        }
-
-        // Thunder
-        _timeSinceLastThunder += Time.deltaTime;
-        if (_timeSinceLastThunder >= _nextThunder && _weatherForecast.ElementAt(0) == WeatherName.Thunder) {
-            _timeSinceLastThunder = 0f;
-            AudioManager.Instance.PlayOneShot(FMODEvents.Instance.Thunder, transform.position);
-            _nextThunder = UnityEngine.Random.Range(MIN_TIME_BETWEEN_THUNDER, MAX_TIME_BETWEEN_THUNDER);
-        }
-
+        UpdateUI();
         UpdateLightColor();
+        InvokeTimeAgents();
     }
+
+    private void UpdateUI() {
+        int currentMinutes = (int)GetMinutes();
+        if (currentMinutes % MINUTES_TO_UPDATE_CLOCK == 0) {
+            OnUpdateUITime?.Invoke((int)GetHours(), currentMinutes);
+        }
+    }
+
+    private void InvokeTimeAgents() {
+        int currentMinutes = (int)GetMinutes();
+        if (currentMinutes % MINUTES_TO_INVOKE_TIMEAGENTS == 0) {
+            InvokeTimeMinuteAgents();
+        }
+    }
+
+
+    private void UpdateThunder() {
+        _timeSinceLastThunder += Time.deltaTime;
+        if (_timeSinceLastThunder >= _nextThunder && _weatherForecast[0] == WeatherName.Thunder) {
+            _timeSinceLastThunder = 0f;
+            _nextThunder = UnityEngine.Random.Range(MIN_TIME_BETWEEN_THUNDER, MAX_TIME_BETWEEN_THUNDER);
+            PlayThunderSoundClientRpc();
+        }
+    }
+
+    [ClientRpc]
+    private void PlayThunderSoundClientRpc() {
+        AudioManager.Instance.PlayOneShot(FMODEvents.Instance.Thunder, transform.position);
+    }
+
 
     #region Time
     private void InvokeTimeMinuteAgents() {
@@ -205,22 +204,17 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     }
 
     private void UpdateLightColor() {
-        // Calculate the position on the curve based on the current hour
         float curvePosition = _nightTimeCurve.Evaluate(GetHours());
-
-        // Calculate the color by interpolating between the day and night colors based on the curve position
         Color newColor = Color.Lerp(_dayLightColor, _nightLightColor, curvePosition);
-
-        // Update the global light color
         _globalLight.color = newColor;
     }
 
     private float GetHours() {
-        return _currentTime / 3600f;
+        return _currentTime.Value / 3600f;
     }
 
     private float GetMinutes() {
-        return _currentTime % 3600f / 60f;
+        return _currentTime.Value % 3600f / 60f;
     }
 
     public void SubscribeTimeAgent(TimeAgent timeAgent) {
@@ -255,38 +249,38 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     }
 
     private void ResetDayAndAdvanceTime() {
-        _currentTime = TIME_TO_WAKE_UP;
-        CurrentDay++;
-        ResetDayAndAdvanceTimeClientRpc(CurrentDay);
+        _currentTime.Value = TIME_TO_WAKE_UP;
+        CurrentDay.Value++;
+        ResetDayAndAdvanceTimeClientRpc(CurrentDay.Value);
         _nextDayAvailable = false;
     }
 
     [ClientRpc]
     private void ResetDayAndAdvanceTimeClientRpc(int currentDay) {
-        CurrentDay = currentDay;
+        CurrentDay.Value = currentDay;
     }
 
     private void CheckAndAdvanceSeasonAndYear() {
-        if (CurrentDay >= DAYS_PER_SEASON) {
-            CurrentDay = 0;
-            CurrentSeason++;
-            OnNextSeasonStarted?.Invoke(CurrentSeason);
+        if (CurrentDay.Value >= DAYS_PER_SEASON) {
+            CurrentDay.Value = 0;
+            CurrentSeason.Value++;
+            OnNextSeasonStarted?.Invoke(CurrentSeason.Value);
 
-            if (CurrentSeason >= SEASONS_PER_YEAR) {
-                CurrentSeason = 0;
-                _currentYear++;
+            if (CurrentSeason.Value >= SEASONS_PER_YEAR) {
+                CurrentSeason.Value = 0;
+                _currentYear.Value++;
             }
         }
 
-        AudioManager.Instance.SetMusicSeason((SeasonName)CurrentSeason);
-        CheckAndAdvanceSeasonClientRpc(CurrentDay, CurrentSeason, _currentYear);
+        AudioManager.Instance.SetMusicSeason((SeasonName)CurrentSeason.Value);
+        CheckAndAdvanceSeasonClientRpc(CurrentDay.Value, CurrentSeason.Value, _currentYear.Value);
     }
 
     [ClientRpc]
     private void CheckAndAdvanceSeasonClientRpc(int currentDay, int currentSeason, int currentYear) {
-        CurrentDay = currentDay;
-        CurrentSeason = currentSeason;
-        _currentYear = currentYear;
+        CurrentDay.Value = currentDay;
+        CurrentSeason.Value = currentSeason;
+        _currentYear.Value = currentYear;
     }
 
     private void UpdateUIAndInvokeEvents() {
@@ -298,7 +292,7 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
 
     [ClientRpc]
     private void UpdateUIAndInvokeEventsClientRpc(float dayLightColor) {
-        OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
+        OnUpdateUIDate?.Invoke(CurrentDay.Value, CurrentSeason.Value, _currentYear.Value);
         OnUpdateUIWeather?.Invoke(new int[] {
             (int)_weatherForecast.ElementAt(0),
             (int)_weatherForecast.ElementAt(1),
@@ -310,35 +304,30 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
 
     #region Weather
     public void GetWeatherForcast() {
-        // Remove the oldest weather forecast
-        _weatherForecast.Dequeue();
-
-        // Determine and enqueue the new weather forecast
-        int probability = UnityEngine.Random.Range(0, 100);
-        WeatherName newWeather;
-        if (probability < _weatherProbability[0]) {
-            // 40% chance for sun
-            newWeather = WeatherName.Sun;
-        } else if (probability < _weatherProbability[1]) {
-            // 20% chance for clouds or wind
-            newWeather = UnityEngine.Random.Range(0, 2) == 0 ? WeatherName.Clouds : WeatherName.Wind;
-        } else if (probability < _weatherProbability[2]) {
-            // 25% chance for rain or snow
-            newWeather = CurrentSeason == 3 ? WeatherName.Snow : WeatherName.Rain;
-        } else {
-            // 15% chance for thunder
-            newWeather = WeatherName.Thunder;
-        }
-
-        _weatherForecast.Enqueue(newWeather);
+        _weatherForecast.RemoveAt(0);
+        _weatherForecast.Add(DetermineNextWeather());
     }
 
+    private WeatherName DetermineNextWeather() {
+        int probability = UnityEngine.Random.Range(0, 100);
+        if (probability < _weatherProbability[0]) {
+            return WeatherName.Sun;
+        } else if (probability < _weatherProbability[1]) {
+            return UnityEngine.Random.Range(0, 2) == 0 ? WeatherName.Clouds : WeatherName.Wind;
+        } else if (probability < _weatherProbability[2]) {
+            return CurrentSeason.Value == (int)SeasonName.Winter ? WeatherName.Snow : WeatherName.Rain;
+        } else {
+            return WeatherName.Thunder;
+        }
+    }
 
     private void ApplyWeather() {
-        if (_weatherForecast.ElementAt(0) == WeatherName.Rain) {
-            OnChangeRainIntensity?.Invoke(LIGHT_RAN_INTENSITY);
-            AudioManager.Instance.SetAmbienceWeather(WeatherName.Sun);
-        } else if (_weatherForecast.ElementAt(0) == WeatherName.Thunder) {
+        var todayWeather = _weatherForecast[0];
+
+        if (todayWeather == WeatherName.Rain) {
+            OnChangeRainIntensity?.Invoke(LIGHT_RAIN_INTENSITY);
+            AudioManager.Instance.SetAmbienceWeather(WeatherName.Rain);
+        } else if (todayWeather == WeatherName.Thunder) {
             OnChangeRainIntensity?.Invoke(HEAVY_RAIN_INTENSITY);
             AudioManager.Instance.SetAmbienceWeather(WeatherName.Thunder);
         } else {
@@ -379,36 +368,34 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
         StartNextDay();
     }
     public void CheatSetTime(int hours, int minutes) {
-        _currentTime = hours * 3600 + minutes * 60;
+        _currentTime.Value = hours * 3600 + minutes * 60;
         OnUpdateUITime?.Invoke((int)GetHours(), (int)GetMinutes());
     }
 
     public void CheatSetDay(int day) {
-        CurrentDay = day;
-        OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
+        CurrentDay.Value = day;
+        OnUpdateUIDate?.Invoke(CurrentDay.Value, CurrentSeason.Value, _currentYear.Value);
     }
 
     public void CheatSetSeason(int season) {
-        CurrentSeason = season;
-        OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
+        CurrentSeason.Value = season;
+        OnUpdateUIDate?.Invoke(CurrentDay.Value, CurrentSeason.Value, _currentYear.Value);
     }
 
     public void CheatSetYear(int year) {
-        _currentYear = year;
-        OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
+        _currentYear.Value = year;
+        OnUpdateUIDate?.Invoke(CurrentDay.Value, CurrentSeason.Value, _currentYear.Value);
     }
 
     public void CheatSetDate(int day, int season, int year) {
-        CurrentDay = day;
-        CurrentSeason = season;
-        _currentYear = year;
-        OnUpdateUIDate?.Invoke(CurrentDay, CurrentSeason, _currentYear);
+        CurrentDay.Value = day;
+        CurrentSeason.Value = season;
+        _currentYear.Value = year;
+        OnUpdateUIDate?.Invoke(CurrentDay.Value, CurrentSeason.Value, _currentYear.Value);
     }
 
     public void CheatSetWeather(int weather) {
-        var weatherList = _weatherForecast.ToList();
-        weatherList[weatherList.Count - 1] = (WeatherName)weather;
-        _weatherForecast = new Queue<WeatherName>(weatherList);
+        _weatherForecast[0] = (WeatherName)weather;
         ApplyWeather();
         UpdateUIAndInvokeEventsClientRpc(GetTodaysGlobalLightColor());
     }
@@ -416,17 +403,17 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
 
     #region Save & Load
     public void SaveData(GameData data) {
-        data.CurrentDay = CurrentDay;
-        data.CurrentSeason = CurrentSeason;
-        data.CurrentYear = _currentYear;
+        data.CurrentDay = CurrentDay.Value;
+        data.CurrentSeason = CurrentSeason.Value;
+        data.CurrentYear = _currentYear.Value;
         data.WeatherForecast = _weatherForecast.ToArray().Select(w => (int)w).ToArray();
     }
 
     public void LoadData(GameData data) {
-        CurrentDay = data.CurrentDay;
-        CurrentSeason = data.CurrentSeason;
-        _currentYear = data.CurrentYear;
-        _weatherForecast = new Queue<WeatherName>(data.WeatherForecast.Select(i => (WeatherName)i));
+        CurrentDay.Value = data.CurrentDay;
+        CurrentSeason.Value = data.CurrentSeason;
+        _currentYear.Value = data.CurrentYear;
+        _weatherForecast = data.WeatherForecast.Select(i => (WeatherName)i).ToList();
     }
     #endregion
 }
