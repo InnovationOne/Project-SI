@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class IntroManager : MonoBehaviour {
+    [SerializeField] private bool _skipIntro;
     [Header("Background")]
     [SerializeField] private Image _background;
 
@@ -23,21 +24,33 @@ public class IntroManager : MonoBehaviour {
     [SerializeField] private Image _octiwareLogo;
     [SerializeField] private Image _fmodLogo;
 
-    private const float STARTUP_TIME = 2f;
-    private const float MINIMUM_TIME = 5f;
+    private const float STARTUP_TIME = 1f;
+    private const float MINIMUM_TIME = 4f;
     private const float FADE_DURATION = 1f;
 
     private float _remainingTime;
 
     private void Awake() {
+        if (_skipIntro) {
+            _background.gameObject.SetActive(false);
+            Destroy(this);
+            return;
+        }
+
+        // Initialize game objects
         _background.gameObject.SetActive(true);
+        _alphaHeaderTextMeshPro.gameObject.SetActive(false);
+        _alphaBodyTextMeshPro.gameObject.SetActive(false);
         _photosensitivityHeaderTextMeshPro.gameObject.SetActive(false);
         _photosensitivityBodyTextMeshPro.gameObject.SetActive(false);
         _octiwareLogo.gameObject.SetActive(false);
         _fmodLogo.gameObject.SetActive(false);
     }
 
+
     private void Start() {
+        _alphaHeaderTextMeshPro.text = _alphaHeaderText;
+        _alphaBodyTextMeshPro.text = _alphaBodyText;
         _photosensitivityHeaderTextMeshPro.text = _photosensitivityHeaderText;
         _photosensitivityBodyTextMeshPro.text = _photosensitivityBodyText;
         StartCoroutine(FadeSequence());
@@ -71,55 +84,45 @@ public class IntroManager : MonoBehaviour {
     }
 
     private IEnumerator ShowElement(params Graphic[] graphics) {
-        // Einblenden der Elemente
+        // Activate graphics and set initial alpha to 0
         foreach (var graphic in graphics) {
             graphic.gameObject.SetActive(true);
-            StartCoroutine(Fade(graphic, 0f, 1f));
+            graphic.canvasRenderer.SetAlpha(0f);
+            graphic.CrossFadeAlpha(1f, FADE_DURATION, false);
         }
 
-        // Wartezeit, oder springe direkt weiter bei Klick
+        // Wait for fade-in to complete
+        yield return new WaitForSeconds(FADE_DURATION);
+
+        // Wait for minimum time or until user clicks
         _remainingTime = MINIMUM_TIME;
         while (_remainingTime > 0) {
             _remainingTime -= Time.deltaTime;
             yield return null;
         }
 
-        // Ausblenden der Elemente
+        // Fade out
         foreach (var graphic in graphics) {
-            StartCoroutine(Fade(graphic, 1f, 0f));
+            graphic.CrossFadeAlpha(0f, FADE_DURATION, false);
         }
+
+        // Wait for fade-out to complete
         yield return new WaitForSeconds(FADE_DURATION);
+
+        // Deactivate graphics
         foreach (var graphic in graphics) {
             graphic.gameObject.SetActive(false);
         }
     }
 
     private IEnumerator HideElement(Graphic graphic) {
-        graphic.gameObject.SetActive(true);
-        StartCoroutine(Fade(graphic, 1f, 0f));
+        // Fade out
+        graphic.CrossFadeAlpha(0f, FADE_DURATION, false);
+
+        // Wait for fade-out to complete
         yield return new WaitForSeconds(FADE_DURATION);
+
+        // Deactivate graphics
         graphic.gameObject.SetActive(false);
-    }
-
-    private IEnumerator Fade(Graphic graphic, float startAlpha, float endAlpha) {
-        Color currentColor = graphic.color;
-        float elapsedTime = 0f;
-
-        // Set initial alpha
-        currentColor.a = startAlpha;
-        graphic.color = currentColor;
-
-        // Gradually change the alpha
-        while (elapsedTime < FADE_DURATION) {
-            elapsedTime += Time.deltaTime;
-            float newAlpha = Mathf.Lerp(startAlpha, endAlpha, elapsedTime / FADE_DURATION);
-            currentColor.a = newAlpha;
-            graphic.color = currentColor;
-            yield return null;
-        }
-
-        // Ensure the final alpha value is set
-        currentColor.a = endAlpha;
-        graphic.color = currentColor;
     }
 }

@@ -8,8 +8,6 @@ public class LoadSceneManager : MonoBehaviour {
         TitleScreenScene,
         GameScene,
         LoadingScene,
-        LobbyScene,
-        CharacterSelectScene,
     }
 
     private static Scene _targetScene;
