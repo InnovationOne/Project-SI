@@ -1,6 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class LoadSceneManager : MonoBehaviour {
 
@@ -10,7 +11,14 @@ public class LoadSceneManager : MonoBehaviour {
         LoadingScene,
     }
 
-    private static Scene _targetScene;
+    public static Scene _targetScene;
+
+
+    // For getting from the main menu to the game for testing
+    [SerializeField] private Button _continueButton;
+    private void Awake() {
+        _continueButton.onClick.AddListener(() => LoadScene(Scene.GameScene));
+    }
 
     public static void LoadScene(Scene targetScene) {
         _targetScene = targetScene;

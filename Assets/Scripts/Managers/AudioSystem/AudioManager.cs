@@ -44,9 +44,13 @@ public class AudioManager : MonoBehaviour {
     }
 
     private void Start() {
-        InitializeAmbience(FMODEvents.Instance.WeatherAmbience);
-        InitializeMusic(FMODEvents.Instance.SeasonMusic);
-        //InitializeMusic(FMODEvents.Instance.TitleTheme);
+        Debug.Log(LoadSceneManager._targetScene);
+        if (LoadSceneManager._targetScene == LoadSceneManager.Scene.GameScene) {
+            InitializeAmbience(FMODEvents.Instance.WeatherAmbience);
+            InitializeMusic(FMODEvents.Instance.SeasonMusic);
+        } else if (LoadSceneManager._targetScene == LoadSceneManager.Scene.TitleScreenScene) {
+            InitializeMusic(FMODEvents.Instance.TitleTheme);
+        }
     }
 
     private void Update() {

@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2282,10 +2281,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d462336c1f46c2743b3a9ec46c5b495a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MasterVolume: 0.05
-  MusicVolume: 0.05
-  AmbienceVolume: 0.05
-  SFXVolume: 0.05
+  MasterVolume: 0.5
+  MusicVolume: 0.5
+  AmbienceVolume: 0.5
+  SFXVolume: 0.5
 --- !u!1001 &1125264596
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2735,7 +2734,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1515235680
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2970,6 +2969,7 @@ MonoBehaviour:
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
   m_CursorLockBehavior: 0
+  m_ScrollDeltaPerTick: 6
 --- !u!1 &1683733151
 GameObject:
   m_ObjectHideFlags: 0
@@ -3725,6 +3725,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd590a57a2eb0bc4eb06d9046aaba76a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _continueButton: {fileID: 1906834735}
 --- !u!1 &2096314552
 GameObject:
   m_ObjectHideFlags: 0

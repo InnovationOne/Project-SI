@@ -137,7 +137,5 @@ public class ResourceNode : NetworkBehaviour {
             default:
                 break;
         }
-
-        
     }
 }

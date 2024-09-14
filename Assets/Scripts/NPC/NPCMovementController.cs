@@ -86,14 +86,14 @@ public class NPCMovementController : MonoBehaviour {
                 }
 
                 Vector2 direction = ((Vector2)_path.LookPoints[pathIndex] - pos2D).normalized;
-                _rigidBody2D.velocity = _speed * speedPercent * direction;
+                _rigidBody2D.linearVelocity = _speed * speedPercent * direction;
             }
 
 
             yield return null;
         }
 
-        _rigidBody2D.velocity = Vector2.zero;
+        _rigidBody2D.linearVelocity = Vector2.zero;
     }
 
     /// <summary>

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7276579673389489145
+--- !u!114 &-8041222654499638861
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -19,16 +19,16 @@ MonoBehaviour:
     Data3: 1834422146
     Data4: -171855394
   Banks:
-  - {fileID: 8395591284583028889}
+  - {fileID: 1231581233775089842}
   IsStream: 1
   Is3D: 0
   IsOneShot: 0
   Parameters:
-  - {fileID: 1739726824255783246}
+  - {fileID: 4406180096695528118}
   MinDistance: 1
   MaxDistance: 20
   Length: 0
---- !u!114 &-3314995203476201572
+--- !u!114 &-6052154251267582171
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -38,24 +38,44 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Music/TitleTheme
+  m_Name: event:/SFX/PlayerFootstepsGras
   m_EditorClassIdentifier: 
-  Path: event:/Music/TitleTheme
+  Path: event:/SFX/PlayerFootstepsGras
   Guid:
-    Data1: -2079989818
-    Data2: 1230313502
-    Data3: -969746801
-    Data4: 2101430498
+    Data1: -208925091
+    Data2: 1105752206
+    Data3: 2121531326
+    Data4: 882437239
   Banks:
-  - {fileID: 8395591284583028889}
-  IsStream: 1
+  - {fileID: 2574768662679467975}
+  IsStream: 0
   Is3D: 0
   IsOneShot: 0
   Parameters: []
   MinDistance: 1
   MaxDistance: 20
-  Length: 164075
---- !u!114 &-2370323374165289132
+  Length: 500
+--- !u!114 &-451583333205724708
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.strings.bank
+  m_EditorClassIdentifier: 
+  Path: ../../audio_system_fmod_project/Build/Desktop/Master.strings.bank
+  Name: Master.strings
+  StudioPath: bank:/Master.strings
+  lastModified: 638617358866940675
+  FileSizes:
+  - Name: Desktop
+    Value: 1408
+  Exists: 1
+--- !u!114 &-406109207348585495
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -65,23 +85,50 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Cut Tree
+  m_Name: event:/Ambience/Thunder
   m_EditorClassIdentifier: 
-  Path: event:/SFX/Cut Tree
+  Path: event:/Ambience/Thunder
   Guid:
-    Data1: -1447766655
-    Data2: 1128049754
-    Data3: 1992628630
-    Data4: -418733698
+    Data1: 1722642744
+    Data2: 1257671676
+    Data3: 205176194
+    Data4: -1540709306
   Banks:
-  - {fileID: 1585626305732770446}
+  - {fileID: 1761331131152182082}
   IsStream: 0
   Is3D: 0
   IsOneShot: 1
   Parameters: []
   MinDistance: 1
   MaxDistance: 20
-  Length: 0
+  Length: 8195
+--- !u!114 &-122557094456717191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music/Loading
+  m_EditorClassIdentifier: 
+  Path: event:/Music/Loading
+  Guid:
+    Data1: -1982843576
+    Data2: 1253425051
+    Data3: -490326095
+    Data4: 1004416554
+  Banks:
+  - {fileID: 1231581233775089842}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 0
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 132075
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,27 +142,27 @@ MonoBehaviour:
   m_Name: FMODStudioCache
   m_EditorClassIdentifier: 
   EditorBanks:
-  - {fileID: 8340691130712139901}
-  - {fileID: 943228614924931619}
-  - {fileID: 7345430674702038942}
-  - {fileID: 8395591284583028889}
-  - {fileID: 1585626305732770446}
+  - {fileID: -451583333205724708}
+  - {fileID: 1761331131152182082}
+  - {fileID: 709982801929463796}
+  - {fileID: 1231581233775089842}
+  - {fileID: 2574768662679467975}
   EditorEvents:
-  - {fileID: 2151374276560195626}
-  - {fileID: 6242010954734514403}
-  - {fileID: -7276579673389489145}
-  - {fileID: 2104821270189222584}
-  - {fileID: -2370323374165289132}
-  - {fileID: 6283796657976788300}
-  - {fileID: -3314995203476201572}
+  - {fileID: 5716869692552411541}
+  - {fileID: -406109207348585495}
+  - {fileID: -8041222654499638861}
+  - {fileID: -122557094456717191}
+  - {fileID: 3521830667660244133}
+  - {fileID: -6052154251267582171}
+  - {fileID: 3084843413870974490}
   EditorParameters: []
   MasterBanks:
-  - {fileID: 7345430674702038942}
+  - {fileID: 709982801929463796}
   StringsBanks:
-  - {fileID: 8340691130712139901}
-  cacheTime: 638617378354194964
-  cacheVersion: 131617
---- !u!114 &593936906069675401
+  - {fileID: -451583333205724708}
+  cacheTime: 638619417453667250
+  cacheVersion: 131619
+--- !u!114 &709982801929463796
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -124,24 +171,38 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
-  m_Name: parameter:/Weather/Weather
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
   m_EditorClassIdentifier: 
-  Name: Weather
-  StudioPath: 
-  Min: 0
-  Max: 1
-  Default: 0
-  ID:
-    data1: 792660260
-    data2: 1454472853
-  Type: 2
-  IsGlobal: 0
-  Labels:
-  - Rain
-  - Thunder
+  Path: ../../audio_system_fmod_project/Build/Desktop/Master.bank
+  Name: Master
+  StudioPath: bank:/Master
+  lastModified: 638617358866919570
+  FileSizes:
+  - Name: Desktop
+    Value: 1486
   Exists: 1
---- !u!114 &943228614924931619
+--- !u!114 &1231581233775089842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Music.bank
+  m_EditorClassIdentifier: 
+  Path: ../../audio_system_fmod_project/Build/Desktop/Music.bank
+  Name: Music
+  StudioPath: bank:/Music
+  lastModified: 638619417453667250
+  FileSizes:
+  - Name: Desktop
+    Value: 15592032
+  Exists: 1
+--- !u!114 &1761331131152182082
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -161,7 +222,7 @@ MonoBehaviour:
   - Name: Desktop
     Value: 1227936
   Exists: 1
---- !u!114 &1585626305732770446
+--- !u!114 &2574768662679467975
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -181,7 +242,61 @@ MonoBehaviour:
   - Name: Desktop
     Value: 43360
   Exists: 1
---- !u!114 &1739726824255783246
+--- !u!114 &3084843413870974490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Cut Tree
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Cut Tree
+  Guid:
+    Data1: -1447766655
+    Data2: 1128049754
+    Data3: 1992628630
+    Data4: -418733698
+  Banks:
+  - {fileID: 2574768662679467975}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 0
+--- !u!114 &3521830667660244133
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music/TitleTheme
+  m_EditorClassIdentifier: 
+  Path: event:/Music/TitleTheme
+  Guid:
+    Data1: -2079989818
+    Data2: 1230313502
+    Data3: -969746801
+    Data4: 2101430498
+  Banks:
+  - {fileID: 1231581233775089842}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 0
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 164075
+--- !u!114 &4406180096695528118
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -209,34 +324,7 @@ MonoBehaviour:
   - Autumn
   - Winter
   Exists: 1
---- !u!114 &2104821270189222584
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/PlayerFootstepsGras
-  m_EditorClassIdentifier: 
-  Path: event:/SFX/PlayerFootstepsGras
-  Guid:
-    Data1: -208925091
-    Data2: 1105752206
-    Data3: 2121531326
-    Data4: 882437239
-  Banks:
-  - {fileID: 1585626305732770446}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 0
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 500
---- !u!114 &2151374276560195626
+--- !u!114 &5716869692552411541
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -255,16 +343,16 @@ MonoBehaviour:
     Data3: -1187991652
     Data4: 1183881452
   Banks:
-  - {fileID: 943228614924931619}
+  - {fileID: 1761331131152182082}
   IsStream: 1
   Is3D: 0
   IsOneShot: 0
   Parameters:
-  - {fileID: 593936906069675401}
+  - {fileID: 8632122191137853049}
   MinDistance: 1
   MaxDistance: 20
   Length: 0
---- !u!114 &6242010954734514403
+--- !u!114 &8632122191137853049
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -273,108 +361,20 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Ambience/Thunder
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Weather/Weather
   m_EditorClassIdentifier: 
-  Path: event:/Ambience/Thunder
-  Guid:
-    Data1: 1722642744
-    Data2: 1257671676
-    Data3: 205176194
-    Data4: -1540709306
-  Banks:
-  - {fileID: 943228614924931619}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 8195
---- !u!114 &6283796657976788300
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Music/Loading
-  m_EditorClassIdentifier: 
-  Path: event:/Music/Loading
-  Guid:
-    Data1: -1982843576
-    Data2: 1253425051
-    Data3: -490326095
-    Data4: 1004416554
-  Banks:
-  - {fileID: 8395591284583028889}
-  IsStream: 1
-  Is3D: 0
-  IsOneShot: 0
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 132075
---- !u!114 &7345430674702038942
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
-  m_Name: bank:/Master.bank
-  m_EditorClassIdentifier: 
-  Path: ../../audio_system_fmod_project/Build/Desktop/Master.bank
-  Name: Master
-  StudioPath: bank:/Master
-  lastModified: 638617358866919570
-  FileSizes:
-  - Name: Desktop
-    Value: 1486
-  Exists: 1
---- !u!114 &8340691130712139901
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
-  m_Name: bank:/Master.strings.bank
-  m_EditorClassIdentifier: 
-  Path: ../../audio_system_fmod_project/Build/Desktop/Master.strings.bank
-  Name: Master.strings
-  StudioPath: bank:/Master.strings
-  lastModified: 638617358866940675
-  FileSizes:
-  - Name: Desktop
-    Value: 1408
-  Exists: 1
---- !u!114 &8395591284583028889
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
-  m_Name: bank:/Music.bank
-  m_EditorClassIdentifier: 
-  Path: ../../audio_system_fmod_project/Build/Desktop/Music.bank
-  Name: Music
-  StudioPath: bank:/Music
-  lastModified: 638617378354194964
-  FileSizes:
-  - Name: Desktop
-    Value: 15051168
+  Name: Weather
+  StudioPath: 
+  Min: 0
+  Max: 1
+  Default: 0
+  ID:
+    data1: 792660260
+    data2: 1454472853
+  Type: 2
+  IsGlobal: 0
+  Labels:
+  - Rain
+  - Thunder
   Exists: 1

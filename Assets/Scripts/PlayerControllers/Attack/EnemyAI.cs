@@ -71,7 +71,7 @@ public class EnemyAI : MonoBehaviour {
     private void HandleIdleState() {
         if (_animator.GetBool(MOVING)) {
             _animator.SetBool(MOVING, false);
-            _rb.velocity = Vector2.zero;
+            _rb.linearVelocity = Vector2.zero;
         }
 
         _idleToRoamingTimer -= Time.deltaTime;
@@ -123,9 +123,9 @@ public class EnemyAI : MonoBehaviour {
     private void HandleHitState() {
         if (_animator.GetBool(MOVING)) {
             StopCoroutine(FollowPath());
-            _rb.velocity = Vector2.zero;
+            _rb.linearVelocity = Vector2.zero;
             _animator.SetBool(MOVING, false);
-        } else if (_rb.velocity == Vector2.zero) {
+        } else if (_rb.linearVelocity == Vector2.zero) {
             ChangeState(EnemyState.Roaming);
             Debug.Log("Changing to last state");
         }
@@ -178,7 +178,7 @@ public class EnemyAI : MonoBehaviour {
             }
 
             _currentDirection = ((Vector2)_path.LookPoints[pathIndex] - pos2d).normalized;
-            _rb.velocity = _enemySO.Speed * _currentDirection;
+            _rb.linearVelocity = _enemySO.Speed * _currentDirection;
             yield return null;
         }
     }

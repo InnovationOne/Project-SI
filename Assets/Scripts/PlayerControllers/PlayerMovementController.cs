@@ -89,12 +89,12 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
         UpdateAnimationState();
 
         //Move the character
-        _rigidBody2D.velocity = _inputDirection * GetCurrentSpeed();
+        _rigidBody2D.linearVelocity = _inputDirection * GetCurrentSpeed();
     }
 
     private void StopMovingAndTurning() {
-        if (_rigidBody2D.velocity != Vector2.zero) {
-            _rigidBody2D.velocity = Vector2.zero;
+        if (_rigidBody2D.linearVelocity != Vector2.zero) {
+            _rigidBody2D.linearVelocity = Vector2.zero;
             _animator.SetBool(MOVING, false);
         }
     }
@@ -147,7 +147,7 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     }
 
     private void UpdateSound() {
-        if (_rigidBody2D.velocity != Vector2.zero) {
+        if (_rigidBody2D.linearVelocity != Vector2.zero) {
             _playerWalkGrass.getPlaybackState(out PLAYBACK_STATE playbackState);
             if (playbackState.Equals(PLAYBACK_STATE.STOPPED)) {
                 _playerWalkGrass.start();

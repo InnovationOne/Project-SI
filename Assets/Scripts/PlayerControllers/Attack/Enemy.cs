@@ -35,7 +35,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable {
 
     private void ApplyKnockback(Vector2 attackerPosition) {
         Vector2 knockbackDirection = ((Vector2)transform.position - attackerPosition).normalized;
-        _rb.velocity = knockbackDirection * _knockbackForce;
+        _rb.linearVelocity = knockbackDirection * _knockbackForce;
         StopCoroutine(ReduceKnockback());
         StartCoroutine(ReduceKnockback());
     }
@@ -46,12 +46,12 @@ public abstract class Enemy : MonoBehaviour, IDamageable {
 
         while (elapsedTime < knockbackDuration) {
             float damping = Mathf.Lerp(_knockbackForce, 0f, elapsedTime / knockbackDuration);
-            _rb.velocity = _rb.velocity.normalized * damping;
+            _rb.linearVelocity = _rb.linearVelocity.normalized * damping;
             elapsedTime += Time.deltaTime;
             yield return null;
         }
 
-        _rb.velocity = Vector2.zero;
+        _rb.linearVelocity = Vector2.zero;
     }
 
     protected int CalculateDamage(int amount, WeaponSO.DamageTypes type) {
