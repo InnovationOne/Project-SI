@@ -24,7 +24,7 @@ public class PlayerDataManager : NetworkBehaviour, IDataPersistance {
     }
 
     public void AddPlayer(Player player) {
-        Debug.Log("Add player to connected players list");
+        //Debug.Log("Add player to connected players list");
         CurrentlyConnectedPlayers.Add(player);
     }
 
@@ -33,7 +33,7 @@ public class PlayerDataManager : NetworkBehaviour, IDataPersistance {
     }
 
     public void RemovePlayer(Player player) {
-        Debug.Log("Remove player from connected players list");
+        //Debug.Log("Remove player from connected players list");
         CurrentlyConnectedPlayers.Remove(player);
     }
 

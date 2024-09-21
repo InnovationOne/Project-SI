@@ -2,6 +2,7 @@ using UnityEngine;
 using FMODUnity;
 using FMOD.Studio;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour {
     public static AudioManager Instance { get; private set; }
@@ -44,11 +45,11 @@ public class AudioManager : MonoBehaviour {
     }
 
     private void Start() {
-        Debug.Log(LoadSceneManager._targetScene);
-        if (LoadSceneManager._targetScene == LoadSceneManager.Scene.GameScene) {
+        var scene = SceneManager.GetActiveScene();
+        if (scene.name == "GameScene") {
             InitializeAmbience(FMODEvents.Instance.WeatherAmbience);
             InitializeMusic(FMODEvents.Instance.SeasonMusic);
-        } else if (LoadSceneManager._targetScene == LoadSceneManager.Scene.TitleScreenScene) {
+        } else if (scene.name == "TitleScreenScene") {
             InitializeMusic(FMODEvents.Instance.TitleTheme);
         }
     }

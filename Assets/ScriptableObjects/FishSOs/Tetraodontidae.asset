@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Tetraodontidae
+  m_EditorClassIdentifier: 
+  FishId: 67
+  Locations: 00000000
+  Method: 0
+  Seasons: 0100000002000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Caught the sea's own spiky stress ball - pufferfish in all its puffed-up glory!
+  - Puff all you want, little fish - you're still on my line!
+  - The pufferfish's unique defense mechanism allows it to inflate rapidly, deterring
+    predators.
+  - If Aesop wrote about fish, this puffer would be the cautionary tale - too much
+    puff, not enough punch.
+  - "Caught a fish that looks like it's in permanent \u2018don't mess with me' mode."
+  - A round, spiky sphere with big eyes - this pufferfish is part balloon, part pincushion.
+  FishSize: 1
+  FishSizeMin: 10
+  FishSizeMax: 20
+  FishItem: {fileID: 11400000, guid: 9753058bd28dc3e40ae9bf2db14d7388, type: 2}

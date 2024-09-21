@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Selachimorpha
+  m_EditorClassIdentifier: 
+  FishId: 58
+  Locations: 00000000
+  Method: 0
+  Seasons: 01000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Caught the sea's most notorious tough guy - shark, the original bad boy of the
+    ocean!
+  - Bet you thought you were the hunter - how's it feel to be the prey?
+  - The shark - a perfect predator, evolved over millions of years to dominate the
+    seas.
+  - The shark - a creature that's haunted sailors' nightmares since time immemorial.
+  - I've caught the sea's top predator - hope it doesn't have friends nearby.
+  - A sleek, gray missile of muscle and teeth, gliding effortlessly through the water.
+  FishSize: 5
+  FishSizeMin: 300
+  FishSizeMax: 600
+  FishItem: {fileID: 11400000, guid: 9b5b33d929206d94c9178bb05ddac972, type: 2}

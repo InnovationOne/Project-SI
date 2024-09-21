@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Sander lucioperca
+  m_EditorClassIdentifier: 
+  FishId: 53
+  Locations: 02000000
+  Method: 0
+  Seasons: 0100000002000000
+  TimeOfDay: 0300000004000000
+  CatchText:
+  - Caught a pike perch - this catch is zander-ful!
+  - Pike perch, you thought you could outsmart me - think again!
+  - Pike perch, or zander, are skilled predators, known for their sharp teeth and
+    keen hunting skills.
+  - Caught a pike perch - it's like holding a little underwater assassin, swift and
+    silent.
+  - Holding this pike perch feels like gripping a sharp, sleek fragment of the river's
+    hunger.
+  - The pike perch's silvery scales shimmer faintly, a blend of greens, grays, and
+    golds.
+  FishSize: 3
+  FishSizeMin: 40
+  FishSizeMax: 100
+  FishItem: {fileID: 11400000, guid: 4a03ce72c3c762e43838c4c1bf533cc2, type: 2}

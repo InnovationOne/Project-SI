@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Stomias boa
+  m_EditorClassIdentifier: 
+  FishId: 66
+  Locations: 00000000
+  Method: 0
+  Seasons: 0200000003000000
+  TimeOfDay: 0300000004000000
+  CatchText:
+  - Caught the ocean's most fearsome little dragon - scaly dragonfish, all teeth
+    and terror!
+  - Thought you could stay hidden in the dark, did you, dragonfish? Not this time!
+  - Scaly dragonfish are deep-sea predators, known for their bioluminescent bodies
+    and fearsome teeth.
+  - A creature of nightmares, the dragonfish is like a sea serpent trapped in a fish's
+    body.
+  - Caught a dragonfish that looks like it's planning something sinister - glowing
+    all the while.
+  - A small, elongated body with scales that glimmer faintly in the dark, the dragonfish
+    is both eerie and beautiful.
+  FishSize: 3
+  FishSizeMin: 80
+  FishSizeMax: 150
+  FishItem: {fileID: 11400000, guid: d72bfb942a1bed64ea32edccbc757cac, type: 2}

@@ -77,7 +77,7 @@ public class EnemyAI : MonoBehaviour {
         _idleToRoamingTimer -= Time.deltaTime;
         if (_idleToRoamingTimer <= 0) {
             ChangeState(EnemyState.Roaming);
-            Debug.Log("Changing to Roaming state");
+            //Debug.Log("Changing to Roaming state");
             _idleToRoamingTimer = Random.Range(_enemySO.MinIdleTime, _enemySO.MaxIdleTime);;
         }
     }
@@ -170,7 +170,7 @@ public class EnemyAI : MonoBehaviour {
                 if (pathIndex == _path.FinishLineIndex) {
                     followingPath = false;
                     ChangeState(EnemyState.Idle);
-                    Debug.Log("Changing to Idle state");
+                    //Debug.Log("Changing to Idle state");
                     break;
                 } else {
                     pathIndex++;

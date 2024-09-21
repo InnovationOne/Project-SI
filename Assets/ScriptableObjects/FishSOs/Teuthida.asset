@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Teuthida
+  m_EditorClassIdentifier: 
+  FishId: 68
+  Locations: 00000000
+  Method: 0
+  Seasons: 00000000010000000200000003000000
+  TimeOfDay: 0000000003000000
+  CatchText:
+  - Looks like I've caught the ocean's ink master - squid, the original underwater
+    artist!
+  - Thought your ink could hide you? Not this time, squid!
+  - Squid are remarkable cephalopods, using jet propulsion and ink for defense.
+  - A creature of mystery and ink, this squid's straight from the pages of a nautical
+    legend.
+  - Caught a squid that's all arms, ink, and mischief - what a slippery character.
+  - A blur of arms and flashing chromatophores, this squid is a master of camouflage
+    and speed.
+  FishSize: 1
+  FishSizeMin: 20
+  FishSizeMax: 40
+  FishItem: {fileID: 11400000, guid: 114d07ed43e641d46bbd7e38ee4b8aa6, type: 2}

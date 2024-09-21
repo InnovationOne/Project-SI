@@ -150,7 +150,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     #region Tool Actions
     private void ToolAction(ItemSO itemSO) {
         // Starte den rekursiven Vorgang
-        Debug.Log("Tool Action");
+        //Debug.Log("Tool Action");
         StartToolAction(itemSO.LeftClickAction.GetEnumerator());
     }
 

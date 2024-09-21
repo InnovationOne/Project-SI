@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Mola mola
+  m_EditorClassIdentifier: 
+  FishId: 36
+  Locations: 00000000
+  Method: 0
+  Seasons: 01000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Looks like I've fished up a giant pancake with fins - sunfish, the sea's flattest
+    resident!
+  - All that size, and still you couldn't avoid me - better luck drifting next time!
+  - The ocean sunfish, or Mola Mola, is one of the heaviest bony fish, known for
+    its disc-like shape and docile nature.
+  - The ocean sunfish - a fish that's more sunbather than swimmer, basking like a
+    king on the sea's surface.
+  - This sunfish looks like it's got nowhere to be and all day to get there.
+  - A giant, rounded body with tiny fins, this sunfish looks more like a drifting
+    disc than a fish.
+  FishSize: 5
+  FishSizeMin: 200
+  FishSizeMax: 500
+  FishItem: {fileID: 11400000, guid: c6c7edf2b18e61341af36e0d902ceee8, type: 2}

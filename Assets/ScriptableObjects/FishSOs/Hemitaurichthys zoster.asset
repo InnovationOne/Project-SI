@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Hemitaurichthys zoster
+  m_EditorClassIdentifier: 
+  FishId: 27
+  Locations: 00000000
+  Method: 0
+  Seasons: 0000000001000000
+  TimeOfDay: 000000000100000002000000
+  CatchText:
+  - This fish looks like it's dressed for a masquerade ball - too bad it's fashionably
+    late.
+  - Thought your fancy stripes would help you hide? Not today, butterfly.
+  - With striking black and white patterns, this butterflyfish is a master of camouflage.
+  - Straight out of a marine masquerade, this fish is the belle of the reef.
+  - Why does this fish look like it's dressed to impress the coral court?
+  - Striking black and white stripes, like a living art deco piece of the sea.
+  FishSize: 1
+  FishSizeMin: 10
+  FishSizeMax: 20
+  FishItem: {fileID: 11400000, guid: 38862de22d9a5444096f56612003f246, type: 2}

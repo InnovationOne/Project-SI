@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Scardinius erythrophthalmus
+  m_EditorClassIdentifier: 
+  FishId: 54
+  Locations: 02000000
+  Method: 0
+  Seasons: 0000000001000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Caught a rudd - talk about a fish with a ruddy good look!
+  - This rudd thought it could hide, but my net had other plans.
+  - Rudd are recognized by their golden scales and bright red fins, making them a
+    striking sight in freshwater.
+  - This rudd's golden body could belong in a waterside painting, glowing in the
+    afternoon sun.
+  - Holding this rudd feels like gripping a small, golden flame, flickering with
+    life.
+  - The rudd's golden scales catch the light, shining like a coin freshly minted
+    from the river.
+  FishSize: 2
+  FishSizeMin: 20
+  FishSizeMax: 40
+  FishItem: {fileID: 11400000, guid: bb63ba373edc2d24cba00a4db9855cb1, type: 2}

@@ -16,17 +16,19 @@ public class FishSO : ScriptableObject {
 
     [HideInInspector] public int FishId;
     [Header("Fish Params")]
-    public Sprite Sprite;
     public FishLocation[] Locations;
     public CatchingMethod Method;
     public TimeAndWeatherManager.SeasonName[] Seasons;
     public TimeAndWeatherManager.TimeOfDay[] TimeOfDay;
-    [TextArea]
-    public string[] CatchText; // funny, pun, normal
+    [TextArea] public string[] CatchText;
 
+    [Header("Size Params")]
     public FishType FishSize;
     public int FishSizeMin;
     public int FishSizeMax;
+
+    [Header("Item Params")]
+    public ItemSO FishItem;
 
     //[Header("Breeding Pond Params")]
     //public ItemSO BreedingPondProduct;

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Barbatula barbatula
+  m_EditorClassIdentifier: 
+  FishId: 8
+  Locations: 01000000
+  Method: 0
+  Seasons: 0000000001000000
+  TimeOfDay: 0200000003000000
+  CatchText:
+  - Caught a stone loach - guess you could say I'm on a rock-solid streak!
+  - Thought you were safe in the rocks? Not from me, loach.
+  - Stone loaches are masters of disguise, blending seamlessly with the riverbed.
+  - This loach's elusive nature is straight out of a Victorian mystery.
+  - This stone loach feels like a pebble with a pulse, alive in my hand.
+  - The loach's earthy tones blend perfectly with the stones, a living piece of the
+    river.
+  FishSize: 0
+  FishSizeMin: 8
+  FishSizeMax: 15
+  FishItem: {fileID: 11400000, guid: 4d7448c290fc70e409b39d5d514d7e9d, type: 2}

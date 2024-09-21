@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Glove
+  m_EditorClassIdentifier: 
+  FishId: 24
+  Locations: 000000000100000002000000
+  Method: 0
+  Seasons: 00000000010000000200000003000000
+  TimeOfDay: 0000000001000000020000000300000004000000
+  CatchText:
+  - I guess I can finally 'hand'le my fishing better with this glove.
+  - Even the fish are mocking me with this glove as a prize.
+  - This glove exemplifies the fusion of practicality and ornate steampunk aesthetics.
+  - This glove makes me think of the adventurers in Jules Verne's tales.
+  - A glove swimming here? Maybe it's enchanted to protect against underwater gears.
+  - The glove's brass buttons glint under the gaslit lamp.
+  FishSize: 3
+  FishSizeMin: 5
+  FishSizeMax: 5
+  FishItem: {fileID: 11400000, guid: eb4cf27f4a38d8248a42d727b77175c8, type: 2}

@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Batoidea
+  m_EditorClassIdentifier: 
+  FishId: 10
+  Locations: 00000000
+  Method: 0
+  Seasons: 0100000002000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Caught the ocean's own flying carpet - ray, gliding through the sea with all
+    the grace of a lazy bird!
+  - Smooth and stealthy, but not stealthy enough to avoid my hook, ray!
+  - Rays are flattened relatives of sharks, using their broad fins to glide gracefully
+    along the ocean floor.
+  - The ray - a fish that's more phantom than flesh, gliding like a wraith in the
+    deep.
+  - "This ray's got a look that says, \u2018I'm not here, you didn't see me' - too
+    bad, fish!"
+  - A broad, flat body and long, sweeping fins make this ray look like a living blanket
+    of the sea.
+  FishSize: 4
+  FishSizeMin: 50
+  FishSizeMax: 200
+  FishItem: {fileID: 11400000, guid: 68c294693fdc167449a7e0209e66ee98, type: 2}

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Makaira nigricans
+  m_EditorClassIdentifier: 
+  FishId: 35
+  Locations: 00000000
+  Method: 0
+  Seasons: 01000000
+  TimeOfDay: 0000000002000000
+  CatchText:
+  - The blue marlin - part fish, part sword, all attitude!
+  - For all that flair and fight, you still end up on my line.
+  - The blue marlin - a master sprinter of the sea, built for speed and strength.
+  - As if pulled straight from Hemingway's dreams, this fish is the old man's prize.
+  - Why does this fish look like it's challenging me to a duel?
+  - Blue scales shimmer like ocean waves, and its bill gleams like polished steel.
+  FishSize: 5
+  FishSizeMin: 200
+  FishSizeMax: 500
+  FishItem: {fileID: 11400000, guid: 481ed5835fc02f344a299d3317785441, type: 2}

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Oncorhynchus mykiss
+  m_EditorClassIdentifier: 
+  FishId: 39
+  Locations: 01000000
+  Method: 0
+  Seasons: 0000000002000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Caught a rainbow trout - looks like I've got a pot of gold at the end of this
+    line!
+  - Thought you could outshine me, rainbow trout? Not today.
+  - Rainbow trout are known for their vibrant coloration, which reflects their health
+    and environment.
+  - Caught a rainbow trout - it's like capturing a little piece of a rainbow's magic.
+  - Holding this rainbow trout feels like gripping a handful of sunlight.
+  - The rainbow trout's scales shimmer with blues, pinks, and silvers, reflecting
+    every glint of light.
+  FishSize: 2
+  FishSizeMin: 40
+  FishSizeMax: 70
+  FishItem: {fileID: 11400000, guid: 6cd2cd2d1fe0f9c4a8ecd704a48cc996, type: 2}

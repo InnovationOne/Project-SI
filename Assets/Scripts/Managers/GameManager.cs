@@ -31,11 +31,11 @@ public class GameManager : NetworkBehaviour {
 
     public override void OnNetworkSpawn() {
         if (IsServer) {
-            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SceneManager_OnLoadEventCompleted; ;
+            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += SceneManager_OnLoadEventCompleted;
         }
     }
 
-    private void SceneManager_OnLoadEventCompleted(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, System.Collections.Generic.List<ulong> clientsCompleted, System.Collections.Generic.List<ulong> clientsTimedOut) {
+    private void SceneManager_OnLoadEventCompleted(string sceneName, UnityEngine.SceneManagement.LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, System.Collections.Generic.List<ulong> clientsTimedOut) {
         foreach (ulong clientID in NetworkManager.Singleton.ConnectedClientsIds) {
             Transform playerTransform = Instantiate(_playerPrefab);
             playerTransform.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientID, true);
@@ -48,7 +48,7 @@ public class GameManager : NetworkBehaviour {
     public void AddPlayerToSleepingDict(ulong clientId) {
         if (!_playerSleepingDict.ContainsKey(clientId)) {
             _playerSleepingDict.Add(clientId, false);
-            Debug.Log($"Add player {clientId} to sleeping dict");
+            //Debug.Log($"Add player {clientId} to sleeping dict");
         }
     }
 
@@ -56,7 +56,7 @@ public class GameManager : NetworkBehaviour {
     public void RemovePlayerFromSleepingDict(ulong clientId) {
         if (!_playerSleepingDict.ContainsKey(clientId)) {
             _playerSleepingDict.Remove(clientId);
-            Debug.Log($"Remove player {clientId} from sleeping dict");
+            //Debug.Log($"Remove player {clientId} from sleeping dict");
         }
     }
     

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Gasterosteus aculeatus
+  m_EditorClassIdentifier: 
+  FishId: 23
+  Locations: 01000000
+  Method: 0
+  Seasons: 0000000002000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Three spines and a whole lot of attitude - this stickleback is all business.
+  - Those spines won't help you now, stickleback. Into the bucket you go.
+  - Sticklebacks are remarkable for their defensive spines, a marvel of evolution.
+  - This stickleback could be the knight of the river, armor and all.
+  - This stickleback is more spine than fish, a prickly little warrior of the water.
+  - The stickleback's spines stand like tiny spears, ready and alert.
+  FishSize: 0
+  FishSizeMin: 5
+  FishSizeMax: 10
+  FishItem: {fileID: 11400000, guid: bf1123ce87eb64d4f9d7e491bbb76209, type: 2}

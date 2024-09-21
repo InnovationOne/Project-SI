@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Alburnoides bipunctatus
+  m_EditorClassIdentifier: 
+  FishId: 3
+  Locations: 02000000
+  Method: 0
+  Seasons: 00000000010000000200000003000000
+  TimeOfDay: 000000000100000002000000
+  CatchText:
+  - Caught a spirlin - looks like I've got this fish spinning on my line!
+  - Spirlin, you thought you were quick, but my line was quicker.
+  - Spirlin are small, silvery fish often found in fast-flowing rivers, where they
+    feed on small invertebrates.
+  - Caught a spirlin - it's like reeling in a tiny, silvery flash of river light.
+  - Holding this spirlin feels like gripping a small, living sliver of the river's
+    silver light.
+  - The spirlin's slender, silvery body reflects the sunlight, flashing like a living
+    needle in the water.
+  FishSize: 0
+  FishSizeMin: 5
+  FishSizeMax: 15
+  FishItem: {fileID: 11400000, guid: 0b0b9a2341e92d940899651621042565, type: 2}

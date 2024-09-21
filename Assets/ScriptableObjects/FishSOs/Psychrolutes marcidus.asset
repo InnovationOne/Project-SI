@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Psychrolutes marcidus
+  m_EditorClassIdentifier: 
+  FishId: 44
+  Locations: 00000000
+  Method: 0
+  Seasons: 03000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Looks like I've caught the sea's very own mood swing on a bad day!
+  - You look like you've lost a bet with the ocean - and the ocean won.
+  - A victim of its own environment, this blobfish collapses without the ocean's
+    pressure.
+  - This fish looks like it belongs in a Dickens novel - just another sad character
+    in a tragic sea tale.
+  - I've fished up a wet sack of disappointment - oh wait, it's a fish.
+  - "A saggy, pink lump with eyes that scream \u2018I'm over it."
+  FishSize: 1
+  FishSizeMin: 20
+  FishSizeMax: 30
+  FishItem: {fileID: 11400000, guid: b29bacb7db4f8e24b9096998546ee082, type: 2}

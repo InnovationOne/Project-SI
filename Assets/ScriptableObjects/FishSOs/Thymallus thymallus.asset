@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Thymallus thymallus
+  m_EditorClassIdentifier: 
+  FishId: 71
+  Locations: 01000000
+  Method: 0
+  Seasons: 0000000002000000
+  TimeOfDay: 00000000020000000300000004000000
+  CatchText:
+  - Caught a grayling; now my day is officially fin-tastic!
+  - This grayling thought it was clever. I thought better.
+  - Graylings are like living paintings with fins of iridescent light.
+  - This grayling shimmers like something out of a Victorian watercolor.
+  - This grayling moves like a whisper in the water, barely there but impossible
+    to ignore.
+  - The grayling's scales flash like tiny mirrors catching the sun's light.
+  FishSize: 2
+  FishSizeMin: 25
+  FishSizeMax: 60
+  FishItem: {fileID: 11400000, guid: c6759d8bf08b093439705e68107d582f, type: 2}

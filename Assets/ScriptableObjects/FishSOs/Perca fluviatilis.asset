@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Perca fluviatilis
+  m_EditorClassIdentifier: 
+  FishId: 41
+  Locations: 01000000
+  Method: 0
+  Seasons: 00000000010000000200000003000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Caught a perch - looks like I'm perching myself on the winner's spot today!
+  - Thought those spines would keep you safe, perch? Guess again.
+  - European perch are apex predators in their habitats, perfectly suited for stealth
+    and speed.
+  - With its regal stripes, this perch could be the heraldry of a knight's shield.
+  - This perch feels like holding a river's little predator, all spines and strategy.
+  - The perch's stripes shimmer in the light, dark bands crossing its green-gold
+    body.
+  FishSize: 2
+  FishSizeMin: 15
+  FishSizeMax: 50
+  FishItem: {fileID: 11400000, guid: 860c24c0349d1c2439ac04c1766936a8, type: 2}

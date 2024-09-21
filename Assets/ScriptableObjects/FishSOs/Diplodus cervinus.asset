@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Diplodus cervinus
+  m_EditorClassIdentifier: 
+  FishId: 20
+  Locations: 00000000
+  Method: 0
+  Seasons: 01000000
+  TimeOfDay: 0000000002000000
+  CatchText:
+  - Caught the ocean's own striped assassin - zebra lionfish, all show and all sting!
+  - All those flashy stripes and spines, and you still ended up on my line - tough
+    break, lion!
+  - Zebra lionfish are venomous predators known for their bold stripes and long,
+    needle-like spines.
+  - The zebra lionfish could be the star of a sea saga - dangerous, beautiful, and
+    always striking from the shadows.
+  - Caught a lionfish that looks like it's been to fashion week - stripes, spikes,
+    and all sass.
+  - With long, flowing fins and bold black and white stripes, the zebra lionfish
+    is a striking, deadly beauty.
+  FishSize: 2
+  FishSizeMin: 20
+  FishSizeMax: 50
+  FishItem: {fileID: 11400000, guid: 8e14046480cbe5245b84fcd70b2c379f, type: 2}

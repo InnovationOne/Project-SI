@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Abramis brama
+  m_EditorClassIdentifier: 
+  FishId: 0
+  Locations: 02000000
+  Method: 0
+  Seasons: 0100000002000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - I'm bream-ing with pride after catching this beauty.
+  - This bream tried to outsmart me - didn't work out too well, did it?
+  - The bream's rounded shape and silver sheen are marks of a classic river dweller.
+  - This bream looks like it swam right out of an Impressionist painting.
+  - This bream feels like holding a moonbeam - silvery, soft, and fleeting.
+  - The bream's scales catch the light, reflecting a soft, silvery glow.
+  FishSize: 2
+  FishSizeMin: 30
+  FishSizeMax: 50
+  FishItem: {fileID: 11400000, guid: 604840eade380b54ea9d9e965cb205ee, type: 2}

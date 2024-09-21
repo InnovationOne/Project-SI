@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Rhodeus amarus
+  m_EditorClassIdentifier: 
+  FishId: 45
+  Locations: 01000000
+  Method: 0
+  Seasons: 03000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Caught a bitterling - guess it's a bitter-sweet victory!
+  - Thought you were a quick one, didn't you, little bitterling? Not quick enough.
+  - The bitterling's vivid colors are a telltale sign of its fascinating lifecycle.
+  - This bitterling looks like it could swim straight out of a Japanese ukiyo-e print.
+  - This tiny fish is like a living shard of stained glass, delicate and bright.
+  - The bitterling's scales shimmer like a kaleidoscope of colors under the sun.
+  FishSize: 0
+  FishSizeMin: 4
+  FishSizeMax: 6
+  FishItem: {fileID: 11400000, guid: 998b48704fb0fb64ba438aa1ec0ef385, type: 2}

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Ceratioidei
+  m_EditorClassIdentifier: 
+  FishId: 14
+  Locations: 00000000
+  Method: 0
+  Seasons: 03000000
+  TimeOfDay: 0300000004000000
+  CatchText:
+  - "Talk about a \u2018catch of the light - this one's a real trickster!"
+  - Thought you'd reel me in with your little light show? Not today!
+  - A living light bulb, the anglerfish is the predator and illusionist of the deep.
+  - Straight out of a sailor's nightmare, this fish is a living ghost story!
+  - This fish looks like it's been rejected from a steampunk horror novel.
+  - With a glowing lure and jagged teeth, this fish is equal parts eerie and entrancing.
+  FishSize: 3
+  FishSizeMin: 50
+  FishSizeMax: 100
+  FishItem: {fileID: 11400000, guid: 0e57c402cc355da48926fa00f12f4e42, type: 2}

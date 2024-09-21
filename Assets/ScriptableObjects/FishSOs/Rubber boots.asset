@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Rubber boots
+  m_EditorClassIdentifier: 
+  FishId: 46
+  Locations: 000000000100000002000000
+  Method: 0
+  Seasons: 00000000010000000200000003000000
+  TimeOfDay: 0000000001000000020000000300000004000000
+  CatchText:
+  - With these rubber boots, I'm 'stomping' through the steampunk waters.
+  - Great, now my catch includes soggy rubber boots - how charming.
+  - These rubber boots are crafted from vulcanized rubber, providing excellent waterproofing.
+  - Wearing these rubber boots feels like being a character in a Victorian-era steampunk
+    novel.
+  - A pair of rubber boots underwater? Maybe they're enchanted to allow walking on
+    submerged gears.
+  - The rubber boots shimmer with a slick, oil-like sheen under the steam-powered
+    lights.
+  FishSize: 3
+  FishSizeMin: 5
+  FishSizeMax: 5
+  FishItem: {fileID: 11400000, guid: ec18c36d40eec394192b4d1a617e7577, type: 2}

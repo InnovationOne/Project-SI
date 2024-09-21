@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Sock
+  m_EditorClassIdentifier: 
+  FishId: 62
+  Locations: 000000000100000002000000
+  Method: 0
+  Seasons: 00000000010000000200000003000000
+  TimeOfDay: 0000000001000000020000000300000004000000
+  CatchText:
+  - This sock really 'stepped up' my game on the steampunk rivers.
+  - Even the fish are mocking me with this sock as a prize.
+  - This sock appears to be woven from high-tensile steampunk fibers, enhancing its
+    durability.
+  - Like Cinderella's lost slipper, this sock holds secrets of the steampunk realms.
+  - I never expected to reel in a sock; perhaps it's enchanted for some steampunk
+    ritual.
+  - The sock's vibrant stripes shimmer under the steam-powered lamplight.
+  FishSize: 3
+  FishSizeMin: 5
+  FishSizeMax: 5
+  FishItem: {fileID: 11400000, guid: 4544005a210b3f0448fc618f977bc605, type: 2}

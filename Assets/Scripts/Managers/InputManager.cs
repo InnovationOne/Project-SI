@@ -37,6 +37,8 @@ public class InputManager : NetworkBehaviour {
     public event Action OnToolbeltSlot10Action;
 
     public event Action OnLeftClickAction;
+    public event Action OnLeftClickStarted;
+    public event Action OnLeftClickCanceled;
     public event Action OnRightClickAction;
 
     public event Action OnLeftControlAction;
@@ -64,7 +66,6 @@ public class InputManager : NetworkBehaviour {
 
     private void Start() {
         playerInputActions.Player.Enable();
-        playerInputActions.Fishing.Disable();
 
         playerInputActions.Player.Run.performed += Run_performed;
         playerInputActions.Player.DropItem.performed += DropItem_performed;
@@ -93,6 +94,8 @@ public class InputManager : NetworkBehaviour {
         playerInputActions.Player.ToolbeltSlot10.performed += ToolbeltSlot10_performed;
 
         playerInputActions.Player.LeftClick.performed += LeftClick_performed;
+        playerInputActions.Player.LeftClick.started += LeftClick_started;
+        playerInputActions.Player.LeftClick.canceled += LeftClick_canceled;
         playerInputActions.Player.RightClick.performed += RightClick_performed;
 
         playerInputActions.Player.Escape.performed += Escape_performed;
@@ -200,6 +203,14 @@ public class InputManager : NetworkBehaviour {
         OnLeftClickAction?.Invoke();
     }
 
+    private void LeftClick_started(InputAction.CallbackContext obj) {
+        OnLeftClickStarted?.Invoke();
+    }
+
+    private void LeftClick_canceled(InputAction.CallbackContext obj) {
+        OnLeftClickCanceled?.Invoke();
+    }
+
     private void RightClick_performed(InputAction.CallbackContext obj) {
         OnRightClickAction?.Invoke();
     }
@@ -223,16 +234,6 @@ public class InputManager : NetworkBehaviour {
     public bool GetLeftControlPressed() {
         return playerInputActions.Player.LeftControl.ReadValue<float>() > 0;
     }
-    #endregion
-
-
-    #region Fishing
-    public bool GetButton1Pressed() => playerInputActions.Fishing.Button1.ReadValue<float>() > 0;
-    public bool GetButton2Pressed() => playerInputActions.Fishing.Button2.ReadValue<float>() > 0;
-    public bool GetButton3Pressed() => playerInputActions.Fishing.Button3.ReadValue<float>() > 0;
-    public bool GetButton4Pressed() => playerInputActions.Fishing.Button4.ReadValue<float>() > 0;
-    public bool GetButton5Pressed() => playerInputActions.Fishing.Button5.ReadValue<float>() > 0;
-    public bool GetButton6Pressed() => playerInputActions.Fishing.Button6.ReadValue<float>() > 0;
     #endregion
 
 
@@ -262,13 +263,11 @@ public class InputManager : NetworkBehaviour {
     public void EnableDebugConsoleActionMap() {
         playerInputActions.DebugConsole.Enable();
         playerInputActions.Player.Disable();
-        playerInputActions.Fishing.Disable();
     }
 
     public void EnablePlayerActionMap() {
         playerInputActions.DebugConsole.Disable();
         playerInputActions.Player.Enable();
-        playerInputActions.Fishing.Disable();
     }
 
 

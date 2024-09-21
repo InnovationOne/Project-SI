@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Salvelinus alpinus
+  m_EditorClassIdentifier: 
+  FishId: 51
+  Locations: 02000000
+  Method: 0
+  Seasons: 0100000002000000
+  TimeOfDay: 00000000020000000300000004000000
+  CatchText:
+  - Caught an Arctic char - guess I'm really ice-ing today's catch!
+  - Arctic char, you thought you could hide in the cold depths, but I've got you
+    now.
+  - Arctic char are perfectly adapted to cold, clear waters, thriving in some of
+    the harshest aquatic environments.
+  - This Arctic char swims like it's been touched by the northern lights, bright
+    and vivid against the cold
+  - Holding this Arctic char feels like gripping a shard of the frozen north, bright
+    and alive.
+  - The Arctic char's vibrant scales shimmer in shades of pink, orange, and red,
+    contrasting with the blue water.
+  FishSize: 2
+  FishSizeMin: 40
+  FishSizeMax: 60
+  FishItem: {fileID: 11400000, guid: 7426b35360101254bb97b19eadbe1420, type: 2}

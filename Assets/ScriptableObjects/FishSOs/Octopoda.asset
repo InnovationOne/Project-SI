@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Octopoda
+  m_EditorClassIdentifier: 
+  FishId: 38
+  Locations: 00000000
+  Method: 0
+  Seasons: 00000000010000000200000003000000
+  TimeOfDay: 0000000003000000
+  CatchText:
+  - This octopus has more tricks up its arms than a stage magician - what a crafty
+    catch!
+  - Ink all you want, you're not escaping my line this time, crafty one!
+  - With three hearts, blue blood, and a brain in every arm, octopuses are the masterminds
+    of the sea.
+  - If Jules Verne wrote about octopuses, this one would be plotting something devious
+    from the depths.
+  - Caught an octopus that looks like it's got a backup plan for every tentacle.
+  - Its eight arms writhe and curl, each covered in suckers that grip like tiny,
+    powerful hands.
+  FishSize: 3
+  FishSizeMin: 50
+  FishSizeMax: 100
+  FishItem: {fileID: 11400000, guid: 3f76351998cee4844be74b6542e141c3, type: 2}

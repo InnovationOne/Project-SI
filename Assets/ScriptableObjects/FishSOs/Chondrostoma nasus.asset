@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Chondrostoma nasus
+  m_EditorClassIdentifier: 
+  FishId: 16
+  Locations: 01000000
+  Method: 0
+  Seasons: 0000000001000000
+  TimeOfDay: 0200000003000000
+  CatchText:
+  - Hooked a nase - it seems my fishing instincts are right on the nose!
+  - Nase, you can't outswim fate - or my net, for that matter.
+  - Nase are bottom feeders, using their unique, downturned mouths to graze on algae
+    and invertebrates.
+  - This nase looks like it could be a character in a tale of river sprites and hidden
+    streams.
+  - This nase feels like holding a living piece of the riverbed, all grit and grace.
+  - The nase's body is sleek and silvery, glinting like a polished pebble.
+  FishSize: 2
+  FishSizeMin: 25
+  FishSizeMax: 40
+  FishItem: {fileID: 11400000, guid: 5f7e4c3de6c544d4790d2c9558d446da, type: 2}

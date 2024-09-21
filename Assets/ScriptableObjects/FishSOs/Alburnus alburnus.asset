@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Alburnus alburnus
+  m_EditorClassIdentifier: 
+  FishId: 4
+  Locations: 01000000
+  Method: 0
+  Seasons: 0100000002000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Caught a bleak - this catch is anything but gloomy!
+  - Bleak, you thought you were too quick for me, didn't you?
+  - Bleak are surface feeders, darting just below the water's top, always on the
+    lookout for insects.
+  - Caught a bleak - it's like pulling a piece of reflected moonlight from the water.
+  - This bleak feels like holding a living shard of silver, flickering with light.
+  - The bleak's scales flash bright and silver, reflecting every flicker of sunlight.
+  FishSize: 1
+  FishSizeMin: 10
+  FishSizeMax: 20
+  FishItem: {fileID: 11400000, guid: f82cba47ca3239047a182c69741e6d3d, type: 2}

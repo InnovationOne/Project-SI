@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Salmo trutta fario
+  m_EditorClassIdentifier: 
+  FishId: 49
+  Locations: 01000000
+  Method: 0
+  Seasons: 00000000010000000200000003000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Trout-standing catch of the day, if I do say so myself.
+  - Thought you were sly, river trout? My line had other plans.
+  - River trout, streamlined perfection - built to thrive in fast-moving waters.
+  - This trout's fight reminded me of Hemingway's tales of fish and man.
+  - It's like catching a piece of the river's spirit, this lively trout.
+  - The trout's scales shimmer like the river's surface at dawn, cool and bright.
+  FishSize: 2
+  FishSizeMin: 30
+  FishSizeMax: 75
+  FishItem: {fileID: 11400000, guid: e4b183808bbc3b442abaa3f56987ca7d, type: 2}

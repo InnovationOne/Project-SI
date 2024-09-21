@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Salmo trutta lacustris
+  m_EditorClassIdentifier: 
+  FishId: 50
+  Locations: 02000000
+  Method: 0
+  Seasons: 0000000002000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Caught a lake trout - talk about a catch that's lake-tastic!
+  - This lake trout thought it was safe in the depths - not with me around.
+  - Lake trout are top predators in their cold, deep-water habitats, thriving in
+    well-oxygenated lakes.
+  - Caught a lake trout - it's like reeling in a deep-water legend from the lake's
+    dark heart.
+  - Holding this lake trout feels like gripping a cold, living shadow from the lake's
+    depths.
+  - The lake trout's mottled scales blend with the rocky bottom, a pattern of greens,
+    grays, and blacks.
+  FishSize: 3
+  FishSizeMin: 50
+  FishSizeMax: 100
+  FishItem: {fileID: 11400000, guid: 4bfaf761567eab840bfa8555fd1bbc19, type: 2}

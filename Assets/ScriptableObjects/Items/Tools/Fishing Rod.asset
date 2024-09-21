@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ItemId: 0
   ItemType: 1
-  ItemName: 
-  ItemIcon: {fileID: 0}
+  ItemName: Fishing Rod
+  ItemIcon: {fileID: 1670585940, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
   IsStackable: 0
   MaxStackableAmount: 1
   CanBeBought: 0
@@ -24,8 +24,14 @@ MonoBehaviour:
   LowestRaritySellPrice: 0
   ItemInfoHoverText: 
   LeftClickAction: []
-  ToolItemRarity: []
+  ToolItemRarity:
+  - {fileID: 1670585940, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
+  - {fileID: -746616447, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
+  - {fileID: 485358893, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
+  - {fileID: 1328047233, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
+  - {fileID: 957941881, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
+  - {fileID: -1263806737, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
   UsageOrDamageOnAction: 
   VolumeOrBiteRate: 
   CatchChance: 
-  EnergyOnAction: 
+  EnergyOnAction: 000000000000000000000000000000000000000000000000

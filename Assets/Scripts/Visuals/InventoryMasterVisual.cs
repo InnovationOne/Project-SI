@@ -15,9 +15,6 @@ public enum InventorySubPanels {
 public class InventoryMasterVisual : MonoBehaviour {
     public static InventoryMasterVisual Instance { get; private set; }
 
-    //public event Action<bool> OnChestPanelToggled;
-
-
     [Header("Standard Panels")]
     [SerializeField] private GameObject[] _subPanels;
     [SerializeField] private Button[] _inventoryButtons;

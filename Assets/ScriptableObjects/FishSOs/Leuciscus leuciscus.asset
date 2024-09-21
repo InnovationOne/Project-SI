@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Leuciscus leuciscus
+  m_EditorClassIdentifier: 
+  FishId: 31
+  Locations: 01000000
+  Method: 0
+  Seasons: 00000000010000000200000003000000
+  TimeOfDay: 0200000003000000
+  CatchText:
+  - Caught a dace - guess you could say I'm really dace-ing my way to victory!
+  - Dace, you may be fast, but not fast enough to escape me!
+  - Dace are agile swimmers, perfectly suited for life in fast-flowing rivers.
+  - Caught a dace - feels like I've pulled a tiny river dancer from the stream.
+  - This dace feels like holding a quicksilver flash, never quite still.
+  - The dace's silver scales glint in the light, a living blade of the river.
+  FishSize: 1
+  FishSizeMin: 15
+  FishSizeMax: 25
+  FishItem: {fileID: 11400000, guid: 30623b2f53c2d8e4391a24623549771a, type: 2}

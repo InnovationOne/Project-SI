@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Macropinna microstoma
+  m_EditorClassIdentifier: 
+  FishId: 34
+  Locations: 00000000
+  Method: 0
+  Seasons: 03000000
+  TimeOfDay: 04000000
+  CatchText:
+  - Caught a fish with a head so transparent, it's like it's got nothing to hide!
+  - All those see-through brains, and still you ended up on my line!
+  - The barreleye - an evolutionary wonder with a transparent head to spot prey from
+    any angle.
+  - This fish looks like it belongs in a Jules Verne novel - part creature, part
+    contraption.
+  - I've caught a fish that looks like it's already been dissected!
+  - A clear dome for a skull, with eyes that roll like marbles in a glass case.
+  FishSize: 1
+  FishSizeMin: 20
+  FishSizeMax: 40
+  FishItem: {fileID: 11400000, guid: 218b8cf90e6d5a443ab3bbe09912865e, type: 2}

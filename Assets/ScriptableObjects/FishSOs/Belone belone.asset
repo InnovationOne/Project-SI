@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Belone belone
+  m_EditorClassIdentifier: 
+  FishId: 11
+  Locations: 00000000
+  Method: 0
+  Seasons: 00000000010000000200000003000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Caught the sea's very own spear - garfish, the jouster of the deep!
+  - You might be sharp, garfish, but not sharp enough to escape me.
+  - With its long, pointed body, the garfish slices through water like a living spear.
+  - If knights of the sea existed, this garfish would be wielding its snout like
+    a lance.
+  - Caught a fish that looks like it's more weapon than creature - what a strange
+    sight.
+  - A long, slender body with a needle-like snout, the garfish cuts through the water
+    like an arrow.
+  FishSize: 3
+  FishSizeMin: 50
+  FishSizeMax: 150
+  FishItem: {fileID: 11400000, guid: 78164b3b8e69fd54f9a3604933e61e6d, type: 2}

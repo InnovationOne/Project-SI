@@ -17,7 +17,9 @@ public class LoadSceneManager : MonoBehaviour {
     // For getting from the main menu to the game for testing
     [SerializeField] private Button _continueButton;
     private void Awake() {
-        _continueButton.onClick.AddListener(() => LoadScene(Scene.GameScene));
+        if (_continueButton != null) {
+            _continueButton.onClick.AddListener(() => LoadScene(Scene.GameScene));
+        }
     }
 
     public static void LoadScene(Scene targetScene) {

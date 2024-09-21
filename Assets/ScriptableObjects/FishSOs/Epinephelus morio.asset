@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Epinephelus morio
+  m_EditorClassIdentifier: 
+  FishId: 21
+  Locations: 00000000
+  Method: 0
+  Seasons: 01000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - This grouper's got more red than a sunset - too bad it's seeing the inside of
+    my net now!
+  - You might be the big boss of the reef, but you're no match for me, grouper!
+  - Red groupers are known for their vibrant coloration and strong, robust bodies,
+    perfect for reef life.
+  - The red grouper - a fish that would be right at home in a salty sea yarn, all
+    bold color and attitude.
+  - Caught a red grouper that seems ready to charge the next coral it sees.
+  - Its robust, deep-red body stands out against the reef, like a fiery gem among
+    rocks.
+  FishSize: 3
+  FishSizeMin: 60
+  FishSizeMax: 120
+  FishItem: {fileID: 11400000, guid: 6a00fc7d7001ea74e95d80d4c6aadd70, type: 2}

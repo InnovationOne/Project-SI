@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Pelecus cultratus
+  m_EditorClassIdentifier: 
+  FishId: 40
+  Locations: 01000000
+  Method: 0
+  Seasons: 0200000003000000
+  TimeOfDay: 0300000004000000
+  CatchText:
+  - Caught a sabrefish - this catch is sharp and slick as a blade!
+  - Sabrefish, you thought you were swift, but my hook was sharper.
+  - Sabrefish are known for their sharp, elongated bodies and forked tails, perfectly
+    designed for swift, agile swimming.
+  - Caught a sabrefish - it's like holding a piece of water's sharpest poetry, swift
+    and gleaming.
+  - Holding this sabrefish feels like gripping a sliver of the river's cutting edge,
+    sleek and swift.
+  - The sabrefish's sleek, silver body glistens like a finely polished blade, cutting
+    through the water with ease.
+  FishSize: 1
+  FishSizeMin: 15
+  FishSizeMax: 30
+  FishItem: {fileID: 11400000, guid: de02ffaf006a82145ad176b729f8e708, type: 2}

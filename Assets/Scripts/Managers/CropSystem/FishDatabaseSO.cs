@@ -36,9 +36,15 @@ public class FishDatabaseSO : ScriptableObject {
     public FishSO GetFish(int tileId, CatchingMethod catchingMethod) {
         var currentSeason = TimeAndWeatherManager.Instance.CurrentSeason;
         var currentTimeOfDay = TimeAndWeatherManager.Instance.CurrentTimeOfDay;
+        int locationId = tileId switch {
+            0 or 1 or 2 => 0,
+            3 => 1,
+            4 => 2,
+            _ => -1
+        };
 
         var availableFish = _fish
-            .Where(fish => fish.Locations.Contains((FishLocation)tileId) &&
+            .Where(fish => fish.Locations.Contains((FishLocation)locationId) &&
                            fish.Method == catchingMethod &&
                            fish.Seasons.Contains((TimeAndWeatherManager.SeasonName)currentSeason.Value) &&
                            fish.TimeOfDay.Contains(currentTimeOfDay))

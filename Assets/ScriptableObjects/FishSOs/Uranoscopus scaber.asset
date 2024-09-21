@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Uranoscopus scaber
+  m_EditorClassIdentifier: 
+  FishId: 72
+  Locations: 00000000
+  Method: 0
+  Seasons: 01000000
+  TimeOfDay: 0000000002000000
+  CatchText:
+  - I've caught the dreamer of the sea - always with its head in the... sand.
+  - Too busy looking at the sky to notice my hook, huh?
+  - The stargazer - an ambush predator that lies in wait, staring skyward.
+  - A seer of the deep, this fish is half fish, half celestial dreamer.
+  - Why does this fish look like it's plotting the next constellation?
+  - A flat body and upward eyes, like it's always looking to the stars above.
+  FishSize: 1
+  FishSizeMin: 15
+  FishSizeMax: 30
+  FishItem: {fileID: 11400000, guid: e556e70c3dac822478ef39eedfc2ddaa, type: 2}

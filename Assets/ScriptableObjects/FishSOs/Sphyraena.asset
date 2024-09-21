@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Sphyraena
+  m_EditorClassIdentifier: 
+  FishId: 63
+  Locations: 00000000
+  Method: 0
+  Seasons: 01000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Looks like I've just reeled in the ocean's meanest smile!
+  - Caught the bully of the sea - how the tables have turned!
+  - A remarkable predator, the barracuda boasts speed, strength, and an intimidating
+    bite.
+  - This fish could rival any pirate's ferocity on the high seas.
+  - If glares could kill, I'd be swimming with the fish.
+  - Its scales gleam like polished metal, and its eyes pierce like daggers.
+  FishSize: 4
+  FishSizeMin: 50
+  FishSizeMax: 200
+  FishItem: {fileID: 11400000, guid: 44c298cc0d87f4b47bf532f3b9a27948, type: 2}

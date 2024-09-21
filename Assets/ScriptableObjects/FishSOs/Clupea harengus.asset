@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Clupea harengus
+  m_EditorClassIdentifier: 
+  FishId: 17
+  Locations: 00000000
+  Method: 0
+  Seasons: 0000000002000000
+  TimeOfDay: 0000000002000000
+  CatchText:
+  - Caught a herring - silver of the sea, and twice as slippery!
+  - This herring thought it could outswim me - wrong!
+  - Known for their schooling behavior, herrings are a keystone species in marine
+    ecosystems.
+  - A fish that's fed kings and sailors alike - humble, yet essential.
+  - Caught a fish that looks like it's always on the run - no rest for the humble
+    herring.
+  - Shimmering silver scales catch every ray, like a coin spinning in water.
+  FishSize: 1
+  FishSizeMin: 20
+  FishSizeMax: 40
+  FishItem: {fileID: 11400000, guid: 8da426be042ed664583576f2f0ec2b0d, type: 2}

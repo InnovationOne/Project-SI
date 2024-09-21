@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Esox lucius
+  m_EditorClassIdentifier: 
+  FishId: 22
+  Locations: 02000000
+  Method: 0
+  Seasons: 02000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Caught a pike - looks like I've really spiked today's catch!
+  - You thought you were the top predator, pike? Not today.
+  - Pike are apex predators, equipped with sharp teeth and a streamlined body for
+    ambush hunting.
+  - This pike could be the dragon of the river, lurking in the depths with a menacing
+    grin.
+  - This pike feels like a living weapon, poised and powerful even out of water.
+  - The pike's scales are dark and mottled, blending perfectly with the shadowy waters.
+  FishSize: 3
+  FishSizeMin: 60
+  FishSizeMax: 150
+  FishItem: {fileID: 11400000, guid: ecad2f18de7a8f54a90093e477b7336e, type: 2}

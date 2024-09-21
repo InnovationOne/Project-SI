@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Pristidae
+  m_EditorClassIdentifier: 
+  FishId: 43
+  Locations: 00000000
+  Method: 0
+  Seasons: 01000000
+  TimeOfDay: 0000000001000000
+  CatchText:
+  - Caught the ocean's buzzsaw on fins - sawfish, slicing through the sea with style!
+  - Thought you could carve your way out of trouble? Not today, sawfish!
+  - Sawfish are rays with long, toothed snouts used for slashing prey and defending
+    against predators.
+  - The sawfish - a creature that looks like it swam out of a pirate's tool chest,
+    all blade and bravado.
+  - This sawfish looks like it's planning to cut its way through anything in its
+    path - what a menacing blade!
+  - A long, toothed snout juts forward like a living blade, giving the sawfish a
+    fierce, predatory look.
+  FishSize: 5
+  FishSizeMin: 200
+  FishSizeMax: 500
+  FishItem: {fileID: 11400000, guid: a1325659ebd895642861c7fbda9c5118, type: 2}

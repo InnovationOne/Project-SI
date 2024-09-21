@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5cda17449ffc96429329d03ecc0141c, type: 3}
+  m_Name: Rutilus rutilus
+  m_EditorClassIdentifier: 
+  FishId: 47
+  Locations: 02000000
+  Method: 0
+  Seasons: 0000000001000000
+  TimeOfDay: 0000000002000000
+  CatchText:
+  - This roach didn't slip past me - I've got it hook, line, and sinker!
+  - Thought you could swim past, roach? Not on my watch.
+  - Common roach are adaptable fish, thriving in lakes, rivers, and canals across
+    Europe.
+  - This roach looks like it could have swum straight out of a traditional English
+    pond painting.
+  - This roach feels like holding a flash of silver, quick and lively in my hand.
+  - The roach's scales shine like tiny mirrors, reflecting light with every twist.
+  FishSize: 1
+  FishSizeMin: 15
+  FishSizeMax: 35
+  FishItem: {fileID: 11400000, guid: aa52924d05f4b6a4a84754d8ff076072, type: 2}
