@@ -33,7 +33,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
     private ItemSlot _itemSlotForShowInfo;
     private bool _showInfo = false;
     private float _currentTime = 0f;
-    
+
 
     public void ItemContainerPanelAwake() {
         if (_splitButton != null) {
@@ -49,23 +49,23 @@ public abstract class ItemContainerUI : MonoBehaviour {
             _itemInfo.gameObject.SetActive(false);
         }
     }
-    
+
     private void Start() {
         ItemContainer.OnItemsUpdated += ShowUIButtonContains;
 
         Init();
     }
-    
+
     private void Update() {
         if (_showInfo) {
             ShowItemInfo();
-        } 
+        }
         if (_showRightClickMenu) {
             _splitAmountSliderText.text = _splitAmountSlider.value.ToString();
             if (_showInfo) {
                 HideItemInfo();
             }
-        } 
+        }
         if (DragItemUI.Instance.gameObject.activeSelf) {
             HideItemInfo();
             HideRightClickMenu();
@@ -74,7 +74,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
 
     public void Init() {
         //Set the button index on the button
-        for (int i = 0; i < ItemContainer.ItemSlots .Count && i < ItemButtons.Length; i++) {
+        for (int i = 0; i < ItemContainer.ItemSlots.Count && i < ItemButtons.Length; i++) {
             ItemButtons[i].GetComponent<BackpackButton>().SetButtonIndex(i);
         }
 
@@ -140,21 +140,24 @@ public abstract class ItemContainerUI : MonoBehaviour {
 
     private void SplitItem() {
         if (_buttonIndex >= 0) {
-            if ((int)_splitAmountSlider.value > 0) {
-                ItemSlot newItemSlot = new();
-                newItemSlot.Set(new ItemSlot(
-                    ItemContainer.ItemSlots[_buttonIndex].ItemId, 
-                    (int)_splitAmountSlider.value, 
-                    ItemContainer.ItemSlots[_buttonIndex].RarityId));
+            int splitValue = (int)_splitAmountSlider.value;
+            if (splitValue > 0) {
+                ItemSlot originalSlot = ItemContainer.ItemSlots[_buttonIndex];
+                ItemSlot newItemSlot = new ItemSlot(
+                originalSlot.ItemId,
+                splitValue,
+                originalSlot.RarityId
+                );
                 PlayerItemDragAndDropController.LocalInstance.OnLeftClick(newItemSlot);
 
                 // When all items are "Splitted" clear the item slot
-                if ((int)_splitAmountSlider.maxValue == (int)_splitAmountSlider.value) {
-                    ItemContainer.ItemSlots[_buttonIndex].Clear();
+                if ((int)_splitAmountSlider.maxValue == splitValue) {
+                    originalSlot.Clear();
                 } else {
-                    ItemContainer.ItemSlots[_buttonIndex].Amount = (int)_splitAmountSlider.maxValue - (int)_splitAmountSlider.value;
+                    int newAmount = (int)_splitAmountSlider.maxValue - splitValue;
+                    originalSlot.Set(new ItemSlot(originalSlot.ItemId, newAmount, originalSlot.RarityId));
                 }
-                
+
                 ShowUIButtonContains();
             } else {
                 return;
@@ -236,14 +239,14 @@ public abstract class ItemContainerUI : MonoBehaviour {
         int scalerWidth = Screen.width / 640;
         int scalerHeight = Screen.height / 360;
         int xValue, yValue;
-        
+
         // Right
         if (_itemInfo.position.x / scalerWidth + _itemInfo.sizeDelta.x > GetComponentInParent<Canvas>().GetComponent<RectTransform>().sizeDelta.x) {
             xValue = 1;
         } else {
             xValue = 0;
         }
-        
+
         // Bottom
         if (_itemInfo.position.y / scalerHeight - _itemInfo.sizeDelta.y < 0) {
             yValue = 0;

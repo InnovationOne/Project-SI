@@ -262,7 +262,7 @@ public class InputManager : NetworkBehaviour {
     /// Checks if the shift key is pressed.
     /// </summary>
     /// <returns>True if shift is pressed; otherwise, false.</returns>
-    public bool GetShiftPressed() {
+    public bool IsShiftPressed() {
         return _playerInputActions.Player.Run.ReadValue<float>() > 0;
     }
 

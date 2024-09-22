@@ -19,4 +19,6 @@ public class ItemManager : NetworkBehaviour {
 
         ItemDatabase.InitializeItems();
     }
+
+    public int GetMaxStackableAmount(int itemId) => _itemDatabase[itemId].MaxStackableAmount;    
 }

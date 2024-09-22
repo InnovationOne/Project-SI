@@ -89,7 +89,8 @@ public class InventoryUI : ItemContainerUI {
             }
 
             if (remainingAmount > 0) {
-                ItemContainer.ItemSlots[buttonIndex].Amount = remainingAmount;
+                var slot = ItemContainer.ItemSlots[buttonIndex];
+                slot.Set(new ItemSlot(slot.ItemId, remainingAmount, slot.RarityId));
             } else {
                 ItemContainer.ItemSlots[buttonIndex].Clear();
             }

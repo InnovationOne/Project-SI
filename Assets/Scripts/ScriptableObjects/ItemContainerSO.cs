@@ -53,13 +53,13 @@ public class ItemContainerSO : ScriptableObject {
     private int AddToExisting(ItemSlot itemSlot, bool skipToolbelt) {
         var relevantSlots = GetRelevantSlots(skipToolbelt).ToList();
         foreach (var slot in relevantSlots) {
-            if (slot.ItemId == itemSlot.ItemId && slot.Amount < ItemManager.Instance.ItemDatabase[itemSlot.ItemId].MaxStackableAmount && slot.RarityId == itemSlot.RarityId) {
-                int addable = Math.Min(ItemManager.Instance.ItemDatabase[itemSlot.ItemId].MaxStackableAmount - slot.Amount, itemSlot.Amount);
-                slot.Amount += addable;
-                itemSlot.Amount -= addable;
-                if (itemSlot.Amount == 0) {
-                    return 0;
-                }
+            if (slot.ItemId == itemSlot.ItemId && 
+                slot.Amount < ItemManager.Instance.ItemDatabase[itemSlot.ItemId].MaxStackableAmount && 
+                slot.RarityId == itemSlot.RarityId) {
+                int maxStackable = ItemManager.Instance.GetMaxStackableAmount(slot.ItemId);
+                int addable = Math.Min(maxStackable - slot.Amount, itemSlot.Amount);
+                slot.AddAmount(addable, maxStackable);
+                itemSlot.RemoveAmount(addable);
             }
         }
         return AddToEmpty(itemSlot, skipToolbelt);
@@ -76,11 +76,10 @@ public class ItemContainerSO : ScriptableObject {
     private int AddToEmpty(ItemSlot itemSlot, bool skipToolbelt) {
         var relevantSlots = GetRelevantSlots(skipToolbelt).ToList();
         foreach (var slot in relevantSlots.Where(x => x.ItemId == -1)) {
-            slot.ItemId = itemSlot.ItemId;
-            slot.RarityId = itemSlot.RarityId;
-            int addable = Math.Min(ItemManager.Instance.ItemDatabase[itemSlot.ItemId].MaxStackableAmount, itemSlot.Amount);
-            slot.Amount = addable;
-            itemSlot.Amount -= addable;
+            slot.Set(new ItemSlot(itemSlot.ItemId, 0, itemSlot.RarityId));
+            int addable = Math.Min(ItemManager.Instance.GetMaxStackableAmount(itemSlot.ItemId), itemSlot.Amount);
+            int actualAdded = slot.AddAmount(addable, ItemManager.Instance.GetMaxStackableAmount(itemSlot.ItemId));
+            itemSlot.RemoveAmount(actualAdded);
 
             if (itemSlot.Amount == 0) {
                 break;
@@ -183,33 +182,29 @@ public class ItemContainerSO : ScriptableObject {
     /// <returns>A new list of item slots with combined items.</returns>
     public List<ItemSlot> CombineItemsByTypeAndRarity() {
         return _itemSlots
-            .Where(slot => ItemManager.Instance.ItemDatabase[slot.ItemId] != null)
+            .Where(slot => !slot.IsEmpty)
             .GroupBy(slot => new { slot.ItemId, slot.RarityId })
-            .Select(g => new ItemSlot {
-                ItemId = g.First().ItemId,
-                Amount = g.Sum(x => x.Amount),
-                RarityId = g.Key.RarityId
-            })
+            .Select(g => new ItemSlot(g.Key.ItemId, g.Sum(x => x.Amount), g.Key.RarityId))
             .ToList();
     }
 
     /// <summary>
-    /// Removes a specified amount of items with a given item ID and rarity ID from the item container.
+    /// Removes a specified amount of items from the inventory.
     /// </summary>
-    /// <param name="itemId">The ID of the item to remove.</param>
-    /// <param name="amount">The amount of items to remove.</param>
-    /// <param name="rarityId">The rarity ID of the items to remove.</param>
+    /// <param name="itemSlot">The item slot to remove from.</param>
     private void RemoveItemAmount(ItemSlot itemSlot) {
         var filteredItemSlots = _itemSlots
-            .Where(x => x != null && ItemManager.Instance.ItemDatabase[x.ItemId] != null && x.ItemId == itemSlot.ItemId && x.RarityId == itemSlot.RarityId)
+            .Where(x => !itemSlot.IsEmpty &&
+                        x.ItemId == itemSlot.ItemId &&
+                        x.RarityId == itemSlot.RarityId)
             .ToList();
 
         foreach (var filteredItemSlot in filteredItemSlots) {
             int removalAmount = Math.Min(itemSlot.Amount, filteredItemSlot.Amount);
-            filteredItemSlot.Amount -= removalAmount;
-            itemSlot.Amount -= removalAmount;
+            filteredItemSlot.RemoveAmount(removalAmount);
+            itemSlot.RemoveAmount(removalAmount);
 
-            if (filteredItemSlot.Amount <= 0) {
+            if (filteredItemSlot.IsEmpty) {
                 filteredItemSlot.Clear();
             }
 

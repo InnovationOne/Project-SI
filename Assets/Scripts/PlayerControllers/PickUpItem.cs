@@ -145,11 +145,16 @@ public class PickUpItem : NetworkBehaviour {
 
         AttemptToAddToDragAndDrop();
 
-        if (_itemSlot.Amount > 0) {
-            _itemSlot.Amount = inventoryController.InventoryContainer.AddItem(_itemSlot, false);
-        }
+        if (!_itemSlot.IsEmpty) {
+            // Attempt to add items to the inventory and get the remaining amount
+            int remainingAmount = inventoryController.InventoryContainer.AddItem(_itemSlot, false);
 
-        DespawnItemServerRpc();
+            // Calculate the amount that was successfully added
+            int addedAmount = _itemSlot.Amount - remainingAmount;
+
+            // Remove the added amount from the current item slot
+            _itemSlot.RemoveAmount(addedAmount);
+        }
     }
 
 
@@ -168,7 +173,15 @@ public class PickUpItem : NetworkBehaviour {
     private void AttemptToAddToDragAndDrop() {
         if (DragItemUI.Instance.gameObject.activeSelf) {
             var dragAndDropController = _closestPlayer.GetComponent<PlayerItemDragAndDropController>();
-            _itemSlot.Amount = dragAndDropController.TryToAddItemToDragItem(_itemSlot);
+
+            // Attempt to add items to the drag-and-drop slot and get the remaining amount
+            int remainingAmount = dragAndDropController.TryToAddItemToDragItem(_itemSlot);
+
+            // Calculate the amount that was successfully added
+            int addedAmount = _itemSlot.Amount - remainingAmount;
+
+            // Remove the added amount from the current item slot
+            _itemSlot.RemoveAmount(addedAmount);
         }
     }
 
