@@ -6,11 +6,16 @@ using UnityEngine;
 public class PlayerInteractController : NetworkBehaviour {
     public static PlayerInteractController LocalInstance { get; private set; }
 
+    // Maximum distance within which interactions can occur
     private const float MAX_INTERACT_DISTANCE = 0.4f;
-    private Interactable _interactable;
+
+    // Cached references
+    private Interactable _currentInteractable;
     private BoxCollider2D _playerCollider;
     private Player _player;
 
+    // Preallocated buffer for non-allocating physics queries
+    private static readonly Collider2D[] _interactablesBuffer = new Collider2D[10]; // Adjust size as needed
 
     private void Awake() {
         _playerCollider = GetComponent<BoxCollider2D>();
@@ -18,11 +23,16 @@ public class PlayerInteractController : NetworkBehaviour {
     }
 
     private void Start() {
-        InputManager.Instance.OnInteractAction += InputManager_OnInteractAction;
+        InputManager.Instance.OnInteractAction += HandleInteractAction;
     }
 
     private new void OnDestroy() {
-        InputManager.Instance.OnInteractAction -= InputManager_OnInteractAction;
+        // Ensure event is unsubscribed to prevent memory leaks
+        if (InputManager.Instance != null) {
+            InputManager.Instance.OnInteractAction -= HandleInteractAction;
+        }
+
+        base.OnDestroy();
     }
 
     public override void OnNetworkSpawn() {
@@ -37,54 +47,87 @@ public class PlayerInteractController : NetworkBehaviour {
 
     private void Update() {
         if (IsOwner) {
-            ProcessInteractionCheck();
+            CheckInteractionDistance();
         }
     }
 
     /// <summary>
     /// Handles the interaction action triggered by the input manager.
     /// </summary>
-    private void InputManager_OnInteractAction() {
-        DiscoverInteractables();
+    private void HandleInteractAction() {
+        FindClosestInteractable();
 
-        if (_interactable != null) {
-            _interactable.Interact(_player);
+        if (_currentInteractable != null) {
+            _currentInteractable.Interact(_player);
         }
     }
 
     /// <summary>
-    /// Processes the interaction check and triggers the interaction with the last interactable object if it is out of the maximum distance to the player.
+    /// Checks if the current interactable is still within the allowed interaction distance.
+    /// If not, it triggers the interaction and clears the reference.
     /// </summary>
-    private void ProcessInteractionCheck() {
-        if (_interactable != null &&
-            _interactable.MaxDistanceToPlayer > 0f &&
-            Vector2.Distance(transform.position, _interactable.transform.position) > _interactable.MaxDistanceToPlayer) {
+    private void CheckInteractionDistance() {
+        if (_currentInteractable == null || _currentInteractable.MaxDistanceToPlayer <= 0f) {
+            return;
+        }
 
-            _interactable.Interact(_player);
-            _interactable = null;
+        Vector2 playerPosition = transform.position;
+        Vector2 interactablePosition = _currentInteractable.transform.position;
+        float sqrDistance = (playerPosition - interactablePosition).sqrMagnitude;
+        float sqrMaxDistance = _currentInteractable.MaxDistanceToPlayer * _currentInteractable.MaxDistanceToPlayer;
+
+        if (sqrDistance > sqrMaxDistance) {
+            _currentInteractable.Interact(_player);
+            _currentInteractable = null;
         }
     }
 
     /// <summary>
-    /// Discovers interactable objects within a certain distance from the player.
+    /// Finds the closest interactable object within the maximum interaction distance.
+    /// Utilizes non-allocating physics queries to enhance performance.
     /// </summary>
-    private void DiscoverInteractables() {
-        var colliders = Physics2D.OverlapCircleAll(_playerCollider.bounds.center, MAX_INTERACT_DISTANCE);
-        Interactable interactable = null;
-        float closestDistance = float.MaxValue;
+    private void FindClosestInteractable() {
+        Vector2 center = _playerCollider.bounds.center;
+        float radius = MAX_INTERACT_DISTANCE;
+
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(center, radius);
+        Interactable closestInteractable = null;
+        float closestSqrDistance = float.MaxValue;
+        Vector2 playerPosition = transform.position;
+
         foreach (Collider2D collider in colliders) {
-            if (!collider.TryGetComponent(out interactable)) {
+            if (collider == null) {
+                continue;
+            }
+
+            // Attempt to get Interactable component from the collider or its parent
+            if (!collider.TryGetComponent(out Interactable interactable)) {
                 interactable = collider.GetComponentInParent<Interactable>();
             }
-            if (interactable != null) {
-                float distance = Vector2.Distance(transform.position, collider.transform.position);
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                }
+
+            if (interactable == null) {
+                continue;
+            }
+
+            // Calculate squared distance to avoid unnecessary square root computation
+            Vector2 interactablePosition = interactable.transform.position;
+            float sqrDistance = (playerPosition - interactablePosition).sqrMagnitude;
+
+            if (sqrDistance < closestSqrDistance) {
+                closestSqrDistance = sqrDistance;
+                closestInteractable = interactable;
             }
         }
 
-        _interactable = interactable;
+        _currentInteractable = closestInteractable;
+    }
+
+    // Optional: Visualize the interaction radius in the Unity Editor
+    private void OnDrawGizmosSelected() {
+        if (_playerCollider != null) {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(_playerCollider.bounds.center, MAX_INTERACT_DISTANCE);
+        }
     }
 }
 

@@ -145,7 +145,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Toolbelt Slot Select"",
+                    ""name"": ""MouseWheel"",
                     ""type"": ""Value"",
                     ""id"": ""8d9abc29-99de-4297-8077-c5f96bfc76c8"",
                     ""expectedControlType"": ""Delta"",
@@ -506,7 +506,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard"",
-                    ""action"": ""Toolbelt Slot Select"",
+                    ""action"": ""MouseWheel"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -974,7 +974,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_Map = m_Player.FindAction("Map", throwIfNotFound: true);
         m_Player_Escape = m_Player.FindAction("Escape", throwIfNotFound: true);
         m_Player_Pause = m_Player.FindAction("Pause", throwIfNotFound: true);
-        m_Player_ToolbeltSlotSelect = m_Player.FindAction("Toolbelt Slot Select", throwIfNotFound: true);
+        m_Player_MouseWheel = m_Player.FindAction("MouseWheel", throwIfNotFound: true);
         m_Player_ToolbeltSlot1 = m_Player.FindAction("Toolbelt Slot 1", throwIfNotFound: true);
         m_Player_ToolbeltSlot2 = m_Player.FindAction("Toolbelt Slot 2", throwIfNotFound: true);
         m_Player_ToolbeltSlot3 = m_Player.FindAction("Toolbelt Slot 3", throwIfNotFound: true);
@@ -1077,7 +1077,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Map;
     private readonly InputAction m_Player_Escape;
     private readonly InputAction m_Player_Pause;
-    private readonly InputAction m_Player_ToolbeltSlotSelect;
+    private readonly InputAction m_Player_MouseWheel;
     private readonly InputAction m_Player_ToolbeltSlot1;
     private readonly InputAction m_Player_ToolbeltSlot2;
     private readonly InputAction m_Player_ToolbeltSlot3;
@@ -1110,7 +1110,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @Map => m_Wrapper.m_Player_Map;
         public InputAction @Escape => m_Wrapper.m_Player_Escape;
         public InputAction @Pause => m_Wrapper.m_Player_Pause;
-        public InputAction @ToolbeltSlotSelect => m_Wrapper.m_Player_ToolbeltSlotSelect;
+        public InputAction @MouseWheel => m_Wrapper.m_Player_MouseWheel;
         public InputAction @ToolbeltSlot1 => m_Wrapper.m_Player_ToolbeltSlot1;
         public InputAction @ToolbeltSlot2 => m_Wrapper.m_Player_ToolbeltSlot2;
         public InputAction @ToolbeltSlot3 => m_Wrapper.m_Player_ToolbeltSlot3;
@@ -1174,9 +1174,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Pause.started += instance.OnPause;
             @Pause.performed += instance.OnPause;
             @Pause.canceled += instance.OnPause;
-            @ToolbeltSlotSelect.started += instance.OnToolbeltSlotSelect;
-            @ToolbeltSlotSelect.performed += instance.OnToolbeltSlotSelect;
-            @ToolbeltSlotSelect.canceled += instance.OnToolbeltSlotSelect;
+            @MouseWheel.started += instance.OnMouseWheel;
+            @MouseWheel.performed += instance.OnMouseWheel;
+            @MouseWheel.canceled += instance.OnMouseWheel;
             @ToolbeltSlot1.started += instance.OnToolbeltSlot1;
             @ToolbeltSlot1.performed += instance.OnToolbeltSlot1;
             @ToolbeltSlot1.canceled += instance.OnToolbeltSlot1;
@@ -1265,9 +1265,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Pause.started -= instance.OnPause;
             @Pause.performed -= instance.OnPause;
             @Pause.canceled -= instance.OnPause;
-            @ToolbeltSlotSelect.started -= instance.OnToolbeltSlotSelect;
-            @ToolbeltSlotSelect.performed -= instance.OnToolbeltSlotSelect;
-            @ToolbeltSlotSelect.canceled -= instance.OnToolbeltSlotSelect;
+            @MouseWheel.started -= instance.OnMouseWheel;
+            @MouseWheel.performed -= instance.OnMouseWheel;
+            @MouseWheel.canceled -= instance.OnMouseWheel;
             @ToolbeltSlot1.started -= instance.OnToolbeltSlot1;
             @ToolbeltSlot1.performed -= instance.OnToolbeltSlot1;
             @ToolbeltSlot1.canceled -= instance.OnToolbeltSlot1;
@@ -1441,7 +1441,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnMap(InputAction.CallbackContext context);
         void OnEscape(InputAction.CallbackContext context);
         void OnPause(InputAction.CallbackContext context);
-        void OnToolbeltSlotSelect(InputAction.CallbackContext context);
+        void OnMouseWheel(InputAction.CallbackContext context);
         void OnToolbeltSlot1(InputAction.CallbackContext context);
         void OnToolbeltSlot2(InputAction.CallbackContext context);
         void OnToolbeltSlot3(InputAction.CallbackContext context);

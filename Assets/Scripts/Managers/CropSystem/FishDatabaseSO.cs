@@ -174,9 +174,9 @@ public class FishDatabaseSO : ScriptableObject {
                 { FishType.VerySmall, 0.40f },
                 { FishType.Small,      0.275f },
                 { FishType.Medium,     0.175f },
-                { FishType.Large,      0.09f },
-                { FishType.VeryLarge,  0.05f },
-                { FishType.Leviathan,  0.001f }
+                { FishType.Large,      0.125f },
+                { FishType.VeryLarge,  0.025f },
+                { FishType.Leviathan,  0.00f }
             }
         },
         { 4, new Dictionary<FishType, float>
@@ -184,9 +184,9 @@ public class FishDatabaseSO : ScriptableObject {
                 { FishType.VerySmall, 0.40f },
                 { FishType.Small,      0.275f },
                 { FishType.Medium,     0.175f },
-                { FishType.Large,      0.09f },
-                { FishType.VeryLarge,  0.05f },
-                { FishType.Leviathan,  0.001f }
+                { FishType.Large,      0.125f },
+                { FishType.VeryLarge,  0.025f },
+                { FishType.Leviathan,  0.00f }
             }
         }
     };
@@ -235,7 +235,7 @@ public class FishDatabaseSO : ScriptableObject {
 
         // Calculate catch chance
         int rarityId = PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().RarityId;
-        float catchChance = fishingRod.BiteRate[rarityId] / 100f;
+        float catchChance = fishingRod.CatchChance[rarityId - 1] / 100f;
 
         // Filter available fish without using LINQ to reduce allocations
         var availableFish = new List<FishSO>();
@@ -261,14 +261,27 @@ public class FishDatabaseSO : ScriptableObject {
         }
 
         FishSO selectedFish = null;
-        const int MaxAttempts = 20;
-        int attempt = 0;
 
-        while (selectedFish == null && attempt < MaxAttempts) {
-            attempt++;
+        // Initialize a HashSet to keep track of tried fish sizes
+        var triedSizes = new HashSet<FishType>();
+
+        while (selectedFish == null && triedSizes.Count < probabilities.Count) {
+            // Create a copy of probabilities excluding tried sizes
+            var remainingProbabilities = probabilities
+                .Where(kvp => !triedSizes.Contains(kvp.Key))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            // If no remaining probabilities, break the loop
+            if (remainingProbabilities.Count == 0) {
+                Debug.LogWarning("All fish sizes have been tried.");
+                break;
+            }
 
             // Select a random fish size based on probabilities
-            FishType selectedSize = GetRandomFishSize(probabilities);
+            FishType selectedSize = GetRandomFishSize(remainingProbabilities);
+
+            // Add the selected size to the tried sizes
+            triedSizes.Add(selectedSize);
 
             // Select a random fish of the selected size
             var fishOfSize = new List<FishSO>();
@@ -330,8 +343,7 @@ public class FishDatabaseSO : ScriptableObject {
     /// <summary>
     /// Determines if a fish type is considered rare.
     /// </summary>
-    private static bool IsRareFish(FishType fishType) =>
-        fishType == FishType.VeryLarge || fishType == FishType.Leviathan;
+    private static bool IsRareFish(FishType fishType) => fishType == FishType.VeryLarge || fishType == FishType.Leviathan;
 
     /// <summary>
     /// Selects a random fish size based on adjusted probabilities.
@@ -348,6 +360,6 @@ public class FishDatabaseSO : ScriptableObject {
         }
 
         Debug.LogError("Failed to select a fish size based on probabilities.");
-        return FishType.None; // Assuming FishType.None exists as a fallback
+        return FishType.None; // FishType.None as a fallback
     }
 }

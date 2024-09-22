@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -12,13 +13,12 @@ public class InputManager : NetworkBehaviour {
     public static InputManager Instance { get; private set; }
 
     // Input Action Maps
-    private PlayerInputActions playerInputActions;
+    private PlayerInputActions _playerInputActions;
 
-    // Player
+    // Player Events
     public event Action OnRunAction;
     public event Action OnDropItemAction;
     public event Action OnInteractAction;
-
     public event Action OnInventoryAction;
     public event Action OnCraftAction;
     public event Action OnRelationAction;
@@ -26,38 +26,41 @@ public class InputManager : NetworkBehaviour {
     public event Action OnCharacterAction;
     public event Action OnMissionAction;
     public event Action OnMapAction;
-    public event Action OnEscapeAction;
     public event Action OnPauseAction;
+    public event Action OnEscapeAction;
 
-    public event Action OnToolbeltSlot1Action;
-    public event Action OnToolbeltSlot2Action;
-    public event Action OnToolbeltSlot3Action;
-    public event Action OnToolbeltSlot4Action;
-    public event Action OnToolbeltSlot5Action;
-    public event Action OnToolbeltSlot6Action;
-    public event Action OnToolbeltSlot7Action;
-    public event Action OnToolbeltSlot8Action;
-    public event Action OnToolbeltSlot9Action;
-    public event Action OnToolbeltSlot10Action;
+    // Toolbelt Slot Actions
+    private readonly Dictionary<int, Action> _toolbeltSlotActions = new Dictionary<int, Action>();
 
+    // Mouse Click Events
     public event Action OnLeftClickAction;
     public event Action OnLeftClickStarted;
     public event Action OnLeftClickCanceled;
     public event Action OnRightClickAction;
 
+    // Modifier Keys
     public event Action OnLeftControlAction;
 
-    public const int SHIFT_KEY_AMOUNT = 10;
-
-
-    // Debug Console
+    // Debug Console Events
     public event Action DebugConsole_OnDebugConsoleAction;
     public event Action DebugConsole_OnCheatConsoleAction;
     public event Action DebugConsole_OnEnterAction;
     public event Action DebugConsole_OnArrowUpAction;
     public event Action DebugConsole_OnArrowDownAction;
 
+    // Constants
+    public const int SHIFT_KEY_AMOUNT = 10;
 
+    // Array der ToolbeltSlot InputActions für einfachen Zugriff
+    private readonly InputAction[] _toolbeltSlotInputActions = new InputAction[10];
+
+    // Dictionary zur Speicherung der Delegates für die ToolbeltSlot Performeds
+    private readonly Dictionary<int, Action<InputAction.CallbackContext>> _toolbeltSlotPerformedCallbacks = new Dictionary<int, Action<InputAction.CallbackContext>>();
+
+
+    /// <summary>
+    /// Initializes the singleton instance and input actions.
+    /// </summary>
     private void Awake() {
         if (Instance != null) {
             throw new Exception("Found more than one Input Manager in the scene.");
@@ -65,252 +68,280 @@ public class InputManager : NetworkBehaviour {
             Instance = this;
         }
 
-        playerInputActions = new();
+        _playerInputActions = new PlayerInputActions();
     }
 
+    /// <summary>
+    /// Subscribes an action to a specific toolbelt slot.
+    /// </summary>
+    /// <param name="slotNumber">The toolbelt slot number (1-10).</param>
+    /// <param name="action">The action to invoke when the slot is activated.</param>
+    public void SubscribeToolbeltSlotAction(int slotNumber, Action action) {
+        if (slotNumber < 1 || slotNumber > 10) {
+            Debug.LogError($"Invalid toolbelt slot number: {slotNumber}. Must be between 1 and 10.");
+            return;
+        }
+
+        if (_toolbeltSlotActions.ContainsKey(slotNumber)) {
+            _toolbeltSlotActions[slotNumber] += action;
+        } else {
+            _toolbeltSlotActions[slotNumber] = action;
+        }
+    }
+
+    /// <summary>
+    /// Unsubscribes an action from a specific toolbelt slot.
+    /// </summary>
+    /// <param name="slotNumber">The toolbelt slot number (1-10).</param>
+    /// <param name="action">The action to remove.</param>
+    public void UnsubscribeToolbeltSlotAction(int slotNumber, Action action) {
+        if (_toolbeltSlotActions.ContainsKey(slotNumber)) {
+            _toolbeltSlotActions[slotNumber] -= action;
+            if (_toolbeltSlotActions[slotNumber] == null) {
+                _toolbeltSlotActions.Remove(slotNumber);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Enables the appropriate action maps on start.
+    /// </summary>
     private void Start() {
-        playerInputActions.Player.Enable();
+        _playerInputActions.Player.Enable();
+        _playerInputActions.DebugConsole.Disable(); // Assuming DebugConsole is disabled by default
 
-        playerInputActions.Player.Run.performed += Run_performed;
-        playerInputActions.Player.DropItem.performed += DropItem_performed;
-        playerInputActions.Player.Interact.performed += Interact_performed;
+        // Initialisieren der ToolbeltSlot InputActions
+        InitializeToolbeltSlotActions();
 
-        playerInputActions.Player.Inventory.performed += Inventory_performed;
-        playerInputActions.Player.Craft.performed += Craft_performed;
-        playerInputActions.Player.Relation.performed += Relation_performed;
-        playerInputActions.Player.Wiki.performed += Wiki_performed;
-        playerInputActions.Player.Character.performed += Character_performed;
+        // Subscribe to player input actions
+        _playerInputActions.Player.Run.performed += Run_performed;
+        _playerInputActions.Player.DropItem.performed += DropItem_performed;
+        _playerInputActions.Player.Interact.performed += Interact_performed;
 
-        playerInputActions.Player.Mission.performed += Mission_performed;
-        playerInputActions.Player.Map.performed += Map_performed;
+        _playerInputActions.Player.Inventory.performed += Inventory_performed;
+        _playerInputActions.Player.Craft.performed += Craft_performed;
+        _playerInputActions.Player.Relation.performed += Relation_performed;
+        _playerInputActions.Player.Wiki.performed += Wiki_performed;
+        _playerInputActions.Player.Character.performed += Character_performed;
 
-        playerInputActions.Player.Pause.performed += Pause_performed;
+        _playerInputActions.Player.Mission.performed += Mission_performed;
+        _playerInputActions.Player.Map.performed += Map_performed;
 
-        playerInputActions.Player.ToolbeltSlot1.performed += ToolbeltSlot1_performed;
-        playerInputActions.Player.ToolbeltSlot2.performed += ToolbeltSlot2_performed;
-        playerInputActions.Player.ToolbeltSlot3.performed += ToolbeltSlot3_performed;
-        playerInputActions.Player.ToolbeltSlot4.performed += ToolbeltSlot4_performed;
-        playerInputActions.Player.ToolbeltSlot5.performed += ToolbeltSlot5_performed;
-        playerInputActions.Player.ToolbeltSlot6.performed += ToolbeltSlot6_performed;
-        playerInputActions.Player.ToolbeltSlot7.performed += ToolbeltSlot7_performed;
-        playerInputActions.Player.ToolbeltSlot8.performed += ToolbeltSlot8_performed;
-        playerInputActions.Player.ToolbeltSlot9.performed += ToolbeltSlot9_performed;
-        playerInputActions.Player.ToolbeltSlot10.performed += ToolbeltSlot10_performed;
+        _playerInputActions.Player.Pause.performed += Pause_performed;
+        _playerInputActions.Player.Escape.performed += Escape_performed;
 
-        playerInputActions.Player.LeftClick.performed += LeftClick_performed;
-        playerInputActions.Player.LeftClick.started += LeftClick_started;
-        playerInputActions.Player.LeftClick.canceled += LeftClick_canceled;
-        playerInputActions.Player.RightClick.performed += RightClick_performed;
+        // Mouse Clicks
+        _playerInputActions.Player.LeftClick.performed += LeftClick_performed;
+        _playerInputActions.Player.LeftClick.started += LeftClick_started;
+        _playerInputActions.Player.LeftClick.canceled += LeftClick_canceled;
+        _playerInputActions.Player.RightClick.performed += RightClick_performed;
 
-        playerInputActions.Player.Escape.performed += Escape_performed;
-        playerInputActions.Player.DebugConsole.performed += DebugConsole_DebugConsole_performed;
-
+        // Modifier Keys
+        _playerInputActions.Player.LeftControl.performed += LeftControl_performed;
+        _playerInputActions.Player.LeftControl.canceled += LeftControl_canceled;
 
         // Debug Console
-        playerInputActions.DebugConsole.DebugConsole.performed += DebugConsole_DebugConsole_performed;
-        playerInputActions.DebugConsole.CheatConsole.performed += DebugConsole_CheatConsole_performed;
-        playerInputActions.DebugConsole.Enter.performed += DebugConsoleEnter_performed;
-        playerInputActions.DebugConsole.ArrowUp.performed += DebugConsoleArrowUp_performed;
-        playerInputActions.DebugConsole.ArrowDown.performed += DebugConsoleArrowDown_performed;
+        _playerInputActions.DebugConsole.DebugConsole.performed += DebugConsole_DebugConsole_performed;
+        _playerInputActions.DebugConsole.CheatConsole.performed += DebugConsole_CheatConsole_performed;
+        _playerInputActions.DebugConsole.Enter.performed += DebugConsoleEnter_performed;
+        _playerInputActions.DebugConsole.ArrowUp.performed += DebugConsoleArrowUp_performed;
+        _playerInputActions.DebugConsole.ArrowDown.performed += DebugConsoleArrowDown_performed;
     }
 
-    #region Player
-    private void Run_performed(InputAction.CallbackContext obj) {
-        OnRunAction?.Invoke();
+    /// <summary>
+    /// Initialisiert die ToolbeltSlot InputActions und abonniert deren performed Events.
+    /// </summary>
+    private void InitializeToolbeltSlotActions() {
+        // Manuelles Zuordnen der ToolbeltSlot InputActions
+        _toolbeltSlotInputActions[0] = _playerInputActions.Player.ToolbeltSlot1;
+        _toolbeltSlotInputActions[1] = _playerInputActions.Player.ToolbeltSlot2;
+        _toolbeltSlotInputActions[2] = _playerInputActions.Player.ToolbeltSlot3;
+        _toolbeltSlotInputActions[3] = _playerInputActions.Player.ToolbeltSlot4;
+        _toolbeltSlotInputActions[4] = _playerInputActions.Player.ToolbeltSlot5;
+        _toolbeltSlotInputActions[5] = _playerInputActions.Player.ToolbeltSlot6;
+        _toolbeltSlotInputActions[6] = _playerInputActions.Player.ToolbeltSlot7;
+        _toolbeltSlotInputActions[7] = _playerInputActions.Player.ToolbeltSlot8;
+        _toolbeltSlotInputActions[8] = _playerInputActions.Player.ToolbeltSlot9;
+        _toolbeltSlotInputActions[9] = _playerInputActions.Player.ToolbeltSlot10;
+
+        for (int i = 0; i < _toolbeltSlotInputActions.Length; i++) {
+            int slotNumber = i + 1; // 1-basiert
+            Action<InputAction.CallbackContext> callback = (ctx) => InvokeToolbeltSlotAction(slotNumber);
+            _toolbeltSlotInputActions[i].performed += callback;
+            _toolbeltSlotPerformedCallbacks.Add(slotNumber, callback);
+        }
     }
 
-    private void DropItem_performed(InputAction.CallbackContext obj) {
-        OnDropItemAction?.Invoke();
-    }
+    #region Player Input Handlers
+    private void Run_performed(InputAction.CallbackContext obj) => OnRunAction?.Invoke();
 
-    private void Interact_performed(InputAction.CallbackContext obj) {
-        OnInteractAction?.Invoke();
-    }
+    private void DropItem_performed(InputAction.CallbackContext obj) => OnDropItemAction?.Invoke();
 
-    private void Inventory_performed(InputAction.CallbackContext obj) {
-        OnInventoryAction?.Invoke();
-    }
+    private void Interact_performed(InputAction.CallbackContext obj) => OnInteractAction?.Invoke();
 
-    private void Craft_performed(InputAction.CallbackContext obj) {
-        OnCraftAction?.Invoke();
-    }
+    private void Inventory_performed(InputAction.CallbackContext obj) => OnInventoryAction?.Invoke();
 
-    private void Relation_performed(InputAction.CallbackContext obj) {
-        OnRelationAction?.Invoke();
-    }
+    private void Craft_performed(InputAction.CallbackContext obj) => OnCraftAction?.Invoke();
 
-    private void Wiki_performed(InputAction.CallbackContext obj) {
-        OnCollectionAction?.Invoke();
-    }
+    private void Relation_performed(InputAction.CallbackContext obj) => OnRelationAction?.Invoke();
 
-    private void Character_performed(InputAction.CallbackContext obj) {
-        OnCharacterAction?.Invoke();
-    }
+    private void Wiki_performed(InputAction.CallbackContext obj) => OnCollectionAction?.Invoke();
 
-    private void Mission_performed(InputAction.CallbackContext obj) {
-        OnMissionAction?.Invoke();
-    }
+    private void Character_performed(InputAction.CallbackContext obj) => OnCharacterAction?.Invoke();
 
-    private void Map_performed(InputAction.CallbackContext obj) {
-        OnMapAction?.Invoke();
-    }
+    private void Mission_performed(InputAction.CallbackContext obj) => OnMissionAction?.Invoke();
 
-    private void Escape_performed(InputAction.CallbackContext obj) {
-        OnEscapeAction?.Invoke();
-    }
+    private void Map_performed(InputAction.CallbackContext obj) => OnMapAction?.Invoke();
 
-    private void Pause_performed(InputAction.CallbackContext obj) {
-        OnPauseAction?.Invoke();
-    }
+    private void Pause_performed(InputAction.CallbackContext obj) => OnPauseAction?.Invoke();
 
-    private void ToolbeltSlot1_performed(InputAction.CallbackContext obj) {
-        OnToolbeltSlot1Action?.Invoke();
-    }
+    private void Escape_performed(InputAction.CallbackContext obj) => OnEscapeAction?.Invoke();
 
-    private void ToolbeltSlot2_performed(InputAction.CallbackContext obj) {
-        OnToolbeltSlot2Action?.Invoke();
-    }
+    private void LeftClick_performed(InputAction.CallbackContext obj) => OnLeftClickAction?.Invoke();
 
-    private void ToolbeltSlot3_performed(InputAction.CallbackContext obj) {
-        OnToolbeltSlot3Action?.Invoke();
-    }
+    private void LeftClick_started(InputAction.CallbackContext obj) => OnLeftClickStarted?.Invoke();
 
-    private void ToolbeltSlot4_performed(InputAction.CallbackContext obj) {
-        OnToolbeltSlot4Action?.Invoke();
-    }
+    private void LeftClick_canceled(InputAction.CallbackContext obj) => OnLeftClickCanceled?.Invoke();
 
-    private void ToolbeltSlot5_performed(InputAction.CallbackContext obj) {
-        OnToolbeltSlot5Action?.Invoke();
-    }
+    private void RightClick_performed(InputAction.CallbackContext obj) => OnRightClickAction?.Invoke();
 
-    private void ToolbeltSlot6_performed(InputAction.CallbackContext obj) {
-        OnToolbeltSlot6Action?.Invoke();
-    }
+    private void LeftControl_performed(InputAction.CallbackContext obj) => OnLeftControlAction?.Invoke();
 
-    private void ToolbeltSlot7_performed(InputAction.CallbackContext obj) {
-        OnToolbeltSlot7Action?.Invoke();
-    }
+    private void LeftControl_canceled(InputAction.CallbackContext obj) => OnLeftControlAction?.Invoke();
+    #endregion
 
-    private void ToolbeltSlot8_performed(InputAction.CallbackContext obj) {
-        OnToolbeltSlot8Action?.Invoke();
+    #region Toolbelt Slot Handling
+    /// <summary>
+    /// Invokes all subscribed actions for a specific toolbelt slot.
+    /// </summary>
+    /// <param name="slotNumber">The toolbelt slot number (1-10).</param>
+    private void InvokeToolbeltSlotAction(int slotNumber) {
+        if (_toolbeltSlotActions.TryGetValue(slotNumber, out var action)) {
+            action?.Invoke();
+        }
     }
+    #endregion
 
-    private void ToolbeltSlot9_performed(InputAction.CallbackContext obj) {
-        OnToolbeltSlot9Action?.Invoke();
-    }
+    #region Debug Console Handlers
+    private void DebugConsole_DebugConsole_performed(InputAction.CallbackContext obj) => DebugConsole_OnDebugConsoleAction?.Invoke();
 
-    private void ToolbeltSlot10_performed(InputAction.CallbackContext obj) {
-        OnToolbeltSlot10Action?.Invoke();
-    }
+    private void DebugConsole_CheatConsole_performed(InputAction.CallbackContext obj) => DebugConsole_OnCheatConsoleAction?.Invoke();
 
-    private void LeftClick_performed(InputAction.CallbackContext obj) {
-        OnLeftClickAction?.Invoke();
-    }
+    private void DebugConsoleEnter_performed(InputAction.CallbackContext obj) => DebugConsole_OnEnterAction?.Invoke();
 
-    private void LeftClick_started(InputAction.CallbackContext obj) {
-        OnLeftClickStarted?.Invoke();
-    }
+    private void DebugConsoleArrowUp_performed(InputAction.CallbackContext obj) => DebugConsole_OnArrowUpAction?.Invoke();
 
-    private void LeftClick_canceled(InputAction.CallbackContext obj) {
-        OnLeftClickCanceled?.Invoke();
-    }
+    private void DebugConsoleArrowDown_performed(InputAction.CallbackContext obj) => DebugConsole_OnArrowDownAction?.Invoke();
+    #endregion
 
-    private void RightClick_performed(InputAction.CallbackContext obj) {
-        OnRightClickAction?.Invoke();
-    }
-
+    /// <summary>
+    /// Retrieves the normalized movement vector.
+    /// </summary>
+    /// <returns>Normalized movement vector.</returns>
     public Vector2 GetMovementVectorNormalized() {
-        return playerInputActions.Player.Movement.ReadValue<Vector2>().normalized;
+        return _playerInputActions.Player.Movement.ReadValue<Vector2>().normalized;
     }
 
+    /// <summary>
+    /// Retrieves the mouse wheel input vector.
+    /// </summary>
+    /// <returns>Mouse wheel vector.</returns>
     public Vector2 GetMouseWheelVector() {
-        return playerInputActions.Player.ToolbeltSlotSelect.ReadValue<Vector2>();
+        return _playerInputActions.Player.MouseWheel.ReadValue<Vector2>();
     }
 
+    /// <summary>
+    /// Retrieves the current pointer position.
+    /// </summary>
+    /// <returns>Pointer position vector.</returns>
     public Vector2 GetPointerPosition() {
-        return playerInputActions.Player.PointerPosition.ReadValue<Vector2>();
+        return _playerInputActions.Player.PointerPosition.ReadValue<Vector2>();
     }
 
+    /// <summary>
+    /// Checks if the shift key is pressed.
+    /// </summary>
+    /// <returns>True if shift is pressed; otherwise, false.</returns>
     public bool GetShiftPressed() {
-        return playerInputActions.Player.Run.ReadValue<float>() > 0;
+        return _playerInputActions.Player.Run.ReadValue<float>() > 0;
     }
 
+    /// <summary>
+    /// Checks if the left control key is pressed.
+    /// </summary>
+    /// <returns>True if left control is pressed; otherwise, false.</returns>
     public bool GetLeftControlPressed() {
-        return playerInputActions.Player.LeftControl.ReadValue<float>() > 0;
-    }
-    #endregion
-
-
-    #region Debug Console
-    public void DebugConsole_DebugConsole_performed(InputAction.CallbackContext obj) {
-        DebugConsole_OnDebugConsoleAction?.Invoke();
+        return _playerInputActions.Player.LeftControl.ReadValue<float>() > 0;
     }
 
-    public void DebugConsole_CheatConsole_performed(InputAction.CallbackContext obj) {
-        DebugConsole_OnCheatConsoleAction?.Invoke();
-    }
+    #region Action Map Management
 
-    public void DebugConsoleEnter_performed(InputAction.CallbackContext obj) {
-        DebugConsole_OnEnterAction?.Invoke();
-    }
-
-    public void DebugConsoleArrowUp_performed(InputAction.CallbackContext obj) {
-        DebugConsole_OnArrowUpAction?.Invoke();
-    }
-
-    public void DebugConsoleArrowDown_performed(InputAction.CallbackContext obj) {
-        DebugConsole_OnArrowDownAction?.Invoke();
-    }
-    #endregion
-
-
+    /// <summary>
+    /// Enables the Debug Console action map and disables the Player action map.
+    /// </summary>
     public void EnableDebugConsoleActionMap() {
-        playerInputActions.DebugConsole.Enable();
-        playerInputActions.Player.Disable();
+        _playerInputActions.DebugConsole.Enable();
+        _playerInputActions.Player.Disable();
     }
 
+    /// <summary>
+    /// Enables the Player action map and disables the Debug Console action map.
+    /// </summary>
     public void EnablePlayerActionMap() {
-        playerInputActions.DebugConsole.Disable();
-        playerInputActions.Player.Enable();
+        _playerInputActions.DebugConsole.Disable();
+        _playerInputActions.Player.Enable();
     }
 
+    #endregion
 
-    private new void OnDestroy() {
-        playerInputActions.Player.Run.performed -= Run_performed;
-        playerInputActions.Player.DropItem.performed -= DropItem_performed;
-        playerInputActions.Player.Interact.performed -= Interact_performed;
+    /// <summary>
+    /// Cleans up event subscriptions to prevent memory leaks.
+    /// </summary>
+    private void OnDestroy() {
+        // Unsubscribe from player input actions
+        _playerInputActions.Player.Run.performed -= Run_performed;
+        _playerInputActions.Player.DropItem.performed -= DropItem_performed;
+        _playerInputActions.Player.Interact.performed -= Interact_performed;
 
-        playerInputActions.Player.Inventory.performed -= Inventory_performed;
-        playerInputActions.Player.Relation.performed -= Relation_performed;
-        playerInputActions.Player.Wiki.performed -= Wiki_performed;
-        playerInputActions.Player.Character.performed -= Character_performed;
-        playerInputActions.Player.Mission.performed -= Mission_performed;
-        playerInputActions.Player.Map.performed -= Map_performed;
-        playerInputActions.Player.Escape.performed -= Escape_performed;
-        playerInputActions.Player.Pause.performed -= Pause_performed;
+        _playerInputActions.Player.Inventory.performed -= Inventory_performed;
+        _playerInputActions.Player.Craft.performed -= Craft_performed;
+        _playerInputActions.Player.Relation.performed -= Relation_performed;
+        _playerInputActions.Player.Wiki.performed -= Wiki_performed;
+        _playerInputActions.Player.Character.performed -= Character_performed;
 
-        playerInputActions.Player.ToolbeltSlot1.performed -= ToolbeltSlot1_performed;
-        playerInputActions.Player.ToolbeltSlot2.performed -= ToolbeltSlot2_performed;
-        playerInputActions.Player.ToolbeltSlot3.performed -= ToolbeltSlot3_performed;
-        playerInputActions.Player.ToolbeltSlot4.performed -= ToolbeltSlot4_performed;
-        playerInputActions.Player.ToolbeltSlot5.performed -= ToolbeltSlot5_performed;
-        playerInputActions.Player.ToolbeltSlot6.performed -= ToolbeltSlot6_performed;
-        playerInputActions.Player.ToolbeltSlot7.performed -= ToolbeltSlot7_performed;
-        playerInputActions.Player.ToolbeltSlot8.performed -= ToolbeltSlot8_performed;
-        playerInputActions.Player.ToolbeltSlot9.performed -= ToolbeltSlot9_performed;
-        playerInputActions.Player.ToolbeltSlot10.performed -= ToolbeltSlot10_performed;
+        _playerInputActions.Player.Mission.performed -= Mission_performed;
+        _playerInputActions.Player.Map.performed -= Map_performed;
 
-        playerInputActions.Player.LeftClick.performed -= LeftClick_performed;
-        playerInputActions.Player.RightClick.performed -= RightClick_performed;
+        _playerInputActions.Player.Pause.performed -= Pause_performed;
+        _playerInputActions.Player.Escape.performed -= Escape_performed;
 
-        playerInputActions.Player.Escape.performed -= Escape_performed;
-        playerInputActions.Player.DebugConsole.performed -= DebugConsole_DebugConsole_performed;
+        _playerInputActions.Player.LeftClick.performed -= LeftClick_performed;
+        _playerInputActions.Player.LeftClick.started -= LeftClick_started;
+        _playerInputActions.Player.LeftClick.canceled -= LeftClick_canceled;
+        _playerInputActions.Player.RightClick.performed -= RightClick_performed;
 
-        // Debug Console
-        playerInputActions.DebugConsole.DebugConsole.performed -= DebugConsole_DebugConsole_performed;
-        playerInputActions.DebugConsole.CheatConsole.performed -= DebugConsole_CheatConsole_performed;
-        playerInputActions.DebugConsole.Enter.performed -= DebugConsoleEnter_performed;
-        playerInputActions.DebugConsole.ArrowUp.performed -= DebugConsoleArrowUp_performed;
-        playerInputActions.DebugConsole.ArrowDown.performed -= DebugConsoleArrowDown_performed;
+        _playerInputActions.Player.LeftControl.performed -= LeftControl_performed;
+        _playerInputActions.Player.LeftControl.canceled -= LeftControl_canceled;
+
+        // Unsubscribe from debug console actions
+        _playerInputActions.DebugConsole.DebugConsole.performed -= DebugConsole_DebugConsole_performed;
+        _playerInputActions.DebugConsole.CheatConsole.performed -= DebugConsole_CheatConsole_performed;
+        _playerInputActions.DebugConsole.Enter.performed -= DebugConsoleEnter_performed;
+        _playerInputActions.DebugConsole.ArrowUp.performed -= DebugConsoleArrowUp_performed;
+        _playerInputActions.DebugConsole.ArrowDown.performed -= DebugConsoleArrowDown_performed;
+
+        // Unsubscribe from toolbelt slot performed events
+        foreach (var kvp in _toolbeltSlotPerformedCallbacks) {
+            int slotNumber = kvp.Key;
+            var callback = kvp.Value;
+            if (slotNumber >= 1 && slotNumber <= 10) {
+                _toolbeltSlotInputActions[slotNumber - 1].performed -= callback;
+            }
+        }
+        _toolbeltSlotPerformedCallbacks.Clear();
+        _toolbeltSlotActions.Clear();
+
+        // Dispose input actions
+        _playerInputActions.Dispose();
     }
 }

@@ -484,7 +484,7 @@ public class PlayerFishingController : MonoBehaviour {
     /// </summary>
     private IEnumerator WaitForFish() {
         // Determine a random time for the fish to bite within the defined range and fishing rod rarity
-        float timeToBite = UnityEngine.Random.Range(TIME_TO_BITE_MIN, TIME_TO_BITE_MAX) * (1 - (_fishingRod.BiteRate[_toolbelt.GetCurrentlySelectedToolbeltItemSlot().RarityId] / 100));
+        float timeToBite = UnityEngine.Random.Range(TIME_TO_BITE_MIN, TIME_TO_BITE_MAX) * (1 - (_fishingRod.BiteRate[_toolbelt.GetCurrentlySelectedToolbeltItemSlot().RarityId - 1] / 100f));
         yield return new WaitForSeconds(timeToBite);
 
         // Retrieve a fish based on the tile ID and fishing method
@@ -554,7 +554,6 @@ public class PlayerFishingController : MonoBehaviour {
     private void ReelInMinigame() {
         // Check for LMB key press to count button presses
         _pressCount++;
-        Debug.Log($"Press {_pressCount}/{_presses}");
 
         // Check if the required number of presses has been reached
         if (_pressCount >= _presses) {

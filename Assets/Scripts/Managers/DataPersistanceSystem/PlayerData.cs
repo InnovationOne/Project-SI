@@ -13,7 +13,7 @@ public class PlayerData {
     public Vector2 Position;
     public Vector2 LastDirection;
     public Vector2 RespawnPosition;
-    public Vector2 HosptitalRespawnPosition;
+    public Vector2 HospitalRespawnPosition;
 
     public int InventorySize;
     public string Inventory;

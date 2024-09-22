@@ -65,14 +65,14 @@ public class InventoryUI : ItemContainerUI {
         }
 
         // Show the correct inventory rarity icon
-        _backpackRarityIcon.sprite = Array.IndexOf(PlayerInventoryController.LocalInstance.InventorySizes, PlayerInventoryController.LocalInstance.CurrentInventorySize) switch {
+        _backpackRarityIcon.sprite = PlayerInventoryController.LocalInstance.InventorySizes.IndexOf(PlayerInventoryController.LocalInstance.CurrentInventorySize) switch {
             0 => _rarityIconSprites[0],
             1 => _rarityIconSprites[1],
             _ => _rarityIconSprites[2],
         };
 
         // Show the correct toolbelt rarity icon
-        _toolbeltRarityIcon.sprite = Array.IndexOf(PlayerToolbeltController.LocalInstance.ToolbeltSizes, PlayerToolbeltController.LocalInstance.ToolbeltSize) switch {
+        _toolbeltRarityIcon.sprite = PlayerToolbeltController.LocalInstance.ToolbeltSizes.IndexOf(PlayerToolbeltController.LocalInstance.ToolbeltSize) switch {
             0 => _rarityIconSprites[0],
             1 => _rarityIconSprites[1],
             _ => _rarityIconSprites[2],

@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -9,17 +9,26 @@ using UnityEngine;
 public class PlayerInventoryController : NetworkBehaviour, IPlayerDataPersistance {
     public static PlayerInventoryController LocalInstance { get; private set; }
 
-    private readonly int[] _inventorySizes = { 10, 20, 30 };
-    public int[] InventorySizes => _inventorySizes;
+    // Immutable collection of possible inventory sizes.
+    private static readonly ReadOnlyCollection<int> _inventorySizes = Array.AsReadOnly(new int[] { 10, 20, 30 });
+    public ReadOnlyCollection<int> InventorySizes => _inventorySizes;
 
+    // Current inventory size, defaulting to maximum size.
     private int _currentInventorySize = 30;
     public int CurrentInventorySize => _currentInventorySize;
 
+    // Reference to the inventory container ScriptableObject.
     [SerializeField] private ItemContainerSO _inventoryContainer;
     public ItemContainerSO InventoryContainer => _inventoryContainer;
 
+    // Cached reference to InventoryUI to minimize property access overhead.
+    private InventoryUI _inventoryUI;
+
 
     private void Start() {
+        // Cache the InventoryUI reference
+        _inventoryUI = InventoryUI.Instance;
+
         SetInventorySize(_currentInventorySize);
     }
 
@@ -34,42 +43,41 @@ public class PlayerInventoryController : NetworkBehaviour, IPlayerDataPersistanc
     }
 
     /// <summary>
-    /// Initializes the item container.
-    /// </summary>
-    private void InitializeItemContainer() {
-        if (_inventoryContainer == null) {
-            _inventoryContainer = (ItemContainerSO)ScriptableObject.CreateInstance(typeof(ItemContainerSO));
-            _inventoryContainer.Initialize(_inventorySizes[^1]);
-        }
-    }
-
-    /// <summary>
     /// Sets the inventory size.
     /// </summary>
     /// <param name="inventorySize">The new inventory size.</param>
     public void SetInventorySize(int inventorySize) {
-        if (inventorySize > InventorySizes[^1]) {
-            Debug.LogError("Can't set inventorySize higher than MAX_INVENTORY_SIZE");
+        if (inventorySize > _inventorySizes[^1]) {
+            Debug.LogError($"Cannot set inventory size higher than maximum allowed size {_inventorySizes[^1]}.");
             return;
         }
 
+        if (_currentInventorySize == inventorySize) {
+            return; // No change needed
+        }
+
         _currentInventorySize = inventorySize;
-        InventoryUI.Instance.InventoryOrToolbeltSizeChanged();
+
+        if (_inventoryContainer != null) {
+            _inventoryUI.InventoryOrToolbeltSizeChanged();
+        }
+
     }
 
     #region Save and Load
     public void SavePlayer(PlayerData playerData) {
-        playerData.Inventory = _inventoryContainer.SaveItemContainer();
+        if (_inventoryContainer != null) {
+            playerData.Inventory = _inventoryContainer.SaveItemContainer();
+        }
         playerData.InventorySize = _currentInventorySize;
     }
 
     public void LoadPlayer(PlayerData playerData) {
         _currentInventorySize = playerData.InventorySize;
-        InitializeItemContainer();
+
         if (!string.IsNullOrEmpty(playerData.Inventory)) {
             _inventoryContainer.LoadItemContainer(playerData.Inventory);
         }
     }
-
     #endregion
 }

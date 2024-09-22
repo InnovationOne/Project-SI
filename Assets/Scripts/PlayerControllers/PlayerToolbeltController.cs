@@ -1,69 +1,88 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem.Utilities;
 
-// This script controlls the players toolbelt
+/// <summary>
+/// Controls the player's toolbelt, handling tool selection, toolbelt size, and interactions.
+/// </summary>
 public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance {
     public static PlayerToolbeltController LocalInstance { get; private set; }
 
+    // Events for toolbelt changes and toggling
     public event Action OnToolbeltChanged;
     public event Action OnToggleToolbelt;
 
+    // Predefined toolbelt sizes
     private readonly int[] _toolbeltSizes = { 5, 7, 10 };
-    public int[] ToolbeltSizes => _toolbeltSizes;
+    public ReadOnlyCollection<int> ToolbeltSizes => Array.AsReadOnly(_toolbeltSizes);
 
+    // Current toolbelt size and selected tool slot/belt
     private int _toolbeltSize = 10;
     public int ToolbeltSize => _toolbeltSize;
 
-
+    // Constants
     private const int MAX_TOOLBELTS = 3;
+    private const float ROTATION_STEP = 90f;
+
+    // Current selections
     private int _selectedToolSlot = 0;
     private int _selectedToolbelt = 0;
-    private const float _rotationStep = 90f;
+
+    // Flags
     private bool _toolbeltSelectionBlocked = false;
 
+    // Cached references
     private ToolbeltUI _visual;
     private InputManager _inputManager;
+    private PlayerMovementController _playerMovement;
+    private PlayerInventoryController _inventoryController;
 
 
     private void Start() {
         _visual = ToolbeltUI.Instance;
         _inputManager = InputManager.Instance;
+        _playerMovement = GetComponent<PlayerMovementController>();
+        _inventoryController = GetComponent<PlayerInventoryController>();
 
-        _visual.OnToolbeltSlotLeftClick += ToolbeltVisual_OnToolbeltSlotLeftClick;
-        _inputManager.OnDropItemAction += InputManager_OnDropItemAction;
-        _inputManager.OnToolbeltSlot1Action += InputManager_OnToolbeltSlot1Action;
-        _inputManager.OnToolbeltSlot2Action += InputManager_OnToolbeltSlot2Action;
-        _inputManager.OnToolbeltSlot3Action += InputManager_OnToolbeltSlot3Action;
-        _inputManager.OnToolbeltSlot4Action += InputManager_OnToolbeltSlot4Action;
-        _inputManager.OnToolbeltSlot5Action += InputManager_OnToolbeltSlot5Action;
-        _inputManager.OnToolbeltSlot6Action += InputManager_OnToolbeltSlot6Action;
-        _inputManager.OnToolbeltSlot7Action += InputManager_OnToolbeltSlot7Action;
-        _inputManager.OnToolbeltSlot8Action += InputManager_OnToolbeltSlot8Action;
-        _inputManager.OnToolbeltSlot9Action += InputManager_OnToolbeltSlot9Action;
-        _inputManager.OnToolbeltSlot10Action += InputManager_OnToolbeltSlot10Action;
+        // Subscribe to visual events
+        _visual.OnToolbeltSlotLeftClick += OnToolbeltSlotLeftClick;
 
-        PauseGameManager.Instance.OnShowLocalPauseGame += PauseMenuController_OnTogglePauseMenu;
+        // Subscribe to input actions using a loop to reduce redundancy
+        for (int i = 1; i <= _toolbeltSizes[^1]; i++) {
+            int slotIndex = i - 1; // Zero-based index
+            _inputManager.SubscribeToolbeltSlotAction(i, () => SelectToolbeltSlot(slotIndex));
+        }
+
+        // Subscribe to other input actions
+        _inputManager.OnDropItemAction += OnDropItemAction;
+
+        // Subscribe to pause menu toggle
+        PauseGameManager.Instance.OnShowLocalPauseGame += OnTogglePauseMenu;
 
         Initialize();
     }
 
     private new void OnDestroy() {
-        _visual.OnToolbeltSlotLeftClick -= ToolbeltVisual_OnToolbeltSlotLeftClick;
+        base.OnDestroy();
 
-        _inputManager.OnDropItemAction -= InputManager_OnDropItemAction;
-        _inputManager.OnToolbeltSlot1Action -= InputManager_OnToolbeltSlot1Action;
-        _inputManager.OnToolbeltSlot2Action -= InputManager_OnToolbeltSlot2Action;
-        _inputManager.OnToolbeltSlot3Action -= InputManager_OnToolbeltSlot3Action;
-        _inputManager.OnToolbeltSlot4Action -= InputManager_OnToolbeltSlot4Action;
-        _inputManager.OnToolbeltSlot5Action -= InputManager_OnToolbeltSlot5Action;
-        _inputManager.OnToolbeltSlot6Action -= InputManager_OnToolbeltSlot6Action;
-        _inputManager.OnToolbeltSlot7Action -= InputManager_OnToolbeltSlot7Action;
-        _inputManager.OnToolbeltSlot8Action -= InputManager_OnToolbeltSlot8Action;
-        _inputManager.OnToolbeltSlot9Action -= InputManager_OnToolbeltSlot9Action;
-        _inputManager.OnToolbeltSlot10Action -= InputManager_OnToolbeltSlot10Action;
+        if (_visual != null) {
+            _visual.OnToolbeltSlotLeftClick -= OnToolbeltSlotLeftClick;
+        }
 
-        PauseGameManager.Instance.OnShowLocalPauseGame -= PauseMenuController_OnTogglePauseMenu;
+        if (_inputManager != null) {
+            for (int i = 1; i <= _toolbeltSizes[^1]; i++) {
+                _inputManager.UnsubscribeToolbeltSlotAction(i, () => SelectToolbeltSlot(i - 1));
+            }
+
+            _inputManager.OnDropItemAction -= OnDropItemAction;
+        }
+
+        if (PauseGameManager.Instance != null) {
+            PauseGameManager.Instance.OnShowLocalPauseGame -= OnTogglePauseMenu;
+        }
     }
 
     public override void OnNetworkSpawn() {
@@ -90,172 +109,159 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
         }
     }
 
-    #region Input
+    #region Input Handling
     /// <summary>
     /// Processes the tool selection based on the mouse wheel input.
     /// </summary>
     private void ProcessToolSelection() {
         float mouseWheelDelta = _inputManager.GetMouseWheelVector().y;
-        if (mouseWheelDelta == 0f) {
+        if (Mathf.Approximately(mouseWheelDelta, 0f)) {
             return;
         }
 
         bool isNext = mouseWheelDelta < 0f;
-        if (_toolbeltSize == _toolbeltSizes[^1] && _inputManager.GetLeftControlPressed()) {
-            SelectToolbeltFromMouseWheele(isNext, mouseWheelDelta);
+        bool isMaxSize = _toolbeltSize == _toolbeltSizes[^1];
+        bool isCtrlPressed = _inputManager.GetLeftControlPressed();
+
+        if (isMaxSize && isCtrlPressed) {
+            ToggleToolbelt(isNext, mouseWheelDelta);
         } else {
-            SelectToolFromMouseWheel(isNext);
+            SelectTool(isNext);
         }
 
         OnToolbeltChanged?.Invoke();
     }
 
     /// <summary>
-    /// Selects the next or previous tool in the toolbelt based on the mouse wheel input.
+    /// Selects the next or previous tool in the toolbelt.
     /// </summary>
-    /// <param name="isNext">A boolean value indicating whether to select the next tool (true) or the previous tool (false).</param>
-    private void SelectToolFromMouseWheel(bool isNext) {
-        if (isNext) {
-            SetToolRight();
-        } else {            
-            SetToolLeft();
-        }
+    /// <param name="isNext">True to select the next tool, false for the previous.</param>
+    private void SelectTool(bool isNext) {
+        _selectedToolSlot = isNext
+            ? (_selectedToolSlot + 1) % _toolbeltSize
+            : (_selectedToolSlot - 1 + _toolbeltSize) % _toolbeltSize;
 
         _visual.SetToolbeltSlotHighlight(_selectedToolSlot);
     }
 
     /// <summary>
-    /// Selects the next or previous toolbelt based on the mouse wheel input.
+    /// Toggles the toolbelt to the next or previous set.
     /// </summary>
-    /// <param name="isNext">True if selecting the next toolbelt, false if selecting the previous toolbelt.</param>
+    /// <param name="isNext">True to select the next toolbelt, false for the previous.</param>
     /// <param name="mouseWheelDelta">The delta value of the mouse wheel input.</param>
-    private void SelectToolbeltFromMouseWheele(bool isNext, float mouseWheelDelta) {
-        int shiftAmount = mouseWheelDelta < 0f ? _toolbeltSizes[^1] : -_toolbeltSizes[^1];
-        float rotationAmount = mouseWheelDelta < 0f ? _rotationStep : -_rotationStep;
+    private void ToggleToolbelt(bool isNext, float mouseWheelDelta) {
+        _selectedToolbelt = isNext
+            ? (_selectedToolbelt + 1) % MAX_TOOLBELTS
+            : (_selectedToolbelt - 1 + MAX_TOOLBELTS) % MAX_TOOLBELTS;
 
-        if (isNext) {
-            SetNextToolbelt();
-        } else {
-            SetPreviousToolbelt();
-        }
-
+        float rotationAmount = isNext ? ROTATION_STEP : -ROTATION_STEP;
         _visual.ToolbeltChanged(_selectedToolbelt, rotationAmount);
-        PlayerInventoryController.LocalInstance.InventoryContainer.ShiftSlots(shiftAmount);
+
+        int shiftAmount = isNext ? _toolbeltSizes[^1] : -_toolbeltSizes[^1];
+        _inventoryController.InventoryContainer.ShiftSlots(shiftAmount);
+
         _visual.ShowUIButtonContains();
     }
 
     /// <summary>
-    /// Sets the selected tool slot to the next slot in the toolbelt.
-    /// </summary>
-    private void SetToolRight() => _selectedToolSlot = (_selectedToolSlot + 1) % _toolbeltSize;
-    /// <summary>
-    /// Sets the selected tool slot to the left of the current slot.
-    /// </summary>
-    private void SetToolLeft() => _selectedToolSlot = (_selectedToolSlot - 1 + _toolbeltSize) % _toolbeltSize;
-    /// <summary>
-    /// Sets the next toolbelt in the rotation.
-    /// </summary>
-    private void SetNextToolbelt() => _selectedToolbelt = (_selectedToolbelt + 1) % MAX_TOOLBELTS;
-    /// <summary>
-    /// Sets the previous toolbelt in the player's inventory.
-    /// </summary>
-    private void SetPreviousToolbelt() => _selectedToolbelt = (_selectedToolbelt - 1 + MAX_TOOLBELTS) % MAX_TOOLBELTS;
-
-    /// <summary>
-    /// Event handler for left-clicking on a toolbelt slot in the toolbelt visual.
+    /// Event handler for left-clicking a toolbelt slot in the UI.
     /// </summary>
     /// <param name="selectedToolbeltSlot">The index of the selected toolbelt slot.</param>
-    private void ToolbeltVisual_OnToolbeltSlotLeftClick(int selectedToolbeltSlot) => _selectedToolSlot = selectedToolbeltSlot;
-
-    /// <summary>
-    /// Handles the action of dropping an item from the player's toolbelt.
-    /// </summary>
-    private void InputManager_OnDropItemAction() {
-        if (!IsOwner || DragItemUI.Instance.gameObject.activeSelf) {
-            return;
-        }
-
-        var toolbeltItem = GetCurrentlySelectedToolbeltItemSlot();
-        var playerMovement = GetComponent<PlayerMovementController>();
-        var inventoryController = GetComponent<PlayerInventoryController>();
-
-        ItemSpawnManager.Instance.SpawnItemServerRpc(
-            itemSlot: new ItemSlot(toolbeltItem.ItemId, 1, toolbeltItem.RarityId),
-            initialPosition: transform.position,
-            motionDirection: playerMovement.LastMotionDirection,
-            useInventoryPosition: true);
-
-        inventoryController.InventoryContainer.RemoveItem(new ItemSlot(toolbeltItem.ItemId, 1, toolbeltItem.RarityId));
-    }
-
-    /// <summary>
-    /// Selects the toolbelt slot with the specified slot ID.
-    /// </summary>
-    /// <param name="slotId">The ID of the toolbelt slot to select.</param>
-    private void SelectToolbeltSlot(int slotId) {
-        if (_toolbeltSize > slotId) {
-            _selectedToolSlot = slotId;
+    private void OnToolbeltSlotLeftClick(int selectedToolbeltSlot) {
+        if (selectedToolbeltSlot >= 0 && selectedToolbeltSlot < _toolbeltSize) {
+            _selectedToolSlot = selectedToolbeltSlot;
             OnToolbeltChanged?.Invoke();
             _visual.SetToolbeltSlotHighlight(_selectedToolSlot);
         }
     }
 
-    private void InputManager_OnToolbeltSlot1Action() => SelectToolbeltSlot(0);
-    private void InputManager_OnToolbeltSlot2Action() => SelectToolbeltSlot(1);
-    private void InputManager_OnToolbeltSlot3Action() => SelectToolbeltSlot(2);
-    private void InputManager_OnToolbeltSlot4Action() => SelectToolbeltSlot(3);
-    private void InputManager_OnToolbeltSlot5Action() => SelectToolbeltSlot(4);
-    private void InputManager_OnToolbeltSlot6Action() => SelectToolbeltSlot(5);
-    private void InputManager_OnToolbeltSlot7Action() => SelectToolbeltSlot(6);
-    private void InputManager_OnToolbeltSlot8Action() => SelectToolbeltSlot(7);
-    private void InputManager_OnToolbeltSlot9Action() => SelectToolbeltSlot(8);
-    private void InputManager_OnToolbeltSlot10Action() => SelectToolbeltSlot(9);
-    #endregion
+    /// <summary>
+    /// Handles the action of dropping an item from the player's toolbelt.
+    /// </summary>
+    private void OnDropItemAction() {
+        if (!IsOwner || DragItemUI.Instance.gameObject.activeSelf) {
+            return;
+        }
 
-    // ????
-    private void SetToolbeltSize() {
-        // TODO: Change when UI is implemented
-        //InventoryPanel.Instance.InventoryOrToolbeltSizeChanged();
+        ItemSlot toolbeltItem = GetCurrentlySelectedToolbeltItemSlot();
+        if (toolbeltItem == null) {
+            return;
+        }
+
+        ItemSpawnManager.Instance.SpawnItemServerRpc(
+            itemSlot: new ItemSlot(toolbeltItem.ItemId, 1, toolbeltItem.RarityId),
+            initialPosition: transform.position,
+            motionDirection: _playerMovement.LastMotionDirection,
+            useInventoryPosition: true);
+
+        _inventoryController.InventoryContainer.RemoveItem(new ItemSlot(toolbeltItem.ItemId, 1, toolbeltItem.RarityId));
     }
 
     /// <summary>
-    /// Clears the current item slot in the player's toolbelt.
+    /// Selects a toolbelt slot based on the provided index.
+    /// </summary>
+    /// <param name="slotIndex">Zero-based index of the toolbelt slot.</param>
+    private void SelectToolbeltSlot(int slotIndex) {
+        if (slotIndex >= 0 && slotIndex < _toolbeltSize) {
+            _selectedToolSlot = slotIndex;
+            OnToolbeltChanged?.Invoke();
+            _visual.SetToolbeltSlotHighlight(_selectedToolSlot);
+        }
+    }
+    #endregion
+
+    #region Toolbelt Management
+    /// <summary>
+    /// Sets the toolbelt size based on the provided size ID.
+    /// </summary>
+    /// <param name="toolbeltSizeId">The ID representing the new toolbelt size.</param>
+    public void SetToolbeltSize(int toolbeltSizeId) {
+        return;
+
+        if (toolbeltSizeId < 0 || toolbeltSizeId >= _toolbeltSizes.Length) {
+            Debug.LogError("Invalid toolbelt size ID.");
+            return;
+        }
+
+        _toolbeltSize = _toolbeltSizes[toolbeltSizeId];
+        _visual.SetToolbeltSize(_toolbeltSize);
+        _visual.SetToolbeltSlotHighlight(_selectedToolSlot);
+        InventoryUI.Instance.InventoryOrToolbeltSizeChanged();
+    }
+
+    /// <summary>
+    /// Clears the currently selected item slot in the toolbelt.
     /// </summary>
     public void ClearCurrentItemSlot() {
-        PlayerInventoryController.LocalInstance.InventoryContainer.ClearItemSlot(_selectedToolSlot);
+        _inventoryController.InventoryContainer.ClearItemSlot(_selectedToolSlot);
         _visual.ShowUIButtonContains();
     }
 
     /// <summary>
-    /// Represents a slot in the player's toolbelt that can hold an item.
+    /// Retrieves the currently selected item slot in the toolbelt.
     /// </summary>
-    public ItemSlot GetCurrentlySelectedToolbeltItemSlot() => PlayerInventoryController.LocalInstance.InventoryContainer.ItemSlots[_selectedToolSlot];
+    /// <returns>The currently selected ItemSlot.</returns>
+    public ItemSlot GetCurrentlySelectedToolbeltItemSlot() {
+        if (_inventoryController.InventoryContainer.ItemSlots.Count > _selectedToolSlot) {
+            return _inventoryController.InventoryContainer.ItemSlots[_selectedToolSlot];
+        }
+
+        return null;
+    }
 
     /// <summary>
     /// Locks or unlocks the toolbelt selection.
     /// </summary>
-    /// <param name="block">True to lock the toolbelt selection, false to unlock it.</param>
+    /// <param name="block">True to lock, false to unlock.</param>
     public void LockToolbelt(bool block) => _toolbeltSelectionBlocked = block;
-    
+    #endregion
+
+    #region Pause Menu Handling
     /// <summary>
     /// Event handler for toggling the pause menu.
     /// </summary>
-    private void PauseMenuController_OnTogglePauseMenu() => OnToggleToolbelt?.Invoke();
-
-
-    /// <summary>
-    /// Sets the toolbelt size.
-    /// </summary>
-    /// <param name="toolbeltSizeId">The new inventory size.</param>
-    public void SetToolbeltSize(int toolbeltSizeId) {
-        if (toolbeltSizeId > ToolbeltSizes.Length - 1) {
-            Debug.LogError("Can't set inventorySize higher than MAX_INVENTORY_SIZE");
-            return;
-        }
-
-        _toolbeltSize = ToolbeltSizes[toolbeltSizeId];
-        InventoryUI.Instance.InventoryOrToolbeltSizeChanged();
-    }
+    private void OnTogglePauseMenu() => OnToggleToolbelt?.Invoke();
+    #endregion
 
 
     #region Save & Load
@@ -265,8 +271,11 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
     }
 
     public void LoadPlayer(PlayerData playerData) {
-        _selectedToolSlot = playerData.LastSelectedToolbeltSlot;
-        _toolbeltSize = playerData.ToolbeltSize;
+        _selectedToolSlot = Mathf.Clamp(playerData.LastSelectedToolbeltSlot, 0, _toolbeltSize - 1);
+        _toolbeltSize = Mathf.Clamp(playerData.ToolbeltSize, _toolbeltSizes[0], _toolbeltSizes[^1]);
+
+        _visual.SetToolbeltSize(_toolbeltSize);
+        _visual.SetToolbeltSlotHighlight(_selectedToolSlot);
     }
     #endregion
 }

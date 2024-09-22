@@ -18,14 +18,10 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
 
     // Cached references for optimization
     private ItemManager _itemManager;
-    private CanvasGroup _dragCanvasGroup;
+    private CanvasGroup _dragItemUICanvasGroup;
 
     private void Awake() {
         ClearItemSlot();
-
-        _dragCanvasGroup = DragItemUI.Instance.GetComponent<CanvasGroup>();
-        // Cache the ItemManager instance if it's not already cached
-
     }
 
     private void Start() {
@@ -33,6 +29,8 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
         if (_itemManager == null) {
             Debug.LogError("ItemManager instance is not available.");
         }
+
+        _dragItemUICanvasGroup = DragItemUI.Instance.GetComponent<CanvasGroup>();
 
         _selectedImage.gameObject.SetActive(false);
     }
@@ -132,18 +130,18 @@ public class BackpackButton : MonoBehaviour, IPointerClickHandler, IPointerDownH
     }
 
     public void OnBeginDrag(PointerEventData eventData) {
-        if (_dragCanvasGroup != null) {
+        if (_dragItemUICanvasGroup != null) {
             // Dragged item cannot block the button to trigger events
-            _dragCanvasGroup.blocksRaycasts = false;
+            _dragItemUICanvasGroup.blocksRaycasts = false;
         }
     }
 
     public void OnDrag(PointerEventData eventData) { }
 
     public void OnEndDrag(PointerEventData eventData) {
-        if (_dragCanvasGroup != null) {
+        if (_dragItemUICanvasGroup != null) {
             // Dragged item can be clicked again
-            _dragCanvasGroup.blocksRaycasts = true;
+            _dragItemUICanvasGroup.blocksRaycasts = true;
         }
     }
 
