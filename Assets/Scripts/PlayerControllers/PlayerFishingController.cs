@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -10,6 +9,7 @@ using static FishSO;
 /// <summary>
 /// Represents a range of button presses required to reel in different sizes of fish.
 /// </summary>
+[Serializable]
 public struct FishButtonPressRange {
     public int MinPresses;
     public int MaxPresses;
@@ -30,14 +30,14 @@ public class PlayerFishingController : MonoBehaviour {
     [SerializeField] private GameObject _bobberPrefab; // Prefab for the bobber (float)
     [SerializeField] private LineRenderer _lineRendererPrefab; // Prefab for the fishing line
     [SerializeField] private FishDatabaseSO _fishDatabaseSO; // ScriptableObject containing fish data
-    [SerializeField] private ToolSO _fishingRod;
+    [SerializeField] private FishingRodToolSO _fishingRod;
 
     [Header("UI Elements")]
     [SerializeField] private Image _fishCatchText; // UI Image to display catch messages
     [SerializeField] private SpriteRenderer _alertPopup; // SpriteRenderer for alert popups
 
     [Header("Visual Settings")]
-    [SerializeField] private float _bobberAlphaAdjustment = 0.5f;
+    [SerializeField, Range(0f, 1f)] private float _bobberAlphaAdjustment = 0.5f;
     #endregion
 
     #region Constants
@@ -67,6 +67,40 @@ public class PlayerFishingController : MonoBehaviour {
     private SpriteRenderer _bobberSpriteRenderer; // SpriteRenderer of the bobber
     private TextMeshProUGUI _catchTextTMP; // Text component for catch messages
     private PlayerToolbeltController _toolbelt;
+
+    private static readonly FishButtonPressRange[] _pressRanges = new FishButtonPressRange[]
+    {
+        new(3, 5),    // VerySmall
+        new(5, 8),    // Small
+        new(8, 12),   // Medium
+        new(12, 16),  // Large
+        new(16, 20),  // VeryLarge
+        new(20, 30)   // Leviathan
+    };
+
+    /// <summary>
+    /// Enumerates the different types of fishing tiles.
+    /// </summary>
+    private enum TileType {
+        Invalid = -1, // Represents an invalid or unrecognized tile
+        Coast = 0,
+        Sea = 1,
+        DeepSea = 2,
+        River = 3,
+        Lake = 4
+    }
+
+    /// <summary>
+    /// Represents the different states of the fishing process.
+    /// </summary>
+    private enum FishingState {
+        Idle, // Player is not fishing
+        Casting, // Player is in the process of casting
+        Fishing, // Line is cast, waiting for a fish
+        ReelingIn // Player is reeling in a fish
+    }
+
+    private FishingState _currentState = FishingState.Idle;
     #endregion
 
     #region Private Fields
@@ -87,38 +121,8 @@ public class PlayerFishingController : MonoBehaviour {
     private Coroutine _castLineCoroutine;
     private Coroutine _waitForFishCoroutine;
 
-    /// <summary>
-    /// Enumerates the different types of fishing tiles.
-    /// </summary>
-    private enum TileType {
-        Invalid = -1, // Represents an invalid or unrecognized tile
-        Coast = 0,
-        Sea = 1,
-        DeepSea = 2,
-        River = 3,
-        Lake = 4
-    }
-
-    private static readonly Dictionary<FishType, FishButtonPressRange> pressRanges = new Dictionary<FishType, FishButtonPressRange> {
-        { FishType.VerySmall, new FishButtonPressRange(3, 5) },
-        { FishType.Small, new FishButtonPressRange(5, 8) },
-        { FishType.Medium, new FishButtonPressRange(8, 12) },
-        { FishType.Large, new FishButtonPressRange(12, 16) },
-        { FishType.VeryLarge, new FishButtonPressRange(16, 20) },
-        { FishType.Leviathan, new FishButtonPressRange(20, 30) },
-    };
-
-    /// <summary>
-    /// Represents the different states of the fishing process.
-    /// </summary>
-    private enum FishingState {
-        Idle, // Player is not fishing
-        Casting, // Player is in the process of casting
-        Fishing, // Line is cast, waiting for a fish
-        ReelingIn // Player is reeling in a fish
-    }
-
-    private FishingState _currentState = FishingState.Idle;
+    // Preallocated arrays to minimize memory allocations
+    private Vector3[] _linePositionsBuffer = new Vector3[SEGMENT_COUNT];
     #endregion
 
     #region Unity Callbacks
@@ -134,63 +138,11 @@ public class PlayerFishingController : MonoBehaviour {
     /// Sets up initial references and validates component assignments.
     /// </summary>
     private void Start() {
-        if (PlayerToolbeltController.LocalInstance == null) {
-            Debug.LogError("No playerToolbeltController found.");
-        }
-        _toolbelt = PlayerToolbeltController.LocalInstance;
-
-        if (InputManager.Instance == null) {
-            Debug.LogError("No inputManager found.");
-        }
-        InputManager.Instance.OnLeftClickAction += OnLeftClickAction;
-        InputManager.Instance.OnLeftClickStarted += OnLeftClickStarted;
-        InputManager.Instance.OnLeftClickCanceled += OnLeftClickCanceled;
-
+        InitializeToolbelt();
+        InitializeInput();
         InitializeFishData();
         AssignFishingTilemap();
         AssignCatchText();
-    }
-
-    private void OnLeftClickAction() {
-        if (_currentCooldown > 0 || (_toolbelt != null && _fishingRod.ItemId != _toolbelt.GetCurrentlySelectedToolbeltItemSlot().ItemId)) {
-            return;
-        }
-
-        switch (_currentState) {
-            case FishingState.Idle:
-                HandleIdleState();
-                break;
-
-            case FishingState.Fishing:
-                HandleFishingState();
-                break;
-
-            case FishingState.ReelingIn:
-                ReelInMinigame();
-                break;
-        }
-    }
-
-    private void OnLeftClickStarted() {
-        if (_currentCooldown > 0) {
-            return;
-        }
-
-        _isLeftClickHeld = true;
-    }
-
-    private void OnLeftClickCanceled() {
-        if (_currentCooldown > 0) {
-            return;
-        }
-
-        _isLeftClickHeld = false;
-
-        if (_currentState == FishingState.Casting) {
-            StopPreview();
-            _currentState = FishingState.Fishing;
-            _castLineCoroutine ??= StartCoroutine(CastLine());
-        }
     }
 
     /// <summary>
@@ -237,9 +189,48 @@ public class PlayerFishingController : MonoBehaviour {
                 break;
         }
     }
+
+    private void OnDestroy() {
+        UnsubscribeInput();
+    }
     #endregion
 
     #region Initialization Methods
+    /// <summary>
+    /// Initializes the player's toolbelt controller reference.
+    /// </summary>
+    private void InitializeToolbelt() {
+        if (PlayerToolbeltController.LocalInstance == null) {
+            Debug.LogError("No PlayerToolbeltController instance found.");
+            return;
+        }
+        _toolbelt = PlayerToolbeltController.LocalInstance;
+    }
+
+    /// <summary>
+    /// Initializes input system event subscriptions.
+    /// </summary>
+    private void InitializeInput() {
+        if (InputManager.Instance == null) {
+            Debug.LogError("No InputManager found.");
+            return;
+        }
+        InputManager.Instance.OnLeftClickAction += OnLeftClickAction;
+        InputManager.Instance.OnLeftClickStarted += OnLeftClickStarted;
+        InputManager.Instance.OnLeftClickCanceled += OnLeftClickCanceled;
+    }
+
+    /// <summary>
+    /// Unsubscribes from input system events to prevent memory leaks.
+    /// </summary>
+    private void UnsubscribeInput() {
+        if (InputManager.Instance != null) {
+            InputManager.Instance.OnLeftClickAction -= OnLeftClickAction;
+            InputManager.Instance.OnLeftClickStarted -= OnLeftClickStarted;
+            InputManager.Instance.OnLeftClickCanceled -= OnLeftClickCanceled;
+        }
+    }
+
     /// <summary>
     /// Initializes fish data from the database.
     /// </summary>
@@ -288,6 +279,50 @@ public class PlayerFishingController : MonoBehaviour {
     }
     #endregion
 
+    #region Input Handlers
+    private void OnLeftClickAction() {
+        if (_currentCooldown > 0 || (_toolbelt != null && _fishingRod.ItemId != _toolbelt.GetCurrentlySelectedToolbeltItemSlot().ItemId)) {
+            return;
+        }
+
+        switch (_currentState) {
+            case FishingState.Idle:
+                PlayerMovementController.LocalInstance.SetCanMoveAndTurn(false);
+                HandleIdleState();
+                break;
+
+            case FishingState.Fishing:
+                HandleFishingState();
+                break;
+
+            case FishingState.ReelingIn:
+                ReelInMinigame();
+                break;
+        }
+    }
+
+    private void OnLeftClickStarted() {
+        if (_currentCooldown > 0) {
+            return;
+        }
+
+        _isLeftClickHeld = true;
+    }
+
+    private void OnLeftClickCanceled() {
+        if (_currentCooldown > 0) {
+            return;
+        }
+
+        _isLeftClickHeld = false;
+
+        if (_currentState == FishingState.Casting) {
+            StopPreview();
+            _currentState = FishingState.Fishing;
+            _castLineCoroutine ??= StartCoroutine(CastLine());
+        }
+    }
+    #endregion
 
     #region State Handlers
     /// <summary>
@@ -371,13 +406,12 @@ public class PlayerFishingController : MonoBehaviour {
         _bobber.transform.position = castPosition;
 
         // Generate and set positions for the casting arc (parabola)
-        Vector3[] linePositions = new Vector3[SEGMENT_COUNT];
         for (int i = 0; i < SEGMENT_COUNT; i++) {
             float t = (float)i / (SEGMENT_COUNT - 1);
-            linePositions[i] = CalculateArcPoint(t, _fishingRodTip, castPosition, CAST_ARC_HEIGHT);
+            _linePositionsBuffer[i] = CalculateArcPoint(t, _fishingRodTip, castPosition, CAST_ARC_HEIGHT);
         }
         _lineRenderer.positionCount = SEGMENT_COUNT;
-        _lineRenderer.SetPositions(linePositions);
+        _lineRenderer.SetPositions(_linePositionsBuffer);
     }
 
     /// <summary>
@@ -449,13 +483,13 @@ public class PlayerFishingController : MonoBehaviour {
     /// Coroutine that waits for a random time before a fish bites.
     /// </summary>
     private IEnumerator WaitForFish() {
-        // Determine a random time for the fish to bite within the defined range
-        float timeToBite = UnityEngine.Random.Range(TIME_TO_BITE_MIN, TIME_TO_BITE_MAX);
+        // Determine a random time for the fish to bite within the defined range and fishing rod rarity
+        float timeToBite = UnityEngine.Random.Range(TIME_TO_BITE_MIN, TIME_TO_BITE_MAX) * (1 - (_fishingRod.BiteRate[_toolbelt.GetCurrentlySelectedToolbeltItemSlot().RarityId] / 100));
         yield return new WaitForSeconds(timeToBite);
 
         // Retrieve a fish based on the tile ID and fishing method
         if (_fishDatabaseSO != null) {
-            _currentFish = _fishDatabaseSO.GetFish(_tileId, CatchingMethod.FishingRod);
+            _currentFish = _fishDatabaseSO.GetFish(_fishingRod, _tileId, CatchingMethod.FishingRod);
             if (_currentFish == null) {
                 Debug.LogError($"No fish found for tileId {_tileId} using FishingRod method.");
                 ReelInWithoutCatch();
@@ -509,8 +543,8 @@ public class PlayerFishingController : MonoBehaviour {
 
         // Determine the number of required button presses based on fish size
         _presses = UnityEngine.Random.Range(
-            pressRanges[_currentFish.FishSize].MinPresses,
-            pressRanges[_currentFish.FishSize].MaxPresses + 1 // +1 to make MaxPresses inclusive
+            _pressRanges[(int)_currentFish.FishSize].MinPresses,
+            _pressRanges[(int)_currentFish.FishSize].MaxPresses + 1 // +1 to make MaxPresses inclusive
         );
     }
 
@@ -543,7 +577,6 @@ public class PlayerFishingController : MonoBehaviour {
             ResetVariables();
             return;
         }
-
     }
     #endregion
 
@@ -556,11 +589,8 @@ public class PlayerFishingController : MonoBehaviour {
     /// <param name="end">End position.</param>
     /// <param name="height">Height of the arc.</param>
     /// <returns>Calculated position on the arc.</returns>
-    private Vector3 CalculateArcPoint(float t, Vector3 start, Vector3 end, float height) {
-        Vector3 point = Vector3.Lerp(start, end, t);
-        point.y += Mathf.Sin(t * Mathf.PI) * height;
-        return point;
-    }
+    private Vector3 CalculateArcPoint(float t, Vector3 start, Vector3 end, float height) =>
+        Vector3.Lerp(start, end, t) + height * Mathf.Sin(t * Mathf.PI) * Vector3.up;
 
     /// <summary>
     /// Calculates a point with a sag effect between two points.
@@ -570,12 +600,8 @@ public class PlayerFishingController : MonoBehaviour {
     /// <param name="end">End position.</param>
     /// <param name="sagHeight">Height of the sag.</param>
     /// <returns>Calculated position with sag.</returns>
-    private Vector3 CalculateSagPoint(float t, Vector3 start, Vector3 end, float sagHeight) {
-        Vector3 point = Vector3.Lerp(start, end, t);
-        float sag = Mathf.Sin(t * Mathf.PI) * sagHeight;
-        point.y -= sag; // Apply sag to the y-axis
-        return point;
-    }
+    private Vector3 CalculateSagPoint(float t, Vector3 start, Vector3 end, float sagHeight) =>
+        Vector3.Lerp(start, end, t) - Mathf.Sin(t * Mathf.PI) * sagHeight * Vector3.up;
 
     /// <summary>
     /// Draws the fishing line with a sag effect between two points.
@@ -584,15 +610,16 @@ public class PlayerFishingController : MonoBehaviour {
     /// <param name="end">End position of the line.</param>
     /// <param name="segmentCount">Number of segments in the line.</param>
     private void DrawFishingLine(Vector3 start, Vector3 end, int segmentCount) {
-        if (_lineRenderer == null) return; // Prevent errors if LineRenderer is missing
+        if (_lineRenderer == null) {
+            return; // Prevent errors if LineRenderer is missing
+        }
 
-        Vector3[] linePositions = new Vector3[segmentCount];
         for (int i = 0; i < segmentCount; i++) {
             float t = (float)i / (segmentCount - 1);
-            linePositions[i] = CalculateSagPoint(t, start, end, LINE_SAG_HEIGHT);
+            _linePositionsBuffer[i] = CalculateSagPoint(t, start, end, LINE_SAG_HEIGHT);
         }
         _lineRenderer.positionCount = segmentCount;
-        _lineRenderer.SetPositions(linePositions);
+        _lineRenderer.SetPositions(_linePositionsBuffer);
     }
 
     /// <summary>
@@ -635,6 +662,8 @@ public class PlayerFishingController : MonoBehaviour {
             StopCoroutine(_waitForFishCoroutine);
             _waitForFishCoroutine = null;
         }
+
+        PlayerMovementController.LocalInstance.SetCanMoveAndTurn(true);
     }
 
     /// <summary>
@@ -675,10 +704,4 @@ public class PlayerFishingController : MonoBehaviour {
         }
     }
     #endregion
-
-    private void OnDestroy() {
-        InputManager.Instance.OnLeftClickAction -= OnLeftClickAction;
-        InputManager.Instance.OnLeftClickStarted -= OnLeftClickStarted;
-        InputManager.Instance.OnLeftClickCanceled -= OnLeftClickCanceled;
-    }
 }

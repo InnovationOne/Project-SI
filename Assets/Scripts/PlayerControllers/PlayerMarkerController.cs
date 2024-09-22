@@ -23,7 +23,7 @@ public class PlayerMarkerController : NetworkBehaviour {
     private int _currentToolMaxRarity;
     private int _currentlyUsedRarity;
     private int _energyCost;
-    private int[] _areaSizes;
+    private Area _areaSize;
     private List<Vector3Int> _areaPositions = new();
     private ToolSO.ToolTypes _toolType;
 
@@ -80,16 +80,16 @@ public class PlayerMarkerController : NetworkBehaviour {
     }
 
     #region Area Marker
-    public void TriggerAreaMarker(int toolRarity, int[] areaSizes, int energyCost, ToolSO.ToolTypes toolType) {
-        ResetAreaMarkerState(toolRarity, areaSizes, energyCost, toolType);
+    public void TriggerAreaMarker(int toolRarity, Area areaSize, int energyCost, ToolSO.ToolTypes toolType) {
+        ResetAreaMarkerState(toolRarity, areaSize, energyCost, toolType);
         PlayerMovementController.LocalInstance.ChangeMoveSpeed(false);
     }
 
-    private void ResetAreaMarkerState(int toolRarity, int[] sizes, int cost, ToolSO.ToolTypes type) {
+    private void ResetAreaMarkerState(int toolRarity, Area areaSize, int cost, ToolSO.ToolTypes type) {
         _currentChangeSizeTimer = 0f;
         _currentlyUsedRarity = 0;
         _currentToolMaxRarity = toolRarity;
-        _areaSizes = sizes;
+        _areaSize = areaSize;
         _energyCost = cost;
         _useAreaIndicator = true;
         _toolType = type;
@@ -109,8 +109,7 @@ public class PlayerMarkerController : NetworkBehaviour {
 
     private void ShowAreaMarker(Vector3Int position, Vector2 motionDirection) {
         UpdateAreaSize();
-        int size = _areaSizes[_currentlyUsedRarity];
-        CalculateAreaDimensions(motionDirection, size, out int xsize, out int ysize);
+        CalculateAreaDimensions(motionDirection, _areaSize, out int xsize, out int ysize);
         Vector3Int[,] positions = GenerateCellPositions(position, motionDirection, xsize, ysize);
 
         ResetMarkerTiles();
@@ -144,13 +143,13 @@ public class PlayerMarkerController : NetworkBehaviour {
     }
 
     // Calculate the area dimensions based on the last motion vector (horizontal or vertical)
-    private void CalculateAreaDimensions(Vector2 lastMotionVector, int currentAreaSize, out int xsize, out int ysize) {
+    private void CalculateAreaDimensions(Vector2 lastMotionVector, Area currentAreaSize, out int xsize, out int ysize) {
         if (lastMotionVector.x == 0) {
-            xsize = currentAreaSize / 10;
-            ysize = currentAreaSize % 10;
+            xsize = currentAreaSize.XSize;
+            ysize = currentAreaSize.YSize;
         } else {
-            xsize = currentAreaSize % 10;
-            ysize = currentAreaSize / 10;
+            xsize = currentAreaSize.YSize;
+            ysize = currentAreaSize.XSize;
         }
     }
 

@@ -11,7 +11,7 @@ public class FishSO : ScriptableObject {
     }
 
     public enum FishType {
-        VerySmall, Small, Medium, Large, VeryLarge, Leviathan,
+        VerySmall, Small, Medium, Large, VeryLarge, Leviathan, None
     }
 
     [HideInInspector] public int FishId;

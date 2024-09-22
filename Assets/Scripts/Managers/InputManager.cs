@@ -1,13 +1,17 @@
 using System;
 using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// This class handels the custom input system and saves / loads custom hotkeys
+/// <summary>
+/// Handles custom input actions and manages input-related events.
+/// Utilizes modern C# features and optimizes for performance and memory usage.
+/// </summary>
 public class InputManager : NetworkBehaviour {
+    // Singleton Instance
     public static InputManager Instance { get; private set; }
 
+    // Input Action Maps
     private PlayerInputActions playerInputActions;
 
     // Player
@@ -259,7 +263,7 @@ public class InputManager : NetworkBehaviour {
     }
     #endregion
 
-    
+
     public void EnableDebugConsoleActionMap() {
         playerInputActions.DebugConsole.Enable();
         playerInputActions.Player.Disable();

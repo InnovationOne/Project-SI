@@ -24,8 +24,8 @@ public class GatherResourceNodeSO : ToolActionSO {
             ResourceNode resourceNode = collider.gameObject.GetComponent<ResourceNode>();
             if (resourceNode != null && resourceNode.CanHitResourceNodeType(canHitNodesOfType)) {
                 // Apply damage or usage to the resource node
-                ToolSO tool = ItemManager.Instance.ItemDatabase[itemSlot.ItemId] as ToolSO;
-                int damage = tool.UsageOrDamageOnAction[itemSlot.RarityId - 1];
+                AxePickaxeToolSO axePickaxeToolSO = ItemManager.Instance.ItemDatabase[itemSlot.ItemId] as AxePickaxeToolSO;
+                int damage = axePickaxeToolSO.DamageOnAction[itemSlot.RarityId - 1];
                 resourceNode.HitResourceNode(damage);
                 break; // Exit after hitting the first valid resource node
             }

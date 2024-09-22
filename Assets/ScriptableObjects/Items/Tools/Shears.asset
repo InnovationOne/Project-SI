@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ItemId: 0
   ItemType: 1
-  ItemName: 
-  ItemIcon: {fileID: 0}
+  ItemName: Shears
+  ItemIcon: {fileID: 955900066, guid: 63b11b1bded63414fa59533c250ce37f, type: 3}
   IsStackable: 0
   MaxStackableAmount: 1
   CanBeBought: 0
@@ -24,8 +24,7 @@ MonoBehaviour:
   LowestRaritySellPrice: 0
   ItemInfoHoverText: 
   LeftClickAction: []
-  ToolItemRarity: []
-  UsageOrDamageOnAction: 
-  VolumeOrBiteRate: 
-  CatchChance: 
-  EnergyOnAction: 
+  ToolItemRarity:
+  - {fileID: 955900066, guid: 63b11b1bded63414fa59533c250ce37f, type: 3}
+  - {fileID: -79569679, guid: 63b11b1bded63414fa59533c250ce37f, type: 3}
+  EnergyOnAction: 0200000001000000

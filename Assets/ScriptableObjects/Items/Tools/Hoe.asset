@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bba8e0c7705831442842ff6a46903f08, type: 3}
+  m_Script: {fileID: 11500000, guid: ba95ee4fe05344546943f23f53b313ef, type: 3}
   m_Name: Hoe
   m_EditorClassIdentifier: 
-  ItemId: 0
+  ItemId: 247
   ItemType: 1
   ItemName: Hoe
   ItemIcon: {fileID: -353817283, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
@@ -26,13 +26,23 @@ MonoBehaviour:
   LeftClickAction:
   - {fileID: 11400000, guid: b64a87a2324a65f4e9b3f1f961aed4f1, type: 2}
   ToolItemRarity:
-  - {fileID: -353817283, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: -1531437662, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: 93053059, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: 211345418, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: 1390980680, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: -940353732, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  UsageOrDamageOnAction: 0b0000000d0000000f000000210000002300000037000000
-  VolumeOrBiteRate: 
-  CatchChance: 
-  EnergyOnAction: 000000000000000000000000000000000000000000000000
+  - {fileID: -46204096, guid: 9d8917446a3602749bc552cbc5cd5b7a, type: 3}
+  - {fileID: 760875105, guid: 9d8917446a3602749bc552cbc5cd5b7a, type: 3}
+  - {fileID: 1031652478, guid: 9d8917446a3602749bc552cbc5cd5b7a, type: 3}
+  - {fileID: 846666257, guid: 9d8917446a3602749bc552cbc5cd5b7a, type: 3}
+  - {fileID: -305250215, guid: 9d8917446a3602749bc552cbc5cd5b7a, type: 3}
+  - {fileID: 1186623260, guid: 9d8917446a3602749bc552cbc5cd5b7a, type: 3}
+  EnergyOnAction: 060000000500000004000000030000000200000001000000
+  Area:
+  - XSize: 1
+    YSize: 1
+  - XSize: 3
+    YSize: 1
+  - XSize: 5
+    YSize: 1
+  - XSize: 5
+    YSize: 3
+  - XSize: 5
+    YSize: 5
+  - XSize: 7
+    YSize: 7

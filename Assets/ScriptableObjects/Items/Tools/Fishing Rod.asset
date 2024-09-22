@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bba8e0c7705831442842ff6a46903f08, type: 3}
+  m_Script: {fileID: 11500000, guid: ccb8d6febfefc994fa3c66f800d3b185, type: 3}
   m_Name: Fishing Rod
   m_EditorClassIdentifier: 
   ItemId: 0
@@ -25,13 +25,12 @@ MonoBehaviour:
   ItemInfoHoverText: 
   LeftClickAction: []
   ToolItemRarity:
-  - {fileID: 1670585940, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: -746616447, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: 485358893, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: 1328047233, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: 957941881, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: -1263806737, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  UsageOrDamageOnAction: 
-  VolumeOrBiteRate: 
-  CatchChance: 
-  EnergyOnAction: 000000000000000000000000000000000000000000000000
+  - {fileID: 388949299, guid: db2a25debcd4c00408e27c89fa316b46, type: 3}
+  - {fileID: 2145607378, guid: db2a25debcd4c00408e27c89fa316b46, type: 3}
+  - {fileID: 4332240, guid: db2a25debcd4c00408e27c89fa316b46, type: 3}
+  - {fileID: 2068720384, guid: db2a25debcd4c00408e27c89fa316b46, type: 3}
+  - {fileID: 1711239464, guid: db2a25debcd4c00408e27c89fa316b46, type: 3}
+  - {fileID: 1601044567, guid: db2a25debcd4c00408e27c89fa316b46, type: 3}
+  EnergyOnAction: 060000000500000004000000030000000200000001000000
+  BiteRate: 000000000a00000014000000230000003c00000064000000
+  CatchChance: 0000000002000000040000000a0000001400000028000000

@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bba8e0c7705831442842ff6a46903f08, type: 3}
+  m_Script: {fileID: 11500000, guid: 5cd98b811a170ce4dabec9aa6e6459d7, type: 3}
   m_Name: Pickaxe
   m_EditorClassIdentifier: 
-  ItemId: 249
+  ItemId: 0
   ItemType: 1
   ItemName: Pickaxe
   ItemIcon: {fileID: -458366411, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
@@ -28,13 +28,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 96e3e9ce912911a4bb64eb5f81ee457f, type: 2}
   - {fileID: 11400000, guid: 9e1953c952a6a6d4990c8535078255ca, type: 2}
   ToolItemRarity:
-  - {fileID: -458366411, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: 985431781, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: -653295636, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: -357405880, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: 1943216844, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: -315733675, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  UsageOrDamageOnAction: 01000000020000000300000004000000050000000a000000
-  VolumeOrBiteRate: 
-  CatchChance: 
-  EnergyOnAction: 000000000000000000000000000000000000000000000000
+  - {fileID: 1924818727, guid: 2351b39fdba2abe4b947de131668e213, type: 3}
+  - {fileID: -905162405, guid: 2351b39fdba2abe4b947de131668e213, type: 3}
+  - {fileID: 749936134, guid: 2351b39fdba2abe4b947de131668e213, type: 3}
+  - {fileID: 508778896, guid: 2351b39fdba2abe4b947de131668e213, type: 3}
+  - {fileID: 830202794, guid: 2351b39fdba2abe4b947de131668e213, type: 3}
+  - {fileID: -460985379, guid: 2351b39fdba2abe4b947de131668e213, type: 3}
+  EnergyOnAction: 050000000400000004000000030000000200000001000000
+  DamageOnAction: 140000001900000019000000220000003200000064000000

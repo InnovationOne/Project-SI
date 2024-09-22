@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ItemId: 0
   ItemType: 1
-  ItemName: 
-  ItemIcon: {fileID: 0}
+  ItemName: Milking Bucket
+  ItemIcon: {fileID: -1501844974, guid: 074f9378d0a0cb54aad9ea691426f39a, type: 3}
   IsStackable: 0
   MaxStackableAmount: 1
   CanBeBought: 0
@@ -24,8 +24,7 @@ MonoBehaviour:
   LowestRaritySellPrice: 0
   ItemInfoHoverText: 
   LeftClickAction: []
-  ToolItemRarity: []
-  UsageOrDamageOnAction: 
-  VolumeOrBiteRate: 
-  CatchChance: 
-  EnergyOnAction: 
+  ToolItemRarity:
+  - {fileID: -1501844974, guid: 074f9378d0a0cb54aad9ea691426f39a, type: 3}
+  - {fileID: -248833925, guid: 074f9378d0a0cb54aad9ea691426f39a, type: 3}
+  EnergyOnAction: 0200000001000000

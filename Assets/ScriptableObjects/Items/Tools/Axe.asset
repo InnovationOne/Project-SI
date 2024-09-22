@@ -9,13 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bba8e0c7705831442842ff6a46903f08, type: 3}
+  m_Script: {fileID: 11500000, guid: 5cd98b811a170ce4dabec9aa6e6459d7, type: 3}
   m_Name: Axe
   m_EditorClassIdentifier: 
-  ItemId: 245
+  ItemId: 0
   ItemType: 1
   ItemName: Axe
-  ItemIcon: {fileID: 356884793, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
+  ItemIcon: {fileID: -2145014237, guid: 0c013a9abc238484a9b8c040f4932603, type: 3}
   IsStackable: 0
   MaxStackableAmount: 1
   CanBeBought: 0
@@ -26,13 +26,11 @@ MonoBehaviour:
   LeftClickAction:
   - {fileID: 11400000, guid: d61de2f2323346a4cb7382b6c5ad91a1, type: 2}
   ToolItemRarity:
-  - {fileID: 356884793, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: 1022068334, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: -2024180839, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: 1360664294, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: -2047508907, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  - {fileID: -473167526, guid: d60d64f54fcb8a940a1486da089a5553, type: 3}
-  UsageOrDamageOnAction: 01000000020000000300000004000000050000000a000000
-  VolumeOrBiteRate: 
-  CatchChance: 
-  EnergyOnAction: 000000000000000000000000000000000000000000000000
+  - {fileID: -2145014237, guid: 0c013a9abc238484a9b8c040f4932603, type: 3}
+  - {fileID: -1699807569, guid: 0c013a9abc238484a9b8c040f4932603, type: 3}
+  - {fileID: 1882552179, guid: 0c013a9abc238484a9b8c040f4932603, type: 3}
+  - {fileID: 1017943528, guid: 0c013a9abc238484a9b8c040f4932603, type: 3}
+  - {fileID: -2068469101, guid: 0c013a9abc238484a9b8c040f4932603, type: 3}
+  - {fileID: -517679556, guid: 0c013a9abc238484a9b8c040f4932603, type: 3}
+  EnergyOnAction: 050000000400000004000000030000000200000001000000
+  DamageOnAction: 0a0000000c0000000d000000110000001900000032000000

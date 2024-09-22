@@ -88,13 +88,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
             if (ItemContainer.ItemSlots[i].ItemId == -1) {
                 ItemButtons[i].GetComponent<BackpackButton>().ClearItemSlot();
             } else {
-                if (ItemContainer.ItemSlots[i].RarityId == 0) {
-                    ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], null);
-                } else if (ItemManager.Instance.ItemDatabase[ItemContainer.ItemSlots[i].ItemId].ItemType == ItemSO.ItemTypes.Tools) {
-                    ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], (ItemManager.Instance.ItemDatabase[ItemContainer.ItemSlots[i].ItemId] as ToolSO).ToolItemRarity[ItemContainer.ItemSlots[i].RarityId - 1]);
-                } else {
-                    ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], RaritySprites[ItemContainer.ItemSlots[i].RarityId - 1]);
-                }
+                ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], RaritySprites);
             }
         }
     }
