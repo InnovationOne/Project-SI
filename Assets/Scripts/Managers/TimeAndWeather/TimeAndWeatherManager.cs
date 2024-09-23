@@ -79,7 +79,7 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
     private readonly int[] _weatherProbability = { 40, 60, 85 };
     private readonly float[] _daytimeColors = { 0.9f, 0.8f, 0.5f };
     private List<WeatherName> _weatherForecast = new List<WeatherName> { WeatherName.Rain, WeatherName.Thunder, WeatherName.Sun };
-    public string GetWeather => _weatherForecast[_weatherForecast.Count - 1].ToString();
+    public string GetWeather => _weatherForecast[^1].ToString();
 
     [Header("Thunder Settings")]
     private const float MIN_TIME_BETWEEN_THUNDER = 10f;
@@ -102,6 +102,9 @@ public class TimeAndWeatherManager : NetworkBehaviour, IDataPersistance {
         if (IsServer) {
             NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_OnClientConnected;
         }
+
+        AudioManager.Instance.InitializeAmbience(FMODEvents.Instance.WeatherAmbience);
+        AudioManager.Instance.InitializeMusic(FMODEvents.Instance.SeasonTheme);
 
         AudioManager.Instance.SetMusicSeason((SeasonName)CurrentSeason.Value);
         if (_weatherForecast.ElementAt(0) == WeatherName.Rain) {

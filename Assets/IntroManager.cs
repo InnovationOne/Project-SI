@@ -47,6 +47,8 @@ public class IntroManager : MonoBehaviour {
 
 
     private void Start() {
+        AudioManager.Instance.InitializeMusic(FMODEvents.Instance.TitleTheme);
+
         _alphaHeaderTextMeshPro.text = _alphaHeaderText;
         _alphaBodyTextMeshPro.text = _alphaBodyText;
         _photosensitivityHeaderTextMeshPro.text = _photosensitivityHeaderText;

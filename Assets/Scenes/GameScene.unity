@@ -7237,10 +7237,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d462336c1f46c2743b3a9ec46c5b495a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MasterVolume: 1
-  MusicVolume: 1
-  AmbienceVolume: 1
-  SFXVolume: 1
+  MasterVolume: 0.5
+  MusicVolume: 0.5
+  AmbienceVolume: 0.5
+  SFXVolume: 0.5
 --- !u!1 &400769106
 GameObject:
   m_ObjectHideFlags: 0
@@ -29275,7 +29275,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd590a57a2eb0bc4eb06d9046aaba76a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _continueButton: {fileID: 0}
 --- !u!114 &1442785155
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30827,7 +30826,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70a80619c43be22488e3e73a23e25373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <SeasonMusic>k__BackingField:
+  <SeasonTheme>k__BackingField:
     Guid:
       Data1: 390591266
       Data2: 1163801395
@@ -30841,7 +30840,7 @@ MonoBehaviour:
       Data3: -969746801
       Data4: 2101430498
     Path: event:/Music/TitleTheme
-  <Loading>k__BackingField:
+  <LoadingTheme>k__BackingField:
     Guid:
       Data1: -1982843576
       Data2: 1253425051

@@ -6,9 +6,9 @@ public class FMODEvents : MonoBehaviour
     public static FMODEvents Instance { get; private set; }
 
     [field: Header("Music")]
-    [field: SerializeField] public EventReference SeasonMusic { get; private set; }
+    [field: SerializeField] public EventReference SeasonTheme { get; private set; }
     [field: SerializeField] public EventReference TitleTheme { get; private set; }
-    [field: SerializeField] public EventReference Loading { get; private set; }
+    [field: SerializeField] public EventReference LoadingTheme { get; private set; }
 
     [field: Header("Ambience")]
     [field: SerializeField] public EventReference WeatherAmbience { get; private set; }
@@ -26,8 +26,8 @@ public class FMODEvents : MonoBehaviour
 
     private void Awake() {
         if (Instance != null) {
-            Debug.LogError("There is more than one instance of FMODEvents in the scene!");
-            return;
+            Debug.Log("There is more than one instance of FMODEvents in the scene!");
+            Destroy(Instance);
         }
         Instance = this;
     }

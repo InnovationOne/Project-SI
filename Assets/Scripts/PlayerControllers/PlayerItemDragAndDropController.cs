@@ -7,9 +7,6 @@ using static ItemSlot;
 public class PlayerItemDragAndDropController : NetworkBehaviour {
     public static PlayerItemDragAndDropController LocalInstance { get; private set; }
 
-    // Constants for clarity
-    private static readonly Vector3 Z_POSITION = new Vector3(0, 0, 0); // Adjust as needed
-
     // Cached references
     private ItemSlot _dragItemSlot;
     private PlayerInventoryController _playerInventoryController;
