@@ -576,7 +576,8 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Check if the position is not plowed or is already fertilized
         if (!CropTileContainer.IsPositionPlowed(wantToFertilizeTilePosition) ||
             !CropTileContainer.IsPositionSeeded(wantToFertilizeTilePosition) ||
-            !CropTileContainer.CanPositionBeFertilized(wantToFertilizeTilePosition, itemId)) {
+            !CropTileContainer.CanPositionBeFertilized(wantToFertilizeTilePosition, itemId)
+            || _cropDatabase[CropTileContainer.GetCropTileAtPosition(wantToFertilizeTilePosition).CropId].IsTree) {
             // If it is, handle the client callback and return
             HandleClientCallback(serverRpcParams, false);
             return;
@@ -629,9 +630,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [ServerRpc(RequireOwnership = false)]
     public void SeedTileServerRpc(Vector3Int wantToSeedTilePosition, int itemId, ServerRpcParams serverRpcParams = default) {
         // Tree
-        if (!CropTileContainer.IsPositionPlowed(wantToSeedTilePosition) &&
-            !CropTileContainer.IsPositionSeeded(wantToSeedTilePosition) &&
-            (ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.IsTree) {
+        if ((ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.IsTree) {
             // Plant the tree
         } else {
             // Check if the position is not plowed or is already seeded
@@ -790,7 +789,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         cropTile = CropTileContainer.GetCropTileAtPosition(gridPosition);
 
         // Check if the position is seeded and the crop is ready to harvest
-        if (!CropTileContainer.IsPositionSeeded(gridPosition) || !CropIsReadyToHarvest(cropTile)) {
+        if (!CropTileContainer.IsPositionSeeded(gridPosition)
+            || !CropIsReadyToHarvest(cropTile)
+            || _cropDatabase[cropTile.CropId].IsTree) { // Is a tree so harvest is by axe
             return false;
         }
 
@@ -1054,7 +1055,8 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Iterate over all crop tiles.
         foreach (CropTile cropTile in CropTileContainer.CropTileMap.Values) {
             // If there's no crop on the tile, mark it as not watered and continue to the next tile.
-            if (cropTile.CropId == -1) {
+            if (cropTile.CropId == -1
+                || _cropDatabase[cropTile.CropId].IsTree) {
                 cropTile.IsWatered = false;
                 VisualizeTileChanges(cropTile);
                 continue;
@@ -1094,7 +1096,13 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
     [ServerRpc(RequireOwnership = false)]
     public void DestroyCropTileServerRpc(Vector3Int position, int usedEnergy, ToolSO.ToolTypes toolTypes, ServerRpcParams serverRpcParams = default) {
-        bool success = HandleToolAction(position, toolTypes);
+        bool success;
+        if (_cropDatabase[CropTileContainer.GetCropTileAtPosition(position).CropId].IsTree) {
+            success = false;
+        } else {
+            success = HandleToolAction(position, toolTypes);
+        }
+
         HandleClientCallback(serverRpcParams, success);
         HandleEnergyReduction(serverRpcParams, usedEnergy);
     }

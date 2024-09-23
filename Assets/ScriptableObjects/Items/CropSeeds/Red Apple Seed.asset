@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00047e703060fbd48ab540ceb5c8fcea, type: 3}
+  m_Name: Red Apple Seed
+  m_EditorClassIdentifier: 
+  ItemId: 0
+  ItemType: 6
+  ItemName: Red Apple Seed
+  ItemIcon: {fileID: 0}
+  IsStackable: 1
+  MaxStackableAmount: 99
+  CanBeBought: 1
+  BuyPrice: 630
+  CanBeSold: 1
+  LowestRaritySellPrice: 315
+  ItemInfoHoverText: 
+  LeftClickAction:
+  - {fileID: 11400000, guid: d28c8e540d8e6ff40978661f4905f0ed, type: 2}
+  CropToGrow: {fileID: 11400000, guid: 60206b96635b84c49834ff7055dcbba6, type: 2}
+  MinSeedFromFruit: 1
+  MaxSeedFromFruit: 3

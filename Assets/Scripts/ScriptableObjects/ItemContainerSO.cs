@@ -3,12 +3,27 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEditor;
 
 // This script creates a list of item slots e.g. inventory
 [CreateAssetMenu(menuName = "Container/Item Container SO")]
 public class ItemContainerSO : ScriptableObject {
-    // Constants for clarity
-    private const int EmptyItemId = ItemSlot.EmptyItemId;
+#if UNITY_EDITOR
+    // This script clears an item container
+    [CustomEditor(typeof(ItemContainerSO))]
+    public class ItemContainerEditor : Editor {
+        public override void OnInspectorGUI() {
+            var itemContainer = target as ItemContainerSO;
+            if (GUILayout.Button("Clear container")) {
+                for (int i = 0; i < itemContainer.ItemSlots.Count; i++) {
+                    itemContainer.ItemSlots[i].Clear();
+                }
+            }
+
+            DrawDefaultInspector();
+        }
+    }
+#endif
 
     // Events
     public event Action OnItemsUpdated;

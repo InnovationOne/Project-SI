@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00047e703060fbd48ab540ceb5c8fcea, type: 3}
-  m_Name: Red Apple Seed
+  m_Name: _Template
   m_EditorClassIdentifier: 
   ItemId: 0
   ItemType: 6
-  ItemName: Red Apple Seed
+  ItemName: 
   ItemIcon: {fileID: 0}
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 1
-  BuyPrice: 630
+  BuyPrice: 0
   CanBeSold: 1
-  LowestRaritySellPrice: 315
+  LowestRaritySellPrice: 0
   ItemInfoHoverText: 
   LeftClickAction:
   - {fileID: 11400000, guid: d28c8e540d8e6ff40978661f4905f0ed, type: 2}
   CropToGrow: {fileID: 0}
-  MinSeedFromFruit: 1
-  MaxSeedFromFruit: 3
+  MinSeedFromFruit: 0
+  MaxSeedFromFruit: 0

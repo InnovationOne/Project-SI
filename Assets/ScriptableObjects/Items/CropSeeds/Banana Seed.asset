@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 00047e703060fbd48ab540ceb5c8fcea, type: 3}
-  m_Name: Lime Seed
+  m_Name: Banana Seed
   m_EditorClassIdentifier: 
   ItemId: 0
   ItemType: 6
-  ItemName: Lime Seed
+  ItemName: Banana Seed
   ItemIcon: {fileID: 0}
   IsStackable: 1
   MaxStackableAmount: 99
   CanBeBought: 1
-  BuyPrice: 580
+  BuyPrice: 760
   CanBeSold: 1
-  LowestRaritySellPrice: 290
+  LowestRaritySellPrice: 380
   ItemInfoHoverText: 
   LeftClickAction:
   - {fileID: 11400000, guid: d28c8e540d8e6ff40978661f4905f0ed, type: 2}
-  CropToGrow: {fileID: 0}
+  CropToGrow: {fileID: 11400000, guid: fa57b2c2512eaa3458a3902b7282fb36, type: 2}
   MinSeedFromFruit: 1
   MaxSeedFromFruit: 3
