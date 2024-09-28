@@ -10,50 +10,40 @@ using Unity.Mathematics;
 
 [Serializable]
 public class SpawnablePrefab {
-    [SerializeField] private GameObject _prefab; // Das Prefab, das gespawnt werden soll
+    [SerializeField] private GameObject _prefab; // The prefab to spawn
     public GameObject Prefab => _prefab;
 
-    [SerializeField][Range(0f, 1f)] private float _spawnProbability; // Wahrscheinlichkeit, dass dieses Prefab gespawnt wird
+    [SerializeField, Range(0f, 1f)] private float _spawnProbability; // Spawn probability for this prefab
     public float SpawnProbability => _spawnProbability;
 }
 
-[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(Collider2D), typeof(PolygonCollider2D))]
 public class PrefabSpawner : NetworkBehaviour {
-    [SerializeField] private Tilemap _targetTilemap; // Referenz zur Tilemap
-    [SerializeField] private List<SpawnablePrefab> _prefabsToSpawn = new(); // Liste der Prefabs mit Spawn-Wahrscheinlichkeiten
-    [SerializeField] private int _minSpawnCount = 1; // Minimale Anzahl von Prefabs, die gespawnt werden
-    [SerializeField] private int _maxSpawnCount = 5; // Maximale Anzahl von Prefabs, die gespawnt werden
+    [SerializeField] private Tilemap _targetTilemap; // Reference to the Tilemap
+    [SerializeField] private List<SpawnablePrefab> _prefabsToSpawn = new(); // List of prefabs with spawn probabilities
+    [SerializeField] private int _minSpawnCount = 1; // Minimum number of prefabs to spawn
+    [SerializeField] private int _maxSpawnCount = 5; // Maximum number of prefabs to spawn
 
-    // LayerMask für Kollisionserkennung (kann im Inspector festgelegt werden)
-    [SerializeField] private LayerMask _collisionLayerMask;
+    // Removed LayerMask as per user request
 
-    // NetworkList zur Verfolgung der auf dem Netzwerk gespawnten Objekte
     private NetworkList<NetworkObjectReference> _spawnedObjects;
 
-    // Kumulative Wahrscheinlichkeiten für effiziente Zufallsauswahl
     private float[] _cumulativeProbabilities;
     private float _totalProbability;
 
     private PolygonCollider2D _spawnArea;
 
-    // Polygon-Daten für thread-sichere Punkt-in-Polygon-Prüfungen
     private NativeArray<float2> _polygonPoints;
 
     private void Awake() {
         _spawnArea = GetComponent<PolygonCollider2D>();
-
-        // Initialisiere NetworkList
         _spawnedObjects = new NetworkList<NetworkObjectReference>();
-
-        // Initialisiere kumulative Wahrscheinlichkeiten
         InitializeCumulativeProbabilities();
-
-        // Extrahiere Polygonpunkte und konvertiere sie in NativeArray für den Job
         ExtractPolygonPoints();
     }
 
     private void OnDestroy() {
-        // Dispose NativeArray zur Vermeidung von Speicherlecks
+        // Dispose NativeArray to prevent memory leaks
         if (_polygonPoints.IsCreated) {
             _polygonPoints.Dispose();
         }
@@ -62,7 +52,7 @@ public class PrefabSpawner : NetworkBehaviour {
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
 
-        // Stelle sicher, dass nur der Server Prefabs spawnt
+        // Initialize NetworkList on network spawn to ensure synchronization
         if (IsServer) {
             SpawnPrefabs();
         }
@@ -77,11 +67,13 @@ public class PrefabSpawner : NetworkBehaviour {
                     networkObject.Despawn();
                 }
             }
+
+            _spawnedObjects.Clear();
         }
     }
 
     /// <summary>
-    /// Initialisiert die kumulativen Wahrscheinlichkeiten für die Prefab-Auswahl.
+    /// Initializes the cumulative probabilities for prefab selection.
     /// </summary>
     private void InitializeCumulativeProbabilities() {
         int count = _prefabsToSpawn.Count;
@@ -95,37 +87,37 @@ public class PrefabSpawner : NetworkBehaviour {
     }
 
     /// <summary>
-    /// Extrahiert die Polygonpunkte aus dem PolygonCollider2D und speichert sie in einem NativeArray.
+    /// Extracts polygon points from the PolygonCollider2D and stores them in a NativeArray.
     /// </summary>
     private void ExtractPolygonPoints() {
-        // Angenommen, der PolygonCollider2D hat einen einzigen Pfad
+        // Assume the PolygonCollider2D has a single path
         Vector2[] localPoints = _spawnArea.GetPath(0);
         int pointCount = localPoints.Length;
 
-        // Transformiere die lokalen Punkte in Weltkoordinaten
-        Vector2[] worldPoints = new Vector2[pointCount];
+        // Transform local points to world coordinates
+        NativeArray<float2> worldPoints = new NativeArray<float2>(pointCount, Allocator.Temp);
         for (int i = 0; i < pointCount; i++) {
-            worldPoints[i] = _spawnArea.transform.TransformPoint(localPoints[i]);
+            Vector3 worldPos = _spawnArea.transform.TransformPoint(localPoints[i]);
+            worldPoints[i] = new float2(worldPos.x, worldPos.y);
         }
 
-        _polygonPoints = new NativeArray<float2>(pointCount, Allocator.Persistent);
-        for (int i = 0; i < pointCount; i++) {
-            _polygonPoints[i] = new float2(worldPoints[i].x, worldPoints[i].y);
-        }
+        // Copy to _polygonPoints for persistent usage
+        _polygonPoints = new NativeArray<float2>(worldPoints, Allocator.Persistent);
+        worldPoints.Dispose();
     }
 
     /// <summary>
-    /// Spawnt Prefabs basierend auf den definierten Wahrscheinlichkeiten und gültigen Tile-Positionen.
+    /// Spawns prefabs based on defined probabilities and valid tile positions.
     /// </summary>
-    public void SpawnPrefabs() {
+    private void SpawnPrefabs() {
         int spawnCount = UnityEngine.Random.Range(_minSpawnCount, _maxSpawnCount + 1);
         Bounds spawnBounds = _spawnArea.bounds;
 
         Vector3Int minTilePosition = _targetTilemap.WorldToCell(spawnBounds.min);
         Vector3Int maxTilePosition = _targetTilemap.WorldToCell(spawnBounds.max);
 
-        // Sammle alle Tile-Positionen innerhalb der Spawn-Bounds, die ein Tile haben
-        List<Vector3Int> allTilePositions = new List<Vector3Int>();
+        // Collect all tile positions within spawn bounds that have a tile
+        NativeList<Vector3Int> allTilePositions = new NativeList<Vector3Int>(Allocator.TempJob);
         for (int x = minTilePosition.x; x <= maxTilePosition.x; x++) {
             for (int y = minTilePosition.y; y <= maxTilePosition.y; y++) {
                 Vector3Int tilePos = new Vector3Int(x, y, 0);
@@ -135,81 +127,63 @@ public class PrefabSpawner : NetworkBehaviour {
             }
         }
 
-        if (allTilePositions.Count == 0) {
-            Debug.LogWarning("Keine Tiles innerhalb der Spawn-Bounds gefunden.");
+        if (allTilePositions.Length == 0) {
+            Debug.LogWarning("No tiles found within spawn bounds.");
+            allTilePositions.Dispose();
             return;
         }
 
-        // Konvertiere die Tile-Positionen in Weltkoordinaten
-        NativeArray<float2> tileWorldPositions = new NativeArray<float2>(allTilePositions.Count, Allocator.TempJob);
-        for (int i = 0; i < allTilePositions.Count; i++) {
+        // Convert tile positions to world coordinates
+        NativeArray<float2> tileWorldPositions = new NativeArray<float2>(allTilePositions.Length, Allocator.TempJob);
+        for (int i = 0; i < allTilePositions.Length; i++) {
             Vector3 worldPos = _targetTilemap.GetCellCenterWorld(allTilePositions[i]);
             tileWorldPositions[i] = new float2(worldPos.x, worldPos.y);
         }
 
-        // Erstelle einen NativeArray für die Ergebnisse der PIP-Prüfung
-        NativeArray<bool> isInsidePolygon = new NativeArray<bool>(allTilePositions.Count, Allocator.TempJob);
+        // Perform point-in-polygon test using Burst-compiled job
+        NativeArray<bool> isInsidePolygon = new NativeArray<bool>(allTilePositions.Length, Allocator.TempJob);
 
-        // Erstelle und plane den Job zur Überprüfung der Punkte
         var pipJob = new FindValidTilePositionsJob {
             PolygonPoints = _polygonPoints,
             TileWorldPositions = tileWorldPositions,
             IsInsidePolygon = isInsidePolygon
-        }.Schedule(allTilePositions.Count, 64);
+        }.Schedule(allTilePositions.Length, 64);
 
-        // Warte auf den Abschluss des Jobs
         pipJob.Complete();
 
-        // Sammle die gültigen Tile-Positionen
+        // Collect valid tile positions inside the polygon
         List<Vector3Int> validTilePositions = new List<Vector3Int>();
-        for (int i = 0; i < allTilePositions.Count; i++) {
+        for (int i = 0; i < allTilePositions.Length; i++) {
             if (isInsidePolygon[i]) {
                 validTilePositions.Add(allTilePositions[i]);
             }
         }
 
-        // Dispose der temporären NativeArrays
+        // Dispose temporary NativeArrays
         tileWorldPositions.Dispose();
         isInsidePolygon.Dispose();
+        allTilePositions.Dispose();
 
         if (validTilePositions.Count == 0) {
-            Debug.LogWarning("Keine gültigen Tile-Positionen innerhalb des Polygons gefunden.");
+            Debug.LogWarning("No valid tile positions found within the polygon.");
             return;
         }
 
-        // Überprüfe, ob auf den Positionen bereits Objekte mit Collider2D vorhanden sind
-        List<Vector3Int> availablePositions = new List<Vector3Int>();
-        foreach (var pos in validTilePositions) {
-            Vector3 worldPosition = _targetTilemap.GetCellCenterWorld(pos);
-            // Verwende einen kleinen Radius, um Überlappungen zu erkennen
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(worldPosition, 0.1f);
-            bool hasCollision = false;
-
-            foreach (var collider in colliders) {
-                // Schließe den eigenen Collider aus
-                if (collider != _spawnArea && !collider.isTrigger) {
-                    hasCollision = true;
-                    break;
-                }
-            }
-
-            if (!hasCollision) {
-                availablePositions.Add(pos);
-            }
-        }
+        // Check for collisions on the main thread
+        List<Vector3Int> availablePositions = CheckCollisions(validTilePositions);
 
         if (availablePositions.Count == 0) {
-            Debug.LogWarning("Keine verfügbaren Positionen zum Spawnen gefunden (alle Positionen sind besetzt).");
+            Debug.LogWarning("No available positions to spawn (all positions are occupied).");
             return;
         }
 
-        // Shuffle der verfügbaren Positionen mit Fisher-Yates Algorithmus
+        // Shuffle available positions using Fisher-Yates algorithm
         Shuffle(availablePositions);
 
-        // Begrenze die Anzahl der zu verwendenden Positionen auf die Spawn-Anzahl
+        // Determine the number of positions to use based on spawn count
         int positionsToUse = Mathf.Min(spawnCount, availablePositions.Count);
 
-        // Liste zur Sammlung der Prefabs und deren Spawn-Positionen
+        // Prepare spawn positions and prefabs
         List<GameObject> prefabsToInstantiate = new List<GameObject>(positionsToUse);
         Vector3[] spawnPositions = new Vector3[positionsToUse];
 
@@ -223,20 +197,52 @@ public class PrefabSpawner : NetworkBehaviour {
             }
         }
 
-        // Instanziiere und spawne Prefabs im Netzwerk
+        // Instantiate and spawn prefabs in the network
         for (int i = 0; i < prefabsToInstantiate.Count; i++) {
             SpawnPrefabOnNetwork(prefabsToInstantiate[i], spawnPositions[i]);
         }
     }
 
     /// <summary>
-    /// Findet gültige Tile-Positionen innerhalb der angegebenen Grenzen unter Verwendung eines Burst-kompilierten Jobs.
+    /// Checks for collisions at the given tile positions.
+    /// This method runs on the main thread since Unity's Physics2D API is not thread-safe.
+    /// </summary>
+    /// <param name="tilePositions">List of tile positions to check for collisions.</param>
+    /// <returns>List of available positions without collisions.</returns>
+    private List<Vector3Int> CheckCollisions(List<Vector3Int> tilePositions) {
+        List<Vector3Int> availablePositions = new List<Vector3Int>();
+
+        foreach (var pos in tilePositions) {
+            Vector3 worldPosition = _targetTilemap.GetCellCenterWorld(pos);
+            // Use a small radius to detect nearby colliders
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(worldPosition, 0.1f);
+
+            bool hasCollision = false;
+
+            foreach (var collider in colliders) {
+                // Exclude the spawn area collider and trigger colliders
+                if (collider != _spawnArea && !collider.isTrigger) {
+                    hasCollision = true;
+                    break;
+                }
+            }
+
+            if (!hasCollision) {
+                availablePositions.Add(pos);
+            }
+        }
+
+        return availablePositions;
+    }
+
+    /// <summary>
+    /// Burst-compiled job to perform point-in-polygon tests.
     /// </summary>
     [BurstCompile]
     private struct FindValidTilePositionsJob : IJobParallelFor {
         [ReadOnly] public NativeArray<float2> PolygonPoints;
         [ReadOnly] public NativeArray<float2> TileWorldPositions;
-        public NativeArray<bool> IsInsidePolygon;
+        [WriteOnly] public NativeArray<bool> IsInsidePolygon;
 
         public void Execute(int index) {
             float2 point = TileWorldPositions[index];
@@ -244,11 +250,8 @@ public class PrefabSpawner : NetworkBehaviour {
         }
 
         /// <summary>
-        /// Implementiert den Ray-Casting-Algorithmus für Punkt-in-Polygon-Tests.
+        /// Implements the Ray-Casting algorithm for point-in-polygon tests.
         /// </summary>
-        /// <param name="point">Zu testender Punkt</param>
-        /// <param name="polygon">Polygon-Eckpunkte</param>
-        /// <returns>True, wenn der Punkt innerhalb des Polygons liegt, sonst False</returns>
         private bool IsPointInPolygon(float2 point, NativeArray<float2> polygon) {
             int vertexCount = polygon.Length;
             bool inside = false;
@@ -258,7 +261,7 @@ public class PrefabSpawner : NetworkBehaviour {
                 float xj = polygon[j].x, yj = polygon[j].y;
 
                 bool intersect = ((yi > point.y) != (yj > point.y)) &&
-                                 (point.x < (xj - xi) * (point.y - yi) / ((yj - yi) + 1e-6f) + xi);
+                                 (point.x < (xj - xi) * (point.y - yi) / math.max((yj - yi), 1e-6f) + xi);
                 if (intersect) {
                     inside = !inside;
                 }
@@ -269,58 +272,61 @@ public class PrefabSpawner : NetworkBehaviour {
     }
 
     /// <summary>
-    /// Mischt die Elemente in der bereitgestellten Liste mithilfe des Fisher-Yates-Algorithmus.
+    /// Shuffles the elements in the provided list using the Fisher-Yates algorithm.
     /// </summary>
-    /// <typeparam name="T">Typ der Elemente in der Liste</typeparam>
-    /// <param name="list">Zu mischende Liste</param>
-    private void Shuffle<T>(List<T> list) {
+    /// <param name="list">The list to shuffle.</param>
+    private void Shuffle(List<Vector3Int> list) {
         int n = list.Count;
         if (n <= 1) return;
 
         for (int i = n - 1; i > 0; i--) {
             int k = UnityEngine.Random.Range(0, i + 1);
-            // Elemente tauschen
-            (list[k], list[i]) = (list[i], list[k]);
+            // Swap elements
+            Vector3Int temp = list[k];
+            list[k] = list[i];
+            list[i] = temp;
         }
     }
 
     /// <summary>
-    /// Holt ein zufälliges Prefab basierend auf den vorab berechneten kumulativen Wahrscheinlichkeiten.
+    /// Retrieves a random prefab based on precomputed cumulative probabilities.
     /// </summary>
-    /// <returns>Zufällig ausgewähltes Prefab-GameObject</returns>
+    /// <returns>A randomly selected prefab GameObject.</returns>
     private GameObject GetRandomPrefab() {
         if (_prefabsToSpawn.Count == 0) return null;
 
         float randomPoint = UnityEngine.Random.value * _totalProbability;
 
-        // Binäre Suche für effiziente Suche
+        // Binary search for efficient lookup
         int index = Array.BinarySearch(_cumulativeProbabilities, randomPoint);
         if (index < 0) {
             index = ~index;
         }
 
-        // Index begrenzen, um Out-of-Range-Fehler zu vermeiden
+        // Clamp index to prevent out-of-range errors
         index = Mathf.Clamp(index, 0, _prefabsToSpawn.Count - 1);
         return _prefabsToSpawn[index].Prefab;
     }
 
     /// <summary>
-    /// Spawnt das Prefab im Netzwerk und verfolgt es mithilfe einer NetworkList.
+    /// Spawns the prefab in the network, sets it as a child of this GameObject, and tracks it using a NetworkList.
     /// </summary>
-    /// <param name="prefab">Zu spawnendes Prefab</param>
-    /// <param name="position">Position, an der das Prefab gespawnt wird</param>
+    /// <param name="prefab">The prefab to spawn.</param>
+    /// <param name="position">The position to spawn the prefab at.</param>
     private void SpawnPrefabOnNetwork(GameObject prefab, Vector3 position) {
-        // Instanziere das Prefab als Netzwerkobjekt
-        GameObject networkedPrefab = Instantiate(prefab, position, Quaternion.identity);
+        // Instantiate the prefab as a networked object and set its parent to this GameObject
+        GameObject networkedPrefab = Instantiate(prefab, position, Quaternion.identity, transform);
+
         if (networkedPrefab.TryGetComponent<NetworkObject>(out var networkObject)) {
-            // Spawne das Objekt im Netzwerk
+            // Spawn the object on the network
             networkObject.Spawn();
 
-            // Verfolge das gespawnte Objekt
+            // Track the spawned object
             _spawnedObjects.Add(new NetworkObjectReference(networkObject));
         } else {
-            Debug.LogWarning($"Prefab {prefab.name} hat keine NetworkObject-Komponente.");
+            Debug.LogWarning($"Prefab {prefab.name} lacks a NetworkObject component.");
             Destroy(networkedPrefab);
         }
     }
+
 }

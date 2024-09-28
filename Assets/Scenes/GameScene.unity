@@ -21476,7 +21476,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1096083662}
   - component: {fileID: 1096083664}
-  - component: {fileID: 1096083665}
   - component: {fileID: 1096083663}
   - component: {fileID: 1096083660}
   m_Layer: 0
@@ -21505,11 +21504,8 @@ MonoBehaviour:
     _spawnProbability: 0.5
   - _prefab: {fileID: 3228041000574016177, guid: 631eec394076a974dbf8a514c937e358, type: 3}
     _spawnProbability: 0.5
-  _minSpawnCount: 500
-  _maxSpawnCount: 500
-  _collisionLayerMask:
-    serializedVersion: 2
-    m_Bits: 0
+  _minSpawnCount: 10
+  _maxSpawnCount: 20
 --- !u!4 &1096083662
 Transform:
   m_ObjectHideFlags: 0
@@ -21518,7 +21514,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1096083659}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 4.5, y: 5.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -21601,54 +21597,12 @@ PolygonCollider2D:
       - {x: 10.5, y: -0.5}
       - {x: 10.5, y: 7.5}
       - {x: -2.5, y: 7.5}
+      - {x: -2.5, y: 6.5}
+      - {x: 3.5, y: 4.5}
+      - {x: 3.5, y: 2.5}
+      - {x: -2.5, y: 0.5}
       - {x: -2.5, y: -2.5}
   m_UseDelaunayMesh: 0
---- !u!61 &1096083665
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1096083659}
-  m_Enabled: 0
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 4, y: 2.5}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  m_Size: {x: 13, y: 10}
-  m_EdgeRadius: 0
 --- !u!1001 &1111151956
 PrefabInstance:
   m_ObjectHideFlags: 0
