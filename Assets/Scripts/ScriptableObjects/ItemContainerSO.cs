@@ -34,18 +34,11 @@ public class ItemContainerSO : ScriptableObject {
     // Public Properties
     public IReadOnlyList<ItemSlot> ItemSlots => _itemSlots.AsReadOnly();
 
-    // Cached References
-    private ItemManager _itemManager;
-    private PlayerToolbeltController _playerToolbeltController;
-
     /// <summary>
     /// Initializes the item container with the specified number of slots.
     /// </summary>
     /// <param name="slotsAmount">The number of slots to initialize.</param>
     public void Initialize(int slotsAmount) {
-        _itemManager = ItemManager.Instance;
-        _playerToolbeltController = PlayerToolbeltController.LocalInstance;
-
         _itemSlots = new List<ItemSlot>(slotsAmount);
         for (int i = 0; i < slotsAmount; i++) {
             _itemSlots.Add(new ItemSlot());
@@ -60,15 +53,41 @@ public class ItemContainerSO : ScriptableObject {
     /// <param name="skipToolbelt">A flag indicating whether to skip adding the item to the toolbelt.</param>
     /// <returns>The remaining amount of the item after adding.</returns>
     public int AddItem(ItemSlot itemSlot, bool skipToolbelt) {
-        if (itemSlot.IsEmpty) {
-            Debug.LogError("Invalid itemId or amount.");
+        if (itemSlot == null) {
+            Debug.LogError("itemSlot ist null in AddItem.");
+            return 0;
         }
 
-        var itemSO = _itemManager.ItemDatabase[itemSlot.ItemId];
+        if (itemSlot.IsEmpty) {
+            Debug.LogError("Invalid itemId or amount in AddItem.");
+            return 0;
+        }
 
-        int remainingAmount = ItemManager.Instance.ItemDatabase[itemSlot.ItemId].IsStackable
-            ? AddToExisting(itemSlot, itemSO, skipToolbelt)
-            : AddToEmpty(itemSlot, itemSO, skipToolbelt);
+        if (ItemManager.Instance == null) {
+            Debug.LogError("ItemManager.Instance ist null in AddItem.");
+            return 0;
+        }
+
+        if (ItemManager.Instance.ItemDatabase == null) {
+            Debug.LogError("ItemDatabase ist null in AddItem.");
+            return 0;
+        }
+
+        if (!ItemManager.Instance.ItemDatabase[itemSlot.ItemId]) {
+            Debug.LogError($"ItemDatabase enthält keinen Eintrag für itemId: {itemSlot.ItemId} in AddItem.");
+            return 0;
+        }
+
+        var itemSO = ItemManager.Instance.ItemDatabase[itemSlot.ItemId];
+        if (itemSO == null) {
+            Debug.LogError($"ItemSO für itemId {itemSlot.ItemId} ist null in AddItem.");
+            return 0;
+        }
+
+
+        int remainingAmount = itemSO.IsStackable
+            ? AddToExisting(itemSlot, skipToolbelt)
+            : AddToEmpty(itemSlot, skipToolbelt);
 
         UpdateUI();
         return remainingAmount;
@@ -78,46 +97,50 @@ public class ItemContainerSO : ScriptableObject {
     /// Adds the specified stackable item to existing slots that can accommodate it.
     /// </summary>
     /// <param name="itemSlot">The item slot to add.</param>
-    /// <param name="itemData">Cached item data.</param>
     /// <param name="skipToolbelt">Flag to skip toolbelt slots.</param>
     /// <returns>The remaining amount after attempting to add.</returns>
-    private int AddToExisting(ItemSlot itemSlot, ItemSO itemSO, bool skipToolbelt) {
+    private int AddToExisting(ItemSlot itemSlot, bool skipToolbelt) {
         var relevantSlots = GetRelevantSlots(skipToolbelt);
 
         foreach (var slot in relevantSlots) {
-            if (slot.CanStackWith(itemSlot, _itemManager)) {
-                int maxStackable = _itemManager.GetMaxStackableAmount(slot.ItemId);
+            if (slot.CanStackWith(itemSlot)) {
+                int maxStackable = ItemManager.Instance.GetMaxStackableAmount(slot.ItemId);
                 int addable = Mathf.Min(maxStackable - slot.Amount, itemSlot.Amount);
                 slot.AddAmount(addable, maxStackable);
                 itemSlot.RemoveAmount(addable);
 
-                if (itemSlot.IsEmpty) {
-                    break;
+                if (itemSlot.Amount <= 0) {
+                    return 0;
                 }
             }
         }
 
         // Attempt to add remaining items to empty slots
-        return AddToEmpty(itemSlot, itemSO, skipToolbelt);
+        return AddToEmpty(itemSlot, skipToolbelt);
     }
 
     /// <summary>
     /// Adds the specified item to empty slots.
     /// </summary>
     /// <param name="itemSlot">The item slot to add.</param>
-    /// <param name="itemData">Cached item data.</param>
     /// <param name="skipToolbelt">Flag to skip toolbelt slots.</param>
     /// <returns>The remaining amount after attempting to add.</returns>
-    private int AddToEmpty(ItemSlot itemSlot, ItemSO itemSO, bool skipToolbelt) {
+    private int AddToEmpty(ItemSlot itemSlot, bool skipToolbelt) {
+        if (itemSlot == null) {
+            Debug.LogError("itemSlot ist null in AddToEmpty.");
+            return itemSlot.Amount;
+        }
+
         var relevantSlots = GetRelevantSlots(skipToolbelt);
 
-        foreach (var slot in relevantSlots.Where(x => x.ItemId == -1)) {
+        foreach (var slot in relevantSlots.Where(x => x.IsEmpty)) {
             slot.Set(new ItemSlot(itemSlot.ItemId, 0, itemSlot.RarityId));
-            int addable = Mathf.Min(ItemManager.Instance.GetMaxStackableAmount(itemSlot.ItemId), itemSlot.Amount);
-            int actualAdded = slot.AddAmount(addable, ItemManager.Instance.GetMaxStackableAmount(itemSlot.ItemId));
+            int maxStackable = ItemManager.Instance.GetMaxStackableAmount(itemSlot.ItemId);
+            int addable = Mathf.Min(maxStackable, itemSlot.Amount);
+            int actualAdded = slot.AddAmount(addable, maxStackable);
             itemSlot.RemoveAmount(actualAdded);
 
-            if (itemSlot.IsEmpty) {
+            if (itemSlot.Amount <= 0) {
                 break;
             }
         }
@@ -138,9 +161,9 @@ public class ItemContainerSO : ScriptableObject {
             Debug.LogError("Invalid itemId or amount.");
         }
 
-        var itemSO = _itemManager.ItemDatabase[itemSlot.ItemId];
+        var itemSO = ItemManager.Instance.ItemDatabase[itemSlot.ItemId];
 
-        int remainingAmount = ItemManager.Instance.ItemDatabase[itemSlot.ItemId].IsStackable
+        int remainingAmount = itemSO.IsStackable
             ? CheckExisting(itemSlot, itemSO, skipToolbelt)
             : CheckEmpty(itemSlot, itemSO, skipToolbelt);
 
@@ -159,7 +182,7 @@ public class ItemContainerSO : ScriptableObject {
         var relevantSlots = GetRelevantSlots(skipToolbelt);
 
         foreach (var slot in relevantSlots) {
-            if (slot.CanStackWith(itemSlot, _itemManager)) {
+            if (slot.CanStackWith(itemSlot)) {
                 int addable = Math.Min(ItemManager.Instance.ItemDatabase[itemSlot.ItemId].MaxStackableAmount - slot.Amount, itemSlot.Amount);
                 remainingAmount -= addable;
 
@@ -253,11 +276,11 @@ public class ItemContainerSO : ScriptableObject {
             filteredItemSlot.RemoveAmount(removalAmount);
             itemSlot.RemoveAmount(removalAmount);
 
-            if (filteredItemSlot.IsEmpty) {
+            if (filteredItemSlot.IsEmpty || filteredItemSlot.Amount <= 0) {
                 filteredItemSlot.Clear();
             }
 
-            if (itemSlot.IsEmpty) {
+            if (itemSlot.IsEmpty || itemSlot.Amount <= 0) {
                 break;
             }
         }
@@ -329,7 +352,7 @@ public class ItemContainerSO : ScriptableObject {
     /// Clears the item container by clearing all the slots except for the toolbelt slots.
     /// </summary>
     public void ClearItemContainer() {
-        int toolbeltSize = _playerToolbeltController.ToolbeltSizes[^1];
+        int toolbeltSize = PlayerToolbeltController.LocalInstance.ToolbeltSizes[^1];
         foreach (var slot in _itemSlots.Skip(toolbeltSize)) {
             slot.Clear();
         }
@@ -379,7 +402,7 @@ public class ItemContainerSO : ScriptableObject {
     /// <returns>An enumerable collection of relevant item slots.</returns>
     private IEnumerable<ItemSlot> GetRelevantSlots(bool skipToolbelt) {
         if (skipToolbelt) {
-            int toolbeltSize = _playerToolbeltController.ToolbeltSizes[^1];
+            int toolbeltSize = PlayerToolbeltController.LocalInstance.ToolbeltSizes[^1];
             return _itemSlots.Skip(toolbeltSize);
         }
         return _itemSlots;

@@ -3,6 +3,16 @@ using UnityEngine;
 
 // This script handels the item prefab that is a item on the map
 public class PickUpItem : NetworkBehaviour {
+    #region Constants
+
+    private const float DEFAULT_CAN_PICK_UP_TIMER = 0.75f; // When changing the time also change the time in ItemSpawnManager.cs
+    private const float DEFAULT_PARABOLA_Z = 5f;
+    private const float DEFAULT_END_POSITION_Z_MULTIPLIER = 0.0001f;
+
+    #endregion
+
+    #region Serialized Fields
+
     [Header("Item Movement Settings")]
     [SerializeField] private float _itemMoveSpeed = 0.2f;
     [SerializeField] private float _itemSpeedAcceleration = 0.01f;
@@ -15,14 +25,36 @@ public class PickUpItem : NetworkBehaviour {
     [SerializeField] private float _maxParabolaAnimationTime = 0.4f;
     [SerializeField] private float _parabolaAnimationHeight = 0.2f;
 
-    private float _canPickUpTimer = 0.75f; // When changing the time also change the time in ItemSpawnManager.cs
+    [SerializeField] private ItemSlot _itemSlot;
+
+    #endregion
+
+    #region Private Fields
+
+    private float _canPickUpTimer = DEFAULT_CAN_PICK_UP_TIMER;
     private float _currentPickUpTimer;
     private float _parabolaAnimationTime;
-    private Vector3 _spawnPosition, _endPosition;
-    private ItemSlot _itemSlot;
+    private Vector3 _spawnPosition;
+    private Vector3 _endPosition;
+
     private Player _closestPlayer;
     private float _distanceToPlayer;
+
     private SpriteRenderer _itemRenderer;
+
+    // Cached References
+    private TimeAndWeatherManager _timeAndWeatherManager;
+    private PlayerDataManager _playerDataManager;
+    private ItemManager _itemManager;
+    private DragItemUI _dragItemUI;
+    private EventsManager _eventsManager;
+
+    // Reusable Vector3 to minimize allocations
+    private Vector3 _newPosition;
+
+    #endregion
+
+    #region Unity Callbacks
 
     private void Awake() {
         _itemRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -30,19 +62,23 @@ public class PickUpItem : NetworkBehaviour {
         _itemSlot = new ItemSlot();
     }
 
-    private void Start() => TimeAndWeatherManager.Instance.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
+    private void Start() {
+        // Cache singleton references
+        _timeAndWeatherManager = TimeAndWeatherManager.Instance;
+        _playerDataManager = PlayerDataManager.Instance;
+        _itemManager = ItemManager.Instance;
+        _dragItemUI = DragItemUI.Instance;
+        _eventsManager = EventsManager.Instance;
+
+        if (_timeAndWeatherManager != null) {
+            _timeAndWeatherManager.OnNextDayStarted += OnNextDayStarted;
+        }
+    }
 
 
-    private new void OnDestroy() => TimeAndWeatherManager.Instance.OnNextDayStarted -= TimeAndWeatherManager_OnNextDayStarted;
-
-
-    /// <summary>
-    /// Event handler for when the next day starts in the TimeAndWeatherManager.
-    /// Despawns the item if the game object is not null.
-    /// </summary>
-    private void TimeAndWeatherManager_OnNextDayStarted() {
-        if (gameObject != null) {
-            DespawnItemServerRpc();
+    private new void OnDestroy() {
+        if (_timeAndWeatherManager != null) {
+            _timeAndWeatherManager.OnNextDayStarted -= OnNextDayStarted;
         }
     }
 
@@ -62,6 +98,10 @@ public class PickUpItem : NetworkBehaviour {
         AttemptPickUp();
     }
 
+    #endregion
+
+    #region Network Callbacks
+
     /// <summary>
     /// Moves the item towards the player on the server and calls the client RPC to move the item towards the player.
     /// </summary>
@@ -74,9 +114,38 @@ public class PickUpItem : NetworkBehaviour {
     /// </summary>
     [ClientRpc]
     private void MoveItemTowardsPlayerClientRpc() {
-        transform.position = Vector3.MoveTowards(transform.position, _closestPlayer.transform.position, _itemMoveSpeed);
+        if (_closestPlayer == null) { 
+            return; 
+        }
+
+        _newPosition = Vector3.MoveTowards(transform.position, _closestPlayer.transform.position, _itemMoveSpeed * Time.deltaTime);
+        transform.position = _newPosition;
         _itemMoveSpeed += _itemSpeedAcceleration;
     }
+
+    /// <summary>
+    /// ServerRpc method that despawns the item.
+    /// </summary>
+    [ServerRpc(RequireOwnership = false)]
+    private void DespawnItemServerRpc() => GetComponent<NetworkObject>().Despawn(true);
+
+    #endregion
+
+    #region Event Handlers
+
+    /// <summary>
+    /// Event handler for when the next day starts in the TimeAndWeatherManager.
+    /// Despawns the item if the game object is not null.
+    /// </summary>
+    private void OnNextDayStarted() {
+        if (gameObject != null) {
+            DespawnItemServerRpc();
+        }
+    }
+
+    #endregion
+
+    #region Animation Methods
 
     /// <summary>
     /// Performs a parabolic animation by updating the position of the transform over time.
@@ -84,9 +153,24 @@ public class PickUpItem : NetworkBehaviour {
     private void PerformParabolaAnimation() {
         if (_parabolaAnimationTime < _maxParabolaAnimationTime) {
             _parabolaAnimationTime += Time.deltaTime;
-            transform.position = MathParabola.Parabola(_spawnPosition, _endPosition, _parabolaAnimationHeight, _parabolaAnimationTime / _maxParabolaAnimationTime);
+            float t = _parabolaAnimationTime / _maxParabolaAnimationTime;
+            transform.position = MathParabola.Parabola(_spawnPosition, _endPosition, _parabolaAnimationHeight, t);
         }
     }
+
+    /// <summary>
+    /// Performs a floating animation by moving the object up and down.
+    /// </summary>
+    private void PerformFloatingAnimation() {
+        float yOffset = Mathf.PingPong(Time.time * _upAndDownSpeed, _timeForLoop) * (_upAndDownHeight * 2) - _upAndDownHeight;
+        _newPosition = transform.position;
+        _newPosition.y += yOffset;
+        transform.position = _newPosition;
+    }
+
+    #endregion
+
+    #region Pick-Up Methods
 
     /// <summary>
     /// Updates the pick-up timer and triggers the pick-up action when the timer reaches the specified duration.
@@ -99,21 +183,14 @@ public class PickUpItem : NetworkBehaviour {
     }
 
     /// <summary>
-    /// Performs a floating animation by moving the object up and down.
-    /// </summary>
-    private void PerformFloatingAnimation() {
-        float yPos = Mathf.PingPong(Time.time * _upAndDownSpeed, _timeForLoop) * (_upAndDownHeight * 2) - _upAndDownHeight;
-        transform.position = new Vector3(transform.position.x, transform.position.y + yPos, transform.position.z);
-    }
-
-    /// <summary>
     /// Attempts to pick up an item if the conditions are met.
     /// </summary>
     private void AttemptPickUp() {
         if (_currentPickUpTimer >= _canPickUpTimer &&
             _distanceToPlayer <= _pickUpDistanceThreshold &&
             _closestPlayer != null &&
-            _closestPlayer.GetComponent<PlayerInventoryController>().InventoryContainer.CanAddItem(_itemSlot)) {
+            _closestPlayer.TryGetComponent(out PlayerInventoryController inventoryController) &&
+            inventoryController.InventoryContainer.CanAddItem(_itemSlot)) {
             MoveItemTowardsPlayerServerRpc();
         }
     }
@@ -128,12 +205,27 @@ public class PickUpItem : NetworkBehaviour {
             return;
         }
 
-        var inventoryController = _closestPlayer.GetComponent<PlayerInventoryController>();
-        bool canAddItem = inventoryController.InventoryContainer.CanAddItem(_itemSlot);
-
-        if (canAddItem) {
+        if (_closestPlayer.TryGetComponent(out PlayerInventoryController inventoryController) &&
+            inventoryController.InventoryContainer.CanAddItem(_itemSlot)) {
             HandleItemCollection(inventoryController);
         }
+    }
+
+    /// <summary>
+    /// Finds the closest player to the current object.
+    /// </summary>
+    private void FindClosestPlayer() {
+        var minDistance = float.MaxValue;
+        _closestPlayer = null;
+
+        foreach (var player in _playerDataManager.CurrentlyConnectedPlayers) {
+            var distance = Vector3.Distance(transform.position, player.transform.position);
+            if (distance < minDistance) {
+                _closestPlayer = player;
+                minDistance = distance;
+            }
+        }
+        _distanceToPlayer = minDistance;
     }
 
     /// <summary>
@@ -155,15 +247,18 @@ public class PickUpItem : NetworkBehaviour {
             // Remove the added amount from the current item slot
             _itemSlot.RemoveAmount(addedAmount);
         }
-    }
 
+        if (_itemSlot.Amount <= 0) {
+            Destroy(this.gameObject);
+        }
+    }
 
     /// <summary>
     /// Notifies that an item has been picked up.
     /// </summary>
     private void NotifyItemPickedUp() {
         for (int i = 0; i < _itemSlot.Amount; i++) {
-            EventsManager.Instance.ItemPickedUpEvents.PickedUpItemId(_itemSlot.ItemId);
+            _eventsManager.ItemPickedUpEvents.PickedUpItemId(_itemSlot.ItemId);
         }
     }
 
@@ -185,27 +280,9 @@ public class PickUpItem : NetworkBehaviour {
         }
     }
 
-    /// <summary>
-    /// ServerRpc method that despawns the item.
-    /// </summary>
-    [ServerRpc(RequireOwnership = false)]
-    private void DespawnItemServerRpc() => GetComponent<NetworkObject>().Despawn(true);
+    #endregion
 
-
-    /// <summary>
-    /// Finds the closest player to the current object.
-    /// </summary>
-    private void FindClosestPlayer() {
-        var distanceToClosestPlayer = float.MaxValue;
-        foreach (var player in PlayerDataManager.Instance.CurrentlyConnectedPlayers) {
-            var distance = Vector3.Distance(transform.position, player.transform.position);
-            if (distance < distanceToClosestPlayer) {
-                _closestPlayer = player;
-                distanceToClosestPlayer = distance;
-            }
-        }
-        _distanceToPlayer = distanceToClosestPlayer;
-    }
+    #region Initialization Methods
 
     /// <summary>
     /// Initializes the item slot with the provided item slot data.
@@ -213,7 +290,7 @@ public class PickUpItem : NetworkBehaviour {
     /// <param name="itemSlot">The item slot data to initialize with.</param>
     public void InitializeItem(ItemSlot itemSlot) {
         _itemSlot.Set(itemSlot);
-        _itemRenderer.sprite = ItemManager.Instance.ItemDatabase[_itemSlot.ItemId].ItemIcon;
+        _itemRenderer.sprite = _itemManager.ItemDatabase[_itemSlot.ItemId].ItemIcon;
     }
 
     /// <summary>
@@ -226,8 +303,10 @@ public class PickUpItem : NetworkBehaviour {
         _canPickUpTimer = 0.4f;
 
         _spawnPosition = start;
-        _spawnPosition.z = 5f;
+        _spawnPosition.z = DEFAULT_PARABOLA_Z;
         _endPosition = end;
-        _endPosition.z = _endPosition.y * 0.0001f;
+        _endPosition.z = end.y * DEFAULT_END_POSITION_Z_MULTIPLIER;
     }
+
+    #endregion
 }

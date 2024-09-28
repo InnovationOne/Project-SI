@@ -37,7 +37,7 @@ public class ItemSlot : INetworkSerializable {
     /// <summary>
     /// Indicates whether the item slot is empty.
     /// </summary>
-    public bool IsEmpty => ItemId == EmptyItemId || ItemId <= 0;
+    public bool IsEmpty => ItemId == EmptyItemId;
 
     /// <summary>
     /// Initializes a new empty instance of the <see cref="ItemSlot"/> class.
@@ -130,17 +130,16 @@ public class ItemSlot : INetworkSerializable {
     /// <param name="other">The other item slot.</param>
     /// <param name="itemManager">Reference to the ItemManager to get item data.</param>
     /// <returns>True if they can stack; otherwise, false.</returns>
-    public bool CanStackWith(ItemSlot other, ItemManager itemManager) {
+    public bool CanStackWith(ItemSlot other) {
         if (IsEmpty || other.IsEmpty) {
             return false;
         }
-            
 
         if (_itemId != other._itemId || _rarityId != other._rarityId) {
             return false;
         }
 
-        int maxStackableAmount = itemManager.GetMaxStackableAmount(_itemId);
+        int maxStackableAmount = ItemManager.Instance.GetMaxStackableAmount(_itemId);
         return _amount < maxStackableAmount;
     }
 

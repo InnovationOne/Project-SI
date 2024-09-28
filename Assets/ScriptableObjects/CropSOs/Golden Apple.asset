@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96faf09248adeb34994902da70ba16e4, type: 3}
   m_Name: Golden Apple
   m_EditorClassIdentifier: 
-  CropID: 0
+  CropID: 92
   IsTree: 1
   DaysToGrow: 28
   ItemToGrowAndSpawn: {fileID: 11400000, guid: be80d50ca2fd6764db9026e0e00bfc05, type: 2}
@@ -23,4 +23,9 @@ MonoBehaviour:
   MinItemAmountToSpawn: 3
   MaxItemAmountToSpawn: 5
   DeadSpritesGrowthStages: []
-  SpritesGrowthStages: []
+  SpritesGrowthStages:
+  - {fileID: 21300000, guid: 486cc85cd21df1c4b9a50a5064456aa4, type: 3}
+  - {fileID: 21300000, guid: 486cc85cd21df1c4b9a50a5064456aa4, type: 3}
+  - {fileID: 21300000, guid: 486cc85cd21df1c4b9a50a5064456aa4, type: 3}
+  - {fileID: 21300000, guid: 486cc85cd21df1c4b9a50a5064456aa4, type: 3}
+  - {fileID: 21300000, guid: 486cc85cd21df1c4b9a50a5064456aa4, type: 3}

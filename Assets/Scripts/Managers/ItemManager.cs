@@ -1,4 +1,6 @@
+using LiteDB;
 using System;
+using System.IO;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -20,5 +22,5 @@ public class ItemManager : NetworkBehaviour {
         ItemDatabase.InitializeItems();
     }
 
-    public int GetMaxStackableAmount(int itemId) => _itemDatabase[itemId].MaxStackableAmount;    
+    public int GetMaxStackableAmount(int itemId) => ItemDatabase[itemId].MaxStackableAmount;
 }

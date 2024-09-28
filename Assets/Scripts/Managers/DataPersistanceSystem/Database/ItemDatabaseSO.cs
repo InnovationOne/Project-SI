@@ -1,5 +1,7 @@
+using LiteDB;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -17,11 +19,21 @@ public class ItemDatabaseSO : ScriptableObject {
             // Reference to the current ItemDatabaseSO object
             ItemDatabaseSO itemDatabase = (ItemDatabaseSO)target;
 
-            GUILayout.Space(10); // Adds some space
-
             if (GUILayout.Button("Start Verification")) {
                 VerifyItemDatabase(itemDatabase);
             }
+
+            GUILayout.Space(10); // Adds some space
+
+            if (GUILayout.Button("Save items to text file")) {
+                string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                string filePath = Path.Combine(desktopPath, "ItemList.txt");
+
+                itemDatabase.InitializeItems();
+                itemDatabase.SaveItemsToTextFile(filePath);
+            }
+
+            GUILayout.Space(10); // Adds some space
 
             // Draws the standard inspector below the custom button
             DrawDefaultInspector();
@@ -54,7 +66,8 @@ public class ItemDatabaseSO : ScriptableObject {
                     break;
             }
         }
-    } 
+    }
+
     /// <summary>
     /// Converts the _items array to a HashSet for efficient lookups.
     /// </summary>
@@ -94,6 +107,20 @@ public class ItemDatabaseSO : ScriptableObject {
             EditorUtility.DisplayDialog("Verification Complete", "All ItemSO are included in the database.", "OK");
             Debug.Log("All ItemSO are included in the database.");
         }
+    }
+
+    // Methode zum Speichern der ItemName und ItemId in eine Textdatei
+    private void SaveItemsToTextFile(string filePath) {
+        int nameColumnWidth = 30; // Definiere eine feste Breite für die Item-Namen-Spalte
+
+        using (StreamWriter writer = new StreamWriter(filePath)) {
+            foreach (var item in _items) {
+                // Schreibe jedes Item im Format "ItemName (ausgerichtet)\tItemId"
+                string formattedName = item.ItemName.PadRight(nameColumnWidth); // Füllt den ItemName mit Leerzeichen auf
+                writer.WriteLine($"{formattedName}\t{item.ItemId}");
+            }
+        }
+        Debug.Log("Item-Liste wurde auf " + filePath + " gespeichert.");
     }
 
     /// <summary>

@@ -10,10 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 7780506183885481909}
   - component: {fileID: 5769684512143497222}
+  - component: {fileID: -4122031764907089558}
   - component: {fileID: 203927945333833695}
   - component: {fileID: 1383536158}
-  - component: {fileID: -4122031764907089558}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Gold
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -83,44 +83,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 0.5}
   m_EdgeRadius: 0
---- !u!114 &203927945333833695
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3228041000574016177}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 335a851cc3b322046a68cee5e9ae3711, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _nodeType: 1
-  _spreadType: 0
-  _startingHP: 10
-  _minimumToolRarity: 5
-  _itemSO: {fileID: 11400000, guid: 4180da3175b6bce42ad674b749bc3d71, type: 2}
-  _minDropCount: 4
-  _maxDropCount: 5
-  _rarityID: 0
-  _shakeAmountX: 0.05
-  _shakeAmountY: 0.01
-  _timeBetweenShakes: 0.03
-  _resourceNodeHighlight: {fileID: 3059046134558748541}
---- !u!114 &1383536158
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3228041000574016177}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _isObjectStationary: 1
-  _objectCollider2D: {fileID: 0}
 --- !u!114 &-4122031764907089558
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -144,6 +106,44 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &203927945333833695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3228041000574016177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 335a851cc3b322046a68cee5e9ae3711, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  _nodeType: 1
+  _spreadType: 0
+  _startingHP: 220
+  _minimumToolRarity: 0
+  _beeNest: {fileID: 0}
+  _itemSO: {fileID: 11400000, guid: 4180da3175b6bce42ad674b749bc3d71, type: 2}
+  _minDropCount: 4
+  _maxDropCount: 5
+  _rarityID: 0
+--- !u!114 &1383536158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3228041000574016177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _isObjectStationary: 1
+  _objectCollider2D: {fileID: 0}
 --- !u!1 &5758856675145893739
 GameObject:
   m_ObjectHideFlags: 0
@@ -154,7 +154,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5267878984480962541}
   - component: {fileID: 3059046134558748541}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: GoldHighligt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -241,7 +241,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3214306252465627122}
   - component: {fileID: 161594060900020782}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: GoldVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -9,7 +9,7 @@ public class CropTile {
     public bool IsRegrowing = false;
     public bool IsWatered = false;
     public int Damage = 0;
-    public HarvestCrop Prefab;
+    public GameObject Prefab;
     public Vector2 SpriteRendererOffset;
     public int SpriteRendererXScale = 1;
     public bool InGreenhouse = false;

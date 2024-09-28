@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: -3642706895242882101}
   - component: {fileID: 4948398707952232944}
   - component: {fileID: 194746138}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Tree
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -106,6 +106,8 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &4948398707952232944
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -118,18 +120,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 335a851cc3b322046a68cee5e9ae3711, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   _nodeType: 0
   _spreadType: 1
-  _startingHP: 10
-  _minimumToolRarity: 6
+  _startingHP: 100
+  _minimumToolRarity: 0
+  _beeNest: {fileID: 0}
   _itemSO: {fileID: 11400000, guid: ce25a1dc6f28fbb4ebfae205be4ac06d, type: 2}
   _minDropCount: 4
   _maxDropCount: 6
   _rarityID: 0
-  _shakeAmountX: 0.05
-  _shakeAmountY: 0.01
-  _timeBetweenShakes: 0.03
-  _resourceNodeHighlight: {fileID: 2489229548638475500}
 --- !u!114 &194746138
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -154,7 +154,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8504518087993782917}
   - component: {fileID: 2489229548638475500}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: TreeHighlight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -241,7 +241,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8871588711810291579}
   - component: {fileID: 8540577875735323340}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: TreeVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}

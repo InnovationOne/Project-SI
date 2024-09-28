@@ -12,11 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18cde282a8d045bf9d245fdcfaa7271b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  QuestionnaireVersion: 1.3
   UserAnswers:
     Answers:
-    - QuestionId: Competitiveness
-      Answers:
-      - Co-operative
     - QuestionId: Pace
       Answers:
       - Slow
@@ -25,14 +23,14 @@ MonoBehaviour:
       - CheatingNotImportant
     - QuestionId: CostSensitivity
       Answers:
-      - BestExperience
+      - NoCost
     - QuestionId: NetcodeArchitecture
       Answers:
-      - MultiServerSessions
+      - ClientServer
     - QuestionId: PlayerCount
       Answers:
       - 4
-  Preset: 8
+  Preset: 1
   SelectedSolutions:
     SelectedHostingModel: 1
-    SelectedNetcodeSolution: 3
+    SelectedNetcodeSolution: 1

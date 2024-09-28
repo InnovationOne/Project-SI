@@ -74,7 +74,7 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
             PickUpItemSlot(clickedItemSlot);
         } else if (clickedItemSlot.IsEmpty) {
             PlaceItemSlotIntoInventory(clickedItemSlot);
-        } else if (_dragItemSlot.CanStackWith(clickedItemSlot, _itemManager)) {
+        } else if (_dragItemSlot.CanStackWith(clickedItemSlot)) {
             HandleItemStacking(clickedItemSlot);
         } else {
             SwitchItemSlots(clickedItemSlot);
@@ -146,7 +146,7 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
             return true;
         }
 
-        return _dragItemSlot.CanStackWith(sourceItemSlot, _itemManager);
+        return _dragItemSlot.CanStackWith(sourceItemSlot);
     }
 
     /// <summary>
@@ -163,7 +163,7 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
     /// Clears the drag item if its amount is zero or less.
     /// </summary>
     private void CheckToClearDragItem() {
-        if (_dragItemSlot.IsEmpty) {
+        if (_dragItemSlot.IsEmpty || _dragItemSlot.Amount <= 0) {
             ClearDragItem();
         }
     }
@@ -228,7 +228,7 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
     /// </summary>
     /// <param name="spawnAmount">The amount of items to spawn.</param>
     private void PlaceItemOnMap(int spawnAmount) {
-        if (_dragItemSlot.IsEmpty) {
+        if (_dragItemSlot.IsEmpty || _dragItemSlot.Amount <= 0) {
             return;
         }
 
@@ -251,14 +251,14 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
     /// </summary>
     /// <param name="targetItemSlot">The inventory slot to place into.</param>
     private void PlaceItemInInventory(ItemSlot targetItemSlot) {
-        if (_dragItemSlot.IsEmpty) { 
+        if (_dragItemSlot.IsEmpty || _dragItemSlot.Amount <= 0) { 
             return; 
         }
 
         if (targetItemSlot.IsEmpty) {
             targetItemSlot.Set(_dragItemSlot);
             _dragItemSlot.Clear();
-        } else if (_dragItemSlot.CanStackWith(targetItemSlot, _itemManager)) {
+        } else if (_dragItemSlot.CanStackWith(targetItemSlot)) {
             int transferAmount = _inputManager.IsShiftPressed()
                 ? Mathf.Min(_dragItemSlot.Amount, InputManager.SHIFT_KEY_AMOUNT)
                 : 1;
