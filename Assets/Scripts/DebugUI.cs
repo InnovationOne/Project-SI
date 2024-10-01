@@ -73,10 +73,10 @@ public class DebugUI : MonoBehaviour {
             string realDateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
             // Get ingame date and time
-            string ingameDateTime = TimeAndWeatherManager.Instance.GetDateTime;
+            string ingameDateTime = TimeManager.Instance.GetDateTime;
 
             // Get weather
-            string weather = TimeAndWeatherManager.Instance.GetWeather;
+            string weather = WeatherManager.Instance.CurrentWeather;
 
             // Get farm stats
             int farmMoney = FinanceManager.Instance.GetMoney;

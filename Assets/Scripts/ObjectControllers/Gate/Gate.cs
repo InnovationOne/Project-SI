@@ -79,4 +79,20 @@ public class Gate : AdjustingObject {
             _visual.SetPath(1, GateSO.OpenPolygonColliderPaths[++_patternIndex]);
         }
     }
+
+    /// <summary>
+    /// Overrides the PickUpItemsInPlacedObject method if necessary.
+    /// </summary>
+    /// <param name="player">The player picking up the gate.</param>
+    public override void PickUpItemsInPlacedObject(Player player) {
+        base.PickUpItemsInPlacedObject(player);
+    }
+
+    /// <summary>
+    /// Optionally override InitializePreLoad if Gate needs specific initialization
+    /// </summary>
+    /// <param name="itemId">The ID of the item.</param>
+    public override void InitializePreLoad(int itemId) {
+        base.InitializePreLoad(itemId);
+    }
 }

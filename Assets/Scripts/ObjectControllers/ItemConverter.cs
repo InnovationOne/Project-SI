@@ -8,12 +8,12 @@ using UnityEngine;
 /// Manages the conversion of items based on recipes and timed processes.
 /// </summary>
 [RequireComponent(typeof(TimeAgent))]
-public class ItemConverter : Interactable, IObjectDataPersistence {
+public class ItemConverter : MonoBehaviour, IObjectDataPersistence, IInteractable {
     private ObjectVisual _visual;
     private SelectRecipeUI _selectRecipeUI;
 
-    [NonSerialized] private const float MAX_DISTANCE_TO_PLAYER = 1.5f;
-    public override float MaxDistanceToPlayer { get => MAX_DISTANCE_TO_PLAYER; }
+    private const float MAX_DISTANCE_TO_PLAYER = 1.5f;
+    public float MaxDistanceToPlayer { get => MAX_DISTANCE_TO_PLAYER; }
 
     private int _recipeId;
     private int _timer;
@@ -25,18 +25,18 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
     /// </summary>
     private void Start() {
         _selectRecipeUI = SelectRecipeUI.Instance;
-        GetComponent<TimeAgent>().onMinuteTimeTick += ItemConverterProcess;
+        GetComponent<TimeAgent>().OnMinuteTimeTick += ItemConverterProcess;
     }
 
     private void OnDestroy() {
-        GetComponent<TimeAgent>().onMinuteTimeTick -= ItemConverterProcess;
+        GetComponent<TimeAgent>().OnMinuteTimeTick -= ItemConverterProcess;
     }
 
     /// <summary>
     /// Initializes the item producer with a specific item identifier.
     /// </summary>
     /// <param name="itemId">The item identifier used to fetch recipe details.</param>
-    public override void InitializePreLoad(int itemId) {
+    public void InitializePreLoad(int itemId) {
         _itemId = itemId;
         ResetTimer();
         _visual = GetComponentInChildren<ObjectVisual>();
@@ -67,7 +67,7 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
     /// If the item converter is eligible for a new recipe and has all the needed items, it selects a recipe and starts item processing.
     /// </summary>
     /// <param name="player">The player interacting with the item converter.</param>
-    public override void Interact(Player player) {
+    public void Interact(Player player) {
         if (CanProcessItems()) {
             SpawnItems();
             ClearStoredItems();
@@ -172,7 +172,7 @@ public class ItemConverter : Interactable, IObjectDataPersistence {
     /// Picks up items in the placed object and spawns them.
     /// </summary>
     /// <param name="player">The player who is picking up the items.</param>
-    public override void PickUpItemsInPlacedObject(Player player) {
+    public void PickUpItemsInPlacedObject(Player player) {
         if (_storedItemSlots.Count > 0) {
             SpawnItems();
         }

@@ -1,7 +1,8 @@
+using System;
 using UnityEngine;
 
 
-public class AnimalController : Interactable {
+public class AnimalController : MonoBehaviour, IInteractable {
     [Header("Animal Settings")]
     [SerializeField] private AnimalSO _animal;
     [SerializeField] private string _animalName;
@@ -17,8 +18,12 @@ public class AnimalController : Interactable {
     [Header("Visual Settings")]
     [SerializeField] private AnimalVisual _animalVisual;
 
+    [NonSerialized] private float _maxDistanceToPlayer;
+    public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
 
-    public override void Interact(Player player) {
+    public void InitializePreLoad(int itemId) { }
+
+    public void Interact(Player player) {
         if (PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId == _animal.ItemToFeed.ItemId && !_wasFed) {
             ShowLove();
             _wasFed = true;
@@ -33,6 +38,8 @@ public class AnimalController : Interactable {
             Debug.Log("Animal gave item");
         }
     }
+
+    public void PickUpItemsInPlacedObject(Player player) { }
 
     private void ShowLove() {
         _animalVisual.ShowLoveIcon();

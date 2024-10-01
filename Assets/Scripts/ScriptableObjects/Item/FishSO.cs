@@ -18,8 +18,8 @@ public class FishSO : ScriptableObject {
     [Header("Fish Params")]
     public FishLocation[] Locations;
     public CatchingMethod Method;
-    public TimeAndWeatherManager.SeasonName[] Seasons;
-    public TimeAndWeatherManager.TimeOfDay[] TimeOfDay;
+    public TimeManager.SeasonName[] Seasons;
+    public TimeManager.TimeOfDay[] TimeOfDay;
     [TextArea] public string[] CatchText;
 
     [Header("Size Params")]

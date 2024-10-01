@@ -70,13 +70,13 @@ public class AudioManager : MonoBehaviour {
         _music.start();
     }
 
-    public void SetMusicSeason(TimeAndWeatherManager.SeasonName seasonName) {
+    public void SetMusicSeason(TimeManager.SeasonName seasonName) {
         if (_music.isValid()) {
             _music.setParameterByName(MUSIC_PARAMETER_NAME, (float)seasonName);
         }
     }
 
-    public void SetAmbienceWeather(TimeAndWeatherManager.WeatherName weatherName) {
+    public void SetAmbienceWeather(WeatherManager.WeatherName weatherName) {
         if (_ambience.isValid()) {
             _ambience.setParameterByName(AMBIENCE_PARAMETER_NAME, (float)weatherName);
         }

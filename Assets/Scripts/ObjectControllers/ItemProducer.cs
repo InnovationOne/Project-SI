@@ -6,22 +6,27 @@ using UnityEngine;
 /// Manages the production of items based on recipes and timed processes.
 /// </summary>
 [RequireComponent(typeof(TimeAgent))]
-public class ItemProducer : Interactable, IObjectDataPersistence {
+public class ItemProducer : MonoBehaviour, IObjectDataPersistence, IInteractable {
     private ObjectVisual _visual;
     private int _recipeId;
     private int _timer;
     private int _itemId;
 
+    [NonSerialized] private float _maxDistanceToPlayer;
+    public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
+
     /// <summary>
     /// Initializes and subscribes to time-based events.
     /// </summary>
-    private void Start() => GetComponent<TimeAgent>().onMinuteTimeTick += ItemProducerProcess;
+    private void Start() => GetComponent<TimeAgent>().OnMinuteTimeTick += ItemProducerProcess;
+
+    private void OnDestroy() => GetComponent<TimeAgent>().OnMinuteTimeTick -= ItemProducerProcess;
 
     /// <summary>
     /// Initializes the item producer with a specific item identifier.
     /// </summary>
     /// <param name="itemId">The item identifier used to fetch recipe details.</param>
-    public override void InitializePreLoad(int itemId) {
+    public void InitializePreLoad(int itemId) {
         _itemId = itemId;
         _recipeId = ProducerSO.Recipe != null ? ProducerSO.Recipe.RecipeId : throw new NotImplementedException("Recipe is not set for this item producer");
         ResetTimer();
@@ -49,7 +54,7 @@ public class ItemProducer : Interactable, IObjectDataPersistence {
     /// Handles interactions with the player, typically used to trigger item production.
     /// </summary>
     /// <param name="player">The player interacting with the item producer.</param>
-    public override void Interact(Player player) {
+    public void Interact(Player player) {
         if (_timer <= 0f) {
             ProduceItems();
             ResetTimer();
@@ -89,7 +94,7 @@ public class ItemProducer : Interactable, IObjectDataPersistence {
     /// Handles the collection of produced items when the object is dismanteled with.
     /// </summary>
     /// <param name="player">The player interacting with the placed object.</param>
-    public override void PickUpItemsInPlacedObject(Player player) {
+    public void PickUpItemsInPlacedObject(Player player) {
         if (_timer <= 0) {
             ProduceItems();
         }

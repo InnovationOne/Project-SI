@@ -43,7 +43,7 @@ public class PickUpItem : NetworkBehaviour {
     private SpriteRenderer _itemRenderer;
 
     // Cached References
-    private TimeAndWeatherManager _timeAndWeatherManager;
+    private TimeManager _timeManager;
     private PlayerDataManager _playerDataManager;
     private ItemManager _itemManager;
     private DragItemUI _dragItemUI;
@@ -64,21 +64,21 @@ public class PickUpItem : NetworkBehaviour {
 
     private void Start() {
         // Cache singleton references
-        _timeAndWeatherManager = TimeAndWeatherManager.Instance;
+        _timeManager = TimeManager.Instance;
         _playerDataManager = PlayerDataManager.Instance;
         _itemManager = ItemManager.Instance;
         _dragItemUI = DragItemUI.Instance;
         _eventsManager = EventsManager.Instance;
 
-        if (_timeAndWeatherManager != null) {
-            _timeAndWeatherManager.OnNextDayStarted += OnNextDayStarted;
+        if (_timeManager != null) {
+            _timeManager.OnNextDayStarted += OnNextDayStarted;
         }
     }
 
 
     private new void OnDestroy() {
-        if (_timeAndWeatherManager != null) {
-            _timeAndWeatherManager.OnNextDayStarted -= OnNextDayStarted;
+        if (_timeManager != null) {
+            _timeManager.OnNextDayStarted -= OnNextDayStarted;
         }
     }
 

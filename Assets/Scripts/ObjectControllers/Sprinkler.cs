@@ -9,11 +9,11 @@ public class Sprinkler : MonoBehaviour {
     private int _itemId;
 
     private void Start() {
-        TimeAndWeatherManager.Instance.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
+        TimeManager.Instance.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
     }
 
     private void OnDestroy() {
-        TimeAndWeatherManager.Instance.OnNextDayStarted -= TimeAndWeatherManager_OnNextDayStarted;
+        TimeManager.Instance.OnNextDayStarted -= TimeAndWeatherManager_OnNextDayStarted;
     }
 
     /// <summary>

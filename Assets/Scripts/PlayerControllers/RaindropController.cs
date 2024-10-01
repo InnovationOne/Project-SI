@@ -5,7 +5,7 @@ public class RaindropController : MonoBehaviour {
     private ParticleSystem _particleSystem;
 
     private void Start() {
-        TimeAndWeatherManager.Instance.OnChangeRainIntensity += OnChangeRainIntensity;
+        WeatherManager.Instance.OnChangeRainIntensity += OnChangeRainIntensity;
         _particleSystem = GetComponent<ParticleSystem>();
     }
 

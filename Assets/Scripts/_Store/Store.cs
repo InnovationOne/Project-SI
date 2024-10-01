@@ -1,10 +1,16 @@
+using System;
 using UnityEngine;
 
-public class Store : Interactable {
+public class Store : MonoBehaviour, IInteractable {
     [Header("Store Container")]
     [SerializeField] public ItemDatabaseSO _storeContainer;
 
     [SerializeField] public StoreVisual _storeVisual;
+
+    [NonSerialized] private float _maxDistanceToPlayer;
+    public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
+
+    public virtual void InitializePreLoad(int itemId) { }
 
     /*
     public void OnLeftClick(ItemSO itemSO) {
@@ -27,7 +33,9 @@ public class Store : Interactable {
         }
     }
     */
-    public override void Interact(Player player) {
+    public virtual void Interact(Player player) {
         // Call the store UI
     }
+
+    public virtual void PickUpItemsInPlacedObject(Player player) { }
 }

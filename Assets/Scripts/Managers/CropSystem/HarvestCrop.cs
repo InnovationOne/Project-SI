@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HarvestCrop : Interactable {
+public class HarvestCrop : MonoBehaviour, IInteractable {
     // A list of fertilizer types and their corresponding sprite renderers to be converted into a dictionary.
     [SerializeField] private List<FertilizerSpriteRendererPair> _fertilizerSpriteRenderersList = new(); 
     // A dictionary of fertilizer types and their corresponding sprite renderers.
     private Dictionary<FertilizerSO.FertilizerTypes, SpriteRenderer> _fertilizerSpriteRenderers = new(); 
     private Vector3Int _cropPosition; // The position of the crop in the grid.
     private bool _initialized = false; // Whether the fertilizer sprite renderers have been initialized.
+
+    [NonSerialized] private float _maxDistanceToPlayer;
+    public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
 
     /// <summary>
     /// Initializes the fertilizer sprite renderers dictionary based on the fertilizer sprite renderers list.
@@ -33,7 +36,7 @@ public class HarvestCrop : Interactable {
     /// Interacts with the crop by harvesting it.
     /// </summary>
     /// <param name="player">The player interacting with the crop.</param>
-    public override void Interact(Player player) {
+    public void Interact(Player player) {
         CropsManager.Instance.HarvestCropServerRpc(_cropPosition);
     }
 
@@ -74,6 +77,10 @@ public class HarvestCrop : Interactable {
         spriteRenderer.enabled = !spriteRenderer.enabled;
         spriteRenderer.color = color ?? Color.white;
     }
+
+    public void PickUpItemsInPlacedObject(Player player) { }
+
+    public void InitializePreLoad(int itemId) { }
 
     /// <summary>
     /// Represents a pair of a fertilizer type and a sprite renderer for a list that is converted into a dictionary.

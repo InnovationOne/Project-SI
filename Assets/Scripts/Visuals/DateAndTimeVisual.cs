@@ -7,8 +7,8 @@ public class DateAndTimeVisual : MonoBehaviour {
 
 
     private void Start() {
-        TimeAndWeatherManager.Instance.OnUpdateUITime += TimeAndWeatherManager_OnUpdateTimeText;
-        TimeAndWeatherManager.Instance.OnUpdateUIDate += TimeAndWeatherManager_OnUpdateDateText;
+        TimeManager.Instance.OnUpdateUITime += TimeAndWeatherManager_OnUpdateTimeText;
+        TimeManager.Instance.OnUpdateUIDate += TimeAndWeatherManager_OnUpdateDateText;
         PauseGameManager.Instance.OnShowLocalPauseGame += PauseMenuController_OnTogglePauseMenu;
     }
 
@@ -17,8 +17,8 @@ public class DateAndTimeVisual : MonoBehaviour {
     }
 
     private void TimeAndWeatherManager_OnUpdateDateText(int currentDay, int currentSeason, int currentYear) {
-        TimeAndWeatherManager.ShortDayName dayName = (TimeAndWeatherManager.ShortDayName)(currentDay % TimeAndWeatherManager.DAYS_PER_WEEK);
-        TimeAndWeatherManager.SeasonName seasonName = (TimeAndWeatherManager.SeasonName)(currentSeason);
+        TimeManager.ShortDayName dayName = (TimeManager.ShortDayName)(currentDay % TimeManager.DAYS_PER_WEEK);
+        TimeManager.SeasonName seasonName = (TimeManager.SeasonName)(currentSeason);
 
         _dateText.text = 
             $"{dayName} {currentDay + 1}. {seasonName}\n" +

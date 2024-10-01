@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49c1742113b00014393e881c7b626b28, type: 3}
   m_Name: Pickaxe
   m_EditorClassIdentifier: 
-  sizeOfInteractableArea: 1
-  canHitNodesOfType: 01000000
+  _canHitNodesOfTypeArray: 01000000
+  _resourceNodeLayerMask:
+    serializedVersion: 2
+    m_Bits: 64

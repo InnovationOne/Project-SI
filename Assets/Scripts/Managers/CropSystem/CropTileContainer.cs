@@ -107,6 +107,8 @@ public class CropTileContainer {
                 SpriteRendererXPosition = cropTile.SpriteRendererOffset.x,
                 SpriteRendererYPosition = cropTile.SpriteRendererOffset.y,
                 InGreenhouse = cropTile.InGreenhouse,
+                IsStruckByLightning = cropTile.IsStruckByLightning,
+
                 SpriteRendererXScale = cropTile.SpriteRendererXScale,
                 GrowthTimeScaler = cropTile.GrowthTimeScaler,
                 RegrowthTimeScaler = cropTile.RegrowthTimeScaler,
@@ -142,6 +144,8 @@ public class CropTileContainer {
                     cropTileData.SpriteRendererXPosition, 
                     cropTileData.SpriteRendererYPosition),
                 InGreenhouse = cropTileData.InGreenhouse,
+                IsStruckByLightning = cropTileData.IsStruckByLightning,
+
                 SpriteRendererXScale = cropTileData.SpriteRendererXScale,
                 GrowthTimeScaler = cropTileData.GrowthTimeScaler,
                 RegrowthTimeScaler = cropTileData.RegrowthTimeScaler,

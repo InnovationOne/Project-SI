@@ -49,7 +49,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
 
     private void Start() {
-        TimeAndWeatherManager.Instance.OnNextDayStarted += HandleNextDayStarted;
+        TimeManager.Instance.OnNextDayStarted += HandleNextDayStarted;
 
         OnUpdateHealth?.Invoke(_currentHealth);
         OnUpdateMaxHealth?.Invoke(_maxHealth);
@@ -60,8 +60,8 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     private new void OnDestroy() {
         base.OnDestroy();
 
-        if (TimeAndWeatherManager.Instance != null) {
-            TimeAndWeatherManager.Instance.OnNextDayStarted -= HandleNextDayStarted;
+        if (TimeManager.Instance != null) {
+            TimeManager.Instance.OnNextDayStarted -= HandleNextDayStarted;
         }
 
         if (LocalInstance == this) {

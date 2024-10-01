@@ -275,11 +275,9 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     /// <param name="gameObject">The GameObject to handle the pick-up interaction for.</param>
     private void HandlePickUpInteraction(GameObject gameObject) {
-        var interactable = gameObject.GetComponent<Interactable>();
+        var interactable = gameObject.GetComponent<IInteractable>();
 
-        if (interactable != null) {
-            interactable.PickUpItemsInPlacedObject(Player.LocalInstance);
-        }
+        interactable?.PickUpItemsInPlacedObject(Player.LocalInstance);
     }
 
     /// <summary>

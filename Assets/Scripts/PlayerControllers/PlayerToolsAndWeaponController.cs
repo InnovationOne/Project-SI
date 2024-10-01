@@ -8,7 +8,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     public static PlayerToolsAndWeaponController LocalInstance { get; private set; }
 
     // Cached references
-    private ResourceNode _lastResourceNode;
+    private ResourceNodeBase _lastResourceNode;
     private PlayerMarkerController _playerMarkerController;
     private PlayerToolbeltController _playerToolbeltController;
     private AttackController _playerAttackController;
@@ -73,7 +73,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
         Collider2D collider2D = Physics2D.OverlapPoint(gridPosition, resourceNodeLayerMask);
         if (collider2D != null) {
-            if (collider2D.TryGetComponent(out ResourceNode resourceNode)) {
+            if (collider2D.TryGetComponent(out ResourceNodeBase resourceNode)) {
                 _lastResourceNode = resourceNode;
             }
         } else if (_lastResourceNode != null) {

@@ -34,7 +34,7 @@ public class WeatherForecaseAndMoneyAndSettingsPanel : MonoBehaviour {
     }
 
     private void Start() {
-        TimeAndWeatherManager.Instance.OnUpdateUIWeather += TimeAndWeatherManager_OnUpdateWeatherImage;
+        WeatherManager.Instance.OnUpdateUIWeather += TimeAndWeatherManager_OnUpdateWeatherImage;
         FinanceManager.Instance.OnUpdateChanged += FinanceManager_OnUpdateMoney;
         PauseGameManager.Instance.OnShowLocalPauseGame += PauseMenuController_OnTogglePauseMenu;
     }
@@ -47,7 +47,7 @@ public class WeatherForecaseAndMoneyAndSettingsPanel : MonoBehaviour {
         //### When upgrading the weather system, this method needs to be updated ###
 
         // Set the weather text and sprite
-        int currentDay = TimeAndWeatherManager.Instance.CurrentDay.Value % TimeAndWeatherManager.DAYS_PER_SEASON;
+        int currentDay = TimeManager.Instance.CurrentDate.Value.Day % TimeManager.DAYS_PER_SEASON;
         for (int i = 0; i < _weatherForcastText.Length; i++) {
             currentDay++;
             _weatherForcastText[i].text = currentDay + ".";

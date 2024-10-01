@@ -223,8 +223,8 @@ public class FishDatabaseSO : ScriptableObject {
     /// Retrieves a fish based on the fishing conditions
     /// </summary>
     public FishSO GetFish(FishingRodToolSO fishingRod, int tileId, CatchingMethod catchingMethod) {
-        var timeManager = TimeAndWeatherManager.Instance;
-        var currentSeason = timeManager.CurrentSeason;
+        var timeManager = TimeManager.Instance;
+        var currentSeason = timeManager.CurrentDate.Value.Season;
         var currentTimeOfDay = timeManager.CurrentTimeOfDay;
 
         // Map tileId to locationId using a precomputed dictionary for faster access
@@ -243,7 +243,7 @@ public class FishDatabaseSO : ScriptableObject {
             var fish = _fish[i];
             if (fish.Locations.Contains((FishLocation)locationId) &&
                 fish.Method == catchingMethod &&
-                fish.Seasons.Contains((TimeAndWeatherManager.SeasonName)currentSeason.Value) &&
+                fish.Seasons.Contains((TimeManager.SeasonName)currentSeason) &&
                 fish.TimeOfDay.Contains(currentTimeOfDay)) {
                 availableFish.Add(fish);
             }

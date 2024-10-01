@@ -188,6 +188,8 @@ MonoBehaviour:
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &6525994358870325032
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -200,15 +202,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 335a851cc3b322046a68cee5e9ae3711, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   _nodeType: 0
   _spreadType: 1
   _startingHP: 100
   _minimumToolRarity: 0
+  _beeNest: {fileID: 0}
   _itemSO: {fileID: 11400000, guid: ce25a1dc6f28fbb4ebfae205be4ac06d, type: 2}
   _minDropCount: 4
   _maxDropCount: 6
   _rarityID: 0
-  _shakeAmountX: 0.05
-  _shakeAmountY: 0.01
-  _timeBetweenShakes: 0.03
-  _resourceNodeHighlight: {fileID: 0}
+  _seedToDrop: {fileID: 0}

@@ -32303,21 +32303,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  _nightLightColor: {r: 0.184, g: 0.192, b: 0.2, a: 0}
-  _dayLightColor: {r: 1, g: 1, b: 1, a: 1}
-  _nightTimeCurve:
-    serializedVersion: 2
-    m_Curve: []
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  _globalLight: {fileID: 930548781}
   _timeScale: 60
-  CurrentDay:
-    m_InternalValue: 0
-  CurrentSeason:
-    m_InternalValue: 0
-  _weatherStation: 0
+  CurrentDate:
+    m_InternalValue:
+      Day: 0
+      Season: 0
+      Year: 0
 --- !u!114 &1562205166
 MonoBehaviour:
   m_ObjectHideFlags: 0

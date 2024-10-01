@@ -1,10 +1,11 @@
 using Newtonsoft.Json;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Rose : Interactable, IObjectDataPersistence {
+public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
     public int ItemId { get; private set; }
     public Vector3 PartnerPosition { get; private set; }
 
@@ -37,9 +38,9 @@ public class Rose : Interactable, IObjectDataPersistence {
 
 
     #region Initialization
-    private void Start() => TimeAndWeatherManager.Instance.OnNextDayStarted += OnNextDayStarted;
+    private void Start() => TimeManager.Instance.OnNextDayStarted += OnNextDayStarted;
 
-    private void OnDestroy() => TimeAndWeatherManager.Instance.OnNextDayStarted -= OnNextDayStarted;
+    private void OnDestroy() => TimeManager.Instance.OnNextDayStarted -= OnNextDayStarted;
 
 
     /// <summary>
@@ -110,8 +111,8 @@ public class Rose : Interactable, IObjectDataPersistence {
     /// <returns>A Vector3 representing the generated position.</returns>
     private Vector3 GenerateRandomSpriteRendererPosition() {
         return new Vector3(
-            Random.Range(-_rosePositionSpread, _rosePositionSpread),
-            Random.Range(-_rosePositionSpread, _rosePositionSpread)
+            UnityEngine.Random.Range(-_rosePositionSpread, _rosePositionSpread),
+            UnityEngine.Random.Range(-_rosePositionSpread, _rosePositionSpread)
         );
     }
 
@@ -131,7 +132,7 @@ public class Rose : Interactable, IObjectDataPersistence {
     /// Interacts with the player.
     /// </summary>
     /// <param name="player">The player object.</param>
-    public override void Interact(Player player) {
+    public void Interact(Player player) {
         if (RoseSO.RoseRecipes[^1].NewRose.ItemForGalaxyRose.ItemId == PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId &&
             RoseSO.RoseRecipes[^1].Roses.All(rose => GetRosesInArea().Contains(rose))) {
             StartCoroutine(DestroyObjectsCoroutine());
@@ -207,7 +208,7 @@ public class Rose : Interactable, IObjectDataPersistence {
     /// <summary>
     /// Represents a recipe for creating a new Rose.
     /// </summary>
-    private RoseRecipeSO SelectRecipe(int partnerItemId) => 
+    private RoseRecipeSO SelectRecipe(int partnerItemId) =>
         RoseSO.RoseRecipes.FirstOrDefault(recipe =>
             recipe.Roses.Contains(PartnerRoseSO(partnerItemId)) &&
             recipe.Roses.Contains(RoseSO) &&
@@ -232,7 +233,7 @@ public class Rose : Interactable, IObjectDataPersistence {
     private void SpawnNewRose() {
         var emptyPositions = GetEmptyPositions();
         if (emptyPositions.Any()) {
-            var spawnPosition = emptyPositions.ElementAt(Random.Range(0, emptyPositions.Count));
+            var spawnPosition = emptyPositions.ElementAt(UnityEngine.Random.Range(0, emptyPositions.Count));
             PlaceableObjectsManager.Instance.PlaceObjectOnMapServerRpc(_roseToSpawnId, spawnPosition);
         }
     }
@@ -265,7 +266,7 @@ public class Rose : Interactable, IObjectDataPersistence {
     /// </summary>
     /// <param name="partnerPosition">The position of the partner.</param>
     public void SetPartner(Vector3Int position) => PartnerPosition = position;
-    
+
     #endregion
 
 
@@ -283,7 +284,7 @@ public class Rose : Interactable, IObjectDataPersistence {
     /// Picks up items in the placed object and performs additional actions if a partner Rose object is present.
     /// </summary>
     /// <param name="player">The player performing the action.</param>
-    public override void PickUpItemsInPlacedObject(Player player) {
+    public void PickUpItemsInPlacedObject(Player player) {
         if (PartnerPosition != Vector3.zero) {
             var partnerRose = PlaceableObjectsManager.Instance.POContainer[new Vector3Int((int)PartnerPosition.x, (int)PartnerPosition.y)].Prefab.GetComponent<Rose>();
             partnerRose.ResetRose();
@@ -314,6 +315,9 @@ public class Rose : Interactable, IObjectDataPersistence {
     /// Gets the RoseSO associated with this Rose instance.
     /// </summary>
     private RoseSO RoseSO => ItemManager.Instance.ItemDatabase[ItemId] as RoseSO;
+
+    [NonSerialized] private float _maxDistanceToPlayer;
+    public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
 
     /// <summary>
     /// Gets the RoseSO associated with the partner Rose.
@@ -347,6 +351,10 @@ public class Rose : Interactable, IObjectDataPersistence {
             _roseToSpawnId = roseData.RoseToSpawnId;
             PartnerPosition = roseData.PartnerPosition;
         }
+    }
+
+    public void InitializePreLoad(int itemId) {
+        return;
     }
     #endregion
 }

@@ -1,15 +1,17 @@
+using Ink.Parsed;
 using UnityEngine;
 
-public class SellChest : Interactable {
+public class SellChest : MonoBehaviour, IInteractable {
     [SerializeField] private ItemContainerSO _sellBoxContainer;
     [SerializeField] private SpriteRenderer _sellBoxHighlight;
 
+    public float MaxDistanceToPlayer => 0f;
 
     private void Awake() {
         _sellBoxHighlight.gameObject.SetActive(false);
     }
 
-    public override void Interact(Player character) {
+    public void Interact(Player character) {
 
         if (ItemManager.Instance.ItemDatabase[PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId] != null 
             && ItemManager.Instance.ItemDatabase[PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId].CanBeSold) {
@@ -20,4 +22,8 @@ public class SellChest : Interactable {
             character.GetComponent<PlayerToolbeltController>().ClearCurrentItemSlot();
         }
     }
+
+    public void PickUpItemsInPlacedObject(Player player) { }
+
+    public void InitializePreLoad(int itemId) { }
 }

@@ -9,13 +9,14 @@ public class CropSO : ScriptableObject {
     [Header("Params")]
     public bool IsTree;
     public int DaysToGrow;
+    public SeedSO ItemForSeeding;
     public ItemSO ItemToGrowAndSpawn;
     public bool IsHarvestedByScythe;
     public bool CanRegrow;
     [ConditionalHide("CanRegrow", true)]
     public int DaysToRegrow;
 
-    public List<TimeAndWeatherManager.SeasonName> SeasonsToGrow;
+    public List<TimeManager.SeasonName> SeasonsToGrow;
 
     [Header("Item min and max amount")]
     public int MinItemAmountToSpawn;

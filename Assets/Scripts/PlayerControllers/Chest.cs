@@ -1,15 +1,13 @@
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Chest : Interactable, IObjectDataPersistence {
+public class Chest : MonoBehaviour, IObjectDataPersistence, IInteractable {
     [Header("References")]
     private ObjectVisual _visual;
     private static readonly ChestUI _chestUI = ChestUI.Instance;
 
     [NonSerialized] private const float MAX_DISTANCE_TO_PLAYER = 1.5f;
-    public override float MaxDistanceToPlayer { get => MAX_DISTANCE_TO_PLAYER; }
+    public float MaxDistanceToPlayer { get => MAX_DISTANCE_TO_PLAYER; }
 
     private ItemContainerSO _itemContainer;
     private bool _opened;
@@ -33,7 +31,7 @@ public class Chest : Interactable, IObjectDataPersistence {
     /// Initializes the chest with the specified item ID.
     /// </summary>
     /// <param name="itemId">The ID of the item to initialize the chest with.</param>
-    public override void InitializePreLoad(int itemId) {
+    public void InitializePreLoad(int itemId) {
         _itemId = itemId;
         InitializeItemContainer();
         _visual = GetComponentInChildren<ObjectVisual>();
@@ -44,7 +42,7 @@ public class Chest : Interactable, IObjectDataPersistence {
     /// Interacts with the chest.
     /// </summary>
     /// <param name="player">The player interacting with the chest.</param>
-    public override void Interact(Player player) {
+    public void Interact(Player player) {
         ToggleChest();
         UpdateVisual();
         UpdateUI();
@@ -78,7 +76,7 @@ public class Chest : Interactable, IObjectDataPersistence {
     /// Picks up items in the placed object and adds them to the player's inventory.
     /// </summary>
     /// <param name="player">The player who is picking up the items.</param>
-    public override void PickUpItemsInPlacedObject(Player player) {
+    public void PickUpItemsInPlacedObject(Player player) {
         foreach (ItemSlot itemSlot in _itemContainer.ItemSlots) {
             int remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(itemSlot, false);
             if (remainingAmount > 0) {

@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UIElements;
 using static CropTile;
 
 /// <summary>
@@ -60,6 +61,8 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private TilemapManager _tilemapReadManager;
     private PlaceableObjectsManager _placeableObjectsManager;
 
+    private const float PROBABILITY_OF_THUNDER_STRIKE = 0.01f;
+    [SerializeField] private ItemSO _coal;
 
     // Future testing
     //private NetworkList<CropTileData> cropTiles = new NetworkList<CropTileData>();
@@ -98,9 +101,10 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     private void Start() {
         // Subscribe to events triggered when the next day starts, the next season starts, and the rain intensity changes
-        TimeAndWeatherManager.Instance.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
-        TimeAndWeatherManager.Instance.OnNextSeasonStarted += TimeAndWeatherManager_OnNextSeasonStarted;
-        TimeAndWeatherManager.Instance.OnChangeRainIntensity += TimeAndWeatherManager_OnChangeRainIntensity;
+        TimeManager.Instance.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
+        TimeManager.Instance.OnNextSeasonStarted += TimeAndWeatherManager_OnNextSeasonStarted;
+        WeatherManager.Instance.OnChangeRainIntensity += TimeAndWeatherManager_OnChangeRainIntensity;
+        WeatherManager.Instance.OnThunderStrike += OnThunderStrike;
 
         // Get references to the TilemapManager and PlaceableObjectsManager instances
         _tilemapReadManager = TilemapManager.Instance;
@@ -209,7 +213,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Iterate over each crop tile
         foreach (CropTile cropTile in CropTileContainer.CropTileMap.Values) {
             // If the crop tile has a crop and the crop cannot survive in the next season
-            if (cropTile.CropId >= 0 && !CropDatabase[cropTile.CropId].SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)nextSeasonIndex)) {
+            if (cropTile.CropId >= 0 && !CropDatabase[cropTile.CropId].SeasonsToGrow.Contains((TimeManager.SeasonName)nextSeasonIndex)) {
                 // Set the damage of the crop to the maximum
                 cropTile.Damage = _maxCropDamage;
             }
@@ -258,10 +262,10 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             // If the crop tile has a crop
             if (cropTile.CropId >= 0) {
                 // If the crop is dead
-                if (cropTile.IsDead(_maxCropDamage)) {
+                if (cropTile.IsDead()) {
                     // Update the dead crop tile
                     UpdateDeadCropTile(cropTile);
-                    Debug.Log($"CropTile: {cropTile.CropId} | IsDead?: {cropTile.IsDead(_maxCropDamage)} | Damage: {cropTile.Damage}");
+                    Debug.Log($"CropTile: {cropTile.CropId} | IsDead?: {cropTile.IsDead()} | Damage: {cropTile.Damage}");
                 } else {
                     // Otherwise, update the alive crop tile
                     UpdateAliveCropTile(cropTile);
@@ -313,7 +317,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="cropTile">The crop tile to update.</param>
     private void UpdateDeadCropTile(CropTile cropTile) {
         // If the crop stage of the crop tile is 0
-        if (cropTile.GetCropStage(CropDatabase[cropTile.CropId]) == 0) {
+        if (cropTile.GetCropStage() == CropStage.Seeded) {
             // Reset the crop tile
             cropTile.ResetCropTile();
         }
@@ -327,8 +331,10 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Retrieve crop information from the database
         var cropInfo = CropDatabase[cropTile.CropId];
 
-        // Check if the crop is a tree and currently in the Growing stage
-        if (cropInfo.IsTree && cropTile.GetCropStage(cropInfo) == CropStage.Growing) {
+        // Check if the crop is a tree and currently in the Growing stage and not struck by a lightning
+        if (cropInfo.IsTree &&
+            cropTile.GetCropStage() == CropStage.Growing &&
+            !cropTile.IsStruckByLightning) {
             // Get the current position of the tree
             int currentX = cropTile.CropPosition.x;
             int currentY = cropTile.CropPosition.y;
@@ -357,7 +363,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
                     var adjacentCropInfo = CropDatabase[adjacentTile.CropId];
 
                     // Get the stage of the adjacent tree
-                    CropStage adjacentStage = adjacentTile.GetCropStage(adjacentCropInfo);
+                    CropStage adjacentStage = adjacentTile.GetCropStage();
 
                     // If the adjacent tree is at a higher stage, current tree cannot grow
                     if (adjacentStage > CropStage.Growing) {
@@ -373,7 +379,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             }
 
             // If the crop in the crop tile is not done growing
-            if (!cropTile.IsCropDoneGrowing(CropDatabase[cropTile.CropId])) {
+            if (!cropTile.IsCropDoneGrowing()) {
                 // Increment the current grow timer of the crop tile.
                 cropTile.CurrentGrowthTimer++;
             }
@@ -408,7 +414,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
                 // If the crop tile has a crop
                 if (cropTile.CropId >= 0) {
                     // Create a crop prefab for the crop tile
-                    CreateCropPrefab(cropTile, CropDatabase[cropTile.CropId].IsTree);
+                    CreateCropPrefab(cropTile, CropDatabase[cropTile.CropId].IsTree, 0); // TODO Die 0 muss die SeedId sein. Vielleicht die SeedId als referenz im CropTile speichern.
                     // Visualize the changes to the crop
                     VisualizeCropChanges(cropTile);
                 }
@@ -449,12 +455,12 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         CropSO cropSO = CropDatabase[cropTile.CropId];
         // If the crop is dead and its stage is not 0
-        if (cropTile.IsDead(_maxCropDamage) && cropTile.GetCropStage(cropSO) != 0) {
+        if (cropTile.IsDead() && cropTile.GetCropStage() != CropStage.Seeded) {
             // Set the sprite of the crop tile to the corresponding dead sprite
-            cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = cropSO.DeadSpritesGrowthStages[(int)cropTile.GetCropStage(cropSO) - 1];
+            cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = cropSO.DeadSpritesGrowthStages[(int)cropTile.GetCropStage() - 1];
         } else {
             // Otherwise, set the sprite of the crop tile to the corresponding growth stage sprite
-            cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = cropSO.SpritesGrowthStages[(int)cropTile.GetCropStage(cropSO)];
+            cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = cropSO.SpritesGrowthStages[(int)cropTile.GetCropStage()];
         }
 
 
@@ -489,10 +495,11 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// Creates a crop prefab for the given crop tile.
     /// </summary>
     /// <param name="cropTile">The crop tile to create the prefab for.</param>
-    private void CreateCropPrefab(CropTile cropTile, bool isTree) {
+    private void CreateCropPrefab(CropTile cropTile, bool isTree, int itemId) {
         // Create and set the prefab of the crop tile
         if (isTree) {
             cropTile.Prefab = Instantiate(_cropsTreeSpritePrefab, transform);
+            cropTile.Prefab.GetComponent<ResourceNodeBase>().SetSeed(ItemManager.Instance.ItemDatabase[itemId] as SeedSO);
         } else {
             cropTile.Prefab = Instantiate(_cropsSpritePrefab, transform);
         }
@@ -685,7 +692,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Tree
         if ((ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.IsTree
             && !CropTileContainer.IsPositionSeeded(wantToSeedTilePosition)
-            && (ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason.Value)
+            && (ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.SeasonsToGrow.Contains((TimeManager.SeasonName)TimeManager.Instance.CurrentDate.Value.Season)
             && Array.IndexOf(_tilesThatCanBePlowed, _tilemapReadManager.ReturnTileBaseAtGridPosition(wantToSeedTilePosition)) != -1
             && !_placeableObjectsManager.POContainer.PlaceableObjects.ContainsKey(wantToSeedTilePosition)) {
             // Plant the tree
@@ -693,7 +700,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             // Check if the position is not plowed or is already seeded
             if (!CropTileContainer.IsPositionPlowed(wantToSeedTilePosition) ||
                 CropTileContainer.IsPositionSeeded(wantToSeedTilePosition) ||
-                !(ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.SeasonsToGrow.Contains((TimeAndWeatherManager.SeasonName)TimeAndWeatherManager.Instance.CurrentSeason.Value)) {
+                !(ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.SeasonsToGrow.Contains((TimeManager.SeasonName)TimeManager.Instance.CurrentDate.Value.Season)) {
                 // If it is, handle the client callback and return
                 HandleClientCallback(serverRpcParams, false);
                 return;
@@ -763,7 +770,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
 
         // Create the crop prefab
-        CreateCropPrefab(cropTile, (ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.IsTree);
+        CreateCropPrefab(cropTile, (ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.IsTree, itemId);
 
         // Initialize the sprite renderer of the crop tile with the given parameters
         InitializeCropTileSpriteRenderer(cropTile, spriteRendererPosition, spriteRendererScaleX, itemId);
@@ -809,7 +816,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Get the crop from the crop database using the crop ID
         CropSO crop = CropDatabase[cropTile.CropId];
         // Set the sprite of the crop tile based on its growth stage
-        cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = crop.SpritesGrowthStages[(int)cropTile.GetCropStage(crop)];
+        cropTile.Prefab.GetComponent<SpriteRenderer>().sprite = crop.SpritesGrowthStages[(int)cropTile.GetCropStage()];
     }
     #endregion
 
@@ -841,6 +848,20 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         HarvestCropClientRpc(position, itemCountToSpawn, itemRarity);
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    public void HarvestTreeServerRpc(Vector3Int position, ServerRpcParams serverRpcParams = default) {
+        // Get the crop tile at the given grid position
+        CropTile cropTile = CropTileContainer.GetCropTileAtPosition(position);
+
+        // Calculate the number of items to spawn when the crop is harvested
+        int itemCountToSpawn = CalculateItemCount(cropTile);
+        // Calculate the rarity of the items to be spawned
+        int itemRarity = CalculateItemRarity(cropTile.QualityScaler);
+
+        // Call the client RPC to harvest the crop
+        HarvestCropClientRpc(position, itemCountToSpawn, itemRarity);
+    }
+
     /// <summary>
     /// Checks if a crop can be harvested at the specified grid position.
     /// </summary>
@@ -853,8 +874,8 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         // Check if the position is seeded and the crop is ready to harvest
         if (!CropTileContainer.IsPositionSeeded(gridPosition)
-            || !CropIsReadyToHarvest(cropTile)
-            || CropDatabase[cropTile.CropId].IsTree) { // Is a tree so harvest is by axe
+            || !cropTile.IsCropHarvestable()
+            || CropDatabase[cropTile.CropId].IsTree) { // Is a tree so harvest is by shaking or axe
             return false;
         }
 
@@ -862,23 +883,11 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     }
 
     /// <summary>
-    /// Checks if a crop is ready to be harvested.
-    /// </summary>
-    /// <param name="cropTile">The crop tile to check.</param>
-    /// <returns>True if the crop is ready to be harvested, false otherwise.</returns>
-    private bool CropIsReadyToHarvest(CropTile cropTile) {
-        // Get the crop from the crop database using the crop ID
-        CropSO crop = CropDatabase[cropTile.CropId];
-        // Check if the crop is done growing and is not dead
-        return cropTile.IsCropDoneGrowing(crop) && !cropTile.IsDead(_maxCropDamage);
-    }
-
-    /// <summary>
     /// Calculates the item count for a given crop tile.
     /// </summary>
     /// <param name="cropTile">The crop tile to calculate the item count for.</param>
     /// <returns>The calculated item count.</returns>
-    private int CalculateItemCount(CropTile cropTile) {
+    public int CalculateItemCount(CropTile cropTile) {
         // Get the crop from the crop database using the crop ID
         CropSO crop = CropDatabase[cropTile.CropId];
 
@@ -895,7 +904,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// Calculates the rarity of an item to be spawned based on the probability to spawn rarity.
     /// </summary>
     /// <returns>The rarity of the item to be spawned. Returns -1 if no rarity is determined.</returns>
-    private int CalculateItemRarity(float rarityBonus) {
+    public int CalculateItemRarity(float rarityBonus) {
         // Generate a random number between 0 and 100
         int rarityToSpawn = UnityEngine.Random.Range(0, 100);
 
@@ -1202,7 +1211,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         CropSO crop = CropDatabase[cropTile.CropId];
 
         // Check if the crop is done growing and if it can be harvested by a scythe
-        bool cropDoneGrowing = cropTile.IsCropDoneGrowing(crop);
+        bool cropDoneGrowing = cropTile.IsCropHarvestable();
         bool cropIsHarvestedByScytheAndDoneGrowing = crop.IsHarvestedByScythe && cropDoneGrowing;
 
         // If the crop can regrow, harvest it
@@ -1236,7 +1245,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [ClientRpc]
     public void DestroyCropTilePlantClientRpc(Vector3Int position) {
         CropTile cropTile = CropTileContainer.GetCropTileAtPosition(position);
-        Destroy(cropTile.Prefab.gameObject);
+        Destroy(cropTile.Prefab);
         cropTile.ResetCropTile();
     }
 
@@ -1292,6 +1301,37 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
+    private void OnThunderStrike() {
+        // Get all cropTiles that are trees
+        List<CropTile> treeCropTiles = new List<CropTile>();
+        if (UnityEngine.Random.value < PROBABILITY_OF_THUNDER_STRIKE) {
+            foreach (CropTile cropTile in CropTileContainer.CropTileMap.Values) {
+                if (CropDatabase[cropTile.CropId].IsTree &&
+                    cropTile.IsCropDoneGrowing()) {
+                    treeCropTiles.Add(cropTile);
+                }
+            }
+        }
+
+        // Select random cropTile
+        int selectedTreeCropTileIndex = UnityEngine.Random.Range(0, treeCropTiles.Count);
+        CropTile selectedTreeCropTile = treeCropTiles[selectedTreeCropTileIndex];
+
+        // Set struck by lightning
+        // TODO: Play an animation to show that this tree is hit by a lightning
+        selectedTreeCropTile.IsStruckByLightning = true;
+
+        // Destroy crops on the tree if harvestable, let the tree drop coal instead
+        if (selectedTreeCropTile.IsCropHarvestable()) {
+            ItemSpawnManager.Instance.SpawnItemServerRpc(
+                itemSlot: new ItemSlot(_coal.ItemId, CalculateItemCount(selectedTreeCropTile), 0),
+                initialPosition: selectedTreeCropTile.Prefab.transform.position,
+                motionDirection: Vector2.zero,
+                spreadType: ItemSpawnManager.SpreadType.Circle);
+
+            HandleCropAfterHarvest(selectedTreeCropTile, CropDatabase[selectedTreeCropTile.CropId]);
+        }
+    }
 
     #region Save and Load
     /// <summary>

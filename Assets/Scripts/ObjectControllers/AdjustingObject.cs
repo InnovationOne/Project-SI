@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public abstract class AdjustingObject : Interactable {
+public abstract class AdjustingObject : MonoBehaviour, IInteractable {
     protected ObjectVisual _visual;
 
     private const int LAYER_MASK_BIT = 8;
@@ -15,6 +15,11 @@ public abstract class AdjustingObject : Interactable {
     private bool[] _currentNeighborFlags = new bool[4];
     protected int _itemId;
     protected int _patternIndex;
+
+    [NonSerialized] private float _maxDistanceToPlayer;
+    public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
+
+   
 
     private static readonly bool[][] _neighborhoodPatterns = {
         new bool[] { false, false, false, false }, // None              Gate: Horizontal
@@ -44,7 +49,7 @@ public abstract class AdjustingObject : Interactable {
     /// Initializes the AdjustingObject with the specified item ID.
     /// </summary>
     /// <param name="itemId">The ID of the item.</param>
-    public override void InitializePreLoad(int itemId) {
+    public virtual void InitializePreLoad(int itemId) {
         _itemId = itemId;
         _fencePosition = _grid.WorldToCell(transform.position);
         InitializeAdjacentPositions();
@@ -126,8 +131,12 @@ public abstract class AdjustingObject : Interactable {
     /// <summary>
     /// Picks up the object and updates neighbor connections.
     /// </summary>
-    public void PickUp() {
+    public virtual void PickUpItemsInPlacedObject(Player player) {
         UpdateNeighborConnections(false);
+        // Additional pick up logic can be implemented here
+    }
+    public virtual void Interact(Player player) {
+        
     }
 
     /// <summary>

@@ -13,6 +13,7 @@ public class CropTile {
     public Vector2 SpriteRendererOffset;
     public int SpriteRendererXScale = 1;
     public bool InGreenhouse = false;
+    public bool IsStruckByLightning = false;
 
     // Fertilizer
     public float GrowthTimeScaler = 1f;
@@ -21,7 +22,10 @@ public class CropTile {
     public float QuantityScaler = 1f;
     public float WaterScaler = 0f;
 
+    private const int MAX_DAMAGE = 100;
+
     public enum CropStage {
+        None,
         Seeded,         // Seeds are planted
         Sprouting,      // Seeds are starting to grow
         Growing,        // Plant is increasing in size and developing
@@ -40,11 +44,17 @@ public class CropTile {
     /// <summary>
     /// Represents the growth stages of a crop.
     /// </summary>
-    public CropStage GetCropStage(CropSO crop) {
-        float growthProgress = CurrentGrowthTimer / (crop.DaysToGrow * GrowthTimeScaler);
-        if (IsRegrowing && !IsCropDoneGrowing(crop)) {
+    public CropStage GetCropStage() {
+        if (CropsManager.Instance == null) {
+            return CropStage.None;
+        }
+        CropSO cropSO = CropsManager.Instance.CropDatabase[CropId];
+
+        float growthProgress = CurrentGrowthTimer / (cropSO.DaysToGrow * GrowthTimeScaler);
+
+        if (IsRegrowing && !(CurrentGrowthTimer >= cropSO.DaysToGrow * GrowthTimeScaler)) {
             return CropStage.Regrowth;
-        } else if (IsCropDoneGrowing(crop)) {
+        } else if (CurrentGrowthTimer >= cropSO.DaysToGrow * GrowthTimeScaler) {
             return CropStage.FullyGrown;
         } else if (growthProgress >= 0.66f) {
             return CropStage.Flowering;
@@ -62,14 +72,16 @@ public class CropTile {
     /// </summary>
     /// <param name="maxDamage">The maximum damage allowed.</param>
     /// <returns>True if the crop tile is dead, false otherwise.</returns>
-    public bool IsDead(int maxDamage) => Damage >= maxDamage;
+    public bool IsDead() => Damage >= MAX_DAMAGE;
 
     /// <summary>
     /// Checks if the crop is done growing based on the current growth timer and the crop's growth time.
     /// </summary>
     /// <param name="crop">The crop to check.</param>
     /// <returns>True if the crop is done growing, false otherwise.</returns>
-    public bool IsCropDoneGrowing(CropSO crop) => CurrentGrowthTimer >= crop.DaysToGrow * GrowthTimeScaler;
+    public bool IsCropDoneGrowing() => GetCropStage() == CropStage.FullyGrown || GetCropStage() == CropStage.Regrowth;
+
+    public bool IsCropHarvestable() => GetCropStage() == CropStage.FullyGrown || !IsDead();
 
     /// <summary>
     /// Resets the crop tile to its default state.
@@ -84,6 +96,8 @@ public class CropTile {
         SpriteRendererOffset = Vector2.zero;
         SpriteRendererXScale = 1;
         InGreenhouse = false;
+        IsStruckByLightning = false;
+
         GrowthTimeScaler = 1f;
         RegrowthTimeScaler = 1f;
         QualityScaler = 1f;
@@ -103,6 +117,8 @@ public class CropTileData {
     public float SpriteRendererXPosition;
     public float SpriteRendererYPosition;
     public bool InGreenhouse;
+    public bool IsStruckByLightning;
+
     public int SpriteRendererXScale;
     public float GrowthTimeScaler;
     public float RegrowthTimeScaler;

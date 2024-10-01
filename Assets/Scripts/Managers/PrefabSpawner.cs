@@ -282,9 +282,7 @@ public class PrefabSpawner : NetworkBehaviour {
         for (int i = n - 1; i > 0; i--) {
             int k = UnityEngine.Random.Range(0, i + 1);
             // Swap elements
-            Vector3Int temp = list[k];
-            list[k] = list[i];
-            list[i] = temp;
+            (list[i], list[k]) = (list[k], list[i]);
         }
     }
 
@@ -328,5 +326,4 @@ public class PrefabSpawner : NetworkBehaviour {
             Destroy(networkedPrefab);
         }
     }
-
 }

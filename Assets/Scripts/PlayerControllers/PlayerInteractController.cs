@@ -10,7 +10,7 @@ public class PlayerInteractController : NetworkBehaviour {
     private const float MAX_INTERACT_DISTANCE = 0.4f;
 
     // Cached references
-    private Interactable _currentInteractable;
+    private IInteractable _currentIInteractable;
     private BoxCollider2D _playerCollider;
     private Player _player;
 
@@ -57,8 +57,8 @@ public class PlayerInteractController : NetworkBehaviour {
     private void HandleInteractAction() {
         FindClosestInteractable();
 
-        if (_currentInteractable != null) {
-            _currentInteractable.Interact(_player);
+        if (_currentIInteractable != null) {
+            _currentIInteractable.Interact(_player);
         }
     }
 
@@ -67,18 +67,18 @@ public class PlayerInteractController : NetworkBehaviour {
     /// If not, it triggers the interaction and clears the reference.
     /// </summary>
     private void CheckInteractionDistance() {
-        if (_currentInteractable == null || _currentInteractable.MaxDistanceToPlayer <= 0f) {
+        if (_currentIInteractable == null || _currentIInteractable.MaxDistanceToPlayer <= 0f) {
             return;
         }
 
         Vector2 playerPosition = transform.position;
-        Vector2 interactablePosition = _currentInteractable.transform.position;
+        Vector2 interactablePosition = ((Component)_currentIInteractable).transform.position;
         float sqrDistance = (playerPosition - interactablePosition).sqrMagnitude;
-        float sqrMaxDistance = _currentInteractable.MaxDistanceToPlayer * _currentInteractable.MaxDistanceToPlayer;
+        float sqrMaxDistance = _currentIInteractable.MaxDistanceToPlayer * _currentIInteractable.MaxDistanceToPlayer;
 
         if (sqrDistance > sqrMaxDistance) {
-            _currentInteractable.Interact(_player);
-            _currentInteractable = null;
+            _currentIInteractable.Interact(_player);
+            _currentIInteractable = null;
         }
     }
 
@@ -91,7 +91,7 @@ public class PlayerInteractController : NetworkBehaviour {
         float radius = MAX_INTERACT_DISTANCE;
 
         Collider2D[] colliders = Physics2D.OverlapCircleAll(center, radius);
-        Interactable closestInteractable = null;
+        IInteractable closestInteractable = null;
         float closestSqrDistance = float.MaxValue;
         Vector2 playerPosition = transform.position;
 
@@ -101,8 +101,8 @@ public class PlayerInteractController : NetworkBehaviour {
             }
 
             // Attempt to get Interactable component from the collider or its parent
-            if (!collider.TryGetComponent(out Interactable interactable)) {
-                interactable = collider.GetComponentInParent<Interactable>();
+            if (!collider.TryGetComponent(out IInteractable interactable)) {
+                interactable = collider.GetComponentInParent<IInteractable>();
             }
 
             if (interactable == null) {
@@ -110,7 +110,7 @@ public class PlayerInteractController : NetworkBehaviour {
             }
 
             // Calculate squared distance to avoid unnecessary square root computation
-            Vector2 interactablePosition = interactable.transform.position;
+            Vector2 interactablePosition = ((Component)interactable).transform.position;
             float sqrDistance = (playerPosition - interactablePosition).sqrMagnitude;
 
             if (sqrDistance < closestSqrDistance) {
@@ -119,7 +119,7 @@ public class PlayerInteractController : NetworkBehaviour {
             }
         }
 
-        _currentInteractable = closestInteractable;
+        _currentIInteractable = closestInteractable;
     }
 
     // Optional: Visualize the interaction radius in the Unity Editor
