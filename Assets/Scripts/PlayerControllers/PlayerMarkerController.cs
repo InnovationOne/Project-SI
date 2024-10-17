@@ -3,45 +3,60 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-// This script manages the marker on the marker tilemap
+/// <summary>
+/// Manages player markers on the marker tilemap, supporting single and area markers.
+/// Utilizes Unity's Multiplayer System for networked synchronization.
+/// </summary>
 public class PlayerMarkerController : NetworkBehaviour {
     public static PlayerMarkerController LocalInstance { get; private set; }
+
+    // Constants
+    private const string MARKER_TILEMAP_TAG = "MarkerTilemap";
 
     [Header("Debug: Params")]
     [SerializeField] private float _areaChangeSizeTimer = 0.8f;
 
     [Header("References")]
     [SerializeField] private TileBase _markerTile;
-    
-    // Single Marker Params
+
+    // Single Marker Parameters
     public Vector3Int MarkedCellPosition { get; private set; }
     private Vector3Int _lastCellPosition;
 
-    // Area Marker Params
+    // Area Marker Parameters
     private bool _useAreaIndicator;
     private float _currentChangeSizeTimer;
     private int _currentToolMaxRarity;
     private int _currentlyUsedRarity;
     private int _energyCost;
     private Area _areaSize;
-    private List<Vector3Int> _areaPositions = new();
+    private readonly List<Vector3Int> _areaPositions = new();
     private ToolSO.ToolTypes _toolType;
 
-    // References
+    // Cached References
     private Tilemap _targetTilemap;
     private BoxCollider2D _boxCollider2D;
+    private PlayerToolbeltController _toolbeltController;
+    private PlayerMovementController _movementController;
+    private CropsManager _cropsManager;
+    private TilemapManager _tilemapManager;
+    private PlayerToolsAndWeaponController _toolsAndWeaponController;
 
+    #region Unity Callbacks
 
     private void Awake() {
-        // Get references
+        // Cache references to reduce overhead in Update
         _boxCollider2D = GetComponent<BoxCollider2D>();
-        _targetTilemap = GameObject.FindGameObjectWithTag("MarkerTilemap").GetComponent<Tilemap>();
+        _targetTilemap = GameObject.FindGameObjectWithTag(MARKER_TILEMAP_TAG)?.GetComponent<Tilemap>();
+
+        // Validate references
+        if (_targetTilemap == null) {
+            Debug.LogError($"Tilemap with tag '{MARKER_TILEMAP_TAG}' not found.");
+        }
     }
 
-    private void Start() => PlayerToolbeltController.LocalInstance.OnToolbeltChanged += PlayerToolbeltController_OnToolbeltChanged;
-    
-    private new void OnDestroy() => PlayerToolbeltController.LocalInstance.OnToolbeltChanged -= PlayerToolbeltController_OnToolbeltChanged;
-    
+    private new void OnDestroy() => PlayerToolbeltController.LocalInstance.OnToolbeltChanged -= HandleToolbeltChanged;
+
     public override void OnNetworkSpawn() {
         if (IsOwner) {
             if (LocalInstance != null) {
@@ -49,14 +64,15 @@ public class PlayerMarkerController : NetworkBehaviour {
                 return;
             }
             LocalInstance = this;
-        }
-    }
 
-    private void PlayerToolbeltController_OnToolbeltChanged() {
-        if (_useAreaIndicator) {
-            _useAreaIndicator = false;
-            ResetMarkerTiles();
-            EnableMoveSpeed();
+            // Cache other singleton instances
+            _toolbeltController = PlayerToolbeltController.LocalInstance;
+            _movementController = PlayerMovementController.LocalInstance;
+            _cropsManager = CropsManager.Instance;
+            _tilemapManager = TilemapManager.Instance;
+            _toolsAndWeaponController = PlayerToolsAndWeaponController.LocalInstance;
+
+            _toolbeltController.OnToolbeltChanged += HandleToolbeltChanged;
         }
     }
 
@@ -65,26 +81,55 @@ public class PlayerMarkerController : NetworkBehaviour {
             return;
         }
 
-        Vector2 motionDirection = PlayerMovementController.LocalInstance.LastMotionDirection;
+        Vector2 motionDirection = _movementController.LastMotionDirection;
         Vector3 positionOffset = new(
             transform.position.x + _boxCollider2D.offset.x + motionDirection.x,
-            transform.position.y + _boxCollider2D.offset.y + motionDirection.y);
-        Vector3Int gridPosition = TilemapManager.Instance.GetGridPosition(positionOffset);
+            transform.position.y + _boxCollider2D.offset.y + motionDirection.y
+        );
+
+        Vector3Int gridPosition = _tilemapManager.GetGridPosition(positionOffset);
 
         if (_useAreaIndicator) {
-            UseAreaMarker(gridPosition, motionDirection);
+            HandleAreaMarker(gridPosition, motionDirection);
             _lastCellPosition = Vector3Int.zero;
         } else {
-            ShowMarker(gridPosition);
+            ShowSingleMarker(gridPosition);
         }
     }
 
-    #region Area Marker
-    public void TriggerAreaMarker(int toolRarity, Area areaSize, int energyCost, ToolSO.ToolTypes toolType) {
-        ResetAreaMarkerState(toolRarity, areaSize, energyCost, toolType);
-        PlayerMovementController.LocalInstance.ChangeMoveSpeed(false);
+    #endregion
+
+    #region Event Handlers
+
+    /// <summary>
+    /// Handles changes in the player's toolbelt.
+    /// Resets area indicators and re-enables movement speed.
+    /// </summary>
+    private void HandleToolbeltChanged() {
+        if (_useAreaIndicator) {
+            _useAreaIndicator = false;
+            ResetMarkerTiles();
+        }
     }
 
+    #endregion
+
+    #region Area Marker
+
+    /// <summary>
+    /// Initiates the area marker with the specified parameters.
+    /// </summary>
+    /// <param name="toolRarity">Rarity level of the tool.</param>
+    /// <param name="areaSize">Size of the area to mark.</param>
+    /// <param name="energyCost">Energy cost associated with the action.</param>
+    /// <param name="toolType">Type of the tool being used.</param>
+    public void TriggerAreaMarker(int toolRarity, Area areaSize, int energyCost, ToolSO.ToolTypes toolType) {
+        ResetAreaMarkerState(toolRarity, areaSize, energyCost, toolType);
+    }
+
+    /// <summary>
+    /// Initializes the state for the area marker.
+    /// </summary>
     private void ResetAreaMarkerState(int toolRarity, Area areaSize, int cost, ToolSO.ToolTypes type) {
         _currentChangeSizeTimer = 0f;
         _currentlyUsedRarity = 0;
@@ -95,82 +140,104 @@ public class PlayerMarkerController : NetworkBehaviour {
         _toolType = type;
     }
 
-    private void UseAreaMarker(Vector3Int position, Vector2 lastMotionVector) {
-        ShowAreaMarker(position, lastMotionVector);
-        PlayerToolsAndWeaponController.LocalInstance.AreaMarkerCallback();
+    /// <summary>
+    /// Handles the logic for displaying and updating the area marker.
+    /// </summary>
+    private void HandleAreaMarker(Vector3Int position, Vector2 lastMotionVector) {
+        DisplayAreaMarker(position, lastMotionVector);
+        _toolsAndWeaponController.AreaMarkerCallback();
 
         if (Input.GetMouseButtonUp(0)) {
             _useAreaIndicator = false;
-            ProcessToolAction();
+            ExecuteToolAction();
             ResetMarkerTiles();
-            EnableMoveSpeed();
         }
     }
 
-    private void ShowAreaMarker(Vector3Int position, Vector2 motionDirection) {
+    /// <summary>
+    /// Displays the area marker based on the current position and motion direction.
+    /// </summary>
+    private void DisplayAreaMarker(Vector3Int position, Vector2 motionDirection) {
         UpdateAreaSize();
-        CalculateAreaDimensions(motionDirection, _areaSize, out int xsize, out int ysize);
-        Vector3Int[,] positions = GenerateCellPositions(position, motionDirection, xsize, ysize);
+
+        (int xSize, int ySize) = CalculateAreaDimensions(motionDirection, _areaSize);
+        Vector3Int[,] positions = GenerateCellPositions(position, motionDirection, xSize, ySize);
 
         ResetMarkerTiles();
-
-        MarkTilesAndAddToList(positions);
+        MarkTilesAndStorePositions(positions);
     }
 
-    private void ProcessToolAction() {
+    /// <summary>
+    /// Executes the action associated with the current tool type.
+    /// </summary>
+    private void ExecuteToolAction() {
         switch (_toolType) {
             case ToolSO.ToolTypes.Hoe:
-                CropsManager.Instance.PlowTiles(_areaPositions, _energyCost);
+                _cropsManager.PlowTiles(_areaPositions, _energyCost);
                 break;
             case ToolSO.ToolTypes.WateringCan:
-                CropsManager.Instance.WaterTiles(_areaPositions, _energyCost);
+                _cropsManager.WaterTiles(_areaPositions, _energyCost);
                 break;
             default:
-                Debug.LogError("No valid tool type.");
+                Debug.LogError("Invalid tool type selected.");
                 break;
         }
     }
 
-    private void EnableMoveSpeed() => PlayerMovementController.LocalInstance.ChangeMoveSpeed(true);
-    
-    // Change the area size every _areaChangeSizeTimer seconds
+    /// <summary>
+    /// Updates the area size based on the timer and tool rarity.
+    /// </summary>
     private void UpdateAreaSize() {
         _currentChangeSizeTimer += Time.deltaTime;
-        if (_currentChangeSizeTimer >= _areaChangeSizeTimer && _currentlyUsedRarity < _currentToolMaxRarity) {
+        if (_currentChangeSizeTimer >= _areaChangeSizeTimer &&
+            _currentlyUsedRarity < _currentToolMaxRarity) {
             _currentChangeSizeTimer = 0f;
             _currentlyUsedRarity++;
         }
     }
 
-    // Calculate the area dimensions based on the last motion vector (horizontal or vertical)
-    private void CalculateAreaDimensions(Vector2 lastMotionVector, Area currentAreaSize, out int xsize, out int ysize) {
-        if (lastMotionVector.x == 0) {
-            xsize = currentAreaSize.XSize;
-            ysize = currentAreaSize.YSize;
+    /// <summary>
+    /// Calculates the dimensions of the area based on the motion direction.
+    /// </summary>
+    private (int xSize, int ySize) CalculateAreaDimensions(Vector2 motionDirection, Area currentAreaSize) {
+        if (Mathf.Approximately(motionDirection.x, 0)) {
+            return (currentAreaSize.XSize, currentAreaSize.YSize);
         } else {
-            xsize = currentAreaSize.YSize;
-            ysize = currentAreaSize.XSize;
+            return (currentAreaSize.YSize, currentAreaSize.XSize);
         }
     }
 
-    private Vector3Int[,] GenerateCellPositions(Vector3Int position, Vector2 lastMotionVector, int xsize, int ysize) {
-        Vector3Int[,] positions = new Vector3Int[xsize, ysize];
-        for (int i = 0; i < xsize; i++) {
-            for (int j = 0; j < ysize; j++) {
-                if (lastMotionVector.x > 0) {
-                    positions[i, j] = position - new Vector3Int(0, (ysize - 1) / 2) + new Vector3Int(i, j, 0);
-                } else if (lastMotionVector.x < 0) {
-                    positions[i, j] = position - new Vector3Int(0, (ysize - 1) / 2) + new Vector3Int(-i, j, 0);
-                } else if (lastMotionVector.y > 0) {
-                    positions[i, j] = position - new Vector3Int((xsize - 1) / 2, 0) + new Vector3Int(i, j, 0);
-                } else if (lastMotionVector.y < 0) {
-                    positions[i, j] = position - new Vector3Int((xsize - 1) / 2, 0) + new Vector3Int(i, -j, 0);
-                }
+    /// <summary>
+    /// Generates cell positions for the area marker based on the current position and motion direction.
+    /// </summary>
+    private Vector3Int[,] GenerateCellPositions(Vector3Int position, Vector2 motionDirection, int xSize, int ySize) {
+        Vector3Int[,] positions = new Vector3Int[xSize, ySize];
+        Vector3Int offset;
+
+        // Determine the offset based on motion direction
+        if (motionDirection.x > 0) {
+            offset = new Vector3Int(0, (ySize - 1) / 2, 0);
+        } else if (motionDirection.x < 0) {
+            offset = new Vector3Int(-xSize + 1, (ySize - 1) / 2, 0);
+        } else if (motionDirection.y > 0) {
+            offset = new Vector3Int((xSize - 1) / 2, 0, 0);
+        } else {
+            offset = new Vector3Int((xSize - 1) / 2, -ySize + 1, 0);
+        }
+
+        for (int i = 0; i < xSize; i++) {
+            for (int j = 0; j < ySize; j++) {
+                Vector3Int cellPosition = position + new Vector3Int(i, j, 0) - offset;
+                positions[i, j] = cellPosition;
             }
         }
+
         return positions;
     }
 
+    /// <summary>
+    /// Resets the marker tiles by clearing all marked area positions.
+    /// </summary>
     private void ResetMarkerTiles() {
         foreach (var cell in _areaPositions) {
             SetTile(cell);
@@ -178,29 +245,48 @@ public class PlayerMarkerController : NetworkBehaviour {
         _areaPositions.Clear();
     }
 
-    private void MarkTilesAndAddToList(Vector3Int[,] positions) {
-        foreach (var position in positions) {
-            _areaPositions.Add(position);
-            SetTile(position, _markerTile);
+    /// <summary>
+    /// Marks the tiles on the tilemap and stores their positions.
+    /// </summary>
+    private void MarkTilesAndStorePositions(Vector3Int[,] positions) {
+        int xSize = positions.GetLength(0);
+        int ySize = positions.GetLength(1);
+
+        for (int i = 0; i < xSize; i++) {
+            for (int j = 0; j < ySize; j++) {
+                Vector3Int pos = positions[i, j];
+                if (!_areaPositions.Contains(pos)) {
+                    _areaPositions.Add(pos);
+                    SetTile(pos, _markerTile);
+                }
+            }
         }
     }
+
     #endregion
 
 
     #region Single Marker
-    // Show the single maker on the map
-    private void ShowMarker(Vector3Int position) {
+
+    /// <summary>
+    /// Displays the single marker on the map.
+    /// </summary>
+    private void ShowSingleMarker(Vector3Int position) {
         MarkedCellPosition = position;
 
         if (MarkedCellPosition != _lastCellPosition) {
             SetTile(_lastCellPosition);
             SetTile(MarkedCellPosition, _markerTile);
-
             _lastCellPosition = MarkedCellPosition;
         }
     }
 
-    private void SetTile(Vector3Int position, TileBase tileBase = null) => _targetTilemap.SetTile(position, tileBase);
-    
+    /// <summary>
+    /// Sets a tile at the specified position.
+    /// </summary>
+    /// <param name="position">Grid position to set the tile.</param>
+    /// <param name="tile">Tile to set. If null, clears the tile.</param>
+    private void SetTile(Vector3Int position, TileBase tile = null) => _targetTilemap.SetTile(position, tile);
+
     #endregion
 }

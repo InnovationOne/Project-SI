@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: -5225251467676991074}
   - component: {fileID: 1966016930495981158}
   - component: {fileID: 9079669687861950075}
-  - component: {fileID: -2619782599425693426}
   - component: {fileID: -1392972338729523816}
+  - component: {fileID: -2619782599425693426}
   - component: {fileID: 6525994358870325032}
   m_Layer: 0
   m_Name: TreeCropPrefab
@@ -151,20 +151,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _fertilizerSpriteRenderersList: []
---- !u!114 &-2619782599425693426
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2950949280833642199}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _isObjectStationary: 1
-  _objectCollider2D: {fileID: 0}
 --- !u!114 &-1392972338729523816
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190,6 +176,21 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &-2619782599425693426
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2950949280833642199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  _isObjectStationary: 1
+  _objectCollider2D: {fileID: 0}
 --- !u!114 &6525994358870325032
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -199,17 +200,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 2950949280833642199}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 335a851cc3b322046a68cee5e9ae3711, type: 3}
+  m_Script: {fileID: 11500000, guid: 4f73ae6b44167a4479b655f6529c9a0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  _nodeType: 0
-  _spreadType: 1
   _startingHP: 100
   _minimumToolRarity: 0
-  _beeNest: {fileID: 0}
   _itemSO: {fileID: 11400000, guid: ce25a1dc6f28fbb4ebfae205be4ac06d, type: 2}
-  _minDropCount: 4
-  _maxDropCount: 6
+  _minDropCount: 1
+  _maxDropCount: 3
   _rarityID: 0
+  _spreadType: 1
+  _beeNest: {fileID: 0}
   _seedToDrop: {fileID: 0}
+  _coal: {fileID: 11400000, guid: c48707f47f83cce4486831e1f1d009a5, type: 2}

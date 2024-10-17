@@ -29,6 +29,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     public float CurrentEnergy => _currentEnergy;
 
     [SerializeField] private float _energyAtRespawn = 10;
+
     [SerializeField, Tooltip("Energy is set to max when resting energy is above this multiplier of max.")]
     private float _minimumEnergyMultiplierForFullReset = 0.25f; // Energy is set to max, when rest energy is above 25%
 
@@ -80,9 +81,11 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     }
 
     private void FixedUpdate() {
-        // Regenerate health and energy if the player is in bed
-        if (_localPlayer.InBed) {
-            RegenerateHealthAndEnergy();
+        if (IsOwner) {
+            // Regenerate health and energy if the player is in bed
+            if (_localPlayer.InBed) {
+                RegenerateHealthAndEnergy();
+            }
         }
     }
 
@@ -90,12 +93,17 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     /// Regenerates health and energy while the player is in bed.
     /// </summary>
     private void RegenerateHealthAndEnergy() {
-        AdjustHealth(_regenHpAmountInBed * Time.deltaTime);
-        AdjustEnergy(_regenEnergyAmountInBed * Time.deltaTime);
+        // Using deltaTime ensures frame rate independence
+        float regenHealth = _regenHpAmountInBed * Time.deltaTime;
+        float regenEnergy = _regenEnergyAmountInBed * Time.deltaTime;
+
+        AdjustHealth(regenHealth);
+        AdjustEnergy(regenEnergy);
     }
 
     private void HandleNextDayStarted() {
         AdjustHealth(_maxHealth - _currentHealth); // Fully restore health
+
         float targetEnergy = _currentEnergy >= _maxEnergy * _minimumEnergyMultiplierForFullReset
             ? _maxEnergy
             : _maxEnergy * _energyMultiplierForNonFullReset;
@@ -163,6 +171,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
 
     #region Energy
+
     /// <summary>
     /// Adjusts the energy of the player by the specified amount.
     /// </summary>

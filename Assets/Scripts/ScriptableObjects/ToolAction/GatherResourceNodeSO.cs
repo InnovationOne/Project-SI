@@ -17,24 +17,21 @@ public class GatherResourceNodeSO : ToolActionSO {
     // Cached reference to ItemManager to reduce repeated access
     private ItemManager _itemManager;
 
-    private bool _isInitialized = false;
+    private bool _init = false;
 
-    /// <summary>
-    /// Initializes the ScriptableObject. Should be called once during play mode.
-    /// </summary>
-    public void Initialize() {
-        if (_isInitialized) {
-            return;
-        }
+    private void OnEnable() {
+        _init = false;
+    }
 
+    private void Init() {
         _canHitNodesOfType = new HashSet<ResourceNodeType>(_canHitNodesOfTypeArray);
         _itemManager = ItemManager.Instance;
-        _isInitialized = true;
+        _init = true;
     }
 
     public override void OnApplyToTileMap(Vector3Int gridPosition, ItemSlot itemSlot) {
-        if (!_isInitialized) {
-            Initialize();
+        if (!_init) {
+            Init();
         }
 
         // Define the area of the tile using local variables

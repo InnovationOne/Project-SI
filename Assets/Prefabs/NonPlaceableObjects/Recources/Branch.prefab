@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 4948398707952232945}
   - component: {fileID: 4948398707952232947}
   - component: {fileID: -3642706895242882101}
-  - component: {fileID: 4948398707952232944}
   - component: {fileID: 194746138}
+  - component: {fileID: 8474667712481936600}
   m_Layer: 6
   m_Name: Branch
   m_TagString: Untagged
@@ -94,7 +94,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 4026396141
+  GlobalObjectIdHash: 167929896
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -107,28 +107,6 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &4948398707952232944
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4948398707952232940}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 335a851cc3b322046a68cee5e9ae3711, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  _nodeType: 2
-  _spreadType: 0
-  _startingHP: 17
-  _minimumToolRarity: 0
-  _beeNest: {fileID: 0}
-  _itemSO: {fileID: 11400000, guid: ce25a1dc6f28fbb4ebfae205be4ac06d, type: 2}
-  _minDropCount: 1
-  _maxDropCount: 2
-  _rarityID: 0
 --- !u!114 &194746138
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141,8 +119,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   _isObjectStationary: 1
   _objectCollider2D: {fileID: 0}
+--- !u!114 &8474667712481936600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4948398707952232940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f18a2085744bd741ae3285e230cf869, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  _startingHP: 17
+  _minimumToolRarity: 0
+  _itemSO: {fileID: 11400000, guid: ce25a1dc6f28fbb4ebfae205be4ac06d, type: 2}
+  _minDropCount: 1
+  _maxDropCount: 1
+  _rarityID: 0
+  _spreadType: 0
 --- !u!1 &7160746654117115934
 GameObject:
   m_ObjectHideFlags: 0
@@ -154,7 +153,7 @@ GameObject:
   - component: {fileID: 8871588711810291579}
   - component: {fileID: 8540577875735323340}
   m_Layer: 6
-  m_Name: TreeVisual
+  m_Name: BranchVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

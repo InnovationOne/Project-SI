@@ -79,7 +79,8 @@ public class DebugUI : MonoBehaviour {
             string weather = WeatherManager.Instance.CurrentWeather;
 
             // Get farm stats
-            int farmMoney = FinanceManager.Instance.GetMoney;
+            int farmMoney = FinanceManager.Instance.GetMoneyFarm;
+            int townMoney = FinanceManager.Instance.GetMoneyTown;
 
             // Get player stats
             float playerHealth = PlayerHealthAndEnergyController.LocalInstance.CurrentHealth;
@@ -105,7 +106,8 @@ public class DebugUI : MonoBehaviour {
               .AppendLine($"Player position: {playerPosition}")
               .AppendLine($"Ingame time and date: {ingameDateTime}")
               .AppendLine($"Weather: {weather}")
-              .AppendLine($"Money: {farmMoney}")
+              .AppendLine($"Farm money: {farmMoney}")
+              .AppendLine($"Town money: {townMoney}")
               .AppendLine()
               .AppendLine($"HP: {playerHealth}, Max HP: {playerMaxHealth}")
               .AppendLine($"Energy: {playerEnergy}, Max Energy: {playerMaxEnergy}")

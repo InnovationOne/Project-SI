@@ -35,7 +35,8 @@ public class WeatherForecaseAndMoneyAndSettingsPanel : MonoBehaviour {
 
     private void Start() {
         WeatherManager.Instance.OnUpdateUIWeather += TimeAndWeatherManager_OnUpdateWeatherImage;
-        FinanceManager.Instance.OnUpdateChanged += FinanceManager_OnUpdateMoney;
+        FinanceManager.Instance.OnFarmMoneyChanged += FinanceManager_OnUpdateFarmMoney;
+        FinanceManager.Instance.OnTownMoneyChanged += FinanceManager_OnUpdateTownMoney;
         PauseGameManager.Instance.OnShowLocalPauseGame += PauseMenuController_OnTogglePauseMenu;
     }
 
@@ -70,7 +71,7 @@ public class WeatherForecaseAndMoneyAndSettingsPanel : MonoBehaviour {
         }
     }
 
-    private void FinanceManager_OnUpdateMoney(int moneyOfFarm) {
+    private void FinanceManager_OnUpdateFarmMoney(int moneyOfFarm) {
         int zeroCount = COUNT_OF_MONEY_NUMBERS - moneyOfFarm.ToString().Length;
 
         // Build the formatted string
@@ -82,5 +83,9 @@ public class WeatherForecaseAndMoneyAndSettingsPanel : MonoBehaviour {
         moneyTextStringBuilder.Append(moneyOfFarm.ToString());
 
         _moneyText.text = moneyTextStringBuilder.ToString();
+    }
+
+    private void FinanceManager_OnUpdateTownMoney(int moneyOfFarm) {
+        return;
     }
 }

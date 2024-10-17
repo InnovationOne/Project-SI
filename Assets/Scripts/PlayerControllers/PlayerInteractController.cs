@@ -2,7 +2,6 @@ using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
-[RequireComponent(typeof(Player))]
 public class PlayerInteractController : NetworkBehaviour {
     public static PlayerInteractController LocalInstance { get; private set; }
 
@@ -14,23 +13,8 @@ public class PlayerInteractController : NetworkBehaviour {
     private BoxCollider2D _playerCollider;
     private Player _player;
 
-    // Preallocated buffer for non-allocating physics queries
-    private static readonly Collider2D[] _interactablesBuffer = new Collider2D[10]; // Adjust size as needed
-
-    private void Awake() {
-        _playerCollider = GetComponent<BoxCollider2D>();
-        _player = GetComponent<Player>();
-    }
-
-    private void Start() {
-        InputManager.Instance.OnInteractAction += HandleInteractAction;
-    }
-
     private new void OnDestroy() {
-        // Ensure event is unsubscribed to prevent memory leaks
-        if (InputManager.Instance != null) {
-            InputManager.Instance.OnInteractAction -= HandleInteractAction;
-        }
+        InputManager.Instance.OnInteractAction -= HandleInteractAction;
 
         base.OnDestroy();
     }
@@ -42,6 +26,11 @@ public class PlayerInteractController : NetworkBehaviour {
                 return;
             }
             LocalInstance = this;
+
+            InputManager.Instance.OnInteractAction += HandleInteractAction;
+
+            _playerCollider = GetComponent<BoxCollider2D>();
+            _player = GetComponent<Player>();
         }
     }
 
@@ -56,10 +45,7 @@ public class PlayerInteractController : NetworkBehaviour {
     /// </summary>
     private void HandleInteractAction() {
         FindClosestInteractable();
-
-        if (_currentIInteractable != null) {
-            _currentIInteractable.Interact(_player);
-        }
+        _currentIInteractable?.Interact(_player);
     }
 
     /// <summary>
@@ -120,14 +106,6 @@ public class PlayerInteractController : NetworkBehaviour {
         }
 
         _currentIInteractable = closestInteractable;
-    }
-
-    // Optional: Visualize the interaction radius in the Unity Editor
-    private void OnDrawGizmosSelected() {
-        if (_playerCollider != null) {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(_playerCollider.bounds.center, MAX_INTERACT_DISTANCE);
-        }
     }
 }
 

@@ -14,6 +14,7 @@ public class GameData {
 
     [Header("Finanz Manager")]
     public int MoneyOfFarm;
+    public int MoneyOfTown;
 
     [Header("Time Manager")]
     public int CurrentDay;

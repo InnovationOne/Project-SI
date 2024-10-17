@@ -92,7 +92,11 @@ public class ItemConverter : MonoBehaviour, IObjectDataPersistence, IInteractabl
     /// Checks if the item is eligible for a new recipe.
     /// </summary>
     /// <returns>True if the item is eligible for a new recipe, false otherwise.</returns>
-    private bool IsEligibleForNewRecipe() => PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot() != null && _storedItemSlots.Any();
+    private bool IsEligibleForNewRecipe()
+    => !PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().IsEmpty
+       && _storedItemSlots != null
+       && _storedItemSlots.Any();
+
 
     private int SelectRecipe() => ConverterSO.Recipes.Count == 0 ? SelectRecipeAutomatically() : _selectRecipeUI.SelectRecipe(ConverterSO.Recipes);
     

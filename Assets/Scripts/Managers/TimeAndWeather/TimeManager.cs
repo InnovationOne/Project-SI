@@ -241,7 +241,7 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
     /// <summary>
     /// Initiates the transition to the next day.
     /// </summary>
-    private void StartNextDay() {
+    public void StartNextDay() {
         InvokeTimeAgentsIfNeeded();
         ResetDayAndAdvanceTime();
         CheckAndAdvanceSeasonAndYear();

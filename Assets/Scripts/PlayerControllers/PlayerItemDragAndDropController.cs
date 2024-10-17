@@ -53,7 +53,6 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
         // Round the pointer position to the nearest integer values
         _roundedPosition.x = Mathf.RoundToInt(pointerPosition.x);
         _roundedPosition.y = Mathf.RoundToInt(pointerPosition.y);
-        _roundedPosition.z = _visual.transform.position.z; // Maintain the original Z position
 
         _visual.transform.position = _roundedPosition;
     }

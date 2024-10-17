@@ -6301,6 +6301,7 @@ Transform:
   - {fileID: 13181173}
   - {fileID: 396021662}
   - {fileID: 369996321}
+  - {fileID: 1045241353}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &362927867
@@ -10988,6 +10989,7 @@ GameObject:
   - component: {fileID: 631834295}
   - component: {fileID: 631834298}
   - component: {fileID: 631834297}
+  - component: {fileID: 631834299}
   m_Layer: 0
   m_Name: elevator_test
   m_TagString: Untagged
@@ -11077,6 +11079,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   _isObjectStationary: 1
   _objectCollider2D: {fileID: 0}
 --- !u!61 &631834298
@@ -11125,6 +11128,31 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1.125, y: 0.29166722}
   m_EdgeRadius: 0
+--- !u!114 &631834299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 631834294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 2937078578
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &643281897
 GameObject:
   m_ObjectHideFlags: 0
@@ -11746,6 +11774,7 @@ GameObject:
   - component: {fileID: 663041004}
   - component: {fileID: 663041009}
   - component: {fileID: 663041007}
+  - component: {fileID: 663041011}
   m_Layer: 0
   m_Name: Animal
   m_TagString: Untagged
@@ -11845,6 +11874,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   _isObjectStationary: 0
   _objectCollider2D: {fileID: 0}
 --- !u!50 &663041008
@@ -11939,6 +11969,31 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2, y: 2}
   m_EdgeRadius: 0
+--- !u!114 &663041011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 663041003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 2560265362
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &663177592
 GameObject:
   m_ObjectHideFlags: 0
@@ -20519,6 +20574,61 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1041528074}
   m_CullTransparentMesh: 1
+--- !u!1 &1045241352
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1045241353}
+  - component: {fileID: 1045241354}
+  m_Layer: 0
+  m_Name: WeatherManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1045241353
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1045241352}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 351133912}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1045241354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1045241352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37b955d2b33cdf44089d61d46b0ecf49, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  _nightLightColor: {r: 0.11764706, g: 0.11764706, b: 0.11764706, a: 1}
+  _dayLightColor: {r: 1, g: 1, b: 1, a: 1}
+  _nightTimeCurve:
+    serializedVersion: 2
+    m_Curve: []
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _globalLight: {fileID: 930548781}
+  _weatherStation: 2
 --- !u!1001 &1045990215
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29654,8 +29764,8 @@ GameObject:
   - component: {fileID: 1451132091}
   - component: {fileID: 1451132090}
   - component: {fileID: 1451132095}
-  - component: {fileID: 1451132094}
   - component: {fileID: 1451132093}
+  - component: {fileID: 1451132099}
   - component: {fileID: 1451132092}
   - component: {fileID: 1451132097}
   - component: {fileID: 1451132096}
@@ -29749,6 +29859,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   _isObjectStationary: 0
   _objectCollider2D: {fileID: 0}
 --- !u!114 &1451132093
@@ -29764,19 +29875,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _patrolArea: {fileID: 2033160601}
---- !u!114 &1451132094
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1451132086}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff15055c78966734885b4dee7b785155, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _enemySO: {fileID: 11400000, guid: d5a87773626b6be4e9eb3fe13d4fe71c, type: 2}
 --- !u!50 &1451132095
 Rigidbody2D:
   serializedVersion: 5
@@ -29887,6 +29985,31 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.46298695, y: 0.17188787}
   m_EdgeRadius: 0
+--- !u!114 &1451132099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1451132086}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 2506141158
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &1451472959 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5821201164105809723, guid: e7d2ff0a3342a3c4ca5c0350f12782ed, type: 3}
@@ -32269,7 +32392,7 @@ GameObject:
   - component: {fileID: 1562205165}
   - component: {fileID: 1562205166}
   m_Layer: 0
-  m_Name: TimeAndWeatherManager
+  m_Name: TimeManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -67987,6 +68110,7 @@ MonoBehaviour:
   _cropsSpritePrefab: {fileID: 2950949280833642199, guid: 61380a55f8c9c5c46abfc62f4717ddaa, type: 3}
   _cropsTreeSpritePrefab: {fileID: 2950949280833642199, guid: 9dd7ebcf16fba4c4eb504fc7b8c9d0cd, type: 3}
   CropDatabase: {fileID: 11400000, guid: f1bad354e78320f428434c301f9c6be8, type: 2}
+  _coal: {fileID: 0}
 --- !u!114 &1582453587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -77783,6 +77907,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2145407300}
     m_Modifications:
+    - target: {fileID: 7362073770877681772, guid: 1a0d03fbce42b2f47b5e7c68284b455d, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 2643955933
+      objectReference: {fileID: 0}
     - target: {fileID: 8447655521753035468, guid: 1a0d03fbce42b2f47b5e7c68284b455d, type: 3}
       propertyPath: _storeVisual
       value: 

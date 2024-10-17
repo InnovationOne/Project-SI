@@ -1,20 +1,16 @@
 using Unity.Netcode;
 using UnityEngine;
 
-// This script handels the item prefab that is a item on the map
+/// <summary>
+/// Manages the behavior of item prefabs placed on the map, including animations, movement, and network synchronization.
+/// </summary>
 public class PickUpItem : NetworkBehaviour {
-    #region Constants
-
-    private const float DEFAULT_CAN_PICK_UP_TIMER = 0.75f; // When changing the time also change the time in ItemSpawnManager.cs
+    private const float DEFAULT_CAN_PICK_UP_TIMER = 0.75f; // Sync with ItemSpawnManager.cs
     private const float DEFAULT_PARABOLA_Z = 5f;
     private const float DEFAULT_END_POSITION_Z_MULTIPLIER = 0.0001f;
 
-    #endregion
-
-    #region Serialized Fields
-
     [Header("Item Movement Settings")]
-    [SerializeField] private float _itemMoveSpeed = 0.2f;
+    [SerializeField] private float _itemMoveSpeed = 0.5f;
     [SerializeField] private float _itemSpeedAcceleration = 0.01f;
     [SerializeField] private float _pickUpDistanceThreshold = 1.25f;
 
@@ -26,10 +22,7 @@ public class PickUpItem : NetworkBehaviour {
     [SerializeField] private float _parabolaAnimationHeight = 0.2f;
 
     [SerializeField] private ItemSlot _itemSlot;
-
-    #endregion
-
-    #region Private Fields
+    [SerializeField] private SpriteRenderer _itemRenderer;
 
     private float _canPickUpTimer = DEFAULT_CAN_PICK_UP_TIMER;
     private float _currentPickUpTimer;
@@ -39,8 +32,6 @@ public class PickUpItem : NetworkBehaviour {
 
     private Player _closestPlayer;
     private float _distanceToPlayer;
-
-    private SpriteRenderer _itemRenderer;
 
     // Cached References
     private TimeManager _timeManager;
@@ -52,17 +43,13 @@ public class PickUpItem : NetworkBehaviour {
     // Reusable Vector3 to minimize allocations
     private Vector3 _newPosition;
 
-    #endregion
 
     #region Unity Callbacks
 
     private void Awake() {
-        _itemRenderer = GetComponentInChildren<SpriteRenderer>();
         _parabolaAnimationTime = _maxParabolaAnimationTime;
         _itemSlot = new ItemSlot();
-    }
 
-    private void Start() {
         // Cache singleton references
         _timeManager = TimeManager.Instance;
         _playerDataManager = PlayerDataManager.Instance;
@@ -74,7 +61,6 @@ public class PickUpItem : NetworkBehaviour {
             _timeManager.OnNextDayStarted += OnNextDayStarted;
         }
     }
-
 
     private new void OnDestroy() {
         if (_timeManager != null) {
@@ -103,42 +89,24 @@ public class PickUpItem : NetworkBehaviour {
     #region Network Callbacks
 
     /// <summary>
-    /// Moves the item towards the player on the server and calls the client RPC to move the item towards the player.
-    /// </summary>
-    [ServerRpc(RequireOwnership = false)]
-    private void MoveItemTowardsPlayerServerRpc() => MoveItemTowardsPlayerClientRpc();
-
-
-    /// <summary>
-    /// Moves the item towards the closest player's position using a client RPC (Remote Procedure Call).
-    /// </summary>
-    [ClientRpc]
-    private void MoveItemTowardsPlayerClientRpc() {
-        if (_closestPlayer == null) { 
-            return; 
-        }
-
-        _newPosition = Vector3.MoveTowards(transform.position, _closestPlayer.transform.position, _itemMoveSpeed * Time.deltaTime);
-        transform.position = _newPosition;
-        _itemMoveSpeed += _itemSpeedAcceleration;
-    }
-
-    /// <summary>
     /// ServerRpc method that despawns the item.
     /// </summary>
     [ServerRpc(RequireOwnership = false)]
-    private void DespawnItemServerRpc() => GetComponent<NetworkObject>().Despawn(true);
+    private void DespawnItemServerRpc() {
+        NetworkObject.Despawn(true);
+    }
+
 
     #endregion
 
     #region Event Handlers
 
     /// <summary>
-    /// Event handler for when the next day starts in the TimeAndWeatherManager.
-    /// Despawns the item if the game object is not null.
+    /// Event handler for when the next day starts in the TimeManager.
+    /// Despawns the item if the game object is active.
     /// </summary>
     private void OnNextDayStarted() {
-        if (gameObject != null) {
+        if (gameObject.activeSelf) {
             DespawnItemServerRpc();
         }
     }
@@ -290,6 +258,18 @@ public class PickUpItem : NetworkBehaviour {
     /// <param name="itemSlot">The item slot data to initialize with.</param>
     public void InitializeItem(ItemSlot itemSlot) {
         _itemSlot.Set(itemSlot);
+        if (_itemManager == null) {
+            Debug.Log("1");
+        }
+        if (_itemManager.ItemDatabase == null) {
+            Debug.Log("2");
+        }
+        if (_itemManager.ItemDatabase[_itemSlot.ItemId] == null) {
+            Debug.Log("3");
+        }
+        if (_itemManager.ItemDatabase[_itemSlot.ItemId].ItemIcon == null) {
+            Debug.Log("4");
+        }
         _itemRenderer.sprite = _itemManager.ItemDatabase[_itemSlot.ItemId].ItemIcon;
     }
 
@@ -309,4 +289,29 @@ public class PickUpItem : NetworkBehaviour {
     }
 
     #endregion
+
+
+
+
+
+    /// <summary>
+    /// Moves the item towards the player on the server and calls the client RPC to move the item towards the player.
+    /// </summary>
+    [ServerRpc(RequireOwnership = false)]
+    private void MoveItemTowardsPlayerServerRpc() => MoveItemTowardsPlayerClientRpc();
+
+
+    /// <summary>
+    /// Moves the item towards the closest player's position using a client RPC (Remote Procedure Call).
+    /// </summary>
+    [ClientRpc]
+    private void MoveItemTowardsPlayerClientRpc() {
+        if (_closestPlayer == null) {
+            return;
+        }
+
+        _newPosition = Vector3.MoveTowards(transform.position, _closestPlayer.transform.position, _itemMoveSpeed * Time.deltaTime);
+        transform.position = _newPosition;
+        _itemMoveSpeed += _itemSpeedAcceleration;
+    }
 }

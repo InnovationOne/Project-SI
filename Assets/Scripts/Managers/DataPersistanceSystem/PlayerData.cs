@@ -5,7 +5,7 @@ using UnityEngine.Analytics;
 [Serializable]
 public class PlayerData {
     [Header("Game")]
-    public Player TargetPlayerGameObject;
+    public ulong OwnerClientId;
 
     [Header("Player")]
     public string Name;
@@ -50,22 +50,4 @@ public class PlayerData {
     [Header("Hidden-Settings")]
     public bool skipTutorial;
     */
-
-    public PlayerData() {
-        // Player
-        Name = "NoName";
-        Gender = Gender.Unknown;
-        Position = Vector2.zero;
-        LastDirection = Vector2.zero;
-        RespawnPosition = Vector2.zero;
-
-        InventorySize = 10;
-        ToolbeltSize = 5;
-
-        // HP & Energy
-        MaxHp = 100;
-        CurrentHp = 100;
-        MaxEnergy = 100;
-        CurrentEnergy = 100;
-    }
 }

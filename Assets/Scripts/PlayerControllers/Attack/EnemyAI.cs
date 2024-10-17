@@ -37,7 +37,7 @@ public class EnemyAI : MonoBehaviour {
     private void Awake() {
         _animator = GetComponent<Animator>();
         _rb = GetComponent<Rigidbody2D>();
-        _enemySO = GetComponent<Enemy>().EnemySO;
+        //_enemySO = GetComponent<Enemy>().EnemySO;
         _targetPosition = transform.position;
     }
 
@@ -78,7 +78,7 @@ public class EnemyAI : MonoBehaviour {
         if (_idleToRoamingTimer <= 0) {
             ChangeState(EnemyState.Roaming);
             //Debug.Log("Changing to Roaming state");
-            _idleToRoamingTimer = Random.Range(_enemySO.MinIdleTime, _enemySO.MaxIdleTime);;
+            //_idleToRoamingTimer = Random.Range(_enemySO.MinIdleTime, _enemySO.MaxIdleTime);;
         }
     }
     #endregion
@@ -178,7 +178,7 @@ public class EnemyAI : MonoBehaviour {
             }
 
             _currentDirection = ((Vector2)_path.LookPoints[pathIndex] - pos2d).normalized;
-            _rb.linearVelocity = _enemySO.Speed * _currentDirection;
+            //_rb.linearVelocity = _enemySO.Speed * _currentDirection;
             yield return null;
         }
     }

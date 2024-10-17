@@ -10,6 +10,7 @@ public class OreResourceNode : ResourceNodeBase {
 
     public override bool CanHitResourceNodeType(HashSet<ResourceNodeType> canBeHit) {
         return canBeHit.Contains(ResourceNodeType.Ore);
+        //return canBeHit?.Contains(ResourceNodeType.Ore) ?? false;
     }
 
     public override void SetSeed(SeedSO seed) { }
@@ -57,13 +58,13 @@ public class OreResourceNode : ResourceNodeBase {
     /// Spawns items dropped from the destroyed ore node.
     /// </summary>
     private void SpawnDroppedItems() {
-        int dropCount = UnityEngine.Random.Range(_minDropCount, _maxDropCount + 1);
-        Vector2 spawnPosition = new Vector2(
+        int dropCount = Random.Range(_minDropCount, _maxDropCount + 1);
+        Vector2 spawnPosition = new(
             transform.position.x + _boxCollider2D.offset.x,
             transform.position.y + _boxCollider2D.offset.y
         );
 
-        ItemSlot itemSlot = new ItemSlot(_itemSO.ItemId, dropCount, _rarityID);
+        ItemSlot itemSlot = new(_itemSO.ItemId, dropCount, _rarityID);
         Vector2 motionDirection = _playerMovementController.LastMotionDirection;
 
         ItemSpawnManager.Instance.SpawnItemServerRpc(

@@ -20,8 +20,10 @@ public class CheatUI : MonoBehaviour {
     public static DebugCommand REMOVE_ALL_CROPS;
 
     [Header("Finanz Manager")]
-    public static DebugCommand<int> ADD_MONEY;
-    public static DebugCommand<int> REMOVE_MONEY;
+    public static DebugCommand<int> ADD_FARM_MONEY;
+    public static DebugCommand<int> REMOVE_FARM_MONEY;
+    public static DebugCommand<int> ADD_TOWN_MONEY;
+    public static DebugCommand<int> REMOVE_TOWN_MONEY;
 
     [Header("Item Manager")]
     public static DebugCommand<int, int, int> ADD_ITEM;
@@ -72,15 +74,25 @@ public class CheatUI : MonoBehaviour {
         _commandDictionary.Add(REMOVE_ALL_CROPS.CommandId, REMOVE_ALL_CROPS);
 
         // Finanz Manager
-        ADD_MONEY = new DebugCommand<int>("add_money", "Adds money to the player's account.", "add_money <amount>", (int amount) => {
-            FinanceManager.Instance.AddMoneyToFarmServerRpc(amount);
+        ADD_FARM_MONEY = new DebugCommand<int>("add_farm_money", "Adds money to the farm's account.", "add_farm_money <amount>", (int amount) => {
+            FinanceManager.Instance.AddMoneyServerRpc(amount, true);
         });
-        _commandDictionary.Add(ADD_MONEY.CommandId, ADD_MONEY);
+        _commandDictionary.Add(ADD_FARM_MONEY.CommandId, ADD_FARM_MONEY);
 
-        REMOVE_MONEY = new DebugCommand<int>("remove_money", "Removes money from the player's account.", "remove_money <amount>", (int amount) => {
-            FinanceManager.Instance.RemoveMoneyFromFarmServerRpc(amount);
+        REMOVE_FARM_MONEY = new DebugCommand<int>("remove_farm_money", "Removes money from the town's account.", "remove_farm_money <amount>", (int amount) => {
+            FinanceManager.Instance.RemoveMoneyFromFarmServerRpc(amount, true);
         });
-        _commandDictionary.Add(REMOVE_MONEY.CommandId, REMOVE_MONEY);
+        _commandDictionary.Add(REMOVE_FARM_MONEY.CommandId, REMOVE_FARM_MONEY);
+
+        ADD_TOWN_MONEY = new DebugCommand<int>("add_town_money", "Adds money to the farm's account.", "add_town_money <amount>", (int amount) => {
+            FinanceManager.Instance.AddMoneyServerRpc(amount, false);
+        });
+        _commandDictionary.Add(ADD_TOWN_MONEY.CommandId, ADD_TOWN_MONEY);
+
+        REMOVE_TOWN_MONEY = new DebugCommand<int>("remove_town_money", "Removes money from the town's account.", "remove_town_money <amount>", (int amount) => {
+            FinanceManager.Instance.RemoveMoneyFromFarmServerRpc(amount, false);
+        });
+        _commandDictionary.Add(REMOVE_TOWN_MONEY.CommandId, REMOVE_TOWN_MONEY);
 
         // Item Manager
         ADD_ITEM = new DebugCommand<int, int, int>("add_item", "Adds an item to the inventory.", "add_item <item_id> <amount> <rarity_id>", (int itemId, int amount, int rarityId) => {

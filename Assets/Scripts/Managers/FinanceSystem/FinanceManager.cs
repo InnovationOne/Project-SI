@@ -1,27 +1,30 @@
 using UnityEngine;
 using System;
 using Unity.Netcode;
-using System.Collections;
 
+/// <summary>
+/// Manages the financial aspects of the farm and town, handling money transactions and synchronization across the network.
+/// </summary>
 public class FinanceManager : NetworkBehaviour, IDataPersistance {
     public static FinanceManager Instance { get; private set; }
 
-    public event Action<int> OnUpdateChanged;
+    // Events to notify subscribers about money changes
+    public event Action<int> OnFarmMoneyChanged;
+    public event Action<int> OnTownMoneyChanged;
 
-    [Header("Debug: Finance")]
-    [SerializeField] private int _moneyOfFarm;
-    public int GetMoney => _moneyOfFarm;
-    private const int MAX_MONEY_OF_FARM = 99999999;
+    private const int MAX_MONEY = 99_999_999;
 
-    [Header("Debug: Save and Load")]
-    [SerializeField] private bool _saveFinance = true;
-    [SerializeField] private bool _loadFinance = true;
+    // Networked variables to synchronize money for the farm and town
+    private readonly NetworkVariable<int> _networkedFarmMoney = new NetworkVariable<int>(0);
+    private readonly NetworkVariable<int> _networkedTownMoney = new NetworkVariable<int>(0);
 
-    // Client <-> Server communication
+    public int GetMoneyFarm => _networkedFarmMoney.Value;
+    public int GetMoneyTown => _networkedTownMoney.Value;
+
+    // Multiplayer-related fields
     private const float MAX_TIMEOUT = 2f;
     private bool _success;
     private bool _callbackSuccessful;
-
 
     private void Awake() {
         if (Instance != null) {
@@ -33,70 +36,137 @@ public class FinanceManager : NetworkBehaviour, IDataPersistance {
 
     public override void OnNetworkSpawn() {
         if (IsServer) {
-            NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_OnClientConnected;
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         }
 
-        OnUpdateChanged?.Invoke(_moneyOfFarm);
+        // Subscribe to changes in farm and town money
+        _networkedFarmMoney.OnValueChanged += HandleFarmMoneyChanged;
+        _networkedTownMoney.OnValueChanged += HandleTownMoneyChanged;
+
+        // Initialize events with current values
+        OnFarmMoneyChanged?.Invoke(_networkedFarmMoney.Value);
+        OnTownMoneyChanged?.Invoke(_networkedTownMoney.Value);
+    }
+
+    public override void OnNetworkDespawn() {
+        base.OnNetworkDespawn();
+
+        // Unsubscribe from events to prevent memory leaks
+        if (NetworkManager.Singleton != null) {
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+        }
+
+        // Unsubscribe from network variable changes
+        _networkedFarmMoney.OnValueChanged -= HandleFarmMoneyChanged;
+        _networkedTownMoney.OnValueChanged -= HandleTownMoneyChanged;
+    }
+
+    /// <summary>
+    /// Handles changes to the farm money network variable.
+    /// </summary>
+    /// <param name="oldValue">The previous value of farm money.</param>
+    /// <param name="newValue">The new value of farm money.</param>
+    private void HandleFarmMoneyChanged(int oldValue, int newValue) {
+        if (oldValue != newValue) {
+            OnFarmMoneyChanged?.Invoke(newValue);
+        }
+    }
+
+    /// <summary>
+    /// Handles changes to the town money network variable.
+    /// </summary>
+    /// <param name="oldValue">The previous value of town money.</param>
+    /// <param name="newValue">The new value of town money.</param>
+    private void HandleTownMoneyChanged(int oldValue, int newValue) {
+        if (oldValue != newValue) {
+            OnTownMoneyChanged?.Invoke(newValue);
+        }
     }
 
 
     #region Client Late Join
-    private void NetworkManager_OnClientConnected(ulong clientId) {
-        NetworkManager_OnClientConnected_ClientRpc(clientId, _moneyOfFarm);
+
+    /// <summary>
+    /// Called when a client connects to the server. Synchronizes money data with the connected client.
+    /// </summary>
+    /// <param name="clientId">The ID of the connected client.</param>
+    private void OnClientConnected(ulong clientId) {
+        SyncMoneyWithClientClientRpc(clientId);
     }
 
+    /// <summary>
+    /// Synchronizes the current money values with the newly connected client.
+    /// </summary>
+    /// <param name="clientId">The ID of the client to synchronize with.</param>
     [ClientRpc]
-    private void NetworkManager_OnClientConnected_ClientRpc(ulong clientId, int moneyOfFarm) {
+    private void SyncMoneyWithClientClientRpc(ulong clientId) {
         if (clientId == NetworkManager.Singleton.LocalClientId && !IsServer) {
-            _moneyOfFarm = moneyOfFarm;
-            OnUpdateChanged?.Invoke(_moneyOfFarm);
+            OnFarmMoneyChanged?.Invoke(_networkedFarmMoney.Value);
+            OnTownMoneyChanged?.Invoke(_networkedTownMoney.Value);
         }
     }
+
     #endregion
 
 
-    #region Add money
+    #region Add and Remove Farm Money
+
+    /// <summary>
+    /// Adds money to either the farm or town.
+    /// </summary>
+    /// <param name="amount">Amount to add.</param>
+    /// <param name="isFarm">True if adding to farm, false for town.</param>
     [ServerRpc(RequireOwnership = false)]
-    public void AddMoneyToFarmServerRpc(int money) {
-        if (money < 0) {
+    public void AddMoneyServerRpc(int amount, bool isFarm, ServerRpcParams rpcParams = default) {
+        if (amount < 0) {
             Debug.LogError("Cannot add negative money.");
             return;
         }
 
-        _moneyOfFarm = Mathf.Min(_moneyOfFarm + money, MAX_MONEY_OF_FARM);
-        AddMoneyToFarmClientRpc(_moneyOfFarm);
-    }
-
-    [ClientRpc]
-    private void AddMoneyToFarmClientRpc(int money) {
-        _moneyOfFarm = money;
-        OnUpdateChanged?.Invoke(_moneyOfFarm);
-    }
-    #endregion
-
-
-    #region Remove money
-    [ServerRpc(RequireOwnership = false)]
-    public void RemoveMoneyFromFarmServerRpc(int money, ServerRpcParams serverRpcParams = default) {
-        var clientId = serverRpcParams.Receive.SenderClientId;
-        if (_moneyOfFarm >= money) {
-            _moneyOfFarm -= money;
-
-            HandleClientCallbackClientRpc(clientId, true);
-
-            RemoveMoneyFromFarmClientRpc(_moneyOfFarm);
-
+        if (isFarm) {
+            _networkedFarmMoney.Value = Mathf.Min(_networkedFarmMoney.Value + amount, MAX_MONEY);
         } else {
-            HandleClientCallbackClientRpc(clientId, false);
+            _networkedTownMoney.Value = Mathf.Min(_networkedTownMoney.Value + amount, MAX_MONEY);
         }
     }
 
-    [ClientRpc]
-    private void RemoveMoneyFromFarmClientRpc(int money) {
-        _moneyOfFarm = money;
-        OnUpdateChanged?.Invoke(_moneyOfFarm);
+    /// <summary>
+    /// Removes money from either the farm or town.
+    /// </summary>
+    /// <param name="amount">Amount to remove.</param>
+    /// <param name="isFarm">True if removing from farm, false for town.</param>
+    [ServerRpc(RequireOwnership = false)]
+    public void RemoveMoneyFromFarmServerRpc(int amount, bool isFarm, ServerRpcParams rpcParams = default) {
+        if (amount < 0) {
+            Debug.LogError("Cannot remove negative money.");
+            HandleClientCallbackClientRpc(rpcParams.Receive.SenderClientId, false);
+            return;
+        }
+
+        bool success = false;
+
+        if (isFarm) {
+            if (_networkedFarmMoney.Value >= amount) {
+                _networkedFarmMoney.Value -= amount;
+                success = true;
+            }
+        } else {
+            if (_networkedTownMoney.Value >= amount) {
+                _networkedTownMoney.Value -= amount;
+                success = true;
+            }
+        }
+
+        HandleClientCallbackClientRpc(rpcParams.Receive.SenderClientId, success);
     }
 
+    #endregion
+
+    /// <summary>
+    /// Handles client callbacks after money removal operations.
+    /// </summary>
+    /// <param name="clientId">The ID of the client.</param>
+    /// <param name="success">Indicates if the operation was successful.</param>
     [ClientRpc]
     private void HandleClientCallbackClientRpc(ulong clientId, bool success) {
         if (clientId == NetworkManager.Singleton.LocalClientId) {
@@ -104,20 +174,19 @@ public class FinanceManager : NetworkBehaviour, IDataPersistance {
             _success = success;
         }
     }
-    #endregion
 
 
     #region Save and Load
+
     public void LoadData(GameData data) {
-        if (_loadFinance) {
-            _moneyOfFarm = data.MoneyOfFarm;
-        }
+        _networkedFarmMoney.Value = data.MoneyOfFarm;
+        _networkedTownMoney.Value = data.MoneyOfTown;
     }
 
     public void SaveData(GameData data) {
-        if (_saveFinance) {
-            data.MoneyOfFarm = _moneyOfFarm;
-        }
+        data.MoneyOfFarm = _networkedFarmMoney.Value;
+        data.MoneyOfTown = _networkedTownMoney.Value;
     }
+
     #endregion
 }

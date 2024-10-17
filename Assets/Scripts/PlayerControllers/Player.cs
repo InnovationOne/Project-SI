@@ -1,13 +1,14 @@
-using System;
 using Unity.Netcode;
 using UnityEngine;
 
 
-public class Player : NetworkBehaviour, IPlayerDataPersistance {
+public class Player : NetworkBehaviour {
     public static Player LocalInstance { get; private set; }
 
-    public bool InBed { get; private set; }
+    // Cached references to managers to optimize performance
+    private GameManager _gameManager;
 
+    public bool InBed { get; private set; }
 
     public override void OnNetworkSpawn() {
         if (IsOwner) {
@@ -16,6 +17,8 @@ public class Player : NetworkBehaviour, IPlayerDataPersistance {
                 return;
             }
             LocalInstance = this;
+
+            _gameManager = GameManager.Instance;
         }
 
         PlayerDataManager.Instance.AddPlayer(this);
@@ -27,27 +30,17 @@ public class Player : NetworkBehaviour, IPlayerDataPersistance {
         GameManager.Instance.RemovePlayerFromSleepingDict(OwnerClientId);
     }
 
-    // Toggle player in bed
+    /// <summary>
+    /// Toggles the player's bed state. Sends RPCs only if the state changes.
+    /// </summary>
+    /// <param name="inBed">True if the player is going to bed, false otherwise.</param>
     public void SetPlayerInBed(bool inBed) {
-        SetInBed(inBed);
-
-        if (InBed) {
-            GameManager.Instance.PlayerIsSleepingServerRpc();
-        } else {
-            GameManager.Instance.PlayerIsAwakeServerRpc();
+        if (InBed == inBed) {
+            // No state change; no action required.
+            return;
         }
-    }
 
-    public void SetInBed(bool inBed) {
         InBed = inBed;
+        _gameManager.SetPlayerSleepingStateServerRpc(inBed);
     }
-
-
-    #region Save and Load
-    public void SavePlayer(PlayerData playerData) {
-    }
-
-    public void LoadPlayer(PlayerData playerData) {
-    }
-    #endregion
 }

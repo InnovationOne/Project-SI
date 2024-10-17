@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -101,9 +102,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     private void Start() {
         // Subscribe to events triggered when the next day starts, the next season starts, and the rain intensity changes
-        TimeManager.Instance.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
-        TimeManager.Instance.OnNextSeasonStarted += TimeAndWeatherManager_OnNextSeasonStarted;
-        WeatherManager.Instance.OnChangeRainIntensity += TimeAndWeatherManager_OnChangeRainIntensity;
+        TimeManager.Instance.OnNextDayStarted += OnNextDayStarted;
+        TimeManager.Instance.OnNextSeasonStarted += OnNextSeasonStarted;
+        WeatherManager.Instance.OnChangeRainIntensity += OnChangeRainIntensity;
         WeatherManager.Instance.OnThunderStrike += OnThunderStrike;
 
         // Get references to the TilemapManager and PlaceableObjectsManager instances
@@ -184,7 +185,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// It performs various tasks related to crop management, such as deleting unseeded tiles,
     /// checking if crops are watered and applying damage, and transferring crop tile data to clients.
     /// </summary>
-    private void TimeAndWeatherManager_OnNextDayStarted() {
+    private void OnNextDayStarted() {
         // If the current instance is not the server
         if (!IsServer) {
             // Log a message and exit the method
@@ -209,7 +210,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// Event handler for when the next season starts in the TimeAndWeatherManager.
     /// </summary>
     /// <param name="nextSeasonIndex">The index of the next season.</param>
-    private void TimeAndWeatherManager_OnNextSeasonStarted(int nextSeasonIndex) {
+    private void OnNextSeasonStarted(int nextSeasonIndex) {
         // Iterate over each crop tile
         foreach (CropTile cropTile in CropTileContainer.CropTileMap.Values) {
             // If the crop tile has a crop and the crop cannot survive in the next season
@@ -571,7 +572,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     private bool CanPlowTile(Vector3Int position) {
         // Check if the position is not already plowed, if the tile at the position can be plowed, and if there is no object placed at the position
         return !CropTileContainer.IsPositionPlowed(position) &&
-               Array.IndexOf(_tilesThatCanBePlowed, _tilemapReadManager.ReturnTileBaseAtGridPosition(position)) != -1 &&
+               Array.IndexOf(_tilesThatCanBePlowed, _tilemapReadManager.GetTileAtGridPosition(position)) != -1 &&
                !_placeableObjectsManager.POContainer.PlaceableObjects.ContainsKey(position);
     }
 
@@ -693,7 +694,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         if ((ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.IsTree
             && !CropTileContainer.IsPositionSeeded(wantToSeedTilePosition)
             && (ItemManager.Instance.ItemDatabase[itemId] as SeedSO).CropToGrow.SeasonsToGrow.Contains((TimeManager.SeasonName)TimeManager.Instance.CurrentDate.Value.Season)
-            && Array.IndexOf(_tilesThatCanBePlowed, _tilemapReadManager.ReturnTileBaseAtGridPosition(wantToSeedTilePosition)) != -1
+            && Array.IndexOf(_tilesThatCanBePlowed, _tilemapReadManager.GetTileAtGridPosition(wantToSeedTilePosition)) != -1
             && !_placeableObjectsManager.POContainer.PlaceableObjects.ContainsKey(wantToSeedTilePosition)) {
             // Plant the tree
         } else {
@@ -1064,7 +1065,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     /// Event handler for the change in rain intensity in the time and weather manager.
     /// </summary>
     /// <param name="intensity">The new rain intensity value.</param>
-    private void TimeAndWeatherManager_OnChangeRainIntensity(int intensity) {
+    private void OnChangeRainIntensity(int intensity) {
         // If the intensity is zero, there is no rain, so dry all crop tiles.
         // Otherwise, there is rain, so water all crop tiles.
         if (intensity == 0) {
@@ -1169,7 +1170,8 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [ServerRpc(RequireOwnership = false)]
     public void DestroyCropTileServerRpc(Vector3Int position, int usedEnergy, ToolSO.ToolTypes toolTypes, ServerRpcParams serverRpcParams = default) {
         bool success;
-        if (CropDatabase[CropTileContainer.GetCropTileAtPosition(position).CropId].IsTree) {
+        if (CropDatabase[CropTileContainer.GetCropTileAtPosition(position).CropId] != null 
+            && CropDatabase[CropTileContainer.GetCropTileAtPosition(position).CropId].IsTree) {
             success = false;
         } else {
             success = HandleToolAction(position, toolTypes);
@@ -1332,6 +1334,112 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             HandleCropAfterHarvest(selectedTreeCropTile, CropDatabase[selectedTreeCropTile.CropId]);
         }
     }
+
+    private void Update() {
+        if (Input.GetKeyDown(KeyCode.Y)) {
+            CheckProtectionAndTriggerCrowAttack();
+        }
+    }
+
+    #region Crow attack
+
+    // Methode zur Überprüfung des Schutzes und Auslösen von Krähenangriffen
+    private void CheckProtectionAndTriggerCrowAttack() {
+        List<CropTile> unprotectedCropTiles = new List<CropTile>();
+
+        foreach (var kvp in CropTileContainer.CropTileMap) {
+            CropTile currentTile = kvp.Value;
+
+            if (currentTile.GetCropStage() != CropStage.Seeded && !currentTile.IsCropHarvestable()) {
+                return;
+            }
+
+            bool isProtected = IsProtected(currentTile.CropPosition);
+
+            if (!isProtected) {
+                unprotectedCropTiles.Add(currentTile);
+            }
+        }
+
+        if (unprotectedCropTiles.Count == 0) {
+            Debug.Log("Alle CropTiles sind geschützt. Keine Krähenangriffe notwendig.");
+            return;
+        }
+
+        // Wähle bis zu 3 zufällige ungeschützte CropTiles aus
+        List<CropTile> tilesToAttack = GetRandomCropTiles(unprotectedCropTiles, 3);
+
+        foreach (var tile in tilesToAttack) {
+            TriggerCrowAttack(tile);
+        }
+    }
+
+    // Überprüft, ob ein CropTile an der gegebenen Position geschützt ist
+    private bool IsProtected(Vector3Int position) {
+        // Definiere die Radien für die verschiedenen Vogelscheuchenstufen
+        int radiusV1 = 5;
+        int radiusV2 = 9;
+        int radiusV3 = 15;
+
+        // Überprüfe für jede Vogelscheuchenstufe
+        if (HasScarecrowInRange(position, radiusV1, ScarecrowType.ScarecrowV1)) {
+            return true;
+        }
+
+        if (HasScarecrowInRange(position, radiusV2, ScarecrowType.ScarecrowV2)) {
+            return true;
+        }
+
+        if (HasScarecrowInRange(position, radiusV3, ScarecrowType.ScarecrowV3)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    // Überprüft, ob innerhalb eines bestimmten Radius eine Vogelscheuche des angegebenen Typs existiert
+    private bool HasScarecrowInRange(Vector3Int position, int radius, ScarecrowType type) {
+        // Definiere den Bereich basierend auf dem Radius
+        int minX = position.x - radius;
+        int maxX = position.x + radius;
+        int minZ = position.z - radius;
+        int maxZ = position.z + radius;
+
+        for (int x = minX; x <= maxX; x++) {
+            for (int z = minZ; z <= maxZ; z++) {
+                Vector3Int checkPos = new Vector3Int(x, position.y, z);
+
+                var test = PlaceableObjectsManager.Instance.POContainer[checkPos];
+                if (test.Prefab.GetComponent<Scarecrow>().ScarecrowType == type) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // Wählt eine zufällige Anzahl von CropTiles aus einer Liste aus
+    private List<CropTile> GetRandomCropTiles(List<CropTile> tiles, int count) {
+        if (tiles.Count <= count) {
+            return new List<CropTile>(tiles);
+        }
+
+        List<CropTile> shuffled = tiles.OrderBy(t => Guid.NewGuid()).ToList();
+        return shuffled.Take(count).ToList();
+    }
+
+    // Führt den Krähenangriff auf das gegebene CropTile aus
+    private void TriggerCrowAttack(CropTile tile) {
+        // Implementiere hier deine Logik für den Krähenangriff
+        Debug.Log($"Krähenangriff auf CropTile bei Position {tile.CropPosition}!");
+
+        // Beispiel: Reduziere den Ertrag des CropTiles, zerstöre es, etc.
+    }
+
+    #endregion
+
+
 
     #region Save and Load
     /// <summary>

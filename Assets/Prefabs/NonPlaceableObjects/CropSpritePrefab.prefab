@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: -5225251467676991074}
   - component: {fileID: 1966016930495981158}
   - component: {fileID: 9079669687861950075}
-  - component: {fileID: -2619782599425693426}
   - component: {fileID: -1392972338729523816}
+  - component: {fileID: -2619782599425693426}
   m_Layer: 0
   m_Name: CropSpritePrefab
   m_TagString: Respawn
@@ -165,20 +165,6 @@ MonoBehaviour:
     SpriteRenderer: {fileID: 2532843437335144485}
   - FertilizerType: 0
     SpriteRenderer: {fileID: 1198485050650314769}
---- !u!114 &-2619782599425693426
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2950949280833642199}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _isObjectStationary: 1
-  _objectCollider2D: {fileID: 0}
 --- !u!114 &-1392972338729523816
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,6 +190,21 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &-2619782599425693426
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2950949280833642199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  _isObjectStationary: 1
+  _objectCollider2D: {fileID: 0}
 --- !u!1 &5736691049357697009
 GameObject:
   m_ObjectHideFlags: 0

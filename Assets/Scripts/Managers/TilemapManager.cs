@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+[RequireComponent(typeof(Tilemap))]
 public class TilemapManager : NetworkBehaviour {
     public static TilemapManager Instance { get; private set; }
 
@@ -28,26 +29,25 @@ public class TilemapManager : NetworkBehaviour {
     /// <param name="position">The 2D position to convert.</param>
     /// <returns>The grid position in the tilemap.</returns>
     public Vector3Int GetGridPosition(Vector2 position) {
-        return _targetTilemap.WorldToCell((Vector3)position);
+        return _targetTilemap.WorldToCell(position);
     }
 
     /// <summary>
-    /// Returns the <see cref="TileBase"/> at the specified grid position.
+    /// Returns the TileBase at the specified grid position.
     /// </summary>
-    /// <param name="gridposition">The grid position to retrieve the tile from.</param>
-    /// <returns>The <see cref="TileBase"/> at the specified grid position.</returns>
-    public TileBase ReturnTileBaseAtGridPosition(Vector3Int gridposition) {
-        return _targetTilemap.GetTile(gridposition);
+    /// <param name="gridPosition">The grid position to retrieve the tile from.</param>
+    /// <returns>The TileBase at the specified grid position.</returns>
+    public TileBase GetTileAtGridPosition(Vector3Int gridPosition) {
+        return _targetTilemap.GetTile(gridPosition);
     }
 
     /// <summary>
-    /// Represents a three-dimensional vector.
+    /// Aligns a world position to the center of the nearest grid cell.
     /// </summary>
+    /// <param name="position">The world position to align.</param>
+    /// <returns>The aligned world position.</returns>
     public Vector3 AlignPositionToGridCenter(Vector3 position) {
-        return position + new Vector3(0.5f, 0.5f);
-    }
-
-    public Vector3Int ConvertVector3ToVerctor3Int(Vector3 vector) {
-        return new Vector3Int((int)vector.x, (int)vector.y, (int)vector.z);
+        Vector3Int cell = _targetTilemap.WorldToCell(position);
+        return _targetTilemap.GetCellCenterWorld(cell);
     }
 }
