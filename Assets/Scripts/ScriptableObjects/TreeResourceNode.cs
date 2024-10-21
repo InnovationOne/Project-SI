@@ -52,9 +52,15 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
         }
 
         Vector3Int pos = Vector3Int.FloorToInt(transform.position);
-        CropTile cropTile = _cropsManager.CropTileContainer.GetCropTileAtPosition(pos);
+        CropTile? cropTileData = _cropsManager.GetCropTileAtPosition(pos);
+        if (!cropTileData.HasValue) {
+            Debug.Log("No cropTile found.");
+            return;
+        }
 
-        if (cropTile == null || !cropTile.IsCropDoneGrowing()) {
+        CropTile cropTile = cropTileData.Value;
+
+        if (!cropTile.IsCropDoneGrowing()) {
             return;
         }
 
@@ -74,10 +80,14 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
     /// </summary>
     private void AttemptSeedSpawn() {
         Vector3Int pos = Vector3Int.FloorToInt(transform.position);
-        CropTile cropTile = _cropsManager.CropTileContainer.GetCropTileAtPosition(pos);
+        CropTile? cropTileData = _cropsManager.GetCropTileAtPosition(pos);
+        if (!cropTileData.HasValue) {
+            Debug.LogError("No cropTile found.");
+        }
 
-        if (cropTile != null &&
-            cropTile.IsCropDoneGrowing() &&
+        CropTile cropTile = cropTileData.Value;
+
+        if (cropTile.IsCropDoneGrowing() &&
             Random.value < PROBABILITY_TO_SEED) {
             ItemSlot seedItemSlot = new ItemSlot(_seedToDrop.ItemId, 1, 0);
             Vector3 spawnPosition = GetRandomAdjacentPosition(pos);
@@ -155,9 +165,14 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
         }
 
         Vector3Int pos = Vector3Int.FloorToInt(transform.position);
-        CropTile cropTile = _cropsManager.CropTileContainer.GetCropTileAtPosition(pos);
+        CropTile? cropTileData = _cropsManager.GetCropTileAtPosition(pos);
+        if (!cropTileData.HasValue) {
+            Debug.LogError("No cropTile found.");
+        }
 
-        if (cropTile != null && cropTile.IsCropDoneGrowing()) {
+        CropTile cropTile = cropTileData.Value;
+
+        if (cropTile.IsCropDoneGrowing()) {
             if (cropTile.IsCropHarvestable()) {
                 Harvest(cropTile); // Harvest
             } else if (cropTile.IsStruckByLightning) {
@@ -171,13 +186,13 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
     }
 
     private void Harvest(CropTile cropTile) {
-        CropsManager.Instance.HarvestTreeServerRpc(Vector3Int.FloorToInt(cropTile.Prefab.transform.position));
+        CropsManager.Instance.HarvestTreeServerRpc(new Vector3IntSerializable(new Vector3Int(cropTile.CropPosition.x, cropTile.CropPosition.y) + Vector3Int.FloorToInt(cropTile.SpriteRendererOffset)));
     }
 
     private void SpawnItem(CropTile cropTile, int itemId) {
         ItemSpawnManager.Instance.SpawnItemServerRpc(
             itemSlot: new ItemSlot(itemId, CropsManager.Instance.CalculateItemCount(cropTile), 0),
-            initialPosition: cropTile.Prefab.transform.position,
+            initialPosition: new Vector2(cropTile.CropPosition.x, cropTile.CropPosition.y) + cropTile.SpriteRendererOffset,
             motionDirection: Vector2.zero,
             spreadType: ItemSpawnManager.SpreadType.Circle);
     }

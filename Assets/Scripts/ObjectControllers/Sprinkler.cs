@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -28,7 +29,8 @@ public class Sprinkler : MonoBehaviour {
 
     private void TimeAndWeatherManager_OnNextDayStarted() {
         List<Vector3Int> positionsToWater = CalculateWateringPositions();
-        CropsManager.Instance.WaterTiles(positionsToWater, 0);
+        Vector3IntSerializable[] positionsSerializable = positionsToWater.Select(v => new Vector3IntSerializable(v)).ToArray();
+        CropsManager.Instance.WaterCropTileServerRpc(positionsSerializable, 0);
     }
 
     /// <summary>

@@ -67,9 +67,7 @@ public class CheatUI : MonoBehaviour {
     private void InitializeCommands() {
         // Crops Manager
         REMOVE_ALL_CROPS = new DebugCommand("remove_all_crops", "Removes all crops from the farm.", "remove_all_crops", () => {
-            foreach (var crop in CropsManager.Instance.CropTileContainer.CropTileMap.Values) {
-                CropsManager.Instance.DestroyCropTilePlantClientRpc(crop.CropPosition);
-            }
+            CropsManager.Instance.CropTiles.Clear();
         });
         _commandDictionary.Add(REMOVE_ALL_CROPS.CommandId, REMOVE_ALL_CROPS);
 

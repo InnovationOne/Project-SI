@@ -177,7 +177,7 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="serverRpcParams">Optional parameters for the server RPC.</param>
     [ServerRpc(RequireOwnership = false)]
     public void PlaceObjectOnMapServerRpc(int itemId, Vector3Int position, ServerRpcParams serverRpcParams = default) {
-        if (!_poContainer.PlaceableObjects.ContainsKey(position) && !CropsManager.Instance.CropTileContainer.IsPositionSeeded(position)) {
+        if (!_poContainer.PlaceableObjects.ContainsKey(position) && !CropsManager.Instance.IsPositionSeeded(position)) {
             HandleItemReduction(serverRpcParams, itemId);
             PlaceObjectOnMapClientRpc(itemId, position);
         }

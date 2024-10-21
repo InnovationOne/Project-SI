@@ -456,9 +456,16 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
     /// <summary>
     /// Cleans up event subscriptions when destroyed.
     /// </summary>
-    private void OnDestroy() {
+    public override void OnNetworkDespawn() {
         if (IsServer) {
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
         }
+    }
+
+    public void StartNextSeason() {
+        var currentDate = CurrentDate.Value;
+        currentDate.Day = 0;
+        currentDate.Season += 1;
+        CurrentDate.Value = currentDate;
     }
 }

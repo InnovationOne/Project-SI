@@ -4,6 +4,6 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Tool Action/Scythe")]
 public class ScytheCropSO : ToolActionSO {
     public override void OnApplyToTileMap(Vector3Int position, ItemSlot itemSlot) {
-        CropsManager.Instance.DestroyCropTileServerRpc(position, (ItemManager.Instance.ItemDatabase[itemSlot.ItemId] as ToolSO).EnergyOnAction[itemSlot.RarityId - 1], ToolSO.ToolTypes.Scythe);
+        CropsManager.Instance.DestroyCropTileServerRpc(new Vector3IntSerializable(position), (ItemManager.Instance.ItemDatabase[itemSlot.ItemId] as ToolSO).EnergyOnAction[itemSlot.RarityId - 1], ToolSO.ToolTypes.Scythe);
     }
 }

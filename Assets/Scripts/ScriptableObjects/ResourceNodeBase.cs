@@ -244,9 +244,9 @@ public abstract class ResourceNodeBase : NetworkBehaviour {
     protected void DestroyNodeAcrossNetwork() {
         Vector3Int position = Vector3Int.FloorToInt(transform.position);
 
-        if (_cropsManager.CropTileContainer.GetCropTileAtPosition(position) != null) {
-            _cropsManager.DestroyCropTilePlantClientRpc(position);
-            _cropsManager.DestroyCropTileClientRpc(position);
+        if (_cropsManager.GetCropTileAtPosition(position) != null) {
+            _cropsManager.DestroyCropTileServerRpc(new Vector3IntSerializable(position), 0, ToolSO.ToolTypes.Pickaxe); // Destroy plant
+            _cropsManager.DestroyCropTileServerRpc(new Vector3IntSerializable(position), 0, ToolSO.ToolTypes.Pickaxe); // Destroy cropTile
         }
 
         DestroyGameObjectClientRpc();

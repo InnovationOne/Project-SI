@@ -7,6 +7,7 @@ public class CropDatabaseSO : ScriptableObject {
     [SerializeField] private List<CropSO> _crops = new();
     // Cache to store crops by their IDs for fast lookup
     private Dictionary<int, CropSO> _cache = new();
+    public List<CropSO> Crops => _crops;
 
     /// <summary>
     /// Initializes the crops in the crop database on Start() and cache all crops.

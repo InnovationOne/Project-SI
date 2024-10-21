@@ -37,7 +37,7 @@ public class HarvestCrop : MonoBehaviour, IInteractable {
     /// </summary>
     /// <param name="player">The player interacting with the crop.</param>
     public void Interact(Player player) {
-        CropsManager.Instance.HarvestCropServerRpc(_cropPosition);
+        CropsManager.Instance.HarvestCropServerRpc(new Vector3IntSerializable(_cropPosition));
     }
 
     /// <summary>

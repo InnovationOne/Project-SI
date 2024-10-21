@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -171,12 +172,14 @@ public class PlayerMarkerController : NetworkBehaviour {
     /// Executes the action associated with the current tool type.
     /// </summary>
     private void ExecuteToolAction() {
+        Vector3IntSerializable[] positionsSerializable = _areaPositions.Select(v => new Vector3IntSerializable(v)).ToArray();
+
         switch (_toolType) {
             case ToolSO.ToolTypes.Hoe:
-                _cropsManager.PlowTiles(_areaPositions, _energyCost);
+                _cropsManager.PlowTilesServerRpc(positionsSerializable, _energyCost);
                 break;
             case ToolSO.ToolTypes.WateringCan:
-                _cropsManager.WaterTiles(_areaPositions, _energyCost);
+                _cropsManager.WaterCropTileServerRpc(positionsSerializable, _energyCost);
                 break;
             default:
                 Debug.LogError("Invalid tool type selected.");
