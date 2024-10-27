@@ -207,6 +207,7 @@ public abstract class ResourceNodeBase : NetworkBehaviour {
         if (selectedTool.RarityId < _minimumToolRarity) {
             Debug.LogWarning("Tool rarity too low.");
             // TODO: Implement bounce back animation & sound
+            HandleClientCallback(rpcParams, false);
             return;
         }
 
@@ -325,6 +326,16 @@ public abstract class ResourceNodeBase : NetworkBehaviour {
     /// </summary>
     /// <param name="seed">The ItemSO representing the seed.</param>
     public abstract void SetSeed(SeedSO seed);
+
+    protected void HandleClientCallback(ServerRpcParams serverRpcParams, bool success) {
+        // Get the client ID from the server RPC parameters
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        // If the client is connected, remove the seed from the sender's inventory
+        if (NetworkManager.ConnectedClients.ContainsKey(clientId)) {
+            var client = NetworkManager.ConnectedClients[clientId];
+            client.PlayerObject.GetComponent<PlayerToolsAndWeaponController>().ClientCallback(success);
+        }
+    }
 
     #endregion
 }

@@ -72,6 +72,13 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
             return;
         }
         Instance = this;
+
+        _weatherForecast = new NetworkList<int>(new List<int> {
+            (int)WeatherName.Rain,
+            (int)WeatherName.Thunder,
+            (int)WeatherName.Sun
+        });
+
         InitializeThunderTimer();
     }
 
@@ -80,8 +87,6 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
-
-        _weatherForecast = new NetworkList<int>(new List<int> { (int)WeatherName.Rain, (int)WeatherName.Thunder, (int)WeatherName.Sun });
 
         if (IsServer) {
             _timeManager = TimeManager.Instance;
@@ -380,6 +385,16 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     /// </summary>
     /// <param name="data">GameData object to save into.</param>
     public void SaveData(GameData data) {
+        if (_weatherForecast == null) {
+            Debug.LogWarning("WeatherForecast is null. Initializing with default values.");
+            _weatherForecast = new NetworkList<int>(new List<int> {
+                (int)WeatherName.Rain,
+                (int)WeatherName.Thunder,
+                (int)WeatherName.Sun
+            });
+        }
+
+
         data.WeatherForecast = new int[_weatherForecast.Count];
         for (int i = 0; i < _weatherForecast.Count; i++) {
             data.WeatherForecast[i] = _weatherForecast[i];

@@ -1,174 +1,148 @@
 using Newtonsoft.Json;
 using System.Collections;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UIElements;
 
 /// <summary>
 /// This script visualizes the placed objects.
 /// </summary>
 public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
-    /// <summary>
-    /// Singleton instance of the PlaceableObjectsManager.
-    /// </summary>
     public static PlaceableObjectsManager Instance { get; private set; }
 
-    [Header("Reference: Database")]
-    private PlaceableObjectsContainer _poContainer;
-    /// <summary>
-    /// Container for all placed objects.
-    /// </summary>
-    public PlaceableObjectsContainer POContainer => _poContainer;
+    [SerializeField] private bool _saveObjects;
+    [SerializeField] private bool _loadObjects;
 
-    [Header("Reference: Tilemap")]
+    public NetworkList<PlaceableObjectData> PlaceableObjects { get; private set; }
+
     private Tilemap _targetTilemap;
-
-    [Header("Reference: Prefab")]
-    [SerializeField] private GameObject _placeableObjectPrefab;
+    private ItemDatabaseSO _itemDatabase;
+    private CropsManager _cropsManager;
 
     [Header("Galaxy Rose")]
     [SerializeField] private RoseSO _galaxyRose;
     [SerializeField] private RuntimeAnimatorController _roseDestroyAnimator;
 
-    /// <summary>
-    /// This method is called when the script instance is being loaded.
-    /// It checks if an instance of the script already exists and destroys the game object if it does.
-    /// Otherwise, it sets the instance to this script and initializes the components.
-    /// </summary>
     private void Awake() {
         if (Instance != null) {
             Debug.LogError("There is more than one instance of PlaceableObjectsManager in the scene!");
         }
 
         Instance = this;
-        InitializeComponents();
-    }
-
-    /// <summary>
-    /// Initializes the components required for the PlaceableObjectsManager.
-    /// </summary>
-    private void InitializeComponents() {
         _targetTilemap = GetComponent<Tilemap>();
-        _poContainer = new PlaceableObjectsContainer();
+
+        PlaceableObjects = new NetworkList<PlaceableObjectData>(new List<PlaceableObjectData>());
+        
+        PlaceableObjects.OnListChanged += PlaceableObjects_OnListChanged;
     }
 
-    /// <summary>
-    /// Called when the object is spawned on the network.
-    /// </summary>
-    public override void OnNetworkSpawn() {
+    private void Start() {
+        _itemDatabase = ItemManager.Instance.ItemDatabase;
+        _cropsManager = CropsManager.Instance;
+    }
+
+
+    #region Network List Change Handler
+
+    private void PlaceableObjects_OnListChanged(NetworkListEvent<PlaceableObjectData> changeEvent) {
+        switch (changeEvent.Type) {
+            case NetworkListEvent<PlaceableObjectData>.EventType.Add:
+                HandlePlaceableObjectAdd(changeEvent.Value);
+                break;
+            case NetworkListEvent<PlaceableObjectData>.EventType.RemoveAt:
+                HandlePlaceableObjectRemove(changeEvent.Value);
+                break;
+            case NetworkListEvent<PlaceableObjectData>.EventType.Value:
+                HandlePlaceableObjectValueChange(changeEvent.Value);
+                break;
+            case NetworkListEvent<PlaceableObjectData>.EventType.Clear:
+                HandlePlaceableObjectsClear(changeEvent.Value);
+                break;
+        }
+    }
+
+    private void HandlePlaceableObjectAdd(PlaceableObjectData placeableObject) {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(placeableObject.PrefabNetworkObjectId, out NetworkObject networkObject)) {
+            VisualizePlaceableObjectOnMap(placeableObject, networkObject);
+        }
+    }
+
+    private void HandlePlaceableObjectRemove(PlaceableObjectData placeableObject) {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(placeableObject.PrefabNetworkObjectId, out NetworkObject networkObject)) {
+            networkObject.Despawn();
+        }
+    }
+
+    private void HandlePlaceableObjectValueChange(PlaceableObjectData placeableObject) {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(placeableObject.PrefabNetworkObjectId, out NetworkObject networkObject)) {
+            //isualizePlaceableObjectChanges(placeableObject, networkObject);
+        }
+    }
+
+    private void HandlePlaceableObjectsClear(PlaceableObjectData placeableObject) {
         if (IsServer) {
-            NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_OnClientConnected;
+            foreach (var cropTile in PlaceableObjects) {
+                if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(cropTile.PrefabNetworkObjectId, out NetworkObject networkObject)) {
+                    networkObject.Despawn();
+                }
+            }
         }
     }
 
-    #region Client Late Join & Network Sync    
-    /// <summary>
-    /// Event handler for when a client is connected to the network.
-    /// </summary>
-    /// <param name="clientId">The ID of the connected client.</param>
-    private void NetworkManager_OnClientConnected(ulong clientId) => NetworkManager_OnClientConnectedClientRpc(clientId, JsonConvert.SerializeObject(_poContainer.SerializePlaceableObjectsContainer()));
-
-
-    /// <summary>
-    /// This method is a ClientRpc that is called when a client connects to the server.
-    /// It receives the client ID and a JSON string representing a POContainer object.
-    /// If the client ID matches the local client ID and the current instance is not a server,
-    /// it unboxes the POContainer object from the JSON string.
-    /// </summary>
-    /// <param name="clientId">The ID of the client that connected.</param>
-    /// <param name="poContainerJson">The JSON string representing a POContainer object.</param>
-    [ClientRpc]
-    private void NetworkManager_OnClientConnectedClientRpc(ulong clientId, string poContainerJson) {
-        if (clientId == NetworkManager.Singleton.LocalClientId && !IsServer) {
-            UnboxPOContainerJson(poContainerJson);
-        }
-    }
-
-    /// <summary>
-    /// Unboxes the placeable object container JSON and adds the placeable objects to the manager.
-    /// </summary>
-    /// <param name="poContainerJson">The JSON string representing the placeable object container.</param>
-    private void UnboxPOContainerJson(string poContainerJson) {
-        foreach (var po in _poContainer.DeserializePlaceableObjecteContainer(poContainerJson)) {
-            _poContainer.Add(po.Position, po);
-            VisualizeObjectOnMap(po);
-        }
-    }
-
-    /// <summary>
-    /// Handles the reduction of an item in the player's inventory.
-    /// </summary>
-    /// <param name="serverRpcParams">The parameters of the server RPC call.</param>
-    /// <param name="itemId">The ID of the item to be reduced.</param>
-    private void HandleItemReduction(ServerRpcParams serverRpcParams, int itemId) {
-        var clientId = serverRpcParams.Receive.SenderClientId;
-        if (NetworkManager.ConnectedClients.ContainsKey(clientId)) {
-            var client = NetworkManager.ConnectedClients[clientId];
-            client.PlayerObject.GetComponent<PlayerInventoryController>().InventoryContainer.RemoveItem(new ItemSlot(itemId, 1, 0));
-        }
-    }
     #endregion
 
-
     #region Visualize Object
+
     /// <summary>
     /// Visualizes the specified placeable object on the map.
     /// </summary>
     /// <param name="objectToPlace">The placeable object to visualize.</param>
-    private void VisualizeObjectOnMap(PlaceableObject objectToPlace) {
-        GameObject gameObject = Instantiate(
-            _placeableObjectPrefab,
-            TilemapManager.Instance.AlignPositionToGridCenter(_targetTilemap.CellToWorld(objectToPlace.Position)),
-            Quaternion.identity);
-
-        // For stuff that can or needs to be done before loading
-        switch ((ItemManager.Instance.ItemDatabase[objectToPlace.ObjectId] as ObjectSO).ObjectType) {
-            case ObjectSO.ObjectTypes.ItemProducer:
-                gameObject.AddComponent<ItemProducer>().InitializePreLoad(objectToPlace.ObjectId);
-                break;
-            case ObjectSO.ObjectTypes.ItemConverter:
-                gameObject.AddComponent<ItemConverter>().InitializePreLoad(objectToPlace.ObjectId);
-                break;
-            case ObjectSO.ObjectTypes.Chest:
-                gameObject.AddComponent<Chest>().InitializePreLoad(objectToPlace.ObjectId);
-                break;
-            case ObjectSO.ObjectTypes.Bed:
-                gameObject.AddComponent<Bed>().InitializePreLoad(objectToPlace.ObjectId);
-                break;
-            case ObjectSO.ObjectTypes.Fence:
-                gameObject.AddComponent<Fence>().InitializePreLoad(objectToPlace.ObjectId);
-                break;
-            case ObjectSO.ObjectTypes.Gate:
-                gameObject.AddComponent<Gate>().InitializePreLoad(objectToPlace.ObjectId);
-                break;
-            case ObjectSO.ObjectTypes.Sprinkler:
-                gameObject.AddComponent<Sprinkler>().Initialize(objectToPlace.ObjectId);
-                break;
-            case ObjectSO.ObjectTypes.Rose:
-                gameObject.GetComponentInChildren<Animator>().runtimeAnimatorController = _roseDestroyAnimator;
-                gameObject.AddComponent<Rose>().Initialize(objectToPlace.ObjectId, _galaxyRose.ItemId, objectToPlace.Position);                
-                break;
-            default:
-                Debug.LogError("Placeable object for this object type isn't implimented!");
-                break;
+    private void VisualizePlaceableObjectOnMap(PlaceableObjectData placeableObject, NetworkObject networkObject) {
+        PlaceableObject placeableObjectComponent = networkObject.GetComponent<PlaceableObject>();
+        if (placeableObjectComponent != null) {
+            placeableObjectComponent.InitializePreLoad(placeableObject.ObjectId);
         }
 
-        // Loading the object data from the object's state from save file
-        gameObject.GetComponent<IObjectDataPersistence>()?.LoadObject(objectToPlace.State);
+        networkObject.GetComponent<IObjectDataPersistence>()?.LoadObject(placeableObject.State);
 
-        // For stuff that needs to be done after loading
-        switch ((ItemManager.Instance.ItemDatabase[objectToPlace.ObjectId] as ObjectSO).ObjectType) {
-            case ObjectSO.ObjectTypes.Rose:
-                gameObject.GetComponent<Rose>().PostLoading();
-                break;
+        if (placeableObjectComponent != null) {
+            placeableObjectComponent.InitializePostLoad();
         }
-
-        objectToPlace.Prefab = gameObject;
     }
     #endregion
 
+    private void CreatePlaceableObjectsPrefab(ref PlaceableObjectData placeableObject, int itemId) {
+        // Ensure this is only executed on the server
+        if (!IsServer) {
+            Debug.LogError("CreatePlaceableObjectsPrefab should only be called on the server.");
+            return;
+        }
 
-    #region Place Object    
+        // Instantiate the appropriate prefab
+        ObjectSO objectSO = _itemDatabase[itemId] as ObjectSO;
+        GameObject prefabInstance = Instantiate(objectSO.ObjectToSpawn, transform);
+
+        // Position the prefab correctly
+        Vector3 worldPosition = TilemapManager.Instance.AlignPositionToGridCenter(_targetTilemap.CellToWorld(placeableObject.Position));
+        prefabInstance.transform.position = worldPosition + new Vector3(0, 0.5f);
+
+        // Ensure the prefab has a NetworkObject component
+        if (!prefabInstance.TryGetComponent(out NetworkObject networkObject)) {
+            networkObject = prefabInstance.AddComponent<NetworkObject>();
+        }
+
+        // Spawn the prefab on the network
+        networkObject.Spawn();
+
+        // Assign the NetworkObjectId to CropTile
+        placeableObject.PrefabNetworkObjectId = networkObject.NetworkObjectId;
+    }
+
+
+    #region Place Object  
+
     /// <summary>
     /// Places an object on the map on the server side.
     /// </summary>
@@ -176,169 +150,161 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     /// <param name="position">The position to place the object at.</param>
     /// <param name="serverRpcParams">Optional parameters for the server RPC.</param>
     [ServerRpc(RequireOwnership = false)]
-    public void PlaceObjectOnMapServerRpc(int itemId, Vector3Int position, ServerRpcParams serverRpcParams = default) {
-        if (!_poContainer.PlaceableObjects.ContainsKey(position) && !CropsManager.Instance.IsPositionSeeded(position)) {
-            HandleItemReduction(serverRpcParams, itemId);
-            PlaceObjectOnMapClientRpc(itemId, position);
-        }
-    }
+    public void PlaceObjectOnMapServerRpc(Vector3IntSerializable positionSerializable, int itemId, ServerRpcParams serverRpcParams = default) {
+        Vector3Int position = positionSerializable.ToVector3Int();
+        ObjectSO objectSO = _itemDatabase[itemId] as ObjectSO;
 
-    /// <summary>
-    /// Places an object on the map with a delay.
-    /// </summary>
-    /// <param name="position">The position where the object should be placed.</param>
-    /// <param name="delay">The delay in seconds before placing the object.</param>
-    public void PlaceObjectOnMapDelayed(Vector3Int position, float delay) {
-        StartCoroutine(PlaceObjectOnMapDelayedCoroutine(position, delay));
-    }
-
-    /// <summary>
-    /// Coroutine that delays the placement of an object on the map.
-    /// </summary>
-    /// <param name="position">The position where the object will be placed.</param>
-    /// <param name="delay">The delay in seconds before placing the object.</param>
-    private IEnumerator PlaceObjectOnMapDelayedCoroutine(Vector3Int position, float delay) {
-        yield return new WaitForSeconds(delay);
-        PlaceObjectOnMapServerRpc(_galaxyRose.ItemId, position);
-    }
-
-    /// <summary>
-    /// Places an object on the map for all clients using a Remote Procedure Call (RPC).
-    /// </summary>
-    /// <param name="itemId">The ID of the item to be placed.</param>
-    /// <param name="positionOnGrid">The position of the object on the grid.</param>
-    [ClientRpc]
-    private void PlaceObjectOnMapClientRpc(int itemId, Vector3Int positionOnGrid) {
-        PlaceableObject placeableObject = new PlaceableObject {
-            ObjectId = itemId,
-            Position = positionOnGrid
-        };
-
-        _poContainer.Add(positionOnGrid, placeableObject);
-        VisualizeObjectOnMap(placeableObject);
-    }
-    #endregion
-
-
-    #region Remove Object
-    /// <summary>
-    /// Server RPC method for picking up an object at the specified grid position.
-    /// </summary>
-    /// <param name="gridPosition">The grid position of the object to pick up.</param>
-    /// <param name="serverRpcParams">Optional parameters for the server RPC.</param>
-    [ServerRpc(RequireOwnership = false)]
-    public void PickUpObjectServerRpc(Vector3Int gridPosition, ServerRpcParams serverRpcParams = default) {
-        if (!CanPickUpObject(gridPosition)) {
+        if (objectSO == null) {
+            Debug.LogError($"Item with ID {itemId} is not an ObjectSO.");
             return;
         }
 
-        PickUpObjectClientRpc(gridPosition);
-    }
-
-    /// <summary>
-    /// Checks if an object can be picked up at the specified grid position.
-    /// </summary>
-    /// <param name="gridPosition">The grid position to check.</param>
-    /// <returns>True if the object can be picked up, false otherwise.</returns>
-    private bool CanPickUpObject(Vector3Int gridPosition) {
-        if (!_poContainer.PlaceableObjects.ContainsKey(gridPosition)) {
-            return false;
+        if (IsPositionPlaced(position)) {
+            HandleClientCallback(serverRpcParams, false);
+            return;
         }
 
-        var placedObject = _poContainer[gridPosition];
-        var objectSO = ItemManager.Instance.ItemDatabase[placedObject.ObjectId] as ObjectSO;
+        if (_cropsManager.IsPositionSeeded(position)) {
+            HandleClientCallback(serverRpcParams, false);
+            return;
+        }
 
-        return objectSO.ItemToPickUpObject.ItemId == PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId;
+        HandleItemReduction(serverRpcParams, itemId);
+        HandleClientCallback(serverRpcParams, true);
+
+        PlaceableObjectData placeableObject = new PlaceableObjectData {
+            ObjectId = itemId,
+            Position = position,
+            State = string.Empty,
+            PrefabNetworkObjectId = 0,
+        };
+
+        CreatePlaceableObjectsPrefab(ref placeableObject, itemId);
+        
+        PlaceableObjects.Add(placeableObject);
     }
 
-    /// <summary>
-    /// Sends a client RPC to pick up an object at the specified grid position.
-    /// </summary>
-    /// <param name="gridPosition">The grid position of the object to pick up.</param>
-    [ClientRpc]
-    private void PickUpObjectClientRpc(Vector3Int gridPosition) {
-        var worldPosition = _targetTilemap.CellToWorld(gridPosition);
-        var placedObject = _poContainer[gridPosition];
+    #endregion
+
+    #region Remove Object
+
+    [ServerRpc(RequireOwnership = false)]
+    public void PickUpObjectServerRpc(Vector3IntSerializable positionSerializable, ServerRpcParams serverRpcParams = default) {
+        Vector3Int position = positionSerializable.ToVector3Int();
+
+        if (!IsPositionPlaced(position)) {
+            HandleClientCallback(serverRpcParams, false);
+            return;
+        }
+
+        int index = FindPlaceableObjectIndexAtPosition(position);
+        if (index < 0) {
+            HandleClientCallback(serverRpcParams, false);
+            return;
+        }
+
+        PlaceableObjectData placeableObject = PlaceableObjects[index];
 
         ItemSpawnManager.Instance.SpawnItemServerRpc(
-            itemSlot: new ItemSlot(placedObject.ObjectId, 1, 0),
-            initialPosition: worldPosition,
+            itemSlot: new ItemSlot(placeableObject.ObjectId, 1, 0),
+            initialPosition: _targetTilemap.CellToWorld(placeableObject.Position),
             motionDirection: PlayerMovementController.LocalInstance.LastMotionDirection,
             spreadType: ItemSpawnManager.SpreadType.Circle);
 
-        HandlePickUpInteraction(placedObject.Prefab);
-        CleanUpPlacedObject(gridPosition, placedObject);
-    }
-
-    /// <summary>
-    /// Handles the pick-up interaction for a given GameObject.
-    /// </summary>
-    /// <param name="gameObject">The GameObject to handle the pick-up interaction for.</param>
-    private void HandlePickUpInteraction(GameObject gameObject) {
-        var interactable = gameObject.GetComponent<IInteractable>();
-
-        interactable?.PickUpItemsInPlacedObject(Player.LocalInstance);
-    }
-
-    /// <summary>
-    /// Destroys the placeable object at the specified grid position on the server.
-    /// </summary>
-    /// <param name="gridPosition">The grid position of the placeable object to destroy.</param>
-    /// <param name="serverRpcParams">Optional parameters for the server RPC.</param>
-    [ServerRpc(RequireOwnership = false)]
-    public void DestroyObjectServerRPC(Vector3Int gridPosition, bool playAnimation = true) {
-        if (!_poContainer.PlaceableObjects.ContainsKey(gridPosition)) {
-            return;
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(placeableObject.PrefabNetworkObjectId, out NetworkObject networkObject)) {
+            IInteractable interactable = networkObject.GetComponent<IInteractable>();
+            interactable?.PickUpItemsInPlacedObject(Player.LocalInstance);
         }
 
-        if (playAnimation && POContainer[gridPosition].Prefab.TryGetComponent<Rose>(out var roseComponent)) {
-            roseComponent.OnObjectDestroyed();
-            StartCoroutine(DestroyAfterAnimation(roseComponent, gridPosition));
-        } else {
-            DestroyObjectClientRPC(gridPosition);
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(placeableObject.PrefabNetworkObjectId, out NetworkObject prefabNetworkObject)) {
+            prefabNetworkObject.Despawn();
         }
+
+        PlaceableObjects.RemoveAt(index);
     }
 
-    /// <summary>
-    /// Coroutine that destroys an object after its animation finishes.
-    /// </summary>
-    /// <param name="roseComponent">The Rose component of the object.</param>
-    /// <param name="gridPosition">The grid position of the object.</param>
-    private IEnumerator DestroyAfterAnimation(Rose roseComponent, Vector3Int gridPosition) {
-        yield return new WaitForSeconds(roseComponent.GetComponentInChildren<Animator>().GetCurrentAnimatorStateInfo(0).length);
-        DestroyObjectClientRPC(gridPosition);
-    }
-
-    /// <summary>
-    /// Destroys the object on the client side using a Remote Procedure Call (RPC).
-    /// </summary>
-    /// <param name="gridPosition">The grid position of the object to be destroyed.</param>
-    [ClientRpc]
-    private void DestroyObjectClientRPC(Vector3Int gridPosition) {
-        CleanUpPlacedObject(gridPosition, _poContainer[gridPosition]);
-    }
-
-    /// <summary>
-    /// Cleans up a placed object by destroying its prefab game object and removing it from the container.
-    /// </summary>
-    /// <param name="gridPosition">The grid position of the placed object.</param>
-    /// <param name="placedObject">The placed object to clean up.</param>
-    private void CleanUpPlacedObject(Vector3Int gridPosition, PlaceableObject placedObject) {
-        Destroy(placedObject.Prefab);
-        _poContainer.Remove(gridPosition);
-    }
     #endregion
 
 
     #region Save & Load
+
     public void SaveData(GameData data) {
-        data.PlacedObjects = _poContainer.SerializePlaceableObjectsContainer();
+        if (_saveObjects) {
+            data.PlacedObjects = JsonConvert.SerializeObject(PlaceableObjects);
+        }
     }
 
     public void LoadData(GameData data) {
-        if (!string.IsNullOrEmpty(data.PlacedObjects)) {
-            UnboxPOContainerJson(data.PlacedObjects);
+        if (!string.IsNullOrEmpty(data.CropsOnMap) && _loadObjects) {
+            List<PlaceableObjectData> placeableObjectDataList = JsonConvert.DeserializeObject<List<PlaceableObjectData>>(data.PlacedObjects);
+            PlaceableObjects.Clear();
+
+            for (int i = 0; i < placeableObjectDataList.Count; i++) {
+                PlaceableObjectData placeableObjectData = placeableObjectDataList[i];
+
+                if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(placeableObjectData.PrefabNetworkObjectId, out NetworkObject networkObject)) {
+                    VisualizePlaceableObjectOnMap(placeableObjectData, networkObject);
+                }
+
+                PlaceableObjects.Add(placeableObjectData);
+                CreatePlaceableObjectsPrefab(ref placeableObjectData, placeableObjectData.ObjectId);
+            }
         }
     }
+
+    #endregion
+
+    #region Utility Methods
+
+    public PlaceableObjectData? GetCropTileAtPosition(Vector3Int position) {
+        for (int i = 0; i < PlaceableObjects.Count; i++) {
+            if (PlaceableObjects[i].Position.Equals(position)) {
+                return PlaceableObjects[i];
+            }
+        }
+        return null;
+    }
+
+    public bool IsPositionPlaced(Vector3Int position) {
+        for (int i = 0; i < PlaceableObjects.Count; i++) {
+            if (PlaceableObjects[i].Position.Equals(position) && PlaceableObjects[i].ObjectId >= 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int FindPlaceableObjectIndexAtPosition(Vector3Int position) {
+        for (int i = 0; i < PlaceableObjects.Count; i++) {
+            if (PlaceableObjects[i].Position.Equals(position)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void HandleItemReduction(ServerRpcParams serverRpcParams, int itemId) {
+        ulong clientId = serverRpcParams.Receive.SenderClientId;
+        if (NetworkManager.ConnectedClients.TryGetValue(clientId, out var client)) {
+            if (client.PlayerObject.TryGetComponent<PlayerInventoryController>(out var inventoryController)) {
+                inventoryController.InventoryContainer.RemoveItem(new ItemSlot(itemId, 1, 0));
+            } else {
+                Debug.LogError($"PlayerInventoryController not found on Client {clientId}");
+            }
+        }
+    }
+
+    private void HandleClientCallback(ServerRpcParams serverRpcParams, bool success) {
+        //if (TestCropsManager.Instance.Test) return;
+
+        // Get the client ID from the server RPC parameters
+        var clientId = serverRpcParams.Receive.SenderClientId;
+        // If the client is connected, remove the seed from the sender's inventory
+        if (NetworkManager.ConnectedClients.ContainsKey(clientId)) {
+            var client = NetworkManager.ConnectedClients[clientId];
+            client.PlayerObject.GetComponent<PlayerToolsAndWeaponController>().ClientCallback(success);
+        }
+    }
+
     #endregion
 }

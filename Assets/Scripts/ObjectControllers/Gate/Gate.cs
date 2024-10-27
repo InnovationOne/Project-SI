@@ -42,7 +42,7 @@ public class Gate : AdjustingObject {
     private void UpdateSpriteAndCollider() {
         int spriteIndex = DetermineSpriteIndex();
         UpdateCollider();
-        _visual.SetSprite(GateSO.Sprites[spriteIndex]);
+        _visual.sprite = GateSO.Sprites[spriteIndex];
     }
 
     /// <summary>
@@ -73,10 +73,11 @@ public class Gate : AdjustingObject {
     /// </summary>
     private void UpdateCollider() {
         int pathCount = _isOpened ? 2 : 1;
-        _visual.SetCollider(pathCount);
-        _visual.SetPath(0, GateSO.OpenPolygonColliderPaths[_patternIndex]);
+        _collider.pathCount = pathCount;
+        _collider.SetPath(0, GateSO.OpenPolygonColliderPaths[_patternIndex]);
+
         if (_isOpened) {
-            _visual.SetPath(1, GateSO.OpenPolygonColliderPaths[++_patternIndex]);
+            _collider.SetPath(1, GateSO.OpenPolygonColliderPaths[++_patternIndex]);
         }
     }
 

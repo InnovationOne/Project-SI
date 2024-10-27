@@ -48,6 +48,7 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
         if (selectedTool.RarityId < _minimumToolRarity) {
             Debug.Log("Tool rarity too low.");
             // TODO: Implement bounce back animation & sound
+            HandleClientCallback(rpcParams, false);
             return;
         }
 

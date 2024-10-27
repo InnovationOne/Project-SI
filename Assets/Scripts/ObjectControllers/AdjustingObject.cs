@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public abstract class AdjustingObject : MonoBehaviour, IInteractable {
-    protected ObjectVisual _visual;
+public abstract class AdjustingObject : PlaceableObject {
+    protected SpriteRenderer _visual;
+    protected PolygonCollider2D _collider;
 
     private const int LAYER_MASK_BIT = 8;
     private LayerMask _layerMask = 1 << LAYER_MASK_BIT;
@@ -42,7 +43,8 @@ public abstract class AdjustingObject : MonoBehaviour, IInteractable {
 
     private void Awake() {
         _grid = FindFirstObjectByType<Grid>();
-        _visual = GetComponentInChildren<ObjectVisual>();
+        _visual = GetComponent<SpriteRenderer>();
+        _collider = GetComponent<PolygonCollider2D>();
     }
 
     /// <summary>

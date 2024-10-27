@@ -6,7 +6,7 @@ using UnityEngine;
 /// Represents a sprinkler object in the game.
 /// </summary>
 public class Sprinkler : MonoBehaviour {
-    private ObjectVisual _visual;
+    private SpriteRenderer _visual;
     private int _itemId;
 
     private void Start() {
@@ -23,8 +23,7 @@ public class Sprinkler : MonoBehaviour {
     /// <param name="itemId">The ID of the sprinkler item.</param>
     public void Initialize(int itemId) {
         _itemId = itemId; 
-        _visual = GetComponentInChildren<ObjectVisual>();
-        _visual.SetSprite(SprinklerSO.InactiveSprite);
+        _visual = GetComponent<SpriteRenderer>();
     }
 
     private void TimeAndWeatherManager_OnNextDayStarted() {

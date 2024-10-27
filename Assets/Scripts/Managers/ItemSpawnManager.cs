@@ -57,7 +57,7 @@ public class ItemSpawnManager : NetworkBehaviour {
 
             // Instantiate and initialize the PickUpItem
             if (NetworkManager.Singleton.SpawnManager != null) {
-                PickUpItem pickUpItem = Instantiate(_pickUpItemPrefab, spawnPosition, Quaternion.identity);
+                PickUpItem pickUpItem = Instantiate(_pickUpItemPrefab, spawnPosition, Quaternion.identity, transform);
                 pickUpItem.InitializeItem(new ItemSlot(itemSlot.ItemId, 1, itemSlot.RarityId));
                 NetworkObject pickUpItemNO = pickUpItem.GetComponent<NetworkObject>();
                 pickUpItemNO.Spawn(true);

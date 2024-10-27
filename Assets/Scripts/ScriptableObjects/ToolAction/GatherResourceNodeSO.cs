@@ -43,6 +43,7 @@ public class GatherResourceNodeSO : ToolActionSO {
 
         if (colliders.Length == 0) {
             Debug.LogWarning("No colliders found in the specified tile area.");
+            PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
             return; // Early exit if no colliders found
         }
 
@@ -50,6 +51,7 @@ public class GatherResourceNodeSO : ToolActionSO {
         var tool = _itemManager.ItemDatabase[itemSlot.ItemId] as AxePickaxeToolSO;
         if (tool == null) {
             Debug.LogError($"ItemDatabase does not contain a valid AxePickaxeToolSO with ItemId: {itemSlot.ItemId}");
+            PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
             return; // Early exit if tool not found or incorrect type
         }
 
@@ -57,6 +59,7 @@ public class GatherResourceNodeSO : ToolActionSO {
         int rarityIndex = itemSlot.RarityId - 1;
         if (rarityIndex < 0 || rarityIndex >= tool.DamageOnAction.Length) {
             Debug.LogError($"Invalid RarityId: {itemSlot.RarityId} for tool with ItemId: {itemSlot.ItemId}");
+            PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
             return; // Early exit if rarityId is invalid
         }
 
@@ -70,9 +73,11 @@ public class GatherResourceNodeSO : ToolActionSO {
                     break; // Exit after hitting the first valid resource node
                 } else {
                     Debug.LogWarning($"ResourceNode of type {resourceNode.name} cannot be hit with the current tool.");
+                    PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
                 }
             } else {
                 Debug.LogWarning($"Collider on GameObject: {collider.gameObject.name} does not have a ResourceNode component.");
+                PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
             }
         }
     }

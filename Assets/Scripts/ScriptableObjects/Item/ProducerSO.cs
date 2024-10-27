@@ -7,6 +7,9 @@ public class ProducerSO : ObjectSO {
     public int ProduceTimeInPercent;
     public RecipeSO Recipe;
 
+    public Sprite ActiveSprite;
+    public Sprite InactiveSprite;
+
     [Header("UI-Settings")]
     public bool CloseUIAndObjectOnPlayerLeave;
 }

@@ -1,9 +1,10 @@
 using System;
+using Unity.Collections;
 using UnityEngine;
 
-public class Chest : MonoBehaviour, IObjectDataPersistence, IInteractable {
+public class Chest : PlaceableObject {
     [Header("References")]
-    private ObjectVisual _visual;
+    private SpriteRenderer _visual;
     private static readonly ChestUI _chestUI = ChestUI.Instance;
 
     [NonSerialized] private const float MAX_DISTANCE_TO_PLAYER = 1.5f;
@@ -31,11 +32,11 @@ public class Chest : MonoBehaviour, IObjectDataPersistence, IInteractable {
     /// Initializes the chest with the specified item ID.
     /// </summary>
     /// <param name="itemId">The ID of the item to initialize the chest with.</param>
-    public void InitializePreLoad(int itemId) {
+    public override void InitializePreLoad(int itemId) {
         _itemId = itemId;
         InitializeItemContainer();
-        _visual = GetComponentInChildren<ObjectVisual>();
-        _visual.SetSprite(ChestSO.InactiveSprite);
+        _visual = GetComponent<SpriteRenderer>();
+        _visual.sprite =ChestSO.ClosedSprite;
     }
 
     /// <summary>
@@ -56,7 +57,7 @@ public class Chest : MonoBehaviour, IObjectDataPersistence, IInteractable {
     /// <summary>
     /// Updates the visual appearance of the chest based on its current state.
     /// </summary>
-    private void UpdateVisual() => _visual.SetSprite(_opened ? ChestSO.ActiveSprite : ChestSO.InactiveSprite);
+    private void UpdateVisual() => _visual.sprite = _opened ? ChestSO.OpenSprite : ChestSO.ClosedSprite;
     
 
     /// <summary>
@@ -76,7 +77,7 @@ public class Chest : MonoBehaviour, IObjectDataPersistence, IInteractable {
     /// Picks up items in the placed object and adds them to the player's inventory.
     /// </summary>
     /// <param name="player">The player who is picking up the items.</param>
-    public void PickUpItemsInPlacedObject(Player player) {
+    public override void PickUpItemsInPlacedObject(Player player) {
         foreach (ItemSlot itemSlot in _itemContainer.ItemSlots) {
             int remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(itemSlot, false);
             if (remainingAmount > 0) {
@@ -96,14 +97,16 @@ public class Chest : MonoBehaviour, IObjectDataPersistence, IInteractable {
 
 
     #region Save & Load
-    public string SaveObject() {
+    public override string SaveObject() {
         return _itemContainer.SaveItemContainer();
     }
 
-    public void LoadObject(string data) {
-        if (!string.IsNullOrEmpty(data)) {
+    public override void LoadObject(FixedString4096Bytes data) {
+        string jsonData = data.ToString();
+
+        if (!string.IsNullOrEmpty(jsonData)) {
             InitializeItemContainer();
-            _itemContainer.LoadItemContainer(data);
+            _itemContainer.LoadItemContainer(jsonData);
         }
     }
     #endregion

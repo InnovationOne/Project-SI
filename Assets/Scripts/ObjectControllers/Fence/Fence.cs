@@ -18,9 +18,6 @@ public class Fence : AdjustingObject {
             Debug.LogError("Index out of range for PolygonColliderPaths or Sprites.");
             return;
         }
-
-        _visual.SetCollider(1);
-        _visual.SetPath(0, FenceSO.PolygonColliderPaths[colliderPatternIndex]);
     }
 
     /// <summary>

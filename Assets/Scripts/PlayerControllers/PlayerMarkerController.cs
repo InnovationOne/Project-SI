@@ -30,7 +30,7 @@ public class PlayerMarkerController : NetworkBehaviour {
     private int _currentToolMaxRarity;
     private int _currentlyUsedRarity;
     private int _energyCost;
-    private Area _areaSize;
+    private Area[] _area;
     private readonly List<Vector3Int> _areaPositions = new();
     private ToolSO.ToolTypes _toolType;
 
@@ -121,23 +121,24 @@ public class PlayerMarkerController : NetworkBehaviour {
     /// Initiates the area marker with the specified parameters.
     /// </summary>
     /// <param name="toolRarity">Rarity level of the tool.</param>
-    /// <param name="areaSize">Size of the area to mark.</param>
+    /// <param name="maxAreaSize">Size of the area to mark.</param>
     /// <param name="energyCost">Energy cost associated with the action.</param>
     /// <param name="toolType">Type of the tool being used.</param>
-    public void TriggerAreaMarker(int toolRarity, Area areaSize, int energyCost, ToolSO.ToolTypes toolType) {
-        ResetAreaMarkerState(toolRarity, areaSize, energyCost, toolType);
+    public void TriggerAreaMarker(int toolRarity, Area[] area, int energyCost, ToolSO.ToolTypes toolType) {
+        SetAreaMarkerState(toolRarity, area, energyCost, toolType);
     }
 
     /// <summary>
     /// Initializes the state for the area marker.
     /// </summary>
-    private void ResetAreaMarkerState(int toolRarity, Area areaSize, int cost, ToolSO.ToolTypes type) {
+    private void SetAreaMarkerState(int toolRarity, Area[] area, int cost, ToolSO.ToolTypes type) {
+        _useAreaIndicator = true;
+
         _currentChangeSizeTimer = 0f;
         _currentlyUsedRarity = 0;
         _currentToolMaxRarity = toolRarity;
-        _areaSize = areaSize;
+        _area = area;
         _energyCost = cost;
-        _useAreaIndicator = true;
         _toolType = type;
     }
 
@@ -161,7 +162,7 @@ public class PlayerMarkerController : NetworkBehaviour {
     private void DisplayAreaMarker(Vector3Int position, Vector2 motionDirection) {
         UpdateAreaSize();
 
-        (int xSize, int ySize) = CalculateAreaDimensions(motionDirection, _areaSize);
+        (int xSize, int ySize) = CalculateAreaDimensions(motionDirection, _area[_currentlyUsedRarity]);
         Vector3Int[,] positions = GenerateCellPositions(position, motionDirection, xSize, ySize);
 
         ResetMarkerTiles();
@@ -192,6 +193,7 @@ public class PlayerMarkerController : NetworkBehaviour {
     /// </summary>
     private void UpdateAreaSize() {
         _currentChangeSizeTimer += Time.deltaTime;
+
         if (_currentChangeSizeTimer >= _areaChangeSizeTimer &&
             _currentlyUsedRarity < _currentToolMaxRarity) {
             _currentChangeSizeTimer = 0f;

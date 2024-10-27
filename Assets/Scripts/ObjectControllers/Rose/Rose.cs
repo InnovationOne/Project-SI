@@ -3,17 +3,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
-public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
+public class Rose : PlaceableObject {
     public int ItemId { get; private set; }
     public Vector3 PartnerPosition { get; private set; }
 
-    private ObjectVisual _visual;
     private Vector3Int _localPosition;
     private int _timer;
     private int _roseToSpawnId = -1;
     private Animator _animator;
+    private SpriteRenderer _visual;
 
     private const string _destroyAnimationName = "Smoke_Transition";
     private const float _destroyRoseDelay = 0.5f;
@@ -55,13 +57,11 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
         _animator.transform.position += new Vector3(0, 0.5f);
 
         ItemId = itemId;
-        _visual = GetComponentInChildren<ObjectVisual>();
+        _visual = GetComponent<SpriteRenderer>();
 
         if (ItemId == galaxyRoseId) {
             // Galaxy Rose
             StartCoroutine(SpawnWithSmoke());
-        } else {
-            _visual.SetSprite(RoseSO.InactiveSprite);
         }
 
         SetupVisual();
@@ -79,8 +79,6 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
             new(0.42f, -1f),
             new(0.42f, -0.62f)
         };
-        _visual.SetCollider(1, true);
-        _visual.SetPath(0, vectors);
         _visual.transform.position += new Vector3(0, 0.5f);
     }
 
@@ -102,7 +100,6 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
     /// <returns>An enumerator that can be used to iterate through the coroutine.</returns>
     private IEnumerator DelayToShowRoseSprite() {
         yield return new WaitForSeconds(_destroyRoseDelay / 4.5f);
-        _visual.SetSprite(RoseSO.InactiveSprite);
     }
 
     /// <summary>
@@ -119,7 +116,7 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
     /// <summary>
     /// Performs post-loading operations for the Rose object.
     /// </summary>
-    public void PostLoading() {
+    public override void InitializePostLoad() {
         if (PartnerPosition == Vector3.zero) {
             LookForPartner();
         }
@@ -132,7 +129,7 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
     /// Interacts with the player.
     /// </summary>
     /// <param name="player">The player object.</param>
-    public void Interact(Player player) {
+    public override void Interact(Player player) {
         if (RoseSO.RoseRecipes[^1].NewRose.ItemForGalaxyRose.ItemId == PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId &&
             RoseSO.RoseRecipes[^1].Roses.All(rose => GetRosesInArea().Contains(rose))) {
             StartCoroutine(DestroyObjectsCoroutine());
@@ -148,9 +145,10 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
         for (int x = -2; x <= 2; x++) {
             for (int y = -2; y <= 2; y++) {
                 var pos = new Vector3Int(_localPosition.x + x, _localPosition.y + y);
-                if (PlaceableObjectsManager.Instance.POContainer.PlaceableObjects.TryGetValue(pos, out var obj)) {
-                    roses.Add(PartnerRoseSO(obj.ObjectId));
-                }
+                PlaceableObjectData? placeableObjectData = PlaceableObjectsManager.Instance.GetCropTileAtPosition(pos);
+                if (placeableObjectData.HasValue) {
+                    roses.Add(PartnerRoseSO(placeableObjectData.Value.ObjectId));
+                }                
             }
         }
         return roses;
@@ -162,13 +160,17 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
     private IEnumerator DestroyObjectsCoroutine() {
         foreach (var position in spiralPositions) {
             Vector3Int pos = new Vector3Int(_localPosition.x + position.x, _localPosition.y + position.y);
-            if (PlaceableObjectsManager.Instance.POContainer.PlaceableObjects.ContainsKey(pos)) {
-                var objectId = PlaceableObjectsManager.Instance.POContainer[pos].ObjectId;
+            PlaceableObjectData? placeableObjectData = PlaceableObjectsManager.Instance.GetCropTileAtPosition(pos);
+
+
+            if (placeableObjectData.HasValue) {
+                PlaceableObjectData placeableObject = placeableObjectData.Value;
+                var objectId = placeableObject.ObjectId;
                 if (ItemManager.Instance.ItemDatabase[objectId] != null) {
                     if (position == spiralPositions[^1]) {
-                        PlaceableObjectsManager.Instance.PlaceObjectOnMapDelayed(pos, _destroyRoseDelay);
+                        //PlaceableObjectsManager.Instance.PlaceObjectOnMapDelayed(pos, _destroyRoseDelay);
                     }
-                    PlaceableObjectsManager.Instance.DestroyObjectServerRPC(pos);
+                    //PlaceableObjectsManager.Instance.DestroyObjectServerRPC(pos);
                     yield return new WaitForSeconds(_destroyRoseDelay);
                 }
             }
@@ -181,10 +183,17 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
     private void LookForPartner() {
         foreach (var position in possiblePartnerPositions) {
             Vector3Int partnerPosition = _localPosition + position;
-            if (PlaceableObjectsManager.Instance.POContainer.PlaceableObjects.TryGetValue(partnerPosition, out var partner) &&
-                partner.ObjectId != ItemId &&
-                partner.Prefab.GetComponent<Rose>().PartnerPosition == Vector3.zero) {
-                var recipe = SelectRecipe(partner.ObjectId);
+            PlaceableObjectData? placeableObjectData = PlaceableObjectsManager.Instance.GetCropTileAtPosition(partnerPosition);
+            if (!placeableObjectData.HasValue) {
+                Debug.LogWarning("No partner found at position: " + partnerPosition);
+            }
+            PlaceableObjectData partnerPlaceableObject = placeableObjectData.Value;
+
+            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(placeableObjectData.Value.PrefabNetworkObjectId, out NetworkObject networkObject) &&
+                partnerPlaceableObject.ObjectId != ItemId &&
+                networkObject.GetComponent<Rose>().PartnerPosition == Vector3.zero) {
+
+                var recipe = SelectRecipe(partnerPlaceableObject.ObjectId);
                 if (recipe != null) {
                     SetPartnerDetails(partnerPosition, recipe);
                     break;
@@ -202,7 +211,7 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
         PartnerPosition = partnerPosition;
         _roseToSpawnId = recipe.NewRose.ItemId;
         _timer = recipe.Time;
-        PlaceableObjectsManager.Instance.POContainer[partnerPosition].Prefab.GetComponent<Rose>().SetPartner(_localPosition);
+        //PlaceableObjectsManager.Instance.POContainer[partnerPosition].Prefab.GetComponent<Rose>().SetPartner(_localPosition);
     }
 
     /// <summary>
@@ -234,7 +243,7 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
         var emptyPositions = GetEmptyPositions();
         if (emptyPositions.Any()) {
             var spawnPosition = emptyPositions.ElementAt(UnityEngine.Random.Range(0, emptyPositions.Count));
-            PlaceableObjectsManager.Instance.PlaceObjectOnMapServerRpc(_roseToSpawnId, spawnPosition);
+            //PlaceableObjectsManager.Instance.PlaceObjectOnMapServerRpc(_roseToSpawnId, spawnPosition);
         }
     }
 
@@ -248,14 +257,14 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
         foreach (var position in possiblePartnerPositions) {
             var localEmptyPosition = _localPosition + position;
             var partnerEmptyPosition = new Vector3Int((int)PartnerPosition.x, (int)PartnerPosition.y) + position;
-
+            /*
             if (PlaceableObjectsManager.Instance.POContainer[localEmptyPosition] == null) {
                 emptyPositions.Add(localEmptyPosition);
             }
 
             if (PlaceableObjectsManager.Instance.POContainer[partnerEmptyPosition] == null) {
                 emptyPositions.Add(partnerEmptyPosition);
-            }
+            }*/
         }
 
         return emptyPositions;
@@ -284,10 +293,10 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
     /// Picks up items in the placed object and performs additional actions if a partner Rose object is present.
     /// </summary>
     /// <param name="player">The player performing the action.</param>
-    public void PickUpItemsInPlacedObject(Player player) {
+    public override void PickUpItemsInPlacedObject(Player player) {
         if (PartnerPosition != Vector3.zero) {
-            var partnerRose = PlaceableObjectsManager.Instance.POContainer[new Vector3Int((int)PartnerPosition.x, (int)PartnerPosition.y)].Prefab.GetComponent<Rose>();
-            partnerRose.ResetRose();
+            //var partnerRose = PlaceableObjectsManager.Instance.POContainer[new Vector3Int((int)PartnerPosition.x, (int)PartnerPosition.y)].Prefab.GetComponent<Rose>();
+            //partnerRose.ResetRose();
         }
     }
 
@@ -306,7 +315,7 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
     /// <returns>An IEnumerator used for coroutine execution.</returns>
     private IEnumerator DelayToHideRoseSprite() {
         yield return new WaitForSeconds(_destroyRoseDelay / 4.5f);
-        _visual.SetSprite(null);
+        //_visual.SetSprite(null);
     }
     #endregion
 
@@ -332,7 +341,7 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
         public Vector3 PartnerPosition;
     }
 
-    public string SaveObject() {
+    public override string SaveObject() {
         var roseDataJson = new RoseData {
             ItemId = ItemId,
             Timer = _timer,
@@ -343,18 +352,16 @@ public class Rose : MonoBehaviour, IObjectDataPersistence, IInteractable {
         return JsonConvert.SerializeObject(roseDataJson);
     }
 
-    public void LoadObject(string data) {
-        if (!string.IsNullOrEmpty(data)) {
-            var roseData = JsonConvert.DeserializeObject<RoseData>(data);
+    public override void LoadObject(FixedString4096Bytes data) {
+        string jsonData = data.ToString();
+
+        if (!string.IsNullOrEmpty(jsonData)) {
+            var roseData = JsonConvert.DeserializeObject<RoseData>(jsonData);
             ItemId = roseData.ItemId;
             _timer = roseData.Timer;
             _roseToSpawnId = roseData.RoseToSpawnId;
             PartnerPosition = roseData.PartnerPosition;
         }
-    }
-
-    public void InitializePreLoad(int itemId) {
-        return;
     }
     #endregion
 }

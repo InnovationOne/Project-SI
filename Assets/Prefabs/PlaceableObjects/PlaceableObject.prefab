@@ -135,7 +135,7 @@ Transform:
   m_GameObject: {fileID: 4948398707952232940}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.5, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -154,9 +154,9 @@ GameObject:
   - component: {fileID: 8539970262639240433}
   - component: {fileID: 4772864127482506771}
   - component: {fileID: 7854799858503777199}
+  - component: {fileID: 671619408885194712}
   - component: {fileID: 8433173917724455547}
   - component: {fileID: 3223141692067306225}
-  - component: {fileID: 671619408885194712}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -285,6 +285,31 @@ PolygonCollider2D:
       - {x: 0.5, y: -0.875}
       - {x: 0.5, y: 0.875}
   m_UseDelaunayMesh: 0
+--- !u!114 &671619408885194712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8970710073516334782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 2911824944
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!114 &8433173917724455547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -312,28 +337,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0312d09a0e94fbc47b657fb405082715, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &671619408885194712
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8970710073516334782}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2911824944
-  InScenePlacedSourceGlobalObjectIdHash: 0
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0

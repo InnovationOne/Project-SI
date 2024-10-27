@@ -2,15 +2,16 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Collections;
 using UnityEngine;
 
 /// <summary>
 /// Manages the conversion of items based on recipes and timed processes.
 /// </summary>
 [RequireComponent(typeof(TimeAgent))]
-public class ItemConverter : MonoBehaviour, IObjectDataPersistence, IInteractable {
-    private ObjectVisual _visual;
+public class ItemConverter : PlaceableObject {
     private SelectRecipeUI _selectRecipeUI;
+    private SpriteRenderer _visual;
 
     private const float MAX_DISTANCE_TO_PLAYER = 1.5f;
     public float MaxDistanceToPlayer { get => MAX_DISTANCE_TO_PLAYER; }
@@ -19,6 +20,10 @@ public class ItemConverter : MonoBehaviour, IObjectDataPersistence, IInteractabl
     private int _timer;
     private int _itemId;
     private List<ItemSlot> _storedItemSlots = new();
+
+    private void Awake() {
+        _visual = GetComponent<SpriteRenderer>();
+    }
 
     /// <summary>
     /// Initializes and subscribes to time-based events.
@@ -36,11 +41,10 @@ public class ItemConverter : MonoBehaviour, IObjectDataPersistence, IInteractabl
     /// Initializes the item producer with a specific item identifier.
     /// </summary>
     /// <param name="itemId">The item identifier used to fetch recipe details.</param>
-    public void InitializePreLoad(int itemId) {
+    public override void InitializePreLoad(int itemId) {
         _itemId = itemId;
         ResetTimer();
-        _visual = GetComponentInChildren<ObjectVisual>();
-        _visual.SetSprite(ConverterSO.InactiveSprite);
+        _visual.sprite = ConverterSO.InactiveSprite;
     }
 
     /// <summary>
@@ -58,7 +62,7 @@ public class ItemConverter : MonoBehaviour, IObjectDataPersistence, IInteractabl
     private void ProcessConversion() {
         _storedItemSlots.Clear();
         _storedItemSlots.AddRange(GetRecipeItemsToProduce());
-        _visual.SetSprite(ConverterSO.InactiveSprite);
+        _visual.sprite = ConverterSO.InactiveSprite;
     }
 
     /// <summary>
@@ -67,7 +71,7 @@ public class ItemConverter : MonoBehaviour, IObjectDataPersistence, IInteractabl
     /// If the item converter is eligible for a new recipe and has all the needed items, it selects a recipe and starts item processing.
     /// </summary>
     /// <param name="player">The player interacting with the item converter.</param>
-    public void Interact(Player player) {
+    public override void Interact(Player player) {
         if (CanProcessItems()) {
             SpawnItems();
             ClearStoredItems();
@@ -147,7 +151,7 @@ public class ItemConverter : MonoBehaviour, IObjectDataPersistence, IInteractabl
     private void StartItemProcessing() {
         DeductRequiredItemsFromInventory();
         ResetTimer();
-        _visual.SetSprite(ConverterSO.ActiveSprite);
+        _visual.sprite = ConverterSO.ActiveSprite;
     }
 
     /// <summary>
@@ -176,7 +180,7 @@ public class ItemConverter : MonoBehaviour, IObjectDataPersistence, IInteractabl
     /// Picks up items in the placed object and spawns them.
     /// </summary>
     /// <param name="player">The player who is picking up the items.</param>
-    public void PickUpItemsInPlacedObject(Player player) {
+    public override void PickUpItemsInPlacedObject(Player player) {
         if (_storedItemSlots.Count > 0) {
             SpawnItems();
         }
@@ -223,7 +227,7 @@ public class ItemConverter : MonoBehaviour, IObjectDataPersistence, IInteractabl
         public List<string> StoredItemSlots = new();
     }
 
-    public string SaveObject() {
+    public override string SaveObject() {
         var itemConverterJson = new ItemConverterData {
             RecipeId = _recipeId,
             Timer = _timer,
@@ -236,9 +240,11 @@ public class ItemConverter : MonoBehaviour, IObjectDataPersistence, IInteractabl
         return JsonConvert.SerializeObject(itemConverterJson);
     }
 
-    public void LoadObject(string data) {
-        if (!string.IsNullOrEmpty(data)) {
-            var itemConverterData = JsonConvert.DeserializeObject<ItemConverterData>(data);
+    public override void LoadObject(FixedString4096Bytes data) {
+        string jsonData = data.ToString();
+
+        if (!string.IsNullOrEmpty(jsonData)) {
+            var itemConverterData = JsonConvert.DeserializeObject<ItemConverterData>(jsonData);
             _storedItemSlots.Clear();
             _recipeId = itemConverterData.RecipeId;
             _timer = itemConverterData.Timer;

@@ -5,12 +5,14 @@ using UnityEngine.Tilemaps;
 using Unity.VisualScripting;
 using System.Diagnostics;
 using System.Linq;
+using Unity.Netcode;
 
-public class TestCropsManager : MonoBehaviour {
+public class TestCropsManager : NetworkBehaviour {
     public static TestCropsManager Instance;
 
     public Tilemap targetTilemap;
     public bool Test;
+    private bool _test;
 
     private CropsManager cropsManager;
     private TimeManager timeManager;
@@ -22,11 +24,12 @@ public class TestCropsManager : MonoBehaviour {
     private void Start() {
         cropsManager = CropsManager.Instance;
         timeManager = TimeManager.Instance;
+        _test = Test;
     }
 
     private void Update() {
-        if (Test) {
-            Test = false;
+        if (_test) {
+            _test = false;
             StartCoroutine(RunAllTests());
         }
     }
@@ -39,57 +42,64 @@ public class TestCropsManager : MonoBehaviour {
 
         // Clear existing crops
         cropsManager.CropTiles.Clear();
-        Stopwatch stopwatch = new();
         yield return null;
 
         // Test 1: Plow Tiles
         UnityEngine.Debug.Log("Test 1: Plowing all plowable tiles...");
-        stopwatch.Start();
         PlowAllPlowableTiles();
-        stopwatch.Stop();
-        UnityEngine.Debug.Log($"PlowTiles_Test completed in {stopwatch.ElapsedMilliseconds} ms.");
-        stopwatch.Reset();
 
         // Test 2: Seed Tiles
         UnityEngine.Debug.Log("Test 2: Seeding all plowed tiles...");
-        stopwatch.Start();
         SeedAllPlowedTiles();
-        stopwatch.Stop();
-        UnityEngine.Debug.Log($"SeedTiles_Test completed in {stopwatch.ElapsedMilliseconds} ms.");
-        stopwatch.Reset();
-        yield break;
-        yield return new WaitForSeconds(2f);
 
         // Test 3: Water Tiles
         UnityEngine.Debug.Log("Test 3: Watering all seeded tiles...");
-        stopwatch.Start();
         WaterAllSeededTiles();
-        stopwatch.Stop();
-        UnityEngine.Debug.Log($"WaterTiles_Test completed in {stopwatch.ElapsedMilliseconds} ms.");
-        stopwatch.Reset();
-        yield return new WaitForSeconds(2f);
 
         // Test 4: Simulate Days
         UnityEngine.Debug.Log("Test 4: Simulating 5 days...");
-        stopwatch.Start();
-        for (int i = 0; i < 30; i++) {
-            timeManager.StartNextDay();
+        for (int i = 0; i < 6; i++) {
+            cropsManager.TestOnNextDayStarted();
             WaterAllSeededTiles();
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(.5f);
         }
-        stopwatch.Stop();
-        UnityEngine.Debug.Log($"StartNextDayAndWaterTiles_Test completed in {stopwatch.ElapsedMilliseconds} ms.");
-        stopwatch.Reset();
 
         // Test 5: Harvest Crops
-        UnityEngine.Debug.Log("Test 5: Harvesting all harvestable crops...");
-        stopwatch.Start();
-        HarvestAllHarvestableCrops();
-        stopwatch.Stop();
-        UnityEngine.Debug.Log($"HarvestCrops_Test completed in {stopwatch.ElapsedMilliseconds} ms.");
-        stopwatch.Reset();
+        UnityEngine.Debug.Log("Test 5: Destroy");
+        //HarvestAllHarvestableCrops();
+        PickaxeAllCrops();
+        yield return new WaitForSeconds(3f);
+        PickaxeAllCrops();
 
-        UnityEngine.Debug.Log("CropsManager Tests Completed.");
+
+        UnityEngine.Debug.Log("Test 6: Scythe Seed");
+        yield return new WaitForSeconds(5f);
+        PlowAllPlowableTiles();
+        SeedAllPlowedTiles();
+        ScytheAllCrops();
+
+
+        UnityEngine.Debug.Log("Test 7: Scythe harvestable Plant");
+        yield return new WaitForSeconds(5f);
+        PlowAllPlowableTiles();
+        SeedAllPlowedTiles();
+        WaterAllSeededTiles();
+        for (int i = 0; i < 6; i++) {
+            cropsManager.TestOnNextDayStarted();
+            WaterAllSeededTiles();
+            yield return new WaitForSeconds(.5f);
+        }
+
+        UnityEngine.Debug.Log("Test 8: Scythe Plant");
+        yield return new WaitForSeconds(5f);
+        PlowAllPlowableTiles();
+        SeedAllPlowedTiles();
+        WaterAllSeededTiles();
+        for (int i = 0; i < 3; i++) {
+            cropsManager.TestOnNextDayStarted();
+            WaterAllSeededTiles();
+            yield return new WaitForSeconds(.5f);
+        }
     }
 
     /// <summary>
@@ -112,7 +122,7 @@ public class TestCropsManager : MonoBehaviour {
     /// Seeds all plowed tiles with crops from the CropDatabase.
     /// </summary>
     private void SeedAllPlowedTiles() {
-        for (int i = 0; i < 1500; i++) {
+        for (int i = 0; i < 2; i++) {
             var position = FindNextPlowedTile();
             Vector3IntSerializable posSerializable = new(position);
             //var id = Random.Range(141, 244 + 1);
@@ -138,13 +148,25 @@ public class TestCropsManager : MonoBehaviour {
     /// </summary>
     private void HarvestAllHarvestableCrops() {
         foreach (var cropTile in cropsManager.CropTiles) {
-            if (cropTile.IsCropHarvestable()) {
+            if (cropTile.CropId != -1 && cropTile.IsCropHarvestable()) {
                 if (cropsManager.CropDatabase[cropTile.CropId].IsTree) {
                     cropsManager.HarvestTreeServerRpc(new Vector3IntSerializable(cropTile.CropPosition), default);
                 } else {
                     cropsManager.HarvestCropServerRpc(new Vector3IntSerializable(cropTile.CropPosition), default);
                 }
             }
+        }
+    }
+
+    private void PickaxeAllCrops() {
+        foreach (var cropTile in cropsManager.CropTiles) {
+            cropsManager.DestroyCropTileServerRpc(new Vector3IntSerializable(cropTile.CropPosition), 0, ToolSO.ToolTypes.Pickaxe);
+        }
+    }
+
+    private void ScytheAllCrops() {
+        foreach (var cropTile in cropsManager.CropTiles) {
+            cropsManager.DestroyCropTileServerRpc(new Vector3IntSerializable(cropTile.CropPosition), 0, ToolSO.ToolTypes.Scythe);
         }
     }
 

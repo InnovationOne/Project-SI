@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 public class Bed : MonoBehaviour, IInteractable {
-    private ObjectVisual _visual;
+    private SpriteRenderer _visual;
     private int _itemId;
 
     [NonSerialized] private float _maxDistanceToPlayer;
@@ -14,8 +14,7 @@ public class Bed : MonoBehaviour, IInteractable {
     /// <param name="itemId">The ID of the item.</param>
     public void InitializePreLoad(int itemId) {
         _itemId = itemId;
-        _visual = GetComponentInChildren<ObjectVisual>();
-        _visual.SetSprite(GetObjectSO().InactiveSprite);
+        _visual = GetComponent<SpriteRenderer>();
     }
 
     /// <summary>

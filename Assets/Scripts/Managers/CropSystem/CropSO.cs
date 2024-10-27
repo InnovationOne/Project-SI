@@ -9,6 +9,7 @@ public class CropSO : ScriptableObject {
     [Header("Params")]
     public bool IsTree;
     public int DaysToGrow;
+    [ConditionalHide("IsTree", true)]
     public SeedSO ItemForSeeding;
     public ItemSO ItemToGrowAndSpawn;
     public bool IsHarvestedByScythe;

@@ -1,13 +1,14 @@
 using Newtonsoft.Json;
 using System;
+using Unity.Collections;
 using UnityEngine;
 
 /// <summary>
 /// Manages the production of items based on recipes and timed processes.
 /// </summary>
 [RequireComponent(typeof(TimeAgent))]
-public class ItemProducer : MonoBehaviour, IObjectDataPersistence, IInteractable {
-    private ObjectVisual _visual;
+public class ItemProducer : PlaceableObject {
+    private SpriteRenderer _visual;
     private int _recipeId;
     private int _timer;
     private int _itemId;
@@ -26,12 +27,12 @@ public class ItemProducer : MonoBehaviour, IObjectDataPersistence, IInteractable
     /// Initializes the item producer with a specific item identifier.
     /// </summary>
     /// <param name="itemId">The item identifier used to fetch recipe details.</param>
-    public void InitializePreLoad(int itemId) {
+    public override void InitializePreLoad(int itemId) {
         _itemId = itemId;
         _recipeId = ProducerSO.Recipe != null ? ProducerSO.Recipe.RecipeId : throw new NotImplementedException("Recipe is not set for this item producer");
         ResetTimer();
-        _visual = GetComponentInChildren<ObjectVisual>();
-        _visual.SetSprite(ProducerSO.InactiveSprite);
+        _visual = GetComponent<SpriteRenderer>();
+        _visual.sprite = ProducerSO.InactiveSprite;
     }
 
 
@@ -43,7 +44,7 @@ public class ItemProducer : MonoBehaviour, IObjectDataPersistence, IInteractable
             _timer--;
 
             if (_timer == 0f) {
-                GetComponent<ObjectVisual>().SetSprite(ProducerSO.InactiveSprite);
+                _visual.sprite = ProducerSO.InactiveSprite;
             }
         } else {
             ResetTimer();
@@ -54,11 +55,11 @@ public class ItemProducer : MonoBehaviour, IObjectDataPersistence, IInteractable
     /// Handles interactions with the player, typically used to trigger item production.
     /// </summary>
     /// <param name="player">The player interacting with the item producer.</param>
-    public void Interact(Player player) {
+    public override void Interact(Player player) {
         if (_timer <= 0f) {
             ProduceItems();
             ResetTimer();
-            _visual.SetSprite(ProducerSO.ActiveSprite);
+            _visual.sprite = ProducerSO.ActiveSprite;
         }
     }
 
@@ -94,7 +95,7 @@ public class ItemProducer : MonoBehaviour, IObjectDataPersistence, IInteractable
     /// Handles the collection of produced items when the object is dismanteled with.
     /// </summary>
     /// <param name="player">The player interacting with the placed object.</param>
-    public void PickUpItemsInPlacedObject(Player player) {
+    public override void PickUpItemsInPlacedObject(Player player) {
         if (_timer <= 0) {
             ProduceItems();
         }
@@ -108,7 +109,7 @@ public class ItemProducer : MonoBehaviour, IObjectDataPersistence, IInteractable
         public int ItemId;
     }
 
-    public string SaveObject() {
+    public override string SaveObject() {
         var itemProducerJson = new ItemProducerData {
             RecipeId = _recipeId,
             Timer = _timer,
@@ -118,9 +119,11 @@ public class ItemProducer : MonoBehaviour, IObjectDataPersistence, IInteractable
         return JsonConvert.SerializeObject(itemProducerJson);
     }
 
-    public void LoadObject(string data) {
-        if (!string.IsNullOrEmpty(data)) {
-            var itemProducerData = JsonConvert.DeserializeObject<ItemProducerData>(data);
+    public override void LoadObject(FixedString4096Bytes data) {
+        string jsonData = data.ToString();
+
+        if (!string.IsNullOrEmpty(jsonData)) {
+            var itemProducerData = JsonConvert.DeserializeObject<ItemProducerData>(jsonData);
             _recipeId = itemProducerData.RecipeId;
             _timer = itemProducerData.Timer;
             _itemId = itemProducerData.ItemId;

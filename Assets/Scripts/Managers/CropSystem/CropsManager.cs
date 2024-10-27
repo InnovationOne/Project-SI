@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Collections;
 using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
@@ -93,10 +94,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
         Instance = this;
 
-        InitializeComponents();
-    }
-
-    private void InitializeComponents() {
         // Initialize Tilemap
         _targetTilemap = GetComponent<Tilemap>();
 
@@ -134,6 +131,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             TimeManager.Instance.OnNextSeasonStarted -= OnNextSeasonStarted;
             WeatherManager.Instance.OnChangeRainIntensity -= OnChangeRainIntensity;
             WeatherManager.Instance.OnThunderStrike -= OnThunderStrike;
+            CropTiles.OnListChanged -= OnCropTilesListChanged;
         }
     }
 
@@ -146,7 +144,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             case NetworkListEvent<CropTile>.EventType.Add:
                 HandleCropTileAdd(changeEvent.Value);
                 break;
-            case NetworkListEvent<CropTile>.EventType.Remove:
+            case NetworkListEvent<CropTile>.EventType.RemoveAt:
                 HandleCropTileRemove(changeEvent.Value);
                 break;
             case NetworkListEvent<CropTile>.EventType.Value:
@@ -159,28 +157,19 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     }
 
     private void HandleCropTileAdd(CropTile cropTile) {
-        VisualizeTileChanges(cropTile.CropPosition);
+        VisualizeTileChanges(cropTile);
     }
 
     private void HandleCropTileRemove(CropTile cropTile) {
-        // Reference the existing NetworkObject using PrefabNetworkObjectId
-        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(cropTile.PrefabNetworkObjectId, out NetworkObject networkObject) &&
-            IsServer) {
-            networkObject.Despawn();
-        }
-
-        // Update the tilemap
         _targetTilemap.SetTile(cropTile.CropPosition, cropTile.IsWatered ? _dirtWet : _dirtDry);
     }
 
     private void HandleCropTileValueChange(CropTile cropTile) {
+        VisualizeTileChanges(cropTile);
+
         // Reference the existing NetworkObject using PrefabNetworkObjectId
-        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(cropTile.PrefabNetworkObjectId, out _)) {
-            // Update visual elements
-            VisualizeCropChanges(cropTile);
-            VisualizeTileChanges(cropTile.CropPosition);
-        } else {
-            Debug.LogError($"Prefab with NetworkObjectId {cropTile.PrefabNetworkObjectId} not found.");
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(cropTile.PrefabNetworkObjectId, out NetworkObject networkObject)) {
+            VisualizeCropChanges(cropTile, networkObject);
         }
     }
 
@@ -200,13 +189,20 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     #endregion
 
     #region Next Day and Season
+    public void TestOnNextDayStarted() {
+        OnNextDayStarted();
+    }
+
 
     private void OnNextDayStarted() {
-        // If the current instance is not the server
-        if (!IsServer) {
-            // Log a message and exit the method
-            Debug.Log("Not server; function needed");
-            return;
+        for (int i = 0; i < CropTiles.Count; i++) {
+            CropTile cropTile = CropTiles[i];
+
+            if (cropTile.CropId >= 0 &&
+                !cropTile.IsCropHarvestable()) {
+                cropTile.CurrentGrowthTimer++;
+                CropTiles[i] = cropTile;
+            }
         }
 
         DeleteSomeUnseededTiles();
@@ -233,21 +229,26 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
     #region Visualize Crop Tiles on Map
 
-    private void VisualizeTileChanges(Vector3Int position) {
-        // Change the tile on the tilemap to plowed dry or wet based on current state
-        bool isWet = _targetTilemap.GetTile<RuleTile>(position) == _dirtWet;
-        TileBase newTile = isWet ? _dirtPlowedWet : _dirtPlowedDry;
-        _targetTilemap.SetTile(position, newTile);
-    }
-
-    private void VisualizeCropChanges(CropTile cropTile) {
-        if (cropTile.CropId < 0) {
-            Debug.Log($"At {cropTile.CropPosition}, CropId is -1");
+    private void VisualizeTileChanges(CropTile cropTile) {
+        Vector3Int position = cropTile.CropPosition;
+        if (!_targetTilemap.HasTile(position)) {
             return;
         }
 
-        if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(cropTile.PrefabNetworkObjectId, out NetworkObject networkObject)) {
-            Debug.LogError($"Prefab with NetworkObjectId {cropTile.PrefabNetworkObjectId} not found.");
+        bool isWet = _targetTilemap.GetTile<RuleTile>(position) == _dirtWet ||
+                     cropTile.IsWatered;
+
+        if (!GetCropTileAtPosition(position).HasValue) {
+            _targetTilemap.SetTile(position, isWet ? _dirtWet : _dirtDry);
+        } else {
+            _targetTilemap.SetTile(position, isWet ? _dirtPlowedWet : _dirtPlowedDry);
+        }
+    }
+
+    private void VisualizeCropChanges(CropTile cropTile, NetworkObject networkObject) {
+        if (cropTile.CropId < 0) {
+            Debug.Log($"At {cropTile.CropPosition}, CropId is -1");
+            return;
         }
 
         CropSO cropSO = CropDatabase[cropTile.CropId];
@@ -266,13 +267,12 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         UpdateFertilizerSprites(cropTile, harvestCrop);
     }
 
-
     private void UpdateCropSprite(CropTile cropTile, CropSO cropSO, SpriteRenderer spriteRenderer) {
         // If the crop is dead and its stage is not 0
         if (cropTile.IsDead() && cropTile.GetCropStage() != CropStage.Seeded) {
             spriteRenderer.sprite = cropSO.DeadSpritesGrowthStages[Mathf.Max(0, (int)cropTile.GetCropStage() - 1)];
         } else {
-            spriteRenderer.sprite = cropSO.SpritesGrowthStages[Mathf.Clamp((int)cropTile.GetCropStage(), 0, cropSO.SpritesGrowthStages.Count - 1)];
+            spriteRenderer.sprite = cropSO.SpritesGrowthStages[Mathf.Clamp((int)cropTile.GetCropStage() - 1, 0, cropSO.SpritesGrowthStages.Count)];
         }
     }
 
@@ -308,8 +308,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-
-    private void CreateCropPrefab(CropTile cropTile, bool isTree, int itemId) {
+    private void CreateCropPrefab(ref CropTile cropTile, bool isTree, int itemId) {
         // Ensure this is only executed on the server
         if (!IsServer) {
             Debug.LogError("CreateCropPrefab should only be called on the server.");
@@ -317,7 +316,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
 
         // Instantiate the appropriate prefab
-        GameObject prefabInstance = Instantiate(isTree ? _cropsTreeSpritePrefab : _cropsSpritePrefab);
+        GameObject prefabInstance = Instantiate(isTree ? _cropsTreeSpritePrefab : _cropsSpritePrefab, transform);
         HarvestCrop harvestCrop = prefabInstance.GetComponent<HarvestCrop>();
 
         if (isTree) {
@@ -340,18 +339,13 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         // Spawn the prefab on the network
         networkObject.Spawn();
-       
+
         // Assign the NetworkObjectId to CropTile
         cropTile.PrefabNetworkObjectId = networkObject.NetworkObjectId;
-
-        // Update the CropTile in the NetworkList
-        int index = FindCropTileIndexAtPosition(cropTile.CropPosition);
-        if (index != -1) {
-            CropTiles[index] = cropTile;
-        }
     }
 
     #endregion Visualize crop tiles on map
+
 
     #region Plow Crop Tile
 
@@ -378,7 +372,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         foreach (var position in canPlowTilePositions) {
             // Create a new CropTile
-            CropTile cropTile = new CropTile {
+            CropTile cropTile = new() {
                 CropId = -1,
                 CropPosition = position,
                 IsWatered = _targetTilemap.GetTile<RuleTile>(position) == _dirtWet,
@@ -403,9 +397,10 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
     private bool CanPlowTile(Vector3Int position) {
         // Check if the position is not already plowed, if the tile at the position can be plowed, and if there is no object placed at the position
+        PlaceableObjectData? placeableObjectData = PlaceableObjectsManager.Instance.GetCropTileAtPosition(position);
         return !IsPositionPlowed(position) &&
                _tilesThatCanBePlowed.Contains(_tilemapReadManager.GetTileAtGridPosition(position)) &&
-               !_placeableObjectsManager.POContainer.PlaceableObjects.ContainsKey(position);
+               !placeableObjectData.HasValue;
     }
 
     private void HandleEnergyReduction(ServerRpcParams serverRpcParams, int totalUsedEnergy) {
@@ -508,11 +503,12 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             return;
         }
 
+        PlaceableObjectData? placeableObjectData = PlaceableObjectsManager.Instance.GetCropTileAtPosition(position);
         if (cropToGrow.IsTree) {
             if (!IsPositionSeeded(position) &&
                 cropToGrow.SeasonsToGrow.Contains((TimeManager.SeasonName)TimeManager.Instance.CurrentDate.Value.Season) &&
                 _tilesThatCanBePlowed.Contains(_tilemapReadManager.GetTileAtGridPosition(position)) &&
-                !_placeableObjectsManager.POContainer.PlaceableObjects.ContainsKey(position)) {
+                !placeableObjectData.HasValue) {
                 // Implement tree planting logic here if necessary
             } else {
                 HandleClientCallback(serverRpcParams, false);
@@ -533,13 +529,13 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         HandleItemReduction(serverRpcParams, itemId);
         HandleClientCallback(serverRpcParams, true);
-        
+
         CropTile changeCropTile = changeCropTileData.Value;
         changeCropTile.CropId = cropToGrow.CropID;
         changeCropTile.SeedItemId = itemId;
 
         // Spawn the prefab and update the NetworkObjectId
-        CreateCropPrefab(changeCropTile, cropToGrow.IsTree, itemId);
+        CreateCropPrefab(ref changeCropTile, cropToGrow.IsTree, itemId);
 
         // Update the CropTile in the NetworkList with the new NetworkObjectId
         int index = FindCropTileIndexAtPosition(position);
@@ -592,7 +588,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         // Spawn the harvested items
         ItemSpawnManager.Instance.SpawnItemServerRpc(
-            itemSlot: new ItemSlot(cropTile.CropId, itemCountToSpawn, itemRarity),
+            itemSlot: new ItemSlot(CropDatabase[cropTile.CropId].ItemToGrowAndSpawn.ItemId, itemCountToSpawn, itemRarity),
             initialPosition: _targetTilemap.CellToWorld(position),
             motionDirection: Vector2.zero,
             spreadType: ItemSpawnManager.SpreadType.Circle);
@@ -731,10 +727,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
                 CropTiles[index] = cropTile;
             }
         }
-
-        foreach (var position in changeRuleTilePositions) {
-            _targetTilemap.SetTile(position, _dirtWet);
-        }
     }
 
     #endregion Watering Can
@@ -849,20 +841,20 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
 
         CropTile cropTile = cropTileData.Value;
-        CropSO cropSO = CropDatabase[cropTile.CropId];
-
-        if (cropSO == null) {
-            Debug.LogError($"CropSO with ID {cropTile.CropId} not found in CropDatabase.");
-            HandleClientCallback(serverRpcParams, false);
-            return;
-        }
 
         bool success;
-        if (cropSO != null && cropSO.IsTree) {
-            success = false; // Trees are harvested differently
+        if (cropTile.CropId >= 0) {
+            CropSO cropSO = CropDatabase[cropTile.CropId];
+
+            if (cropSO.IsTree) {
+                success = false; // Trees are harvested differently
+            } else {
+                success = HandleToolAction(position, toolType);
+            }
         } else {
             success = HandleToolAction(position, toolType);
         }
+
 
         HandleClientCallback(serverRpcParams, success);
         HandleEnergyReduction(serverRpcParams, usedEnergy);
@@ -889,19 +881,15 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         CropTile cropTile = CropTiles[index];
         CropSO crop = CropDatabase[cropTile.CropId];
 
-        if (crop == null) {
-            Debug.LogError($"CropSO with ID {cropTile.CropId} not found in CropDatabase.");
-            return false;
+        if (cropTile.IsCropHarvestable() && !crop.IsTree) {
+            HarvestCropServerRpc(new Vector3IntSerializable(position));
         }
 
-        if (crop.IsHarvestedByScythe && cropTile.IsCropHarvestable()) {
-            HarvestCropServerRpc(new Vector3IntSerializable(position));
-            if (!crop.CanRegrow) {
-                DespawnAndRemoveCrop(index, cropTile);
-            }
+        if (crop.IsHarvestedByScythe && crop.CanRegrow) {
             return true;
         } else {
-            DespawnAndRemoveCrop(index, cropTile);
+            DespawnCrop(cropTile);
+            RemoveCropTile(index);
             return true;
         }
     }
@@ -917,25 +905,27 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
 
         CropTile cropTile = CropTiles[index];
-        if (cropTile.CropId != -1) {
+        if (cropTile.CropId >= 0) {
             cropTile.CropId = -1;
             CropTiles[index] = cropTile;
+            DespawnCrop(cropTile);
             return true;
         } else {
-            DespawnAndRemoveCrop(index, cropTile);
-            _targetTilemap.SetTile(position, null);
+            DespawnCrop(cropTile);
+            RemoveCropTile(index);
             return true;
         }
     }
 
-    private void DespawnAndRemoveCrop(int index, CropTile cropTile) {
+    private void DespawnCrop(CropTile cropTile) {
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(cropTile.PrefabNetworkObjectId, out NetworkObject prefabNetworkObject)) {
             prefabNetworkObject.Despawn();
         }
-
-        CropTiles.RemoveAt(index);
     }
 
+    private void RemoveCropTile(int index) {
+        CropTiles.RemoveAt(index);
+    }
 
     private void DeleteSomeUnseededTiles() {
         List<CropTile> tilesToRemove = new List<CropTile>();
@@ -963,9 +953,12 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     #endregion Destroy Crop
 
     #region Crow attack
+
     // TODO
     private void Update() {
-        if (Input.GetKeyDown(KeyCode.Y)) {
+        Debug.Log("Press F12 to check protection and trigger crow attack");
+        if (Input.GetKeyDown(KeyCode.F12)) {
+            Debug.Log("CheckProtectionAndTriggerCrowAttack");
             CheckProtectionAndTriggerCrowAttack();
         }
     }
@@ -975,13 +968,21 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         List<CropTile> unprotectedCropTiles = new List<CropTile>();
 
         foreach (var cropTile in CropTiles) {
-            if (cropTile.GetCropStage() != CropStage.Seeded && !cropTile.IsCropHarvestable()) {
-                return;
+            if (cropTile.CropId < 0) {
+                continue;
             }
 
-            if (!IsProtected(cropTile.CropPosition)) {
-                unprotectedCropTiles.Add(cropTile);
+            if (cropTile.GetCropStage() != CropStage.Seeded && !cropTile.IsCropHarvestable()) {
+                Debug.Log($"Crop at {cropTile.CropPosition} is not harvestable or just seeded.");
+                continue;
             }
+
+            if (IsProtected(cropTile.CropPosition)) {
+                Debug.Log($"Crop at {cropTile.CropPosition} is protected.");
+                continue;
+            }
+
+            unprotectedCropTiles.Add(cropTile);
         }
 
         if (unprotectedCropTiles.Count == 0) {
@@ -989,7 +990,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             return;
         }
 
-        // Wähle bis zu 3 zufällige ungeschützte CropTiles aus
+        // Select 3 random unprotected CropTiles for crow attack
         List<CropTile> tilesToAttack = GetRandomCropTiles(unprotectedCropTiles, 3);
 
         foreach (var tile in tilesToAttack) {
@@ -1016,16 +1017,23 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Definiere den Bereich basierend auf dem Radius
         int minX = position.x - radius;
         int maxX = position.x + radius;
-        int minZ = position.z - radius;
-        int maxZ = position.z + radius;
+        int minY = position.y - radius;
+        int maxY = position.y + radius;
 
         for (int x = minX; x <= maxX; x++) {
-            for (int z = minZ; z <= maxZ; z++) {
-                Vector3Int checkPos = new Vector3Int(x, position.y, z);
+            for (int y = minY; y <= maxY; y++) {
+                Vector3Int checkPos = new Vector3Int(x, y, position.z);
 
-                var test = PlaceableObjectsManager.Instance.POContainer[checkPos];
-                if (test.Prefab.GetComponent<Scarecrow>().ScarecrowType == type) {
-                    return true;
+                PlaceableObjectData? placeableObjectData = PlaceableObjectsManager.Instance.GetCropTileAtPosition(checkPos);
+                if (!placeableObjectData.HasValue) {
+                    continue;
+                }
+                PlaceableObjectData placeableObject = placeableObjectData.Value;
+
+                if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(placeableObject.PrefabNetworkObjectId, out NetworkObject networkObject)) {
+                    if (networkObject.GetComponent<Scarecrow>().ScarecrowSO.Type == type) {
+                        return true;
+                    }
                 }
             }
         }
@@ -1042,11 +1050,10 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     }
 
     private void TriggerCrowAttack(CropTile tile) {
-        // Implement your logic for crow attack here
-        Debug.Log($"Crow attack on CropTile at position {tile.CropPosition}!");
+        DestroyCropTileServerRpc(new Vector3IntSerializable(tile.CropPosition), 0, ToolSO.ToolTypes.Pickaxe);
 
-        // Example: Reduce crop yield or destroy the crop
-        // Implement accordingly
+        // TODO
+        // Show visual crow flying to the crop and destroying it
     }
 
     #endregion
@@ -1065,11 +1072,15 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             List<CropTile> cropTileList = JsonConvert.DeserializeObject<List<CropTile>>(data.CropsOnMap);
             CropTiles.Clear();
 
-            // Add the deserialized crop tiles to the NetworkList
-            foreach (var cropTile in cropTileList) {
+            for (int i = 0; i < cropTileList.Count; i++) {
+                CropTile cropTile = cropTileList[i];
+
+                if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(cropTile.PrefabNetworkObjectId, out NetworkObject networkObject)) {
+                    VisualizeCropChanges(cropTile, networkObject);
+                }
+
                 CropTiles.Add(cropTile);
-                VisualizeCropChanges(cropTile);
-                CreateCropPrefab(cropTile, CropDatabase[cropTile.CropId], cropTile.SeedItemId);
+                CreateCropPrefab(ref cropTile, CropDatabase[cropTile.CropId], cropTile.SeedItemId);
             }
         }
     }
@@ -1180,9 +1191,8 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
     #endregion
 
-
     private void HandleClientCallback(ServerRpcParams serverRpcParams, bool success) {
-        return;
+        //if (TestCropsManager.Instance.Test) return;
 
         // Get the client ID from the server RPC parameters
         var clientId = serverRpcParams.Receive.SenderClientId;

@@ -1,25 +1,20 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-/// <summary>
-/// Manages the player's tools and weapons, handling usage actions and network synchronization.
-/// </summary>
+// This class represents the character useing an item
 public class PlayerToolsAndWeaponController : NetworkBehaviour {
     public static PlayerToolsAndWeaponController LocalInstance { get; private set; }
 
     // Cached references
     private PlayerMarkerController _playerMarkerController;
     private PlayerToolbeltController _playerToolbeltController;
+    private PlayerMarkerController _playerMakerController;
 
     // Timeout settings
     private const float MAX_TIMEOUT = 2f;
-
-    // Layer Masks for optimized physics queries
-    [SerializeField] private LayerMask resourceNodeLayerMask;
 
     // Flags for callback handling
     private bool _success;
@@ -27,8 +22,6 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     private float _timeout;
     private float _elapsedTime;
 
-    // Delegate to allow dynamic callback handling
-    private Action<bool> ClientCallbackDelegate;
 
     public override void OnNetworkSpawn() {
         if (IsOwner) {
@@ -46,6 +39,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     private void Start() {
         _playerMarkerController = PlayerMarkerController.LocalInstance;
         _playerToolbeltController = PlayerToolbeltController.LocalInstance;
+        _playerMakerController = PlayerMarkerController.LocalInstance;
 
         InputManager.Instance.OnLeftClickAction += HandleLeftClick;
     }
@@ -56,8 +50,6 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     private void OnDestroy() {
         InputManager.Instance.OnLeftClickAction -= HandleLeftClick;
     }
-
-    #region Update Handlers
 
     /// <summary>
     /// Handles the left click action input.
@@ -75,85 +67,56 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
         ItemSO itemSO = ItemManager.Instance.ItemDatabase[selectedItemSlot.ItemId];
         if (itemSO != null) {
-            ExecuteToolActionsAsync(itemSO);
+            ToolAction(itemSO);
         }
     }
-
-    #endregion
 
     #region Tool Actions
 
-    /// <summary>
-    /// Executes tool actions asynchronously.
-    /// </summary>
-    /// <param name="itemSO">The item scriptable object containing tool actions.</param>
-    private async void ExecuteToolActionsAsync(ItemSO itemSO) {
-        foreach (var toolAction in itemSO.LeftClickAction) {
-            if (toolAction == null) {
-                continue;
-            }
+    private void ToolAction(ItemSO itemSO) {
+        // Starte den rekursiven Vorgang
+        StartToolAction(itemSO.LeftClickAction.GetEnumerator());
+    }
 
-            _callbackSuccessful = false;
-            _success = false;
-            _timeout = MAX_TIMEOUT;
-            _elapsedTime = 0f;
-
-            // Execute the tool action
-            toolAction.OnApplyToTileMap(_playerMarkerController.MarkedCellPosition, _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot());
-
-            // Wait for the ServerRpc response with a timeout
-            bool actionSuccess = await WaitForCallbackAsync();
-
-            if (actionSuccess) {
-                continue; // Proceed to the next tool action
-            } else {
-                Debug.Log($"{toolAction.name} | ToolAction failed or timed out!");
-                // Optionally, implement retry logic or user feedback here
+    private void StartToolAction(IEnumerator<ToolActionSO> enumerator) {
+        // Check for the next ToolAction
+        if (enumerator.MoveNext()) {
+            ToolActionSO toolAction = enumerator.Current;
+            if (toolAction != null) {
+                _callbackSuccessful = false;
+                _success = false;
+                _timeout = MAX_TIMEOUT;
+                _elapsedTime = 0f;
+                StartCoroutine(PerformToolAction(toolAction, enumerator));
             }
         }
     }
 
-    /// <summary>
-    /// Waits asynchronously for a callback to be received or a timeout to occur.
-    /// </summary>
-    /// <returns>True if the action was successful; otherwise, false.</returns>
-    private async Task<bool> WaitForCallbackAsync() {
-        var taskCompletionSource = new TaskCompletionSource<bool>();
+    private IEnumerator PerformToolAction(ToolActionSO toolAction, IEnumerator<ToolActionSO> enumerator) {
+        // Execute the ToolAction
+        toolAction.OnApplyToTileMap(_playerMakerController.MarkedCellPosition, _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot());
 
-        void CallbackHandler(bool success) {
-            _callbackSuccessful = true;
-            _success = success;
-            taskCompletionSource.SetResult(success);
+        // Wait for the ServerRpc response
+        while (!_callbackSuccessful && _elapsedTime < _timeout) {
+            yield return null;
+            _elapsedTime += Time.deltaTime;
         }
 
-        // Subscribe to the callback
-        Action<bool> originalCallback = ClientCallback;
-        ClientCallbackDelegate = CallbackHandler;
-        // Assuming there's a way to set the callback, otherwise adjust accordingly
-
-        // Wait for the callback or timeout
-        var delayTask = Task.Delay(TimeSpan.FromSeconds(MAX_TIMEOUT));
-        var completedTask = await Task.WhenAny(taskCompletionSource.Task, delayTask);
-
-        if (completedTask == taskCompletionSource.Task) {
-            return taskCompletionSource.Task.Result;
-        } else {
-            Debug.Log("ToolAction timed out waiting for callback.");
-            return false;
+        if (!_success) {
+            if (_elapsedTime >= _timeout) {
+                Debug.LogError($"{toolAction.name} | ToolAction timeout!");
+            }
+            // Recursilve call when tool action was unsuccessful
+            StartToolAction(enumerator);
         }
     }
 
-    /// <summary>
-    /// Called by the server to notify the client about the action result.
-    /// </summary>
-    /// <param name="success">Indicates whether the action was successful.</param>
     public void ClientCallback(bool success) {
-        ClientCallbackDelegate?.Invoke(success);
+        // Callback from the ServerRpc
+        _callbackSuccessful = true;
+        _success = success;
     }
 
-    /// <summary>
-    /// Callback for area marker events.
-    /// </summary>
     public void AreaMarkerCallback() {
         _elapsedTime = 0f;
     }

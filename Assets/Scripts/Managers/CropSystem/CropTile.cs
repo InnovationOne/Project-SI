@@ -1,9 +1,7 @@
 using System;
-using Unity.Entities;
 using Unity.Netcode;
 using UnityEngine;
 
-// Needed for load and save because Prefab is not serializable
 [Serializable]
 public struct CropTile : INetworkSerializable, IEquatable<CropTile> {
     public int CropId;
@@ -80,7 +78,7 @@ public struct CropTile : INetworkSerializable, IEquatable<CropTile> {
     /// Checks if the crop is harvestable.
     /// </summary>
     /// <returns>True if harvestable, false otherwise.</returns>
-    public readonly bool IsCropHarvestable() => GetCropStage() == CropStage.FullyGrown || !IsDead();
+    public readonly bool IsCropHarvestable() => GetCropStage() == CropStage.FullyGrown && !IsDead();
 
     /// <summary>
     /// Initializes the CropTile to its default state.
