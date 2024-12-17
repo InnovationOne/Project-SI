@@ -3,48 +3,44 @@ using Unity.Netcode;
 using UnityEngine;
 
 /// <summary>
-/// Represents a Tree resource node in the game, handling interactions, networking, and resource management specific to trees.
+/// Tree resource node logic (harvesting, seeding, bee nests).
 /// </summary>
 public class TreeResourceNode : ResourceNodeBase, IInteractable {
     // Serialized Fields
-    [SerializeField] private ItemSpawnManager.SpreadType _spreadType;
-    [SerializeField] private ItemSO _beeNest;
-    [SerializeField] private SeedSO _seedToDrop;
-    [SerializeField] private ItemSO _coal;
+    [SerializeField] ItemSpawnManager.SpreadType _spreadType;
+    [SerializeField] ItemSO _beeNest;
+    [SerializeField] SeedSO _seedToDrop;
+    public SeedSO SeedToDrop => _seedToDrop;
+    [SerializeField] ItemSO _coal;
 
     // Constants
-    private const float PROBABILITY_TO_SEED = 0.1f;
-    private const float PROBABILITY_TO_SEED_AFTER_SHAKE = 0.02f;
-    private const float BEE_NEST_PROBABILITY = 0.05f;
+    const float PROBABILITY_TO_SEED = 0.1f;
+    const float PROBABILITY_TO_SEED_AFTER_SHAKE = 0.02f;
+    const float BEE_NEST_PROBABILITY = 0.05f;
 
     public float MaxDistanceToPlayer => 0f;
 
-    public override bool CanHitResourceNodeType(HashSet<ResourceNodeType> canBeHit) {
-        return canBeHit.Contains(ResourceNodeType.Tree);
-    }
-
-    public override void SetSeed(SeedSO seed) {
-        _seedToDrop = seed;
-    }
-
-    protected override void PerformTypeSpecificNextDayActions() {
-        AttemptSeedSpawn();
-    }
-
-    protected override void PlaySound() {
-        switch (ResourceNodeType.Tree) {
-            case ResourceNodeType.Tree:
-                _audioManager.PlayOneShot(_fmodEvents.HitTreeSFX, transform.position);
-                break;
-            default:
+    private bool _doneGrowing {
+        get {
+            var pos = Vector3Int.FloorToInt(transform.position);
+            var cropTileOpt = _cropsManager.GetCropTileAtPosition(pos);
+            if (!cropTileOpt.HasValue) return false;
+            var cropTile = cropTileOpt.Value;
+            return cropTile.IsCropDoneGrowing(_cropsManager.CropDatabase);
         }
     }
 
+    public override bool CanHitResourceNodeType(HashSet<ResourceNodeType> canBeHit) => canBeHit.Contains(ResourceNodeType.Tree);
+
+    public override void SetSeed(SeedSO seed) => _seedToDrop = seed;
+
+    protected override void PerformTypeSpecificNextDayActions() => AttemptSeedSpawn();
+
+    protected override void PlaySound() => _audioManager.PlayOneShot(_fmodEvents.HitTreeSFX, transform.position);
 
     [ServerRpc(RequireOwnership = false)]
     public override void HitResourceNodeServerRpc(int damage, ServerRpcParams rpcParams = default) {
-        ItemSlot selectedTool = _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot();
-
+        var selectedTool = _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot();
         if (selectedTool.RarityId < _minimumToolRarity) {
             Debug.Log("Tool rarity too low.");
             // TODO: Implement bounce back animation & sound
@@ -52,63 +48,33 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
             return;
         }
 
-        Vector3Int pos = Vector3Int.FloorToInt(transform.position);
-        CropTile? cropTileData = _cropsManager.GetCropTileAtPosition(pos);
-        if (!cropTileData.HasValue) {
-            Debug.Log("No cropTile found.");
-            return;
-        }
-
-        CropTile cropTile = cropTileData.Value;
-
-        if (!cropTile.IsCropDoneGrowing()) {
-            return;
-        }
-
         ApplyDamage(damage);
-
         if (_networkCurrentHp.Value > 0) {
-            HandleCropTileOnHit(cropTile);
+            HandleCropTileOnHit();
         }
 
         if (_networkCurrentHp.Value <= 0) {
             HandleNodeDestruction();
         }
+
+        HandleClientCallback(rpcParams, true);
     }
 
-    /// <summary>
-    /// Attempts to spawn a seed based on probability and crop state.
-    /// </summary>
-    private void AttemptSeedSpawn() {
-        Vector3Int pos = Vector3Int.FloorToInt(transform.position);
-        CropTile? cropTileData = _cropsManager.GetCropTileAtPosition(pos);
-        if (!cropTileData.HasValue) {
-            Debug.LogError("No cropTile found.");
-        }
-
-        CropTile cropTile = cropTileData.Value;
-
-        if (cropTile.IsCropDoneGrowing() &&
-            Random.value < PROBABILITY_TO_SEED) {
-            ItemSlot seedItemSlot = new ItemSlot(_seedToDrop.ItemId, 1, 0);
-            Vector3 spawnPosition = GetRandomAdjacentPosition(pos);
-
+    void AttemptSeedSpawn() {        
+        if (_doneGrowing && Random.value < PROBABILITY_TO_SEED) {
+            var seedItemSlot = new ItemSlot(_seedToDrop.ItemId, 1, 0);
+            var spawnPosition = GetRandomAdjacentPosition(Vector3Int.FloorToInt(transform.position));
             ItemSpawnManager.Instance.SpawnItemServerRpc(
-                itemSlot: seedItemSlot,
-                initialPosition: spawnPosition,
-                motionDirection: Vector2.zero,
-                spreadType: ItemSpawnManager.SpreadType.Circle
-            );
+                seedItemSlot, 
+                spawnPosition, 
+                Vector2.zero, 
+                spreadType: ItemSpawnManager.SpreadType.Circle);
         }
     }
 
-    /// <summary>
-    /// Handles interactions with the crop tile when the node is hit.
-    /// Manages harvesting and potential bee nest spawning.
-    /// </summary>
-    /// <param name="cropTile">The crop tile being interacted with.</param>
-    private void HandleCropTileOnHit(CropTile cropTile) {
-        if (cropTile.IsCropDoneGrowing()) {
+    void HandleCropTileOnHit() {
+        // If done growing, we can attempt harvesting or special drops.
+        if (_doneGrowing) {
             Interact(null);
             return;
         }
@@ -119,86 +85,77 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
         }
     }
 
-    /// <summary>
-    /// Spawns a bee nest item at the resource node's position.
-    /// </summary>
-    private void SpawnBeeNest() {
-        ItemSlot beeNestSlot = new ItemSlot(_beeNest.ItemId, 1, 0);
+    void SpawnBeeNest() {
+        var beeNestSlot = new ItemSlot(_beeNest.ItemId, 1, 0);
         ItemSpawnManager.Instance.SpawnItemServerRpc(
-            itemSlot: beeNestSlot,
-            initialPosition: transform.position,
-            motionDirection: Vector2.zero,
-            spreadType: ItemSpawnManager.SpreadType.Circle
-        );
+            beeNestSlot, 
+            transform.position, 
+            Vector2.zero, 
+            spreadType: ItemSpawnManager.SpreadType.Circle);
 
-        // TODO: Implement bee attack on player
+        // TODO: Bee attack logic here.
     }
 
     protected override void HandleNodeDestruction() {
         SpawnDroppedItems();
         DestroyNodeAcrossNetwork();
+        _cropsManager.DestroyTree(Vector3Int.FloorToInt(transform.position));
     }
 
-    /// <summary>
-    /// Spawns items dropped from the destroyed resource node.
-    /// </summary>
-    private void SpawnDroppedItems() {
+    void SpawnDroppedItems() {
         int dropCount = Random.Range(_minDropCount, _maxDropCount + 1);
-        Vector2 spawnPosition = new Vector2(
-            transform.position.x + _boxCollider2D.offset.x,
-            transform.position.y + _boxCollider2D.offset.y
-        );
+        var spawnPos = new Vector2(transform.position.x + _boxCollider2D.offset.x,
+                                   transform.position.y + _boxCollider2D.offset.y);
 
-        ItemSlot itemSlot = new ItemSlot(_itemSO.ItemId, dropCount, _rarityID);
-        Vector2 motionDirection = _playerMovementController.LastMotionDirection;
+        var itemSlot = new ItemSlot(_itemSO.ItemId, dropCount, _rarityID);
+        var motionDirection = _playerMovementController.LastMotionDirection;
 
         ItemSpawnManager.Instance.SpawnItemServerRpc(
-            itemSlot: itemSlot,
-            initialPosition: spawnPosition,
-            motionDirection: motionDirection,
-            spreadType: _spreadType
-        );
+            itemSlot, 
+            spawnPos, 
+            motionDirection, 
+            spreadType: _spreadType);
     }
 
     public void Interact(Player player) {
-        if (_networkHitShookToday.Value) {
+        if (_networkHitShookToday.Value) return;
+        var pos = Vector3Int.FloorToInt(transform.position);
+        var cropTileOpt = _cropsManager.GetCropTileAtPosition(pos);
+        if (!cropTileOpt.HasValue) {
+            Debug.LogError("No cropTile found.");
             return;
         }
 
-        Vector3Int pos = Vector3Int.FloorToInt(transform.position);
-        CropTile? cropTileData = _cropsManager.GetCropTileAtPosition(pos);
-        if (!cropTileData.HasValue) {
-            Debug.LogError("No cropTile found.");
-        }
+        var cropTile = cropTileOpt.Value;
+        var db = _cropsManager.CropDatabase;
 
-        CropTile cropTile = cropTileData.Value;
-
-        if (cropTile.IsCropDoneGrowing()) {
-            if (cropTile.IsCropHarvestable()) {
-                Harvest(cropTile); // Harvest
+        if (cropTile.IsCropDoneGrowing(db)) {
+            if (cropTile.IsCropHarvestable(db)) {
+                Harvest(cropTile);
             } else if (cropTile.IsStruckByLightning) {
-                SpawnItem(cropTile, _coal.ItemId); // Spawn coal
+                ItemSpawnManager.Instance.SpawnItemServerRpc(
+                    new ItemSlot(_coal.ItemId, CropsManager.Instance.CalculateItemCount(cropTile), 0),
+                    new Vector2(cropTile.CropPosition.x, cropTile.CropPosition.y) + cropTile.SpriteRendererOffset,
+                    Vector2.zero,
+                    spreadType: ItemSpawnManager.SpreadType.Circle);
             } else if (Random.value < PROBABILITY_TO_SEED_AFTER_SHAKE) {
-                SpawnItem(cropTile, CropsManager.Instance.CropDatabase[cropTile.CropId].ItemForSeeding.ItemId); // Spawn seeds
+                var itemId = db[cropTile.CropId].ItemForSeeding.ItemId;
+                ItemSpawnManager.Instance.SpawnItemServerRpc(
+                    new ItemSlot(itemId, CropsManager.Instance.CalculateItemCount(cropTile), 0),
+                    new Vector2(cropTile.CropPosition.x, cropTile.CropPosition.y) + cropTile.SpriteRendererOffset,
+                    Vector2.zero,
+                    spreadType: ItemSpawnManager.SpreadType.Circle);
             }
         }
 
         _networkHitShookToday.Value = true;
     }
 
-    private void Harvest(CropTile cropTile) {
-        CropsManager.Instance.HarvestTreeServerRpc(new Vector3IntSerializable(new Vector3Int(cropTile.CropPosition.x, cropTile.CropPosition.y) + Vector3Int.FloorToInt(cropTile.SpriteRendererOffset)));
-    }
-
-    private void SpawnItem(CropTile cropTile, int itemId) {
-        ItemSpawnManager.Instance.SpawnItemServerRpc(
-            itemSlot: new ItemSlot(itemId, CropsManager.Instance.CalculateItemCount(cropTile), 0),
-            initialPosition: new Vector2(cropTile.CropPosition.x, cropTile.CropPosition.y) + cropTile.SpriteRendererOffset,
-            motionDirection: Vector2.zero,
-            spreadType: ItemSpawnManager.SpreadType.Circle);
+    void Harvest(CropTile cropTile) {
+        var harvestPos = cropTile.CropPosition + Vector3Int.FloorToInt(cropTile.SpriteRendererOffset);
+        CropsManager.Instance.HarvestTreeServerRpc(new Vector3IntSerializable(harvestPos));
     }
 
     public void PickUpItemsInPlacedObject(Player player) { }
-
     public void InitializePreLoad(int itemId) { }
 }

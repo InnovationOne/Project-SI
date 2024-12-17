@@ -27,10 +27,10 @@ public class ToolbeltUI : ItemContainerUI {
         Instance = this;
 
         _inventoryButton.onClick.AddListener(() => {
-            if (InventoryMasterVisual.Instance.LastOpenPanel == InventorySubPanels.none) {
-                InventoryMasterVisual.Instance.SetSubPanel(InventorySubPanels.Crafting);
+            if (InventoryMasterUI.Instance.LastOpenPanel == InventorySubUIs.none) {
+                InventoryMasterUI.Instance.SetSubPanel(InventorySubUIs.Crafting);
             } else {
-                InventoryMasterVisual.Instance.SetSubPanel(InventoryMasterVisual.Instance.LastOpenPanel);
+                InventoryMasterUI.Instance.SetSubPanel(InventoryMasterUI.Instance.LastOpenPanel);
             }
         });
     }
@@ -54,11 +54,11 @@ public class ToolbeltUI : ItemContainerUI {
     }
 
     public void SetToolbeltSlotHighlight(int currentlySelectedTool) {
-        ItemButtons[_lastSelectedTool].GetComponent<BackpackButton>().SetButtonHighlight(false);
+        ItemButtons[_lastSelectedTool].GetComponent<InventorySlot>().SetButtonHighlight(false);
 
         _lastSelectedTool = currentlySelectedTool;
 
-        ItemButtons[currentlySelectedTool].GetComponent<BackpackButton>().SetButtonHighlight(true);
+        ItemButtons[currentlySelectedTool].GetComponent<InventorySlot>().SetButtonHighlight(true);
     }
 
     public void ToolbeltChanged(int selectedToolbelt, float rotation) {

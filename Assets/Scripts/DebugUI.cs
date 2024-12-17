@@ -14,8 +14,6 @@ public class DebugUI : MonoBehaviour {
     private CheatUI _cheatConsole;
 
     private void Awake() {
-        _debugText = GetComponentInChildren<TextMeshProUGUI>();
-        _image = GetComponentInChildren<Image>();
         _cheatConsole = GetComponentInChildren<CheatUI>();
     }
 
@@ -23,6 +21,7 @@ public class DebugUI : MonoBehaviour {
         var inputManager = InputManager.Instance;
         inputManager.DebugConsole_OnCheatConsoleAction += ToggleCheatConsole;
         inputManager.DebugConsole_OnDebugConsoleAction += ToggleDebugConsole;
+        inputManager.Player_OnDebugConsoleAction += ToggleDebugConsole;
 
         _startTime = DateTime.Now;
         _debugText.gameObject.SetActive(false);
@@ -44,6 +43,7 @@ public class DebugUI : MonoBehaviour {
         bool isActive = !_debugText.gameObject.activeSelf;
         _debugText.gameObject.SetActive(isActive);
         _image.gameObject.SetActive(isActive);
+
         if (isActive) {
             InputManager.Instance.EnableDebugConsoleActionMap();
         } else {
@@ -73,10 +73,11 @@ public class DebugUI : MonoBehaviour {
             string realDateTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
             // Get ingame date and time
-            string ingameDateTime = TimeManager.Instance.GetDateTime;
+            //string ingameDateTime = TimeManager.Instance.GetDateTime;
+            string ingameDateTime = string.Empty;
 
             // Get weather
-            string weather = WeatherManager.Instance.CurrentWeather;
+            string weather = WeatherManager.Instance.CurrentWeather.ToString();
 
             // Get farm stats
             int farmMoney = FinanceManager.Instance.GetMoneyFarm;

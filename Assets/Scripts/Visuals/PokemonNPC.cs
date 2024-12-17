@@ -13,7 +13,6 @@ public class PokemonNPC : MonoBehaviour
 
     private void Update()
     {
-        /*
         // Get the pokemon name
         string pokemonName = ((Ink.Runtime.StringValue)DialogueManager.Instance.GetVariableState("pokemon_name")).value;
 
@@ -35,6 +34,6 @@ public class PokemonNPC : MonoBehaviour
             default:
                 Debug.LogWarning("Pokemon name not handelt by switch statement: " + pokemonName);
                 break;
-        }*/
+        }
     }
 }

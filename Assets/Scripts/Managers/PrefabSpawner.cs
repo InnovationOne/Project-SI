@@ -10,50 +10,51 @@ using Unity.Mathematics;
 
 [Serializable]
 public class SpawnablePrefab {
-    [SerializeField] private GameObject _prefab; // The prefab to spawn
+    [SerializeField] GameObject _prefab; // The prefab to spawn
     public GameObject Prefab => _prefab;
 
-    [SerializeField, Range(0f, 1f)] private float _spawnProbability; // Spawn probability for this prefab
+    [SerializeField, Range(0f, 1f)] float _spawnProbability; // Spawn probability for this prefab
     public float SpawnProbability => _spawnProbability;
+
+    [Header("Optional Tree Growth Settings")]
+    [SerializeField] bool _useInitialGrowthRange = false;
+    public bool UseInitialGrowthRange => _useInitialGrowthRange;
+
+    [SerializeField] Vector2Int _initialGrowthTimeRange = new Vector2Int(0, 0);
+    public Vector2Int InitialGrowthTimeRange => _initialGrowthTimeRange;
 }
 
-[RequireComponent(typeof(Collider2D), typeof(PolygonCollider2D))]
+[RequireComponent(typeof(PolygonCollider2D))]
 public class PrefabSpawner : NetworkBehaviour {
-    [SerializeField] private Tilemap _targetTilemap; // Reference to the Tilemap
-    [SerializeField] private List<SpawnablePrefab> _prefabsToSpawn = new(); // List of prefabs with spawn probabilities
-    [SerializeField] private int _minSpawnCount = 1; // Minimum number of prefabs to spawn
-    [SerializeField] private int _maxSpawnCount = 5; // Maximum number of prefabs to spawn
+    [SerializeField] Tilemap _targetTilemap;
+    [SerializeField] List<SpawnablePrefab> _prefabsToSpawn = new(); 
+    [SerializeField] int _minSpawnCount = 1;
+    [SerializeField] int _maxSpawnCount = 5;
 
-    // Removed LayerMask as per user request
+    NetworkList<NetworkObjectReference> _spawnedObjects;
+    float[] _cumulativeProbabilities;
+    float _totalProbability;
+    PolygonCollider2D _spawnArea;
+    NativeArray<float2> _polygonPoints;
 
-    private NetworkList<NetworkObjectReference> _spawnedObjects;
-
-    private float[] _cumulativeProbabilities;
-    private float _totalProbability;
-
-    private PolygonCollider2D _spawnArea;
-
-    private NativeArray<float2> _polygonPoints;
-
-    private void Awake() {
+    void Awake() {
         _spawnArea = GetComponent<PolygonCollider2D>();
+        _spawnArea.isTrigger = true;
         _spawnedObjects = new NetworkList<NetworkObjectReference>();
+
         InitializeCumulativeProbabilities();
         ExtractPolygonPoints();
     }
 
-    private void OnDestroy() {
-        // Dispose NativeArray to prevent memory leaks
+    void OnDestroy() {
         if (_polygonPoints.IsCreated) {
             _polygonPoints.Dispose();
         }
     }
 
-    public override void OnNetworkSpawn() {
-        base.OnNetworkSpawn();
-
-        // Initialize NetworkList on network spawn to ensure synchronization
-        if (IsServer) {
+    private void Update() {
+        if (IsServer && Input.GetKeyDown(KeyCode.F11)) {
+            Debug.Log("PrefabSpawner is spawning prefabs.");
             SpawnPrefabs();
         }
     }
@@ -67,15 +68,11 @@ public class PrefabSpawner : NetworkBehaviour {
                     networkObject.Despawn();
                 }
             }
-
             _spawnedObjects.Clear();
         }
     }
 
-    /// <summary>
-    /// Initializes the cumulative probabilities for prefab selection.
-    /// </summary>
-    private void InitializeCumulativeProbabilities() {
+    void InitializeCumulativeProbabilities() {
         int count = _prefabsToSpawn.Count;
         _cumulativeProbabilities = new float[count];
         _totalProbability = 0f;
@@ -86,41 +83,31 @@ public class PrefabSpawner : NetworkBehaviour {
         }
     }
 
-    /// <summary>
-    /// Extracts polygon points from the PolygonCollider2D and stores them in a NativeArray.
-    /// </summary>
-    private void ExtractPolygonPoints() {
-        // Assume the PolygonCollider2D has a single path
-        Vector2[] localPoints = _spawnArea.GetPath(0);
+    void ExtractPolygonPoints() {
+        var localPoints = _spawnArea.GetPath(0);
         int pointCount = localPoints.Length;
 
-        // Transform local points to world coordinates
-        NativeArray<float2> worldPoints = new NativeArray<float2>(pointCount, Allocator.Temp);
+        var worldPoints = new NativeArray<float2>(pointCount, Allocator.Temp);
         for (int i = 0; i < pointCount; i++) {
-            Vector3 worldPos = _spawnArea.transform.TransformPoint(localPoints[i]);
+            var worldPos = _spawnArea.transform.TransformPoint(localPoints[i]);
             worldPoints[i] = new float2(worldPos.x, worldPos.y);
         }
 
-        // Copy to _polygonPoints for persistent usage
         _polygonPoints = new NativeArray<float2>(worldPoints, Allocator.Persistent);
         worldPoints.Dispose();
     }
 
-    /// <summary>
-    /// Spawns prefabs based on defined probabilities and valid tile positions.
-    /// </summary>
-    private void SpawnPrefabs() {
+    void SpawnPrefabs() {
         int spawnCount = UnityEngine.Random.Range(_minSpawnCount, _maxSpawnCount + 1);
         Bounds spawnBounds = _spawnArea.bounds;
 
         Vector3Int minTilePosition = _targetTilemap.WorldToCell(spawnBounds.min);
         Vector3Int maxTilePosition = _targetTilemap.WorldToCell(spawnBounds.max);
 
-        // Collect all tile positions within spawn bounds that have a tile
-        NativeList<Vector3Int> allTilePositions = new NativeList<Vector3Int>(Allocator.TempJob);
+        using var allTilePositions = new NativeList<Vector3Int>(Allocator.TempJob);
         for (int x = minTilePosition.x; x <= maxTilePosition.x; x++) {
             for (int y = minTilePosition.y; y <= maxTilePosition.y; y++) {
-                Vector3Int tilePos = new Vector3Int(x, y, 0);
+                Vector3Int tilePos = new(x, y, 0);
                 if (_targetTilemap.HasTile(tilePos)) {
                     allTilePositions.Add(tilePos);
                 }
@@ -128,21 +115,16 @@ public class PrefabSpawner : NetworkBehaviour {
         }
 
         if (allTilePositions.Length == 0) {
-            Debug.LogWarning("No tiles found within spawn bounds.");
-            allTilePositions.Dispose();
             return;
         }
 
-        // Convert tile positions to world coordinates
         NativeArray<float2> tileWorldPositions = new NativeArray<float2>(allTilePositions.Length, Allocator.TempJob);
         for (int i = 0; i < allTilePositions.Length; i++) {
             Vector3 worldPos = _targetTilemap.GetCellCenterWorld(allTilePositions[i]);
             tileWorldPositions[i] = new float2(worldPos.x, worldPos.y);
         }
 
-        // Perform point-in-polygon test using Burst-compiled job
         NativeArray<bool> isInsidePolygon = new NativeArray<bool>(allTilePositions.Length, Allocator.TempJob);
-
         var pipJob = new FindValidTilePositionsJob {
             PolygonPoints = _polygonPoints,
             TileWorldPositions = tileWorldPositions,
@@ -151,76 +133,55 @@ public class PrefabSpawner : NetworkBehaviour {
 
         pipJob.Complete();
 
-        // Collect valid tile positions inside the polygon
-        List<Vector3Int> validTilePositions = new List<Vector3Int>();
+        List<Vector3Int> validTilePositions = new();
         for (int i = 0; i < allTilePositions.Length; i++) {
             if (isInsidePolygon[i]) {
                 validTilePositions.Add(allTilePositions[i]);
             }
         }
 
-        // Dispose temporary NativeArrays
         tileWorldPositions.Dispose();
         isInsidePolygon.Dispose();
-        allTilePositions.Dispose();
 
         if (validTilePositions.Count == 0) {
-            Debug.LogWarning("No valid tile positions found within the polygon.");
             return;
         }
 
-        // Check for collisions on the main thread
         List<Vector3Int> availablePositions = CheckCollisions(validTilePositions);
-
         if (availablePositions.Count == 0) {
-            Debug.LogWarning("No available positions to spawn (all positions are occupied).");
             return;
         }
 
-        // Shuffle available positions using Fisher-Yates algorithm
         Shuffle(availablePositions);
-
-        // Determine the number of positions to use based on spawn count
         int positionsToUse = Mathf.Min(spawnCount, availablePositions.Count);
 
-        // Prepare spawn positions and prefabs
-        List<GameObject> prefabsToInstantiate = new List<GameObject>(positionsToUse);
+        List<GameObject> prefabsToInstantiate = new(positionsToUse);
         Vector3[] spawnPositions = new Vector3[positionsToUse];
+        Vector3Int[] tilePositionsForCrops = new Vector3Int[positionsToUse]; // Store tile positions for CropsManager
 
         for (int i = 0; i < positionsToUse; i++) {
             Vector3Int tilePosition = availablePositions[i];
             GameObject selectedPrefab = GetRandomPrefab();
-
             if (selectedPrefab != null) {
                 spawnPositions[i] = _targetTilemap.GetCellCenterWorld(tilePosition);
+                tilePositionsForCrops[i] = tilePosition;
                 prefabsToInstantiate.Add(selectedPrefab);
             }
         }
 
-        // Instantiate and spawn prefabs in the network
         for (int i = 0; i < prefabsToInstantiate.Count; i++) {
-            SpawnPrefabOnNetwork(prefabsToInstantiate[i], spawnPositions[i]);
+            SpawnPrefabOnNetwork(prefabsToInstantiate[i], spawnPositions[i], tilePositionsForCrops[i]);
         }
     }
 
-    /// <summary>
-    /// Checks for collisions at the given tile positions.
-    /// This method runs on the main thread since Unity's Physics2D API is not thread-safe.
-    /// </summary>
-    /// <param name="tilePositions">List of tile positions to check for collisions.</param>
-    /// <returns>List of available positions without collisions.</returns>
-    private List<Vector3Int> CheckCollisions(List<Vector3Int> tilePositions) {
-        List<Vector3Int> availablePositions = new List<Vector3Int>();
-
+    List<Vector3Int> CheckCollisions(List<Vector3Int> tilePositions) {
+        List<Vector3Int> availablePositions = new();
         foreach (var pos in tilePositions) {
             Vector3 worldPosition = _targetTilemap.GetCellCenterWorld(pos);
-            // Use a small radius to detect nearby colliders
             Collider2D[] colliders = Physics2D.OverlapCircleAll(worldPosition, 0.1f);
 
             bool hasCollision = false;
-
             foreach (var collider in colliders) {
-                // Exclude the spawn area collider and trigger colliders
                 if (collider != _spawnArea && !collider.isTrigger) {
                     hasCollision = true;
                     break;
@@ -231,15 +192,11 @@ public class PrefabSpawner : NetworkBehaviour {
                 availablePositions.Add(pos);
             }
         }
-
         return availablePositions;
     }
 
-    /// <summary>
-    /// Burst-compiled job to perform point-in-polygon tests.
-    /// </summary>
     [BurstCompile]
-    private struct FindValidTilePositionsJob : IJobParallelFor {
+    struct FindValidTilePositionsJob : IJobParallelFor {
         [ReadOnly] public NativeArray<float2> PolygonPoints;
         [ReadOnly] public NativeArray<float2> TileWorldPositions;
         [WriteOnly] public NativeArray<bool> IsInsidePolygon;
@@ -249,10 +206,7 @@ public class PrefabSpawner : NetworkBehaviour {
             IsInsidePolygon[index] = IsPointInPolygon(point, PolygonPoints);
         }
 
-        /// <summary>
-        /// Implements the Ray-Casting algorithm for point-in-polygon tests.
-        /// </summary>
-        private bool IsPointInPolygon(float2 point, NativeArray<float2> polygon) {
+        readonly bool IsPointInPolygon(float2 point, NativeArray<float2> polygon) {
             int vertexCount = polygon.Length;
             bool inside = false;
 
@@ -271,59 +225,63 @@ public class PrefabSpawner : NetworkBehaviour {
         }
     }
 
-    /// <summary>
-    /// Shuffles the elements in the provided list using the Fisher-Yates algorithm.
-    /// </summary>
-    /// <param name="list">The list to shuffle.</param>
-    private void Shuffle(List<Vector3Int> list) {
+    void Shuffle(List<Vector3Int> list) {
         int n = list.Count;
-        if (n <= 1) return;
-
         for (int i = n - 1; i > 0; i--) {
             int k = UnityEngine.Random.Range(0, i + 1);
-            // Swap elements
             (list[i], list[k]) = (list[k], list[i]);
         }
     }
 
-    /// <summary>
-    /// Retrieves a random prefab based on precomputed cumulative probabilities.
-    /// </summary>
-    /// <returns>A randomly selected prefab GameObject.</returns>
-    private GameObject GetRandomPrefab() {
+    GameObject GetRandomPrefab() {
         if (_prefabsToSpawn.Count == 0) return null;
-
         float randomPoint = UnityEngine.Random.value * _totalProbability;
-
-        // Binary search for efficient lookup
         int index = Array.BinarySearch(_cumulativeProbabilities, randomPoint);
-        if (index < 0) {
-            index = ~index;
-        }
-
-        // Clamp index to prevent out-of-range errors
+        if (index < 0) index = ~index;
         index = Mathf.Clamp(index, 0, _prefabsToSpawn.Count - 1);
         return _prefabsToSpawn[index].Prefab;
     }
 
-    /// <summary>
-    /// Spawns the prefab in the network, sets it as a child of this GameObject, and tracks it using a NetworkList.
-    /// </summary>
-    /// <param name="prefab">The prefab to spawn.</param>
-    /// <param name="position">The position to spawn the prefab at.</param>
-    private void SpawnPrefabOnNetwork(GameObject prefab, Vector3 position) {
-        // Instantiate the prefab as a networked object and set its parent to this GameObject
-        GameObject networkedPrefab = Instantiate(prefab, position, Quaternion.identity, transform);
+    void SpawnPrefabOnNetwork(GameObject prefab, Vector3 position, Vector3Int tilePosition) {
+        if (prefab.TryGetComponent<TreeResourceNode>(out var treeResource)) {
+            // Fetch seedItemId from the TreeResourceNode
+            int seedItemId = treeResource.SeedToDrop.ItemId;
+            var prefabData = GetPrefabData(prefab);
+            int initialGrowthTimer = 0;
 
-        if (networkedPrefab.TryGetComponent<NetworkObject>(out var networkObject)) {
-            // Spawn the object on the network
-            networkObject.Spawn();
+            // If we have an initial growth range, pick a random value and clamp it
+            if (prefabData != null && prefabData.UseInitialGrowthRange) {
+                initialGrowthTimer = UnityEngine.Random.Range(prefabData.InitialGrowthTimeRange.x, prefabData.InitialGrowthTimeRange.y + 1);
 
-            // Track the spawned object
-            _spawnedObjects.Add(new NetworkObjectReference(networkObject));
+                // Clamp the initialGrowthTimer to CropSO's DaysToGrow
+                if (ItemManager.Instance.ItemDatabase[seedItemId] is SeedSO seedSo && seedSo.CropToGrow != null) {
+                    initialGrowthTimer = Mathf.Clamp(initialGrowthTimer, 0, seedSo.CropToGrow.DaysToGrow);
+                }
+            }
+
+            // Directly call the CropsManager to handle seeding and spawning the tree
+            CropsManager.Instance.SeedTileServerRpc(new Vector3IntSerializable(tilePosition), seedItemId, initialGrowthTimer);
         } else {
-            Debug.LogWarning($"Prefab {prefab.name} lacks a NetworkObject component.");
-            Destroy(networkedPrefab);
+            // For non-tree prefabs, proceed with the normal network instantiation and spawning
+            GameObject networkedPrefab = Instantiate(prefab, position, Quaternion.identity, transform);
+
+            if (networkedPrefab.TryGetComponent<NetworkObject>(out var networkObject)) {
+                networkObject.Spawn();
+                _spawnedObjects.Add(new NetworkObjectReference(networkObject));
+            } else {
+                Debug.LogWarning($"Prefab {prefab.name} lacks a NetworkObject component.");
+                Destroy(networkedPrefab);
+            }
         }
+    }
+
+    SpawnablePrefab GetPrefabData(GameObject prefab) {
+        // Find the corresponding SpawnablePrefab entry
+        foreach (var sp in _prefabsToSpawn) {
+            if (sp.Prefab == prefab) {
+                return sp;
+            }
+        }
+        return null;
     }
 }

@@ -3,50 +3,37 @@ using Unity.Netcode;
 using UnityEngine;
 
 /// <summary>
-/// Represents a Branch resource node in the game, handling interactions, networking, and resource management specific to branches.
+/// Branch resource node logic.
 /// </summary>
 public class BranchResourceNode : ResourceNodeBase {
-    [SerializeField] private ItemSpawnManager.SpreadType _spreadType;
+    [SerializeField] ItemSpawnManager.SpreadType _spreadType;
 
-    public override bool CanHitResourceNodeType(HashSet<ResourceNodeType> canBeHit) {
-        return canBeHit.Contains(ResourceNodeType.Branch);
-    }
+    public override bool CanHitResourceNodeType(HashSet<ResourceNodeType> canBeHit) => canBeHit.Contains(ResourceNodeType.Branch);
 
     public override void SetSeed(SeedSO seed) { }
 
     protected override void PerformTypeSpecificNextDayActions() { }
 
     protected override void PlaySound() {
-        switch (ResourceNodeType.Branch) {
-            case ResourceNodeType.Branch:
-                // TODO: Impliment soundeffect for hitting a branch.
-                //_audioManager.PlayOneShot(_fmodEvents.HitBranchSFX, transform.position);
-                break;
-            default:
-        }
+        // TODO: Play branch hit SFX here
     }
-
 
     [ServerRpc(RequireOwnership = false)]
     public override void HitResourceNodeServerRpc(int damage, ServerRpcParams rpcParams = default) {
-        ItemSlot selectedTool = _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot();
-
+        var selectedTool = _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot();
         if (selectedTool.RarityId < _minimumToolRarity) {
             Debug.Log("Tool rarity too low.");
-            // TODO: Implement bounce back animation & sound
             HandleClientCallback(rpcParams, false);
             return;
         }
 
         ApplyDamage(damage);
 
-        if (_networkCurrentHp.Value > 0) {
-            // Implement branch-specific hit logic if any
-        }
-
         if (_networkCurrentHp.Value <= 0) {
             HandleNodeDestruction();
         }
+
+        HandleClientCallback(rpcParams, true);
     }
 
     protected override void HandleNodeDestruction() {
@@ -54,23 +41,15 @@ public class BranchResourceNode : ResourceNodeBase {
         DestroyNodeAcrossNetwork();
     }
 
-    /// <summary>
-    /// Spawns items dropped from the destroyed branch node.
-    /// </summary>
     private void SpawnDroppedItems() {
-        int dropCount = UnityEngine.Random.Range(_minDropCount, _maxDropCount + 1);
-        Vector2 spawnPosition = new Vector2(
-            transform.position.x + _boxCollider2D.offset.x,
-            transform.position.y + _boxCollider2D.offset.y
-        );
-
-        ItemSlot itemSlot = new ItemSlot(_itemSO.ItemId, dropCount, _rarityID);
-        Vector2 motionDirection = _playerMovementController.LastMotionDirection;
+        int dropCount = Random.Range(_minDropCount, _maxDropCount + 1);
+        var spawnPos = new Vector2(transform.position.x + _boxCollider2D.offset.x,
+                                   transform.position.y + _boxCollider2D.offset.y);
 
         ItemSpawnManager.Instance.SpawnItemServerRpc(
-            itemSlot: itemSlot,
-            initialPosition: spawnPosition,
-            motionDirection: motionDirection,
+            new ItemSlot(_itemSO.ItemId, dropCount, _rarityID),
+            spawnPos,
+            _playerMovementController.LastMotionDirection,
             spreadType: _spreadType
         );
     }

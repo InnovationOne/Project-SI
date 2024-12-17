@@ -47,6 +47,7 @@ public class GameData {
         GroceryStoreLevel = 0;
 
         MoneyOfFarm = 0;
+        MoneyOfTown = 0;
 
         CurrentDay = 0;
         CurrentSeason = 0;
@@ -57,7 +58,6 @@ public class GameData {
 
         PlacedObjects = string.Empty;
 
-        PlayerData = string.Empty;
         Recipes = string.Empty;
         Quests = string.Empty;
         PlayerData = string.Empty;

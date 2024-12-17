@@ -148,7 +148,7 @@ public class TestCropsManager : NetworkBehaviour {
     /// </summary>
     private void HarvestAllHarvestableCrops() {
         foreach (var cropTile in cropsManager.CropTiles) {
-            if (cropTile.CropId != -1 && cropTile.IsCropHarvestable()) {
+            if (cropTile.CropId != -1 && cropTile.IsCropHarvestable(cropsManager.CropDatabase)) {
                 if (cropsManager.CropDatabase[cropTile.CropId].IsTree) {
                     cropsManager.HarvestTreeServerRpc(new Vector3IntSerializable(cropTile.CropPosition), default);
                 } else {

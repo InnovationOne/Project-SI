@@ -3,32 +3,27 @@ using UnityEngine;
 
 [CreateAssetMenu(menuName = "Database/Crop Database")]
 public class CropDatabaseSO : ScriptableObject {
-    // List of crops in the database
-    [SerializeField] private List<CropSO> _crops = new();
-    // Cache to store crops by their IDs for fast lookup
-    private Dictionary<int, CropSO> _cache = new();
+    [SerializeField] List<CropSO> _crops = new();
+    Dictionary<int, CropSO> _cache;
+
     public List<CropSO> Crops => _crops;
 
-    /// <summary>
-    /// Initializes the crops in the crop database on Start() and cache all crops.
-    /// </summary>
+    // Initializes crops and caches them by ID.
     public void InitializeCrops() {
+        _cache = new Dictionary<int, CropSO>(_crops.Count);
         for (int i = 0; i < _crops.Count; i++) {
             _crops[i].CropID = i;
-            _cache[i] = _crops[i]; // Populate the cache
+            _cache[i] = _crops[i];
         }
     }
 
-    /// <summary>
-    /// Indexer to access crops by their IDs from the cache
-    /// </summary>
+    // Access crops by ID.
     public CropSO this[int cropId] {
         get {
             if (_cache.TryGetValue(cropId, out var crop)) {
                 return crop;
-            } else {
-                throw new KeyNotFoundException($"Crop with ID {cropId} does not exist in the cache.");
             }
+            throw new KeyNotFoundException($"Crop with ID {cropId} not found.");
         }
     }
 }

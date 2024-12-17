@@ -12,7 +12,7 @@ public class PickUpItem : NetworkBehaviour {
     [Header("Item Movement Settings")]
     [SerializeField] private float _itemMoveSpeed = 0.5f;
     [SerializeField] private float _itemSpeedAcceleration = 0.01f;
-    [SerializeField] private float _pickUpDistanceThreshold = 1.25f;
+    [SerializeField] private float _pickUpDistanceThreshold = 2f;
 
     [Header("Item Animation Settings")]
     [SerializeField] private float _upAndDownSpeed = 1f;

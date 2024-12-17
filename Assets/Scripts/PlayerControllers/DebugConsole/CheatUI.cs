@@ -78,7 +78,7 @@ public class CheatUI : MonoBehaviour {
         _commandDictionary.Add(ADD_FARM_MONEY.CommandId, ADD_FARM_MONEY);
 
         REMOVE_FARM_MONEY = new DebugCommand<int>("remove_farm_money", "Removes money from the town's account.", "remove_farm_money <amount>", (int amount) => {
-            FinanceManager.Instance.RemoveMoneyFromFarmServerRpc(amount, true);
+            FinanceManager.Instance.RemoveMoneyServerRpc(amount, true);
         });
         _commandDictionary.Add(REMOVE_FARM_MONEY.CommandId, REMOVE_FARM_MONEY);
 
@@ -88,7 +88,7 @@ public class CheatUI : MonoBehaviour {
         _commandDictionary.Add(ADD_TOWN_MONEY.CommandId, ADD_TOWN_MONEY);
 
         REMOVE_TOWN_MONEY = new DebugCommand<int>("remove_town_money", "Removes money from the town's account.", "remove_town_money <amount>", (int amount) => {
-            FinanceManager.Instance.RemoveMoneyFromFarmServerRpc(amount, false);
+            FinanceManager.Instance.RemoveMoneyServerRpc(amount, false);
         });
         _commandDictionary.Add(REMOVE_TOWN_MONEY.CommandId, REMOVE_TOWN_MONEY);
 

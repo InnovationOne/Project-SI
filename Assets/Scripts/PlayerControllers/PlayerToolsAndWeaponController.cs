@@ -56,7 +56,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     /// </summary>
     private void HandleLeftClick() {
         // When the inventory UI is opened, skip input handling
-        if (InventoryMasterVisual.Instance != null && InventoryMasterVisual.Instance.gameObject.activeSelf) {
+        if (InventoryMasterUI.Instance != null && InventoryMasterUI.Instance.gameObject.activeSelf) {
             return;
         }
 

@@ -13,6 +13,7 @@ public class PlayerDataManager : NetworkBehaviour, IDataPersistance {
     private void Awake() {
         if (Instance != null) {
             Debug.LogError("There is more than one instance of PlayerDataManager in the scene!");
+            Destroy(this);
             return;
         }
         Instance = this;

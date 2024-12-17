@@ -57,7 +57,6 @@ public class PauseGameManager : NetworkBehaviour {
 
     private void Start() {
         InputManager.Instance.OnEscapeAction += InputManager_TogglePauseGame;
-        InputManager.Instance.OnPauseAction += InputManager_TogglePauseGame;
 
         PauseGamePanel.Instance.OnResumeGameButtonPressed += InputManager_TogglePauseGame;
         PauseGamePanel.Instance.OnOptionsButtonPressed += PauseGamePanel_OnOptionsButtonPressed;
@@ -76,7 +75,7 @@ public class PauseGameManager : NetworkBehaviour {
 
     public void InputManager_TogglePauseGame() {
         // Close inventory first
-        if (InventoryMasterVisual.Instance.gameObject.activeSelf) {
+        if (InventoryMasterUI.Instance.gameObject.activeSelf) {
             return;
         }
 

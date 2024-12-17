@@ -36,53 +36,36 @@ public struct CropTile : INetworkSerializable, IEquatable<CropTile> {
         Regrowth        // Plant grows again after harvesting
     }
 
-    /// <summary>
-    /// Represents the growth stages of a crop.
-    /// </summary>
-    public readonly CropStage GetCropStage() {
-        if (CropsManager.Instance == null) {
+    // Returns the current growth stage of the crop.
+    public CropStage GetCropStage(CropDatabaseSO cropDatabase) {
+        if (CropId < 0 || cropDatabase == null) {
             return CropStage.None;
         }
-        CropSO cropSO = CropsManager.Instance.CropDatabase[CropId];
 
-        float growthProgress = CurrentGrowthTimer / (cropSO.DaysToGrow * GrowthTimeScaler);
+        var cropSO = cropDatabase[CropId];
+        float requiredTime = cropSO.DaysToGrow * GrowthTimeScaler;
+        float growthProgress = CurrentGrowthTimer / requiredTime;
 
-        if (IsRegrowing && !(CurrentGrowthTimer >= cropSO.DaysToGrow * GrowthTimeScaler)) {
-            return CropStage.Regrowth;
-        } else if (CurrentGrowthTimer >= cropSO.DaysToGrow * GrowthTimeScaler) {
-            return CropStage.FullyGrown;
-        } else if (growthProgress >= 0.66f) {
-            return CropStage.Flowering;
-        } else if (growthProgress >= 0.33f) {
-            return CropStage.Growing;
-        } else if (CurrentGrowthTimer > 0f) {
-            return CropStage.Sprouting;
-        } else {
-            return CropStage.Seeded;
-        }
+        // Check regrowth first
+        if (IsRegrowing && CurrentGrowthTimer < requiredTime) return CropStage.Regrowth;
+        if (CurrentGrowthTimer >= requiredTime) return CropStage.FullyGrown;
+        if (growthProgress >= 0.66f) return CropStage.Flowering;
+        if (growthProgress >= 0.33f) return CropStage.Growing;
+        if (CurrentGrowthTimer > 0f) return CropStage.Sprouting;
+
+        return CropStage.Seeded;
     }
 
-    /// <summary>
-    /// Checks if the crop tile is dead based on the maximum damage allowed.
-    /// </summary>
-    /// <returns>True if the crop tile is dead, false otherwise.</returns>
-    public readonly bool IsDead() => Damage >= MAX_DAMAGE;
+    // Returns true if the crop is dead.
+    public bool IsDead() => Damage >= MAX_DAMAGE;
 
-    /// <summary>
-    /// Checks if the crop is done growing based on the current growth timer and the crop's growth time.
-    /// </summary>
-    /// <returns>True if the crop is done growing, false otherwise.</returns>
-    public readonly bool IsCropDoneGrowing() => GetCropStage() == CropStage.FullyGrown || GetCropStage() == CropStage.Regrowth;
+    // Returns true if the crop is fully grown or in regrowth stage.
+    public bool IsCropDoneGrowing(CropDatabaseSO cropDatabase) => GetCropStage(cropDatabase) == CropStage.FullyGrown || GetCropStage(cropDatabase) == CropStage.Regrowth;
 
-    /// <summary>
-    /// Checks if the crop is harvestable.
-    /// </summary>
-    /// <returns>True if harvestable, false otherwise.</returns>
-    public readonly bool IsCropHarvestable() => GetCropStage() == CropStage.FullyGrown && !IsDead();
+    // Returns true if the crop is harvestable.
+    public bool IsCropHarvestable(CropDatabaseSO cropDatabase) => GetCropStage(cropDatabase) == CropStage.FullyGrown && !IsDead();
 
-    /// <summary>
-    /// Initializes the CropTile to its default state.
-    /// </summary>
+    // Initializes the crop tile with default values.
     public CropTile(bool initialize = true) {
         CropId = -1;
         CropPosition = Vector3Int.zero;
@@ -105,9 +88,7 @@ public struct CropTile : INetworkSerializable, IEquatable<CropTile> {
         PrefabNetworkObjectId = 0;
     }
 
-    /// <summary>
-    /// Serializes the CropTile for network transmission.
-    /// </summary>
+    // Serializes the crop tile for network use.
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter {
         serializer.SerializeValue(ref CropId);
         serializer.SerializeValue(ref CropPosition);
@@ -128,9 +109,6 @@ public struct CropTile : INetworkSerializable, IEquatable<CropTile> {
         serializer.SerializeValue(ref PrefabNetworkObjectId);
     }
 
-    /// <summary>
-    /// Serializes the CropTile for network transmission.
-    /// </summary>
     public bool Equals(CropTile other) {
         return CropId == other.CropId &&
                CropPosition.Equals(other.CropPosition) &&
@@ -151,9 +129,7 @@ public struct CropTile : INetworkSerializable, IEquatable<CropTile> {
                PrefabNetworkObjectId == other.PrefabNetworkObjectId;
     }
 
-    public override bool Equals(object obj) {
-        return obj is CropTile other && Equals(other);
-    }
+    public override bool Equals(object obj) => obj is CropTile other && Equals(other);
 
     public override int GetHashCode() {
         var hash = new HashCode();

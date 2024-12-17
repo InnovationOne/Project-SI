@@ -8,17 +8,15 @@ public enum ScarecrowType {
 }
 
 public class Scarecrow : PlaceableObject {
-    // Scarecrow Tier 2 & 3
-    private const string SCARE_OFF = "ScareOff";
+    // Animation constants for advanced scarecrow behavior.
+    const string SCARE_OFF = "ScareOff";
+    const string MOVE = "Move";
+    const string HORIZONTAL = "Horizontal";
+    const string VERTICAL = "Vertical";
+    const string ACTION_VERSION = "ActionVersion";
+    const string GREET = "Greet";
 
-    // Scarecrow Tier 3
-    private const string MOVE = "Move";
-    private const string HORIZONTAL = "Horizontal";
-    private const string VERTICAL = "Vertical";
-    private const string ACTION_VERSION = "ActionVersion";
-    private const string GREET = "Greet";
-
-    [SerializeField] private ScarecrowSO _scarecrowSO;
+    [SerializeField] ScarecrowSO _scarecrowSO;
     public ScarecrowSO ScarecrowSO => _scarecrowSO;
 
 

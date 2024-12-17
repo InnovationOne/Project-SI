@@ -5229,7 +5229,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   _isObjectStationary: 0
   _objectCollider2D: {fileID: 0}
 --- !u!114 &5102648737730687133
@@ -5323,6 +5322,12 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   _walkSpeed: 2
   _runSpeed: 4
+  _dashSpeedMultiplier: 3
+  _dashDuration: 0.2
+  _dashCooldown: 1
+  _footprintPrefab: {fileID: 3580491474768295568, guid: 0971f0c78c64c4b4688f4b09745d233d, type: 3}
+  _effectSpawnInterval: 0.2
+  _footprintSpread: 0.1
 --- !u!114 &4092168649709497669
 MonoBehaviour:
   m_ObjectHideFlags: 0

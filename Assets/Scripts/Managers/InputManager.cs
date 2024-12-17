@@ -17,17 +17,16 @@ public class InputManager : NetworkBehaviour {
 
     // Player Events
     public event Action OnRunAction;
+    public event Action OnDashAction;
     public event Action OnDropItemAction;
     public event Action OnInteractAction;
+
     public event Action OnInventoryAction;
-    public event Action OnCraftAction;
-    public event Action OnRelationAction;
-    public event Action OnCollectionAction;
-    public event Action OnCharacterAction;
-    public event Action OnMissionAction;
-    public event Action OnMapAction;
-    public event Action OnPauseAction;
     public event Action OnEscapeAction;
+
+    public event Action OnRotateAction;
+    public event Action OnVMirrorAction;
+    public event Action OnHMirrorAction;
 
     // Toolbelt Slot Actions
     private readonly Dictionary<int, Action> _toolbeltSlotActions = new Dictionary<int, Action>();
@@ -43,10 +42,18 @@ public class InputManager : NetworkBehaviour {
 
     // Debug Console Events
     public event Action DebugConsole_OnDebugConsoleAction;
+    public event Action Player_OnDebugConsoleAction;
     public event Action DebugConsole_OnCheatConsoleAction;
     public event Action DebugConsole_OnEnterAction;
     public event Action DebugConsole_OnArrowUpAction;
     public event Action DebugConsole_OnArrowDownAction;
+
+    public event Action Dialogue_OnContinueAction;
+    public event Action Dialogue_OnContinueStarted;
+    public event Action Dialogue_OnContinueCanceled;
+    public event Action Dialogue_OnResponseDown;
+    public event Action Dialogue_OnResponseUp;
+
 
     // Constants
     public const int SHIFT_KEY_AMOUNT = 10;
@@ -115,20 +122,16 @@ public class InputManager : NetworkBehaviour {
 
         // Subscribe to player input actions
         _playerInputActions.Player.Run.performed += Run_performed;
+        _playerInputActions.Player.Dash.performed += Dash_performed;
         _playerInputActions.Player.DropItem.performed += DropItem_performed;
         _playerInputActions.Player.Interact.performed += Interact_performed;
 
         _playerInputActions.Player.Inventory.performed += Inventory_performed;
-        _playerInputActions.Player.Craft.performed += Craft_performed;
-        _playerInputActions.Player.Relation.performed += Relation_performed;
-        _playerInputActions.Player.Wiki.performed += Wiki_performed;
-        _playerInputActions.Player.Character.performed += Character_performed;
-
-        _playerInputActions.Player.Mission.performed += Mission_performed;
-        _playerInputActions.Player.Map.performed += Map_performed;
-
-        _playerInputActions.Player.Pause.performed += Pause_performed;
         _playerInputActions.Player.Escape.performed += Escape_performed;
+
+        _playerInputActions.Player.RotateCWObj.performed += RotateObj_Performed;
+        _playerInputActions.Player.VMirrorObj.performed += VMirrorObj_Performed;
+        _playerInputActions.Player.HMirrorObj.performed += HMirrorObj_Performed;
 
         // Mouse Clicks
         _playerInputActions.Player.LeftClick.performed += LeftClick_performed;
@@ -142,10 +145,17 @@ public class InputManager : NetworkBehaviour {
 
         // Debug Console
         _playerInputActions.DebugConsole.DebugConsole.performed += DebugConsole_DebugConsole_performed;
+        _playerInputActions.Player.DebugConsole.performed += Player_DebugConsole_performed;
         _playerInputActions.DebugConsole.CheatConsole.performed += DebugConsole_CheatConsole_performed;
         _playerInputActions.DebugConsole.Enter.performed += DebugConsoleEnter_performed;
         _playerInputActions.DebugConsole.ArrowUp.performed += DebugConsoleArrowUp_performed;
         _playerInputActions.DebugConsole.ArrowDown.performed += DebugConsoleArrowDown_performed;
+
+        _playerInputActions.Dialogue.Continue.performed += Dialogue_Continue_performed;
+        _playerInputActions.Dialogue.Continue.started += Dialogue_Continue_started;
+        _playerInputActions.Dialogue.Continue.canceled += Dialogue_Continue_canceled;
+        _playerInputActions.Dialogue.ResponseDown.performed += Dialogue_ResponseDown_performed;
+        _playerInputActions.Dialogue.ResponseUp.performed += Dialogue_ResponseUp_performed;
     }
 
     /// <summary>
@@ -175,27 +185,21 @@ public class InputManager : NetworkBehaviour {
     #region Player Input Handlers
     private void Run_performed(InputAction.CallbackContext obj) => OnRunAction?.Invoke();
 
+    private void Dash_performed(InputAction.CallbackContext obj) => OnDashAction?.Invoke();
+
     private void DropItem_performed(InputAction.CallbackContext obj) => OnDropItemAction?.Invoke();
 
     private void Interact_performed(InputAction.CallbackContext obj) => OnInteractAction?.Invoke();
 
     private void Inventory_performed(InputAction.CallbackContext obj) => OnInventoryAction?.Invoke();
 
-    private void Craft_performed(InputAction.CallbackContext obj) => OnCraftAction?.Invoke();
-
-    private void Relation_performed(InputAction.CallbackContext obj) => OnRelationAction?.Invoke();
-
-    private void Wiki_performed(InputAction.CallbackContext obj) => OnCollectionAction?.Invoke();
-
-    private void Character_performed(InputAction.CallbackContext obj) => OnCharacterAction?.Invoke();
-
-    private void Mission_performed(InputAction.CallbackContext obj) => OnMissionAction?.Invoke();
-
-    private void Map_performed(InputAction.CallbackContext obj) => OnMapAction?.Invoke();
-
-    private void Pause_performed(InputAction.CallbackContext obj) => OnPauseAction?.Invoke();
-
     private void Escape_performed(InputAction.CallbackContext obj) => OnEscapeAction?.Invoke();
+
+    private void RotateObj_Performed(InputAction.CallbackContext obj) => OnRotateAction?.Invoke();
+
+    private void VMirrorObj_Performed(InputAction.CallbackContext obj) => OnVMirrorAction?.Invoke();
+
+    private void HMirrorObj_Performed(InputAction.CallbackContext obj) => OnHMirrorAction?.Invoke();
 
     private void LeftClick_performed(InputAction.CallbackContext obj) => OnLeftClickAction?.Invoke();
 
@@ -225,6 +229,8 @@ public class InputManager : NetworkBehaviour {
     #region Debug Console Handlers
     private void DebugConsole_DebugConsole_performed(InputAction.CallbackContext obj) => DebugConsole_OnDebugConsoleAction?.Invoke();
 
+    private void Player_DebugConsole_performed(InputAction.CallbackContext obj) => Player_OnDebugConsoleAction?.Invoke();
+
     private void DebugConsole_CheatConsole_performed(InputAction.CallbackContext obj) => DebugConsole_OnCheatConsoleAction?.Invoke();
 
     private void DebugConsoleEnter_performed(InputAction.CallbackContext obj) => DebugConsole_OnEnterAction?.Invoke();
@@ -232,6 +238,16 @@ public class InputManager : NetworkBehaviour {
     private void DebugConsoleArrowUp_performed(InputAction.CallbackContext obj) => DebugConsole_OnArrowUpAction?.Invoke();
 
     private void DebugConsoleArrowDown_performed(InputAction.CallbackContext obj) => DebugConsole_OnArrowDownAction?.Invoke();
+
+    private void Dialogue_Continue_performed(InputAction.CallbackContext obj) => Dialogue_OnContinueAction?.Invoke();
+
+    private void Dialogue_Continue_started(InputAction.CallbackContext obj) => Dialogue_OnContinueStarted?.Invoke();
+
+    private void Dialogue_Continue_canceled(InputAction.CallbackContext obj) => Dialogue_OnContinueCanceled?.Invoke();
+
+    private void Dialogue_ResponseDown_performed(InputAction.CallbackContext obj) => Dialogue_OnResponseDown?.Invoke();
+
+    private void Dialogue_ResponseUp_performed(InputAction.CallbackContext obj) => Dialogue_OnResponseUp?.Invoke();
     #endregion
 
     /// <summary>
@@ -280,8 +296,10 @@ public class InputManager : NetworkBehaviour {
     /// Enables the Debug Console action map and disables the Player action map.
     /// </summary>
     public void EnableDebugConsoleActionMap() {
-        _playerInputActions.DebugConsole.Enable();
         _playerInputActions.Player.Disable();
+        _playerInputActions.Dialogue.Disable();
+
+        _playerInputActions.DebugConsole.Enable();
     }
 
     /// <summary>
@@ -289,7 +307,16 @@ public class InputManager : NetworkBehaviour {
     /// </summary>
     public void EnablePlayerActionMap() {
         _playerInputActions.DebugConsole.Disable();
+        _playerInputActions.Dialogue.Disable();
+
         _playerInputActions.Player.Enable();
+    }
+
+    public void EnableDialogueActionMap() {
+        _playerInputActions.DebugConsole.Disable();
+        _playerInputActions.Player.Disable();
+
+        _playerInputActions.Dialogue.Enable();
     }
 
     #endregion
@@ -300,20 +327,16 @@ public class InputManager : NetworkBehaviour {
     private void OnDestroy() {
         // Unsubscribe from player input actions
         _playerInputActions.Player.Run.performed -= Run_performed;
+        _playerInputActions.Player.Dash.performed -= Dash_performed;
         _playerInputActions.Player.DropItem.performed -= DropItem_performed;
         _playerInputActions.Player.Interact.performed -= Interact_performed;
 
         _playerInputActions.Player.Inventory.performed -= Inventory_performed;
-        _playerInputActions.Player.Craft.performed -= Craft_performed;
-        _playerInputActions.Player.Relation.performed -= Relation_performed;
-        _playerInputActions.Player.Wiki.performed -= Wiki_performed;
-        _playerInputActions.Player.Character.performed -= Character_performed;
-
-        _playerInputActions.Player.Mission.performed -= Mission_performed;
-        _playerInputActions.Player.Map.performed -= Map_performed;
-
-        _playerInputActions.Player.Pause.performed -= Pause_performed;
         _playerInputActions.Player.Escape.performed -= Escape_performed;
+
+        _playerInputActions.Player.RotateCWObj.performed -= RotateObj_Performed;
+        _playerInputActions.Player.VMirrorObj.performed -= VMirrorObj_Performed;
+        _playerInputActions.Player.HMirrorObj.performed -= HMirrorObj_Performed;
 
         _playerInputActions.Player.LeftClick.performed -= LeftClick_performed;
         _playerInputActions.Player.LeftClick.started -= LeftClick_started;
@@ -325,10 +348,17 @@ public class InputManager : NetworkBehaviour {
 
         // Unsubscribe from debug console actions
         _playerInputActions.DebugConsole.DebugConsole.performed -= DebugConsole_DebugConsole_performed;
+        _playerInputActions.Player.DebugConsole.performed -= Player_DebugConsole_performed;
         _playerInputActions.DebugConsole.CheatConsole.performed -= DebugConsole_CheatConsole_performed;
         _playerInputActions.DebugConsole.Enter.performed -= DebugConsoleEnter_performed;
         _playerInputActions.DebugConsole.ArrowUp.performed -= DebugConsoleArrowUp_performed;
         _playerInputActions.DebugConsole.ArrowDown.performed -= DebugConsoleArrowDown_performed;
+
+        _playerInputActions.Dialogue.Continue.performed -= Dialogue_Continue_performed;
+        _playerInputActions.Dialogue.Continue.started -= Dialogue_Continue_started;
+        _playerInputActions.Dialogue.Continue.canceled -= Dialogue_Continue_canceled;
+        _playerInputActions.Dialogue.ResponseDown.performed -= Dialogue_ResponseDown_performed;
+        _playerInputActions.Dialogue.ResponseUp.performed -= Dialogue_ResponseUp_performed;
 
         // Unsubscribe from toolbelt slot performed events
         foreach (var kvp in _toolbeltSlotPerformedCallbacks) {

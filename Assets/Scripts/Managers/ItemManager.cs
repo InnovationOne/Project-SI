@@ -1,6 +1,4 @@
-using LiteDB;
 using System;
-using System.IO;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -8,11 +6,11 @@ using UnityEngine;
 public class ItemManager : NetworkBehaviour {
     public static ItemManager Instance { get; private set; }
 
-    [SerializeField] private ItemDatabaseSO _itemDatabase;
+    [SerializeField] ItemDatabaseSO _itemDatabase;
     public ItemDatabaseSO ItemDatabase => _itemDatabase;
 
 
-    private void Awake() {
+    void Awake() {
         if (Instance != null) {
             throw new Exception("Found more than one ItemManager in the scene.");
         } else {
@@ -22,5 +20,6 @@ public class ItemManager : NetworkBehaviour {
         ItemDatabase.InitializeItems();
     }
 
+    // Returns the maximum stackable amount for the given item ID.
     public int GetMaxStackableAmount(int itemId) => ItemDatabase[itemId].MaxStackableAmount;
 }

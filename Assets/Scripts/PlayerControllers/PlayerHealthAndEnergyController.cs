@@ -12,44 +12,44 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     public event Action<float> OnUpdateMaxEnergy;
 
     [Header("Health Parameters")]
-    [SerializeField] private float _maxHealth = 100;
+    [SerializeField] float _maxHealth = 100;
     public float MaxHealth => _maxHealth;
 
-    [SerializeField] private float _currentHealth = 100;
+    [SerializeField] float _currentHealth = 100;
     public float CurrentHealth => _currentHealth;
 
-    [SerializeField] private float _hpAtRespawn = 10;
-    [SerializeField] private float _regenHpAmountInBed = 0.5f;
+    [SerializeField] float _hpAtRespawn = 10;
+    [SerializeField] float _regenHpAmountInBed = 0.5f;
 
     [Header("Energy Parameters")]
-    [SerializeField] private float _maxEnergy = 100;
+    [SerializeField] float _maxEnergy = 100;
     public float MaxEnergy => _maxEnergy;
 
-    [SerializeField] private float _currentEnergy = 100;
+    [SerializeField] float _currentEnergy = 100;
     public float CurrentEnergy => _currentEnergy;
 
-    [SerializeField] private float _energyAtRespawn = 10;
+    [SerializeField] float _energyAtRespawn = 10;
 
-    [SerializeField, Tooltip("Energy is set to max when resting energy is above this multiplier of max.")]
-    private float _minimumEnergyMultiplierForFullReset = 0.25f; // Energy is set to max, when rest energy is above 25%
+    [SerializeField, Tooltip("If current energy on day end is above this fraction, next day energy is full.")]
+    float _minimumEnergyMultiplierForFullReset = 0.25f;
 
-    [SerializeField, Tooltip("Energy is set to 50% of max when resting energy is below this multiplier of max.")]
-    private float _energyMultiplierForNonFullReset = 0.5f; // Energy is set to 50% of max, when rest energy is below 25%
+    [SerializeField, Tooltip("If energy is lower than the minimum fraction, next day energy is set to 50% of max.")]
+    float _energyMultiplierForNonFullReset = 0.5f;
 
-    [SerializeField] private float _regenEnergyAmountInBed = 0.5f;
+    [SerializeField] float _regenEnergyAmountInBed = 0.5f;
 
     // TODO Move _hospitalRespawnPosition to the hospital itself
-    private Vector2 _hospitalRespawnPosition;
-    private Player _localPlayer;
-    private PlayerInventoryController _inventoryController;
+    Vector2 _hospitalRespawnPosition;
+    Player _localPlayer;
+    PlayerInventoryController _inventoryController;
 
-    private void Awake() {
+    void Awake() {
         _localPlayer = GetComponent<Player>();
         _inventoryController = GetComponent<PlayerInventoryController>();
     }
 
 
-    private void Start() {
+    void Start() {
         TimeManager.Instance.OnNextDayStarted += HandleNextDayStarted;
 
         OnUpdateHealth?.Invoke(_currentHealth);
@@ -58,7 +58,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
         OnUpdateMaxEnergy?.Invoke(_maxEnergy);
     }
 
-    private new void OnDestroy() {
+    new void OnDestroy() {
         base.OnDestroy();
 
         if (TimeManager.Instance != null) {
@@ -80,29 +80,20 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
         }
     }
 
-    private void FixedUpdate() {
-        if (IsOwner) {
-            // Regenerate health and energy if the player is in bed
-            if (_localPlayer.InBed) {
-                RegenerateHealthAndEnergy();
-            }
+    void FixedUpdate() {
+        if (IsOwner && _localPlayer.InBed) {
+            RegenerateHealthAndEnergy();
         }
     }
 
-    /// <summary>
-    /// Regenerates health and energy while the player is in bed.
-    /// </summary>
-    private void RegenerateHealthAndEnergy() {
-        // Using deltaTime ensures frame rate independence
-        float regenHealth = _regenHpAmountInBed * Time.deltaTime;
-        float regenEnergy = _regenEnergyAmountInBed * Time.deltaTime;
-
-        AdjustHealth(regenHealth);
-        AdjustEnergy(regenEnergy);
+    void RegenerateHealthAndEnergy() {
+        float dt = Time.deltaTime;
+        AdjustHealth(_regenHpAmountInBed * dt);
+        AdjustEnergy(_regenEnergyAmountInBed * dt);
     }
 
-    private void HandleNextDayStarted() {
-        AdjustHealth(_maxHealth - _currentHealth); // Fully restore health
+    void HandleNextDayStarted() {
+        AdjustHealth(_maxHealth - _currentHealth);
 
         float targetEnergy = _currentEnergy >= _maxEnergy * _minimumEnergyMultiplierForFullReset
             ? _maxEnergy

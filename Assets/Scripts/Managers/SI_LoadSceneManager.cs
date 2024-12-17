@@ -11,6 +11,10 @@ public class SI_LoadSceneManager : MonoBehaviour {
         // Add other scenes as needed
     }
 
+    public void LS() {
+        LoadScene(Scene.LoadingScene);
+    }
+
     /// <summary>
     /// Loads a scene asynchronously via the LoadingScene.
     /// </summary>

@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.InputSystem.Utilities;
 
 /// <summary>
 /// Controls the player's toolbelt, handling tool selection, toolbelt size, and interactions.

@@ -8,4 +8,8 @@ public class ObjectSO : ItemSO {
     public List<ItemSlot> ItemsToCraftList;
 
     public GameObject ObjectToSpawn;
+    public Sprite[] ObjectRotationSprites;
+
+    [Header("Tile Sprite Offset")]
+    public Vector3 tileSpriteOffset = Vector3.zero; // Offset für das Sprite auf dem Tile
 }

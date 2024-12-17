@@ -42,7 +42,8 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -2297,6 +2298,10 @@ PrefabInstance:
       propertyPath: GlobalObjectIdHash
       value: 4062749500
       objectReference: {fileID: 0}
+    - target: {fileID: 2975042328982311422, guid: 1db3d019e7038b34b94a834640a9698b, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 3978772626
+      objectReference: {fileID: 0}
     - target: {fileID: 8133313332304751747, guid: 1db3d019e7038b34b94a834640a9698b, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -3160,7 +3165,7 @@ RectTransform:
   m_GameObject: {fileID: 1724637438}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.08, y: 0.08, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1515235680}
@@ -3168,7 +3173,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 4096, y: 3850}
+  m_SizeDelta: {x: 327.68, y: 308}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1724637440
 MonoBehaviour:
@@ -3603,7 +3608,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1683733153}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2068200069}
+        m_TargetAssemblyTypeName: SI_LoadSceneManager, Assembly-CSharp
+        m_MethodName: LS
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!222 &1906834736
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3739,7 +3756,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd590a57a2eb0bc4eb06d9046aaba76a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _continueButton: {fileID: 1906834735}
 --- !u!1 &2096314552
 GameObject:
   m_ObjectHideFlags: 0

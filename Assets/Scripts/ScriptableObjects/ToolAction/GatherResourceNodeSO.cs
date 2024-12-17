@@ -1,84 +1,70 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// This script defines a resource and how it can be hit
+/// <summary>
+/// Tool action for gathering resources from resource nodes.
+/// </summary>
 [CreateAssetMenu(menuName = "Tool Action/Gather Resource Node")]
 public class GatherResourceNodeSO : ToolActionSO {
 
     [Header("Nodes the tool can hit")]
-    [SerializeField] private ResourceNodeType[] _canHitNodesOfTypeArray;
+    [SerializeField] ResourceNodeType[] _canHitNodesOfTypeArray;
+    [SerializeField] LayerMask _resourceNodeLayerMask;
 
-    // Using ReadOnly to prevent modification at runtime
-    private HashSet<ResourceNodeType> _canHitNodesOfType;
+    HashSet<ResourceNodeType> _canHitNodesOfType;
+    ItemManager _itemManager;
+    bool _init = false;
 
-    [Header("Physics Settings")]
-    [SerializeField] private LayerMask _resourceNodeLayerMask;
+    void OnEnable() => _init = false;
 
-    // Cached reference to ItemManager to reduce repeated access
-    private ItemManager _itemManager;
-
-    private bool _init = false;
-
-    private void OnEnable() {
-        _init = false;
-    }
-
-    private void Init() {
+    void InitIfNeeded() {
+        if (_init) return;
         _canHitNodesOfType = new HashSet<ResourceNodeType>(_canHitNodesOfTypeArray);
         _itemManager = ItemManager.Instance;
         _init = true;
     }
 
     public override void OnApplyToTileMap(Vector3Int gridPosition, ItemSlot itemSlot) {
-        if (!_init) {
-            Init();
-        }
+        InitIfNeeded();
 
-        // Define the area of the tile using local variables
-        Vector2 bottomLeft = new Vector2(gridPosition.x + 0.1f, gridPosition.y + 0.1f);
-        Vector2 topRight = new Vector2(gridPosition.x + 0.9f, gridPosition.y + 0.9f);
+        var bottomLeft = new Vector2(gridPosition.x + 0.1f, gridPosition.y + 0.1f);
+        var topRight = new Vector2(gridPosition.x + 0.9f, gridPosition.y + 0.9f);
 
-        // Get all colliders overlapping the tile area with specified LayerMask
-        Collider2D[] colliders = Physics2D.OverlapAreaAll(bottomLeft, topRight, _resourceNodeLayerMask);
-
+        var colliders = Physics2D.OverlapAreaAll(bottomLeft, topRight, _resourceNodeLayerMask);
         if (colliders.Length == 0) {
-            Debug.LogWarning("No colliders found in the specified tile area.");
+            Debug.LogWarning("No resource nodes found.");
             PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
-            return; // Early exit if no colliders found
+            return;
         }
 
-        // Access the tool from the ItemDatabase using ItemId
         var tool = _itemManager.ItemDatabase[itemSlot.ItemId] as AxePickaxeToolSO;
         if (tool == null) {
-            Debug.LogError($"ItemDatabase does not contain a valid AxePickaxeToolSO with ItemId: {itemSlot.ItemId}");
+            Debug.LogError($"No valid AxePickaxeToolSO found for ItemId: {itemSlot.ItemId}");
             PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
-            return; // Early exit if tool not found or incorrect type
+            return;
         }
 
-        // Ensure rarity index is within bounds
         int rarityIndex = itemSlot.RarityId - 1;
         if (rarityIndex < 0 || rarityIndex >= tool.DamageOnAction.Length) {
-            Debug.LogError($"Invalid RarityId: {itemSlot.RarityId} for tool with ItemId: {itemSlot.ItemId}");
+            Debug.LogError($"Invalid RarityId: {itemSlot.RarityId} for tool ItemId: {itemSlot.ItemId}");
             PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
-            return; // Early exit if rarityId is invalid
+            return;
         }
 
         int damage = tool.DamageOnAction[rarityIndex];
 
-        foreach (Collider2D collider in colliders) {
-            if (collider.TryGetComponent<ResourceNodeBase>(out var resourceNode)) {
-                if (resourceNode.CanHitResourceNodeType(_canHitNodesOfType)) {
-                    // Apply damage or usage to the resource node via server RPC
-                    resourceNode.HitResourceNodeServerRpc(damage);
-                    break; // Exit after hitting the first valid resource node
-                } else {
-                    Debug.LogWarning($"ResourceNode of type {resourceNode.name} cannot be hit with the current tool.");
-                    PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
-                }
-            } else {
-                Debug.LogWarning($"Collider on GameObject: {collider.gameObject.name} does not have a ResourceNode component.");
-                PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
+        bool hitSomething = false;
+        foreach (var collider in colliders) {
+            if (collider.TryGetComponent<ResourceNodeBase>(out var resourceNode) && resourceNode.CanHitResourceNodeType(_canHitNodesOfType)) {
+                resourceNode.HitResourceNodeServerRpc(damage);
+                hitSomething = true;
+                break;
             }
+        }
+
+        if (!hitSomething) {
+            Debug.LogWarning("No valid resource nodes of the allowed types hit by the tool.");
+            PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
         }
     }
 }

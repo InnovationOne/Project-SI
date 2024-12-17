@@ -27,7 +27,8 @@ public class DataPersistenceManager : NetworkBehaviour {
 
     private void Awake() {
         if (Instance != null) {
-            throw new Exception("Found more than one Data Persistence Manager in the scene.");
+            Debug.LogError("Found more than one Data Persistence Manager in the scene.");
+            Destroy(this);
         } else {
             Instance = this;
         }
@@ -40,7 +41,7 @@ public class DataPersistenceManager : NetworkBehaviour {
         InitializeSelectedProfileId();
 
         _dataPersistancesObjects = FindAllDataPersistanceObjects();
-        //LoadGame();
+        // TODO: LoadGame();
     }
 
     public override void OnNetworkSpawn() {
