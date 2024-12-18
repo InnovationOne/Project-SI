@@ -40,7 +40,7 @@ public class GroceryStore : Store, IDataPersistance {
 
         ShowGroceryStore();
 
-        InventoryMasterUI.Instance.ToggleStorePanel();
+        //InventoryMasterUI.Instance.ToggleStorePanel();
     }
 
 

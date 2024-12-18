@@ -5,20 +5,20 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Scriptable Objects/ItemSO")]
 public class ItemSO : ScriptableObject {
     public enum ItemTypes {
-        Weapons,
-        Tools,
-        Resources,
-        Food,
+        Weapons,            
+        Tools,              
+        Resources,          
+        Food,               
         PlaceableObject,
-        Plants,
-        Seeds,
-        Fertilizer,
-        Rose,
-        Fish,
-        Insects,
-        Artifacts,
-        Minerals,
-        Animal,
+        Plants,             
+        Seeds,              
+        Fertilizer,         
+        Rose,               
+        Fish,               
+        Insects,            
+        Artifacts,          
+        Minerals,           
+        Animal,             
         none
     }
 

@@ -1,153 +1,172 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public enum InventorySubUIs {
     Inventory,
-    Crafting,
-    Relationships,
-    Wiki,
-    Wardrobe,
-    none,
+    Tool,
+    Heart,
+    Food,
+    Fish,
+    Insect,
+    Plant,
+    Resource,
+    None
 }
 
-// The script manages the player's inventory
+[Serializable]
+public struct SubPanel {
+    public InventorySubUIs PanelType;
+    public GameObject UIElement;
+    public Button Button;
+}
+
 public class InventoryMasterUI : MonoBehaviour {
     public static InventoryMasterUI Instance { get; private set; }
 
     [Header("Standard Panels")]
-    [SerializeField] private GameObject[] _subPanels;
-    [SerializeField] private Button[] _inventoryButtons;
-    [SerializeField] private Image[] _inventoryButtonsSelected;
-    [SerializeField] private TextMeshProUGUI _inventoryText;
+    [SerializeField] SubPanel[] _subPanels;
+    [SerializeField] Button _closeButton;
 
-    [Header("Close Button")]
-    [SerializeField] private Button _closeButton;
+    [Header("UI Elements")]
+    [SerializeField] TextMeshProUGUI _inventoryText;
 
-    public InventorySubUIs LastOpenPanel { get; private set; } = InventorySubUIs.none;
+    public InventorySubUIs LastOpenPanel { get; private set; } = InventorySubUIs.None;
 
-    [Header("Chest Panel")]
-    [SerializeField] private ChestUI _chestPanel;
-
-    [Header("Store Panel")]
-    [SerializeField] private StoreVisual _storePanel;
-
-    private bool _keyPressed = false;
+    InputManager _iPM;
 
 
-    private void Awake() {
+    void Awake() {
+        if (Instance != null) {
+            Debug.LogError("More than one InventoryMasterUI instance in the scene!");
+            return;
+        }
         Instance = this;
 
-        _inventoryButtons[0].onClick.AddListener(() => SetSubPanel(InventorySubUIs.Crafting));
-        _inventoryButtons[1].onClick.AddListener(() => SetSubPanel(InventorySubUIs.Relationships));
-        _inventoryButtons[2].onClick.AddListener(() => SetSubPanel(InventorySubUIs.Wiki));
-        _inventoryButtons[3].onClick.AddListener(() => SetSubPanel(InventorySubUIs.Wardrobe));
-
-        _closeButton.onClick.AddListener(() => {
-            if (_chestPanel.gameObject.activeSelf) {
-                // Chest
-                CloseChestWithButton();
-            } else if (_storePanel.gameObject.activeSelf) {
-                // Store
-                //PlayerInteractController.LocalInstance.InteractAction();
-            } else {
-                // Other
-                ToggleMasterPanel();
-                LastOpenPanel = InventorySubUIs.none;
-            }
-        });
+        InitializeSubPanelListeners();
+        // TODO: //_closeButton.onClick.AddListener(ToggleInventory);
     }
 
-    private void Start() {
-        InputManager.Instance.OnInventoryAction += InputManager_OnInventoryAction;
-        InputManager.Instance.OnEscapeAction += InputManager_OnReturnAction;
+    void Start() {
+        _iPM = InputManager.Instance;
+        SubscribeToInputEvents();
 
-        //_subPanels[3].GetComponent<WikiPanel>().StartForWikiVisual();
-        for (int i = 1; i < _subPanels.Length; i++) {
-            _subPanels[i].SetActive(false);
-        }
-        //_chestPanel.gameObject.SetActive(false);
-        _storePanel.gameObject.SetActive(false);
+        DeactivateAllSubPanelsExcept(InventorySubUIs.Inventory);
         gameObject.SetActive(false);
     }
 
+    void OnDestroy() {
+        UnsubscribeFromInputEvents();
+        RemoveSubPanelListeners();
+    }
 
-    #region PlayerInput
-    private void InputManager_OnInventoryAction() {
-        _keyPressed = true;
-        if (LastOpenPanel == InventorySubUIs.none || LastOpenPanel == InventorySubUIs.Inventory) {
-            SetSubPanel(InventorySubUIs.Crafting);
+    #region -------------------- Initialization --------------------
+    void InitializeSubPanelListeners() {
+        foreach (var subPanel in _subPanels) {
+            subPanel.Button.onClick.AddListener(() => SetSubPanel(subPanel.PanelType));
+        }
+    }
+
+    void RemoveSubPanelListeners() {
+        foreach (var subPanel in _subPanels) {
+            subPanel.Button.onClick.RemoveAllListeners();
+        }
+        // TODO: //_closeButton.onClick.RemoveAllListeners();
+    }
+
+    void SubscribeToInputEvents() {
+        _iPM.OnInventoryAction += HandleInventoryToggle;
+        _iPM.OnEscapeAction += HandleEscape;
+    }
+
+    void UnsubscribeFromInputEvents() {
+        _iPM.OnInventoryAction -= HandleInventoryToggle;
+        _iPM.OnEscapeAction -= HandleEscape;
+    }
+    #endregion -------------------- Initialization --------------------
+
+    #region -------------------- Input Handlers --------------------
+    public void HandleInventoryToggle() {
+        if (LastOpenPanel == InventorySubUIs.None) {
+            SetSubPanel(InventorySubUIs.Inventory);
         } else {
-            SetSubPanel(LastOpenPanel);
+            ToggleInventory();
         }
     }
 
-    private void InputManager_OnCraftAction() {
-        _keyPressed = true;
-        SetSubPanel(InventorySubUIs.Crafting);
-    }
-
-    private void InputManager_OnRelationAction() {
-        _keyPressed = true;
-        SetSubPanel(InventorySubUIs.Relationships);
-    }
-
-    private void InputManager_OnCollectionAction() {
-        _keyPressed = true;
-        SetSubPanel(InventorySubUIs.Wiki);
-    }
-
-    private void InputManager_OnCharacterAction() {
-        _keyPressed = true;
-        SetSubPanel(InventorySubUIs.Wardrobe);
-    }
-
-    private void InputManager_OnReturnAction() {
+    void HandleEscape() {
         if (gameObject.activeSelf) {
-            ToggleMasterPanel();
+            ToggleInventory();
         }
     }
-    #endregion
+    #endregion -------------------- Input Handlers --------------------
 
-
-    public void SetSubPanel(InventorySubUIs subPanel) {
-        if (_chestPanel.gameObject.activeSelf || _storePanel.gameObject.activeSelf) {
+    #region -------------------- Panel Management --------------------
+    public void SetSubPanel(InventorySubUIs targetPanel) {
+        // Close when same panel is clicked
+        if (targetPanel == LastOpenPanel && gameObject.activeSelf) {
+            ToggleInventory();
             return;
         }
 
-        // Set inventory
-        if (subPanel == LastOpenPanel && _keyPressed) {
-            ToggleMasterPanel();
-            LastOpenPanel = InventorySubUIs.none;
-            _keyPressed = false;
-        } else if (!gameObject.activeSelf) {
-            ToggleMasterPanel();
+        // Open panel when closed
+        if (!gameObject.activeSelf) {
+            ToggleInventory();
         }
 
-        // Set sub panel
-        if (LastOpenPanel != InventorySubUIs.none && LastOpenPanel != InventorySubUIs.Inventory) {
-            _inventoryButtonsSelected[(int)LastOpenPanel - 1].gameObject.SetActive(false);
-            _subPanels[(int)LastOpenPanel].SetActive(false);
-        }
-        _inventoryButtonsSelected[(int)subPanel - 1].gameObject.SetActive(true);
-        _subPanels[(int)subPanel].SetActive(true);
-
-        // Update last open panel
-        LastOpenPanel = subPanel;
-
-        _inventoryText.text = subPanel.ToString() + " & Inventory";
+        DeactivateLastOpenPanel();
+        ActivateTargetPanel(targetPanel);
+        UpdateInventoryText(targetPanel);
+        LastOpenPanel = targetPanel;
     }
 
-    private void ToggleMasterPanel() {
+    void DeactivateLastOpenPanel() {
+        if (LastOpenPanel != InventorySubUIs.None) {
+            var lastSubPanel = _subPanels[(int)LastOpenPanel];
+            lastSubPanel.UIElement.SetActive(false);
+            ToggleButtonVisual(lastSubPanel, false);
+        }
+    }
+
+    void ActivateTargetPanel(InventorySubUIs targetPanel) {
+        if (targetPanel != InventorySubUIs.None) {
+            var targetSubPanel = _subPanels[(int)targetPanel];
+            targetSubPanel.UIElement.SetActive(true);
+            ToggleButtonVisual(targetSubPanel, true);
+        }
+    }
+
+    void ToggleButtonVisual(SubPanel subPanel, bool isActive) {
+        Transform bT = subPanel.Button.transform;
+        bT.GetChild(0).gameObject.SetActive(!isActive);
+        bT.GetChild(1).gameObject.SetActive(!isActive);
+        bT.GetChild(2).gameObject.SetActive(isActive);
+        bT.GetChild(3).gameObject.SetActive(isActive);
+    }
+
+    void UpdateInventoryText(InventorySubUIs currentPanel) => _inventoryText.text = currentPanel.ToString();
+
+    void DeactivateAllSubPanelsExcept(InventorySubUIs exception) {
+        foreach (var subPanel in _subPanels) {
+            if (subPanel.PanelType != exception) {
+                subPanel.UIElement.SetActive(false);
+            }
+        }
+    }
+
+    void ToggleInventory() {
         gameObject.SetActive(!gameObject.activeSelf);
         ToolbeltUI.Instance.ToggleToolbelt();
 
         if (DragItemUI.Instance.gameObject.activeSelf) {
-            PlayerItemDragAndDropController.LocalInstance.AddDragItemBackIntoBackpack(_subPanels[(int)InventorySubUIs.Inventory].GetComponent<InventoryUI>().LastSlotId);
+            var inventoryUI = _subPanels[(int)InventorySubUIs.Inventory].UIElement.GetComponent<InventoryUI>();
+            PlayerItemDragAndDropController.LocalInstance.AddDragItemBackIntoBackpack(inventoryUI.LastSlotId);
         }
     }
+    #endregion -------------------- Panel Management --------------------
 
-
+    /*
     #region Chest
     public void ShowChestPanel() {
         //OnChestPanelToggled?.Invoke(!_chestPanel.gameObject.activeSelf);
@@ -223,4 +242,5 @@ public class InventoryMasterUI : MonoBehaviour {
         _storePanel.gameObject.SetActive(false);
     }
     #endregion
+    */
 }

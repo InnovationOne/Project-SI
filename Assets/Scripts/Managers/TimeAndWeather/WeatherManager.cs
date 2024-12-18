@@ -68,6 +68,7 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     }
 
     void Start() {
+        _timeManager = TimeManager.Instance;
         InitializeAudio();
     }
 
@@ -75,7 +76,6 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
         base.OnNetworkSpawn();
 
         if (IsServer) {
-            _timeManager = TimeManager.Instance;
             _timeManager.OnNextDayStarted += HandleNextDayStarted;
             _timeManager.OnNextSeasonStarted += HandleNextSeasonStarted;
             InitializeWeatherProbabilities();

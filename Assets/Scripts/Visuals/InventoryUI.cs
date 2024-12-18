@@ -38,6 +38,8 @@ public class InventoryUI : ItemContainerUI {
     }
 
     public void InventoryOrToolbeltSizeChanged() {
+        // TODO: Get the right image for unlocked and locked and set it based on the size of the inventory
+        /*
         for (int i = 0; i < ItemButtons.Length; i++) {
             // Set the toolbelt slots
             if (i < PlayerToolbeltController.LocalInstance.ToolbeltSizes[2]) {
@@ -77,6 +79,7 @@ public class InventoryUI : ItemContainerUI {
             1 => _rarityIconSprites[1],
             _ => _rarityIconSprites[2],
         };
+        */
     }
 
     public override void OnPlayerLeftClick(int buttonIndex) {
