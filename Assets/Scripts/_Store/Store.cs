@@ -15,9 +15,9 @@ public class Store : MonoBehaviour, IInteractable {
         // Left click logic
     }
 
-    public virtual void Interact(Player player) {
+    public virtual void Interact(PlayerController player) {
         // Call the store UI
     }
 
-    public virtual void PickUpItemsInPlacedObject(Player player) { }
+    public virtual void PickUpItemsInPlacedObject(PlayerController player) { }
 }

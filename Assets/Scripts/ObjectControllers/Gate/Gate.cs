@@ -14,7 +14,7 @@ public class Gate : AdjustingObject {
     /// Interacts with the gate, toggling its state and updating the visuals based on neighbors.
     /// </summary>
     /// <param name="player">The player interacting with the gate.</param>
-    public override void Interact(Player player) {
+    public override void Interact(PlayerController player) {
         ToggleGateState(player);
         UpdateVisualBasedOnNeighbors();
     }
@@ -23,7 +23,7 @@ public class Gate : AdjustingObject {
     /// Toggles the state of the gate based on the player's position.
     /// </summary>
     /// <param name="player">The player object.</param>
-    private void ToggleGateState(Player player) {
+    private void ToggleGateState(PlayerController player) {
         _isOpened = !_isOpened;
         _isOpenedLeftToRight = _isOpened && gameObject.transform.position.x <= player.transform.position.x;
     }
@@ -85,7 +85,7 @@ public class Gate : AdjustingObject {
     /// Overrides the PickUpItemsInPlacedObject method if necessary.
     /// </summary>
     /// <param name="player">The player picking up the gate.</param>
-    public override void PickUpItemsInPlacedObject(Player player) {
+    public override void PickUpItemsInPlacedObject(PlayerController player) {
         base.PickUpItemsInPlacedObject(player);
     }
 

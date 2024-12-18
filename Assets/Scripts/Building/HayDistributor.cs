@@ -15,12 +15,12 @@ public class HayDistributor : MonoBehaviour, IInteractable {
     private PlayerInventoryController _pIC;
 
     private void Start() {
-        _pTC = PlayerToolbeltController.LocalInstance;
-        _pIC = PlayerInventoryController.LocalInstance;
+        _pTC = PlayerController.LocalInstance.PlayerToolbeltController;
+        _pIC = PlayerController.LocalInstance.PlayerInventoryController;
         TimeManager.Instance.OnNextDayStarted += OnNextDay;
     }
 
-    public void Interact(Player player) {
+    public void Interact(PlayerController player) {
         if (_pTC.GetCurrentlySelectedToolbeltItemSlot().ItemId == _hayItem.ItemId && _hayInFeeder < MAX_HAY_CAPACITY) {
             _hayInFeeder++;
             _pIC.InventoryContainer.RemoveItem(new ItemSlot(_hayItem.ItemId, 1, 0));
@@ -45,7 +45,7 @@ public class HayDistributor : MonoBehaviour, IInteractable {
         }
     }
 
-    public void PickUpItemsInPlacedObject(Player player) { }
+    public void PickUpItemsInPlacedObject(PlayerController player) { }
 
     public void InitializePreLoad(int itemId) { }
 }

@@ -48,8 +48,8 @@ public class AnimalController : MonoBehaviour, IInteractable {
         _timeManager.OnNextDayStarted += OnNextDay;
     }
 
-    public void Interact(Player player) {
-        var currentItemId = PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId;
+    public void Interact(PlayerController player) {
+        var currentItemId = PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId;
         var currentItem = ItemManager.Instance.ItemDatabase[currentItemId];
 
         if (currentItem == _animalData.FeedItem && !_wasFed) {
@@ -69,7 +69,7 @@ public class AnimalController : MonoBehaviour, IInteractable {
         if (!_gaveItem) {
             var productSlot = GetTodaysProduct();
             if (productSlot.ItemId >= 0) {
-                PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(productSlot, false);
+                PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(productSlot, false);
                 _gaveItem = true;
                 ShowLove();
             }
@@ -123,6 +123,6 @@ public class AnimalController : MonoBehaviour, IInteractable {
 
     public void InitializePreLoad(int itemId) { }
 
-    public void PickUpItemsInPlacedObject(Player player) { }
+    public void PickUpItemsInPlacedObject(PlayerController player) { }
 }
 

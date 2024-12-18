@@ -3,15 +3,13 @@ using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
 public class PlayerInteractController : NetworkBehaviour {
-    public static PlayerInteractController LocalInstance { get; private set; }
-
     // Maximum distance within which interactions can occur
     private const float MAX_INTERACT_DISTANCE = 0.4f;
 
     // Cached references
     private IInteractable _currentIInteractable;
     private BoxCollider2D _playerCollider;
-    private Player _player;
+    private PlayerController _player;
 
     private new void OnDestroy() {
         InputManager.Instance.OnInteractAction -= HandleInteractAction;
@@ -20,18 +18,12 @@ public class PlayerInteractController : NetworkBehaviour {
     }
 
     public override void OnNetworkSpawn() {
-        if (IsOwner) {
-            if (LocalInstance != null) {
-                Debug.LogError("There is more than one local instance of PlayerInteractController in the scene!");
-                return;
-            }
-            LocalInstance = this;
 
-            InputManager.Instance.OnInteractAction += HandleInteractAction;
+        InputManager.Instance.OnInteractAction += HandleInteractAction;
 
-            _playerCollider = GetComponent<BoxCollider2D>();
-            _player = GetComponent<Player>();
-        }
+        _playerCollider = GetComponent<BoxCollider2D>();
+        _player = GetComponent<PlayerController>();
+
     }
 
     private void Update() {

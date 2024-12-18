@@ -32,7 +32,7 @@ public class GroceryStore : Store, IDataPersistance {
         */
     }
 
-    public override void Interact(Player character) {
+    public override void Interact(PlayerController character) {
         // Store is not build yet
         if (_groceryStoreLevel == 0) {
             return;

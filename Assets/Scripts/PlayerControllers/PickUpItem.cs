@@ -30,7 +30,7 @@ public class PickUpItem : NetworkBehaviour {
     private Vector3 _spawnPosition;
     private Vector3 _endPosition;
 
-    private Player _closestPlayer;
+    private PlayerController _closestPlayer;
     private float _distanceToPlayer;
 
     // Cached References

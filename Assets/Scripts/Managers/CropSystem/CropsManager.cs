@@ -1045,7 +1045,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         var client = NetworkManager.ConnectedClients[clientId];
         if (client.PlayerObject.TryGetComponent<PlayerToolsAndWeaponController>(out var ptw)) {
-            ptw.ClientCallback(success);
+            ptw.ClientCallbackClientRpc(success);
         }
     }
 

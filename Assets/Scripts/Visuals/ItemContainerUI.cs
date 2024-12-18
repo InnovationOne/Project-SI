@@ -148,7 +148,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
                 splitValue,
                 originalSlot.RarityId
                 );
-                PlayerItemDragAndDropController.LocalInstance.OnLeftClick(newItemSlot);
+                PlayerController.LocalInstance.PlayerItemDragAndDropController.OnLeftClick(newItemSlot);
 
                 // When all items are "Splitted" clear the item slot
                 if ((int)_splitAmountSlider.maxValue == splitValue) {

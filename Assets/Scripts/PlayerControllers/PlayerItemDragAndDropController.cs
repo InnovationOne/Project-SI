@@ -5,8 +5,6 @@ using UnityEngine.EventSystems;
 using static ItemSlot;
 
 public class PlayerItemDragAndDropController : NetworkBehaviour {
-    public static PlayerItemDragAndDropController LocalInstance { get; private set; }
-
     // Cached references
     private ItemSlot _dragItemSlot;
     private PlayerInventoryController _playerInventoryController;
@@ -22,18 +20,10 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
         _dragItemSlot = new ItemSlot();
         _playerInventoryController = GetComponent<PlayerInventoryController>();
         _itemManager = ItemManager.Instance;
-        _playerMovementController = PlayerMovementController.LocalInstance;
+        _playerMovementController = GetComponent<PlayerMovementController>();
     }
 
     public override void OnNetworkSpawn() {
-        if (IsOwner) {
-            if (LocalInstance != null) {
-                Debug.LogError("There is more than one local instance of PlayerItemDragAndDropController in the scene!");
-                return;
-            }
-            LocalInstance = this;
-        }
-
         _visual = DragItemUI.Instance;
         _inputManager = InputManager.Instance;
     }

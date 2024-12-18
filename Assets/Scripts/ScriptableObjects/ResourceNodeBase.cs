@@ -93,9 +93,9 @@ public abstract class ResourceNodeBase : NetworkBehaviour {
 
     protected virtual void InitializeServer() {
         _timeManager = TimeManager.Instance;
-        _playerToolbeltController = PlayerToolbeltController.LocalInstance;
+        _playerToolbeltController = PlayerController.LocalInstance.PlayerToolbeltController;
         _cropsManager = CropsManager.Instance;
-        _playerMovementController = PlayerMovementController.LocalInstance;
+        _playerMovementController = PlayerController.LocalInstance.PlayerMovementController;
         _audioManager = AudioManager.Instance;
         _fmodEvents = FMODEvents.Instance;
 
@@ -212,7 +212,7 @@ public abstract class ResourceNodeBase : NetworkBehaviour {
         if (NetworkManager.ConnectedClients.ContainsKey(clientId)) {
             var client = NetworkManager.ConnectedClients[clientId];
             if (client.PlayerObject.TryGetComponent<PlayerToolsAndWeaponController>(out var ptw)) {
-                ptw.ClientCallback(success);
+                ptw.ClientCallbackClientRpc(success);
             }
         }
     }

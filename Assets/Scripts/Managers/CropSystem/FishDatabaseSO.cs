@@ -234,7 +234,7 @@ public class FishDatabaseSO : ScriptableObject {
         }
 
         // Calculate catch chance
-        int rarityId = PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().RarityId;
+        int rarityId = PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().RarityId;
         float catchChance = fishingRod.CatchChance[rarityId - 1] / 100f;
 
         // Filter available fish without using LINQ to reduce allocations

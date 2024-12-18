@@ -189,8 +189,8 @@ public class GameManager : NetworkBehaviour {
     /// </summary>
     [ClientRpc]
     private void SetAllPlayersAwakeClientRpc() {
-        if (Player.LocalInstance != null) {
-            Player.LocalInstance.SetPlayerInBed(false);
+        if (PlayerController.LocalInstance != null) {
+            PlayerController.LocalInstance.SetPlayerInBed(false);
         } else {
             Debug.LogWarning("LocalInstance of Player is not set.");
         }

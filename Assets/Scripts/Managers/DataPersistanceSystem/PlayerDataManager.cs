@@ -5,7 +5,7 @@ using Unity.Netcode;
 public class PlayerDataManager : NetworkBehaviour, IDataPersistance {
     public static PlayerDataManager Instance { get; private set; }
 
-    public List<Player> CurrentlyConnectedPlayers { get; private set; }
+    public List<PlayerController> CurrentlyConnectedPlayers { get; private set; }
 
     private PlayerDataContainer _playerDataContainer;
 
@@ -18,13 +18,13 @@ public class PlayerDataManager : NetworkBehaviour, IDataPersistance {
         }
         Instance = this;
 
-        CurrentlyConnectedPlayers = new List<Player>();
+        CurrentlyConnectedPlayers = new List<PlayerController>();
         _playerDataContainer = new PlayerDataContainer();
 
         DontDestroyOnLoad(this);
     }
 
-    public void AddPlayer(Player player) {
+    public void AddPlayer(PlayerController player) {
         //Debug.Log("Add player to connected players list");
         CurrentlyConnectedPlayers.Add(player);
     }
@@ -33,7 +33,7 @@ public class PlayerDataManager : NetworkBehaviour, IDataPersistance {
         Debug.Log("Load Player Data");
     }
 
-    public void RemovePlayer(Player player) {
+    public void RemovePlayer(PlayerController player) {
         //Debug.Log("Remove player from connected players list");
         CurrentlyConnectedPlayers.Remove(player);
     }

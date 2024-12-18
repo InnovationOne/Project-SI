@@ -29,10 +29,10 @@ public abstract class PlaceableObject : NetworkBehaviour, IObjectDataPersistence
     public virtual string SaveObject() { return string.Empty; }
 
     // Called when a player interacts with this object.
-    public virtual void Interact(Player player) { }
+    public virtual void Interact(PlayerController player) { }
 
     // Called when a player picks up items stored within this placed object.
-    public virtual void PickUpItemsInPlacedObject(Player player) { }
+    public virtual void PickUpItemsInPlacedObject(PlayerController player) { }
 }
 
 /// <summary>

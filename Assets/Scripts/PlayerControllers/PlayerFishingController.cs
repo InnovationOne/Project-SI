@@ -200,11 +200,11 @@ public class PlayerFishingController : MonoBehaviour {
     /// Initializes the player's toolbelt controller reference.
     /// </summary>
     private void InitializeToolbelt() {
-        if (PlayerToolbeltController.LocalInstance == null) {
+        if (PlayerController.LocalInstance.PlayerToolbeltController == null) {
             Debug.LogError("No PlayerToolbeltController instance found.");
             return;
         }
-        _toolbelt = PlayerToolbeltController.LocalInstance;
+        _toolbelt = PlayerController.LocalInstance.PlayerToolbeltController;
     }
 
     /// <summary>
@@ -287,7 +287,7 @@ public class PlayerFishingController : MonoBehaviour {
 
         switch (_currentState) {
             case FishingState.Idle:
-                PlayerMovementController.LocalInstance.SetCanMoveAndTurn(false);
+                PlayerController.LocalInstance.PlayerMovementController.SetCanMoveAndTurn(false);
                 HandleIdleState();
                 break;
 
@@ -395,13 +395,13 @@ public class PlayerFishingController : MonoBehaviour {
     /// </summary>
     private void UpdatePreview() {
         // Ensure PlayerMovementController instance exists
-        if (PlayerMovementController.LocalInstance == null) {
+        if (PlayerController.LocalInstance.PlayerMovementController == null) {
             Debug.LogError("PlayerMovementController.LocalInstance is null.");
             return;
         }
 
         // Calculate the direction and position of the cast based on player movement
-        Vector3 castDirection = PlayerMovementController.LocalInstance.LastMotionDirection.normalized;
+        Vector3 castDirection = PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection.normalized;
         Vector3 castPosition = _fishingRodTip + castDirection * _currentCastingDistance;
         _bobber.transform.position = castPosition;
 
@@ -430,14 +430,14 @@ public class PlayerFishingController : MonoBehaviour {
     /// </summary>
     private IEnumerator CastLine() {
         // Ensure PlayerMovementController instance exists
-        if (PlayerMovementController.LocalInstance == null) {
+        if (PlayerController.LocalInstance.PlayerMovementController == null) {
             Debug.LogError("PlayerMovementController.LocalInstance is null.");
             ReelInWithoutCatch();
             yield break;
         }
 
         // Calculate the direction and final position of the cast
-        Vector3 castDirection = PlayerMovementController.LocalInstance.LastMotionDirection.normalized;
+        Vector3 castDirection = PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection.normalized;
         Vector3 castPosition = _fishingRodTip + castDirection * _currentCastingDistance;
 
         // Animate the bobber moving along the casting arc
@@ -563,8 +563,8 @@ public class PlayerFishingController : MonoBehaviour {
             StartCoroutine(SetFishCatchText($"You caught a {_currentFish.FishItem.ItemName}. It is {_currentFish.CalculateFishSize()} cm long.\n{_currentFish.CatchText[UnityEngine.Random.Range(0, _currentFish.CatchText.Length)]}"));
 
             // Add the caught fish to the player's inventory
-            if (PlayerInventoryController.LocalInstance != null && PlayerInventoryController.LocalInstance.InventoryContainer != null) {
-                PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(new ItemSlot(_currentFish.FishItem.ItemId, 1, 0), false);
+            if (PlayerController.LocalInstance.PlayerInventoryController != null && PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer != null) {
+                PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(new ItemSlot(_currentFish.FishItem.ItemId, 1, 0), false);
             } else {
                 Debug.LogError("PlayerInventoryController or InventoryContainer is null.");
             }
@@ -662,7 +662,7 @@ public class PlayerFishingController : MonoBehaviour {
             _waitForFishCoroutine = null;
         }
 
-        PlayerMovementController.LocalInstance.SetCanMoveAndTurn(true);
+        PlayerController.LocalInstance.PlayerMovementController.SetCanMoveAndTurn(true);
     }
 
     /// <summary>

@@ -32,7 +32,7 @@ public class Building : PlaceableObject {
         }
     }
 
-    public virtual void Interact(Player player) {
+    public virtual void Interact(PlayerController player) {
         // Öffnet z. B. ein UI, das zeigt, wie viele Tiere hier drin sind, 
         // ob Heu verteilt wurde, Incubator Status, etc.
         Debug.Log("Interacting with Stall: " + _buildingSO.BuildingName);

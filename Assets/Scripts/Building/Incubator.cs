@@ -19,13 +19,13 @@ public class Incubator : MonoBehaviour, IInteractable {
     public float MaxDistanceToPlayer => 2f;
 
     private void Start() {
-        _pTC = PlayerToolbeltController.LocalInstance;
-        _pIC = PlayerInventoryController.LocalInstance;
+        _pTC = PlayerController.LocalInstance.PlayerToolbeltController;
+        _pIC = PlayerController.LocalInstance.PlayerInventoryController;
         _parentStall = GetComponentInParent<Building>();
 
     } 
 
-    public void Interact(Player player) {
+    public void Interact(PlayerController player) {
         foreach(var ItemSO in _hatchableEggs) {
             if (_pTC.GetCurrentlySelectedToolbeltItemSlot().ItemId == ItemSO.ItemId && _eggItemID == 0) {                
                 _eggItemID = ItemSO.ItemId;
@@ -70,7 +70,7 @@ public class Incubator : MonoBehaviour, IInteractable {
         }
     }
 
-    public void PickUpItemsInPlacedObject(Player player) { }
+    public void PickUpItemsInPlacedObject(PlayerController player) { }
 
     public void InitializePreLoad(int itemId) { }
 }

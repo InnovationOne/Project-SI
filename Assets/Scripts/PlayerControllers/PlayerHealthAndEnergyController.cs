@@ -4,8 +4,6 @@ using UnityEngine;
 
 // This script handels hp and energy of the player
 public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPersistance {
-    public static PlayerHealthAndEnergyController LocalInstance { get; private set; }
-
     public event Action<float> OnUpdateHealth;
     public event Action<float> OnUpdateMaxHealth;
     public event Action<float> OnUpdateEnergy;
@@ -40,11 +38,11 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
     // TODO Move _hospitalRespawnPosition to the hospital itself
     Vector2 _hospitalRespawnPosition;
-    Player _localPlayer;
+    PlayerController _localPlayer;
     PlayerInventoryController _inventoryController;
 
     void Awake() {
-        _localPlayer = GetComponent<Player>();
+        _localPlayer = GetComponent<PlayerController>();
         _inventoryController = GetComponent<PlayerInventoryController>();
     }
 
@@ -63,20 +61,6 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
         if (TimeManager.Instance != null) {
             TimeManager.Instance.OnNextDayStarted -= HandleNextDayStarted;
-        }
-
-        if (LocalInstance == this) {
-            LocalInstance = null;
-        }
-    }
-
-    public override void OnNetworkSpawn() {
-        if (IsOwner) {
-            if (LocalInstance != null) {
-                Debug.LogError("There is more than one local instance of PlayerHealthAndEnergyController in the scene!");
-                return;
-            }
-            LocalInstance = this;
         }
     }
 

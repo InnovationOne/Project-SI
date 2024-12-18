@@ -64,7 +64,7 @@ public class DebugUI : MonoBehaviour {
             float fps = 1.0f / _deltaTime;
 
             // Get Player position
-            Vector3 playerPosition = Player.LocalInstance != null ? Player.LocalInstance.transform.position : Vector3.zero;
+            Vector3 playerPosition = PlayerController.LocalInstance != null ? PlayerController.LocalInstance.transform.position : Vector3.zero;
 
             // Get game time
             string gameTime = GetGameTime();
@@ -84,10 +84,10 @@ public class DebugUI : MonoBehaviour {
             int townMoney = FinanceManager.Instance.GetMoneyTown;
 
             // Get player stats
-            float playerHealth = PlayerHealthAndEnergyController.LocalInstance.CurrentHealth;
-            float playerMaxHealth = PlayerHealthAndEnergyController.LocalInstance.MaxHealth;
-            float playerEnergy = PlayerHealthAndEnergyController.LocalInstance.CurrentEnergy;
-            float playerMaxEnergy = PlayerHealthAndEnergyController.LocalInstance.MaxEnergy;
+            float playerHealth = PlayerController.LocalInstance.PlayerHealthAndEnergyController.CurrentHealth;
+            float playerMaxHealth = PlayerController.LocalInstance.PlayerHealthAndEnergyController.MaxHealth;
+            float playerEnergy = PlayerController.LocalInstance.PlayerHealthAndEnergyController.CurrentEnergy;
+            float playerMaxEnergy = PlayerController.LocalInstance.PlayerHealthAndEnergyController.MaxEnergy;
 
             // Get memory usage
             string memoryUsage = GetMemoryUsage();

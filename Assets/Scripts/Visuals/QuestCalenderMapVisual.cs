@@ -107,7 +107,7 @@ public class QuestCalenderMapVisual : MonoBehaviour {
 
         // Enable the toolbelt selection after closing the quest panel
         if (_lastOpenPanel == QCMSubPanels.Quest) {
-            PlayerToolbeltController.LocalInstance.LockToolbelt(false);
+            PlayerController.LocalInstance.PlayerToolbeltController.LockToolbelt(false);
         }
     }
 

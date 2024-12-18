@@ -55,7 +55,7 @@ public class ItemProducer : PlaceableObject {
     /// Handles interactions with the player, typically used to trigger item production.
     /// </summary>
     /// <param name="player">The player interacting with the item producer.</param>
-    public override void Interact(Player player) {
+    public override void Interact(PlayerController player) {
         if (_timer <= 0f) {
             ProduceItems();
             ResetTimer();
@@ -69,12 +69,12 @@ public class ItemProducer : PlaceableObject {
     /// <param name="player">The player for whom items are being produced.</param>
     private void ProduceItems() {
         foreach (ItemSlot itemSlot in RecipeManager.Instance.RecipeDatabase[_recipeId].ItemsToProduce) {
-            int remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(itemSlot, false);
+            int remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(itemSlot, false);
             if (remainingAmount > 0) {
                 ItemSpawnManager.Instance.SpawnItemServerRpc(
                     itemSlot: itemSlot,
                     initialPosition: transform.position,
-                    motionDirection: PlayerMovementController.LocalInstance.LastMotionDirection,
+                    motionDirection: PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
                     spreadType: ItemSpawnManager.SpreadType.Circle);
             }
         }
@@ -95,7 +95,7 @@ public class ItemProducer : PlaceableObject {
     /// Handles the collection of produced items when the object is dismanteled with.
     /// </summary>
     /// <param name="player">The player interacting with the placed object.</param>
-    public override void PickUpItemsInPlacedObject(Player player) {
+    public override void PickUpItemsInPlacedObject(PlayerController player) {
         if (_timer <= 0) {
             ProduceItems();
         }

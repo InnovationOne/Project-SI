@@ -49,13 +49,13 @@ public class QuestPoint : MonoBehaviour {
     }
 
     private void OnTriggerEnter2D(Collider2D collision) {
-        if (collision.TryGetComponent<Player>(out var player)) {
+        if (collision.TryGetComponent<PlayerController>(out var player)) {
             _playerInRange = true;
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision) {
-        if (collision.TryGetComponent<Player>(out var player)) {
+        if (collision.TryGetComponent<PlayerController>(out var player)) {
             _playerInRange = false;
         }
     }

@@ -7,8 +7,6 @@ using UnityEngine;
 /// Manages the player's inventory and provides methods for saving and loading player data.
 /// </summary>
 public class PlayerInventoryController : NetworkBehaviour, IPlayerDataPersistance {
-    public static PlayerInventoryController LocalInstance { get; private set; }
-
     // Immutable collection of possible inventory sizes.
     private static readonly ReadOnlyCollection<int> _inventorySizes = Array.AsReadOnly(new int[] { 10, 20, 30 });
     public ReadOnlyCollection<int> InventorySizes => _inventorySizes;
@@ -30,16 +28,6 @@ public class PlayerInventoryController : NetworkBehaviour, IPlayerDataPersistanc
         _inventoryUI = InventoryUI.Instance;
 
         SetInventorySize(_currentInventorySize);
-    }
-
-    public override void OnNetworkSpawn() {
-        if (IsOwner) {
-            if (LocalInstance != null) {
-                Debug.LogError("There is more than one local instance of PlayerInventoryController in the scene!");
-                return;
-            }
-            LocalInstance = this;
-        }
     }
 
     /// <summary>

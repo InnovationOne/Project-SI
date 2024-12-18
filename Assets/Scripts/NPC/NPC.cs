@@ -28,9 +28,9 @@ public class NPC : MonoBehaviour, IInteractable {
         //GetComponent<Pathfinding>().MoveTo(_moveSpeed, DailyRoutines[_weekDay].Locations[_locationId].Position);
     }
 
-    public void Interact(Player player) { }
+    public void Interact(PlayerController player) { }
 
-    public void PickUpItemsInPlacedObject(Player player) { }
+    public void PickUpItemsInPlacedObject(PlayerController player) { }
 
     public void InitializePreLoad(int itemId) { }
 }

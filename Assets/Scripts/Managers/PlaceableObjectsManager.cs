@@ -172,11 +172,11 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         ItemSpawnManager.Instance.SpawnItemServerRpc(
             new ItemSlot(obj.ObjectId, 1, 0),
             _targetTilemap.CellToWorld(obj.Position),
-            PlayerMovementController.LocalInstance.LastMotionDirection,
+            PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
             spreadType: ItemSpawnManager.SpreadType.Circle);
 
         if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(obj.PrefabNetworkObjectId, out var netObj)) {
-            netObj.GetComponent<IInteractable>()?.PickUpItemsInPlacedObject(Player.LocalInstance);
+            netObj.GetComponent<IInteractable>()?.PickUpItemsInPlacedObject(PlayerController.LocalInstance);
             netObj.Despawn();
         }
 
@@ -226,7 +226,7 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     void HandleClientCallback(ServerRpcParams serverRpcParams, bool success) {
         ulong clientId = serverRpcParams.Receive.SenderClientId;
         if (NetworkManager.ConnectedClients.TryGetValue(clientId, out var client)) {
-            client.PlayerObject.GetComponent<PlayerToolsAndWeaponController>().ClientCallback(success);
+            client.PlayerObject.GetComponent<PlayerToolsAndWeaponController>().ClientCallbackClientRpc(success);
         }
     }
 }

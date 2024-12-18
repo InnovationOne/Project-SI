@@ -129,8 +129,8 @@ public class Rose : PlaceableObject {
     /// Interacts with the player.
     /// </summary>
     /// <param name="player">The player object.</param>
-    public override void Interact(Player player) {
-        if (RoseSO.RoseRecipes[^1].NewRose.ItemForGalaxyRose.ItemId == PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId &&
+    public override void Interact(PlayerController player) {
+        if (RoseSO.RoseRecipes[^1].NewRose.ItemForGalaxyRose.ItemId == PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId &&
             RoseSO.RoseRecipes[^1].Roses.All(rose => GetRosesInArea().Contains(rose))) {
             StartCoroutine(DestroyObjectsCoroutine());
         }
@@ -293,7 +293,7 @@ public class Rose : PlaceableObject {
     /// Picks up items in the placed object and performs additional actions if a partner Rose object is present.
     /// </summary>
     /// <param name="player">The player performing the action.</param>
-    public override void PickUpItemsInPlacedObject(Player player) {
+    public override void PickUpItemsInPlacedObject(PlayerController player) {
         if (PartnerPosition != Vector3.zero) {
             //var partnerRose = PlaceableObjectsManager.Instance.POContainer[new Vector3Int((int)PartnerPosition.x, (int)PartnerPosition.y)].Prefab.GetComponent<Rose>();
             //partnerRose.ResetRose();

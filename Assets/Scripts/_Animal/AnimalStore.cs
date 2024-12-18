@@ -12,7 +12,7 @@ public class AnimalStore : Store {
     private NetworkSpawnManager _nSM;
 
     void Start() {
-        _pIC = PlayerInventoryController.LocalInstance;
+        _pIC = PlayerController.LocalInstance.PlayerInventoryController;
         _fM = FinanceManager.Instance;
         _pOM = PlaceableObjectsManager.Instance;
         _iM = ItemManager.Instance;

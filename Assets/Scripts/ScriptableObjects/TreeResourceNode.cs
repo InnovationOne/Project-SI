@@ -117,7 +117,7 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
             spreadType: _spreadType);
     }
 
-    public void Interact(Player player) {
+    public void Interact(PlayerController player) {
         if (_networkHitShookToday.Value) return;
         var pos = Vector3Int.FloorToInt(transform.position);
         var cropTileOpt = _cropsManager.GetCropTileAtPosition(pos);
@@ -156,6 +156,6 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
         CropsManager.Instance.HarvestTreeServerRpc(new Vector3IntSerializable(harvestPos));
     }
 
-    public void PickUpItemsInPlacedObject(Player player) { }
+    public void PickUpItemsInPlacedObject(PlayerController player) { }
     public void InitializePreLoad(int itemId) { }
 }

@@ -7,8 +7,6 @@ using UnityEngine;
 /// Controls the player's toolbelt, handling tool selection, toolbelt size, and interactions.
 /// </summary>
 public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance {
-    public static PlayerToolbeltController LocalInstance { get; private set; }
-
     // Events for toolbelt changes and toggling
     public event Action OnToolbeltChanged;
     public event Action OnToggleToolbelt;
@@ -80,16 +78,6 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
 
         if (PauseGameManager.Instance != null) {
             PauseGameManager.Instance.OnShowLocalPauseGame -= OnTogglePauseMenu;
-        }
-    }
-
-    public override void OnNetworkSpawn() {
-        if (IsOwner) {
-            if (LocalInstance != null) {
-                Debug.LogError("There is more than one local instance of PlayerToolbeltController in the scene!");
-                return;
-            }
-            LocalInstance = this;
         }
     }
 

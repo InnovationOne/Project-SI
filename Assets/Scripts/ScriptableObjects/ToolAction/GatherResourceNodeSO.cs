@@ -33,21 +33,21 @@ public class GatherResourceNodeSO : ToolActionSO {
         var colliders = Physics2D.OverlapAreaAll(bottomLeft, topRight, _resourceNodeLayerMask);
         if (colliders.Length == 0) {
             Debug.LogWarning("No resource nodes found.");
-            PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
+            PlayerController.LocalInstance.PlayerToolsAndWeaponController.ClientCallbackClientRpc(false);
             return;
         }
 
         var tool = _itemManager.ItemDatabase[itemSlot.ItemId] as AxePickaxeToolSO;
         if (tool == null) {
             Debug.LogError($"No valid AxePickaxeToolSO found for ItemId: {itemSlot.ItemId}");
-            PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
+            PlayerController.LocalInstance.PlayerToolsAndWeaponController.ClientCallbackClientRpc(false);
             return;
         }
 
         int rarityIndex = itemSlot.RarityId - 1;
         if (rarityIndex < 0 || rarityIndex >= tool.DamageOnAction.Length) {
             Debug.LogError($"Invalid RarityId: {itemSlot.RarityId} for tool ItemId: {itemSlot.ItemId}");
-            PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
+            PlayerController.LocalInstance.PlayerToolsAndWeaponController.ClientCallbackClientRpc(false);
             return;
         }
 
@@ -64,7 +64,7 @@ public class GatherResourceNodeSO : ToolActionSO {
 
         if (!hitSomething) {
             Debug.LogWarning("No valid resource nodes of the allowed types hit by the tool.");
-            PlayerToolsAndWeaponController.LocalInstance.ClientCallback(false);
+            PlayerController.LocalInstance.PlayerToolsAndWeaponController.ClientCallbackClientRpc(false);
         }
     }
 }

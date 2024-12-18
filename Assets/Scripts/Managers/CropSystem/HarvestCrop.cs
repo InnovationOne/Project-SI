@@ -36,7 +36,7 @@ public class HarvestCrop : MonoBehaviour, IInteractable {
     /// Interacts with the crop by harvesting it.
     /// </summary>
     /// <param name="player">The player interacting with the crop.</param>
-    public void Interact(Player player) {
+    public void Interact(PlayerController player) {
         CropsManager.Instance.HarvestCropServerRpc(new Vector3IntSerializable(_cropPosition));
     }
 
@@ -78,7 +78,7 @@ public class HarvestCrop : MonoBehaviour, IInteractable {
         spriteRenderer.color = color ?? Color.white;
     }
 
-    public void PickUpItemsInPlacedObject(Player player) { }
+    public void PickUpItemsInPlacedObject(PlayerController player) { }
 
     public void InitializePreLoad(int itemId) { }
 

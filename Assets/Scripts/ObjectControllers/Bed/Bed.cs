@@ -21,12 +21,12 @@ public class Bed : MonoBehaviour, IInteractable {
     /// Interacts with the bed object.
     /// </summary>
     /// <param name="player">The player object.</param>
-    public void Interact(Player player) {
+    public void Interact(PlayerController player) {
         player.SetPlayerInBed(!player.InBed);
-        PlayerMovementController.LocalInstance.SetCanMoveAndTurn(player.InBed);
+        PlayerController.LocalInstance.PlayerMovementController.SetCanMoveAndTurn(player.InBed);
     }
 
-    public void PickUpItemsInPlacedObject(Player player) { }
+    public void PickUpItemsInPlacedObject(PlayerController player) { }
 
     /// <summary>
     /// Represents a ScriptableObject for objects in the game.

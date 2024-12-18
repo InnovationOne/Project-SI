@@ -1,20 +1,13 @@
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Netcode;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.UIElements;
-using static UnityEditor.Rendering.ShadowCascadeGUI;
 
 /// <summary>
 /// Manages player markers on the marker tilemap, supporting single and area markers.
 /// Utilizes Unity's Multiplayer System for networked synchronization.
 /// </summary>
 public class PlayerMarkerController : NetworkBehaviour {
-    public static PlayerMarkerController LocalInstance { get; private set; }
-
     // Constants
     private const string MARKER_TILEMAP_TAG = "MarkerTilemap";
     private const string BASE_TILEMAP_TAG = "BaseTilemap";
@@ -68,47 +61,30 @@ public class PlayerMarkerController : NetworkBehaviour {
     }
 
     public override void OnNetworkSpawn() {
-        if (IsOwner) {
-            if (LocalInstance != null) {
-                Debug.LogError("There is more than one local instance of PlayerMarkerController in the scene!");
-                return;
-            }
-            LocalInstance = this;
+        // Cache references to other systems
+        _toolbeltController = GetComponent<PlayerToolbeltController>();
+        _movementController = GetComponent<PlayerMovementController>();
+        _cropsManager = CropsManager.Instance;
+        _tilemapManager = TilemapManager.Instance;
+        _toolsAndWeaponController = GetComponent<PlayerToolsAndWeaponController>();
+        _inputManager = InputManager.Instance;
 
-            LocalInstance = this;
+        // Listen to toolbelt changes and input events
+        _toolbeltController.OnToolbeltChanged += HandleToolbeltChanged;
+        _inputManager.OnLeftClickCanceled += HandleLeftClickCanceled;
+        _inputManager.OnRotateAction += HandleCWRotate;
+        _inputManager.OnVMirrorAction += HandleVMirror;
+        _inputManager.OnHMirrorAction += HandleHMirror;
 
-            // Cache references to other systems
-            _toolbeltController = PlayerToolbeltController.LocalInstance;
-            _movementController = PlayerMovementController.LocalInstance;
-            _cropsManager = CropsManager.Instance;
-            _tilemapManager = TilemapManager.Instance;
-            _toolsAndWeaponController = PlayerToolsAndWeaponController.LocalInstance;
-            _inputManager = InputManager.Instance;
-
-            // Listen to toolbelt changes and input events
-            _toolbeltController.OnToolbeltChanged += HandleToolbeltChanged;
-            _inputManager.OnLeftClickCanceled += HandleLeftClickCanceled;
-            _inputManager.OnRotateAction += HandleCWRotate;
-            _inputManager.OnVMirrorAction += HandleVMirror;
-            _inputManager.OnHMirrorAction += HandleHMirror;
-        }
     }
 
     private void OnDestroy() {
-        if (LocalInstance == this && _toolbeltController != null) {
-            _toolbeltController.OnToolbeltChanged -= HandleToolbeltChanged;
-        }
+        _toolbeltController.OnToolbeltChanged -= HandleToolbeltChanged;
 
-        if (_inputManager != null) {
-            _inputManager.OnLeftClickCanceled -= HandleLeftClickCanceled;
-        }
+        _inputManager.OnLeftClickCanceled -= HandleLeftClickCanceled;
     }
 
     private void Update() {
-        if (LocalInstance == null) {
-            return;
-        }
-
         // Determine the cell based on movement direction and player position
         Vector2 motionDirection = _movementController.LastMotionDirection;
         Vector3 positionOffset = transform.position + (Vector3)_boxCollider2D.offset + (Vector3)motionDirection;
@@ -194,7 +170,7 @@ public class PlayerMarkerController : NetworkBehaviour {
         MarkAreaPositions(positions);
 
         // Inform tools controller about current area marker
-        _toolsAndWeaponController.AreaMarkerCallback();
+        _toolsAndWeaponController.AreaMarkerCallbackClientRpc();
     }
 
     // Execute server-side action based on the tool type
@@ -348,7 +324,7 @@ public class PlayerMarkerController : NetworkBehaviour {
             int id = _toolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId;
             ItemSO itemSO = ItemManager.Instance.ItemDatabase[id];
             ObjectSO objectSO = (ObjectSO)itemSO;
-            
+
             if (objectSO.ObjectRotationSprites.Length > 1) {
                 HighlightId++;
                 if (HighlightId > objectSO.ObjectRotationSprites.Length - 1) {

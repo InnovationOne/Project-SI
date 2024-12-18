@@ -233,7 +233,7 @@ public class ItemContainerSO : ScriptableObject {
     /// Sorts the items in the container based on item type and rarity.
     /// </summary>
     public void SortItems() {
-        int toolbeltSize = PlayerToolbeltController.LocalInstance.ToolbeltSizes[^1];
+        int toolbeltSize = PlayerController.LocalInstance.PlayerToolbeltController.ToolbeltSizes[^1];
 
         var itemSlots = _itemSlots
             .Skip(toolbeltSize)
@@ -292,7 +292,7 @@ public class ItemContainerSO : ScriptableObject {
     /// Clears the item container by clearing all the slots except for the toolbelt slots.
     /// </summary>
     public void ClearItemContainer() {
-        int toolbeltSize = PlayerToolbeltController.LocalInstance.ToolbeltSizes[^1];
+        int toolbeltSize = PlayerController.LocalInstance.PlayerToolbeltController.ToolbeltSizes[^1];
         foreach (var slot in _itemSlots.Skip(toolbeltSize)) {
             slot.Clear();
         }
@@ -342,7 +342,7 @@ public class ItemContainerSO : ScriptableObject {
     /// <returns>An enumerable collection of relevant item slots.</returns>
     private IEnumerable<ItemSlot> GetRelevantSlots(bool skipToolbelt) {
         if (skipToolbelt) {
-            int toolbeltSize = PlayerToolbeltController.LocalInstance.ToolbeltSizes[^1];
+            int toolbeltSize = PlayerController.LocalInstance.PlayerToolbeltController.ToolbeltSizes[^1];
             return _itemSlots.Skip(toolbeltSize);
         }
         return _itemSlots;

@@ -32,6 +32,6 @@ public class CraftVisual : MonoBehaviour {
     }
 
     public void OnLeftClick(int buttonIndex) {
-        PlayerCraftController.LocalInstance.OnLeftClick(buttonIndex);
+        PlayerController.LocalInstance.PlayerCraftController.OnLeftClick(buttonIndex);
     }
 }

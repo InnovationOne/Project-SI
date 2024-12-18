@@ -25,7 +25,7 @@ public class HealthAndEnergyUI : NetworkBehaviour {
     /// Subscribes to the player's health and energy events.
     /// </summary>
     public override void OnNetworkSpawn() {
-        _playerController = PlayerHealthAndEnergyController.LocalInstance;
+        _playerController = PlayerController.LocalInstance.PlayerHealthAndEnergyController;
         _playerController.OnUpdateHealth += ChangeHp;
         _playerController.OnUpdateMaxHealth += ChangeMaxHp;
         _playerController.OnUpdateEnergy += ChangeEnergy;

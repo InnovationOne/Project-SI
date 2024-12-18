@@ -94,17 +94,17 @@ public class CheatUI : MonoBehaviour {
 
         // Item Manager
         ADD_ITEM = new DebugCommand<int, int, int>("add_item", "Adds an item to the inventory.", "add_item <item_id> <amount> <rarity_id>", (int itemId, int amount, int rarityId) => {
-            PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(new ItemSlot(itemId, amount, rarityId), false);
+            PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(new ItemSlot(itemId, amount, rarityId), false);
         });
         _commandDictionary.Add(ADD_ITEM.CommandId, ADD_ITEM);
 
         REMOVE_ITEM = new DebugCommand<int, int, int>("remove_item", "Removes an item from the inventory.", "remove_item <item_id> <amount> <rarity_id>", (int itemId, int amount, int rarityId) => {
-            PlayerInventoryController.LocalInstance.InventoryContainer.RemoveItem(new ItemSlot(itemId, amount, rarityId));
+            PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.RemoveItem(new ItemSlot(itemId, amount, rarityId));
         });
         _commandDictionary.Add(REMOVE_ITEM.CommandId, REMOVE_ITEM);
 
         REMOVE_ALL_ITEMS = new DebugCommand("remove_all_items", "Removes all items from the inventory.", "remove_all_items", () => {
-            PlayerInventoryController.LocalInstance.InventoryContainer.ClearItemContainer();
+            PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.ClearItemContainer();
         });
         _commandDictionary.Add(REMOVE_ALL_ITEMS.CommandId, REMOVE_ALL_ITEMS);
 
@@ -154,34 +154,34 @@ public class CheatUI : MonoBehaviour {
 
         // Player Health and Energy Controller
         SET_HP = new DebugCommand<int>("set_hp", "Sets the player's health to the given value.", "set_hp <hp>", (int hp) => {
-            PlayerHealthAndEnergyController.LocalInstance.AdjustHealth(hp);
+            PlayerController.LocalInstance.PlayerHealthAndEnergyController.AdjustHealth(hp);
         });
         _commandDictionary.Add(SET_HP.CommandId, SET_HP);
 
         SET_MAX_HP = new DebugCommand<int>("set_max_hp", "Sets the player's max health to the given value.", "set_max_hp <max_hp>", (int maxHp) => {
-            PlayerHealthAndEnergyController.LocalInstance.AdjustMaxHealth(maxHp);
+            PlayerController.LocalInstance.PlayerHealthAndEnergyController.AdjustMaxHealth(maxHp);
         });
         _commandDictionary.Add(SET_MAX_HP.CommandId, SET_MAX_HP);
 
         SET_ENERGY = new DebugCommand<int>("set_energy", "Sets the player's energy to the given value.", "set_energy <energy>", (int energy) => {
-            PlayerHealthAndEnergyController.LocalInstance.AdjustEnergy(energy);
+            PlayerController.LocalInstance.PlayerHealthAndEnergyController.AdjustEnergy(energy);
         });
         _commandDictionary.Add(SET_ENERGY.CommandId, SET_ENERGY);
 
         SET_MAX_ENERGY = new DebugCommand<int>("set_max_energy", "Sets the player's max energy to the given value.", "set_max_energy <max_energy>", (int maxEnergy) => {
-            PlayerHealthAndEnergyController.LocalInstance.AdjustMaxEnergy(maxEnergy);
+            PlayerController.LocalInstance.PlayerHealthAndEnergyController.AdjustMaxEnergy(maxEnergy);
         });
         _commandDictionary.Add(SET_MAX_ENERGY.CommandId, SET_MAX_ENERGY);
 
         // Toolbelt Controller
         SET_TOOLBELT_SIZE = new DebugCommand<int>("set_toolbelt_size", "Sets the size of the player's toolbelt to the given value.", "set_toolbelt_size <size_Id>", (int size_Id) => {
-            PlayerToolbeltController.LocalInstance.SetToolbeltSize(size_Id);
+            PlayerController.LocalInstance.PlayerToolbeltController.SetToolbeltSize(size_Id);
         });
         _commandDictionary.Add(SET_TOOLBELT_SIZE.CommandId, SET_TOOLBELT_SIZE);
 
         // Inventory Controller
         SET_INVENTORY_SIZE = new DebugCommand<int>("set_inventory_size", "Sets the size of the player's inventory to the given value.", "set_inventory_size <size_Id>", (int size_Id) => {
-            PlayerInventoryController.LocalInstance.SetInventorySize(size_Id);
+            PlayerController.LocalInstance.PlayerInventoryController.SetInventorySize(size_Id);
         });
         _commandDictionary.Add(SET_INVENTORY_SIZE.CommandId, SET_INVENTORY_SIZE);
 

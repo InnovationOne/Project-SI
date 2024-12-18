@@ -8,8 +8,6 @@ using static WeatherManager;
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(BoxCollider2D))]
 public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance {
-    public static PlayerMovementController LocalInstance { get; private set; }
-
     // Movement Directions
     public Vector2 LastMotionDirection { get; private set; } = Vector2.right;
 
@@ -88,18 +86,6 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
         _inputManager.OnRunAction -= ToggleRunState;
         _playerWalkGrassEvent.release();
         //TODO _playerDashEvent.release();
-    }
-
-    public override void OnNetworkSpawn() {
-        base.OnNetworkSpawn();
-
-        if (IsOwner) {
-            if (LocalInstance != null) {
-                Debug.LogError("There is more than one local instance of PlayerMovementController in the scene!");
-                return;
-            }
-            LocalInstance = this;
-        }
     }
 
     private void ToggleRunState() {
