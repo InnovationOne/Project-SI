@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,7 +27,7 @@ public class InventoryMasterUI : MonoBehaviour {
     public static InventoryMasterUI Instance { get; private set; }
 
     [Header("Standard Panels")]
-    [SerializeField] SubPanel[] _subPanels;
+    [SerializeField] SubPanel[] _subPanelsArray;
     [SerializeField] Button _closeButton;
 
     [Header("UI Elements")]
@@ -34,8 +35,11 @@ public class InventoryMasterUI : MonoBehaviour {
 
     public InventorySubUIs LastOpenPanel { get; private set; } = InventorySubUIs.None;
 
-    InputManager _iPM;
-
+    Dictionary<InventorySubUIs, SubPanel> _subPanels;
+    InputManager _iM;
+    InventoryUI _iUI;
+    ToolbeltUI _tUI;
+    PlayerItemDragAndDropController _pIDADC;
 
     void Awake() {
         if (Instance != null) {
@@ -44,12 +48,29 @@ public class InventoryMasterUI : MonoBehaviour {
         }
         Instance = this;
 
-        InitializeSubPanelListeners();
-        // TODO: //_closeButton.onClick.AddListener(ToggleInventory);
+        // Convert array to dictionary for safer lookups
+        _subPanels = new Dictionary<InventorySubUIs, SubPanel>();
+        foreach (var panel in _subPanelsArray) {
+            _subPanels[panel.PanelType] = panel;
+        }
+
+        // Setup panel button listeners
+        foreach (var kvp in _subPanels) {
+            var subPanel = kvp.Value;
+            if (subPanel.Button != null) {
+                subPanel.Button.onClick.AddListener(() => SetSubPanel(subPanel.PanelType));
+            }
+        }
+
+        if (_closeButton != null) {
+            _closeButton.onClick.AddListener(() => ToggleInventory());
+        }
     }
 
     void Start() {
-        _iPM = InputManager.Instance;
+        _iM = InputManager.Instance;
+        _iUI = InventoryUI.Instance;
+        _tUI = ToolbeltUI.Instance;
         SubscribeToInputEvents();
 
         DeactivateAllSubPanelsExcept(InventorySubUIs.Inventory);
@@ -58,31 +79,29 @@ public class InventoryMasterUI : MonoBehaviour {
 
     void OnDestroy() {
         UnsubscribeFromInputEvents();
-        RemoveSubPanelListeners();
+
+        // Remove listeners
+        foreach (var kvp in _subPanels) {
+            var subPanel = kvp.Value;
+            if (subPanel.Button != null) {
+                subPanel.Button.onClick.RemoveAllListeners();
+            }
+        }
+
+        if (_closeButton != null) {
+            _closeButton.onClick.RemoveAllListeners();
+        }
     }
 
     #region -------------------- Initialization --------------------
-    void InitializeSubPanelListeners() {
-        foreach (var subPanel in _subPanels) {
-            subPanel.Button.onClick.AddListener(() => SetSubPanel(subPanel.PanelType));
-        }
-    }
-
-    void RemoveSubPanelListeners() {
-        foreach (var subPanel in _subPanels) {
-            subPanel.Button.onClick.RemoveAllListeners();
-        }
-        // TODO: //_closeButton.onClick.RemoveAllListeners();
-    }
-
     void SubscribeToInputEvents() {
-        _iPM.OnInventoryAction += HandleInventoryToggle;
-        _iPM.OnEscapeAction += HandleEscape;
+        _iM.OnInventoryAction += HandleInventoryToggle;
+        _iM.OnEscapeAction += HandleEscape;
     }
 
     void UnsubscribeFromInputEvents() {
-        _iPM.OnInventoryAction -= HandleInventoryToggle;
-        _iPM.OnEscapeAction -= HandleEscape;
+        _iM.OnInventoryAction -= HandleInventoryToggle;
+        _iM.OnEscapeAction -= HandleEscape;
     }
     #endregion -------------------- Initialization --------------------
 
@@ -104,13 +123,13 @@ public class InventoryMasterUI : MonoBehaviour {
 
     #region -------------------- Panel Management --------------------
     public void SetSubPanel(InventorySubUIs targetPanel) {
-        // Close when same panel is clicked
+        // If panel is already open, close instead
         if (targetPanel == LastOpenPanel && gameObject.activeSelf) {
             ToggleInventory();
             return;
         }
 
-        // Open panel when closed
+        // If inventory is closed, open it first
         if (!gameObject.activeSelf) {
             ToggleInventory();
         }
@@ -122,46 +141,53 @@ public class InventoryMasterUI : MonoBehaviour {
     }
 
     void DeactivateLastOpenPanel() {
-        if (LastOpenPanel != InventorySubUIs.None) {
-            var lastSubPanel = _subPanels[(int)LastOpenPanel];
-            lastSubPanel.UIElement.SetActive(false);
+        if (LastOpenPanel != InventorySubUIs.None && _subPanels.TryGetValue(LastOpenPanel, out var lastSubPanel)) {
+            if (lastSubPanel.UIElement != null) {
+                lastSubPanel.UIElement.SetActive(false);
+            }
             ToggleButtonVisual(lastSubPanel, false);
         }
     }
 
     void ActivateTargetPanel(InventorySubUIs targetPanel) {
-        if (targetPanel != InventorySubUIs.None) {
-            var targetSubPanel = _subPanels[(int)targetPanel];
-            targetSubPanel.UIElement.SetActive(true);
+        if (targetPanel != InventorySubUIs.None && _subPanels.TryGetValue(targetPanel, out var targetSubPanel)) {
+            if (targetSubPanel.UIElement != null) {
+                targetSubPanel.UIElement.SetActive(true);
+            }
             ToggleButtonVisual(targetSubPanel, true);
         }
     }
 
     void ToggleButtonVisual(SubPanel subPanel, bool isActive) {
-        Transform bT = subPanel.Button.transform;
-        bT.GetChild(0).gameObject.SetActive(!isActive);
-        bT.GetChild(1).gameObject.SetActive(!isActive);
-        bT.GetChild(2).gameObject.SetActive(isActive);
-        bT.GetChild(3).gameObject.SetActive(isActive);
+        if (subPanel.Button.TryGetComponent<Inven_Main_A>(out var invenMainA)) {
+            invenMainA.ToggleButtonVisual(isActive);
+        }
     }
 
-    void UpdateInventoryText(InventorySubUIs currentPanel) => _inventoryText.text = currentPanel.ToString();
+    void UpdateInventoryText(InventorySubUIs currentPanel) {
+        if (_inventoryText != null) {
+            _inventoryText.text = currentPanel.ToString();
+        }
+    }
 
     void DeactivateAllSubPanelsExcept(InventorySubUIs exception) {
-        foreach (var subPanel in _subPanels) {
-            if (subPanel.PanelType != exception) {
-                subPanel.UIElement.SetActive(false);
+        foreach (var kvp in _subPanels) {
+            if (kvp.Key != exception && kvp.Value.UIElement != null) {
+                kvp.Value.UIElement.SetActive(false);
             }
         }
     }
 
-    void ToggleInventory() {
-        gameObject.SetActive(!gameObject.activeSelf);
-        ToolbeltUI.Instance.ToggleToolbelt();
+    void ToggleInventory(bool forceActive = false) {
+        var newActiveState = forceActive || !gameObject.activeSelf;
+        gameObject.SetActive(newActiveState);
+        _tUI.ToggleToolbelt();
 
-        if (DragItemUI.Instance.gameObject.activeSelf) {
-            var inventoryUI = _subPanels[(int)InventorySubUIs.Inventory].UIElement.GetComponent<InventoryUI>();
-            PlayerItemDragAndDropController.LocalInstance.AddDragItemBackIntoBackpack(inventoryUI.LastSlotId);
+        // If dragging an item and closing the inventory, return the item
+        if (!newActiveState && DragItemUI.Instance != null && DragItemUI.Instance.gameObject.activeSelf) {
+            _pIDADC.AddDragItemBackIntoBackpack(
+                _iUI != null ? _iUI.LastSlotId : -1
+            );
         }
     }
     #endregion -------------------- Panel Management --------------------
