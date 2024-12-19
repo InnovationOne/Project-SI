@@ -1,12 +1,22 @@
 using UnityEngine;
 
-// This script handels plowing a tile on the grid
+// Plow action: Applies a "hoe" action to an area defined by the equipped AreaToolSO.
 [CreateAssetMenu(menuName = "Tool Action/Plow")]
 public class PlowCropTileSO : ToolActionSO {
     public override void OnApplyToTileMap(Vector3Int position, ItemSlot itemSlot) {
-        PlayerController.LocalInstance.PlayerMarkerController.TriggerAreaMarker(itemSlot.RarityId - 1, 
-            (ItemManager.Instance.ItemDatabase[itemSlot.ItemId] as AreaToolSO).Area, 
-            (ItemManager.Instance.ItemDatabase[itemSlot.ItemId] as AreaToolSO).EnergyOnAction[itemSlot.RarityId - 1], 
-            ToolSO.ToolTypes.Hoe);
+        int rarityIndex = itemSlot.RarityId - 1;
+        if (ItemManager.Instance.ItemDatabase[itemSlot.ItemId] is AreaToolSO areaTool) {
+            int energyCost = areaTool.EnergyOnAction[rarityIndex];
+            Area[] area = areaTool.Area;
+
+            PlayerController.LocalInstance.PlayerMarkerController.TriggerAreaMarker(
+                rarityIndex,
+                area,
+                energyCost,
+                ToolSO.ToolTypes.Hoe
+            );
+        } else {
+            Debug.LogWarning("Attempted to plow with a non-area tool.");
+        }
     }
 }

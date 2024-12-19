@@ -1,93 +1,75 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class HarvestCrop : MonoBehaviour, IInteractable {
-    // A list of fertilizer types and their corresponding sprite renderers to be converted into a dictionary.
-    [SerializeField] private List<FertilizerSpriteRendererPair> _fertilizerSpriteRenderersList = new(); 
-    // A dictionary of fertilizer types and their corresponding sprite renderers.
-    private Dictionary<FertilizerSO.FertilizerTypes, SpriteRenderer> _fertilizerSpriteRenderers = new(); 
-    private Vector3Int _cropPosition; // The position of the crop in the grid.
-    private bool _initialized = false; // Whether the fertilizer sprite renderers have been initialized.
+[Serializable]
+public class FertilizerSpriteRendererPair {
+    public FertilizerSO.FertilizerTypes FertilizerType;
+    public SpriteRenderer SpriteRenderer;
+}
 
-    [NonSerialized] private float _maxDistanceToPlayer;
-    public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
+public class HarvestCrop : NetworkBehaviour, IInteractable {
+    [SerializeField] List<FertilizerSpriteRendererPair> _fertilizerSpriteRenderersList = new();
 
-    /// <summary>
-    /// Initializes the fertilizer sprite renderers dictionary based on the fertilizer sprite renderers list.
-    /// </summary>
+    [NonSerialized] float _maxDistanceToPlayer;
+    public float MaxDistanceToPlayer => _maxDistanceToPlayer;
+
+    Dictionary<FertilizerSO.FertilizerTypes, SpriteRenderer> _fertilizerSpriteRenderers = new(); 
+    Vector3Int _cropPosition;
+    CropsManager _cropsManager;
+
+    private void Awake() {
+        InitializeFertilizerRenderers();
+    }
+
+    private void Start() {
+        _cropsManager = CropsManager.Instance;
+    }
+
+    // Build the dictionary from the serialized list for quick runtime lookups.
     private void InitializeFertilizerRenderers() {
-        if (_fertilizerSpriteRenderersList.Count == 0) {
-            Debug.LogWarning("FertilizerSpriteRendererList is empty. Ensure that it is properly populated in the Unity Editor.");
-            return;
-        }
-
         _fertilizerSpriteRenderers = new Dictionary<FertilizerSO.FertilizerTypes, SpriteRenderer>(_fertilizerSpriteRenderersList.Count);
-        foreach (var pair in _fertilizerSpriteRenderersList) {
-            if (pair.SpriteRenderer == null) {
-                Debug.LogError($"Missing SpriteRenderer for {pair.FertilizerType}");
+        foreach (var kvp in _fertilizerSpriteRenderersList) {
+            if (kvp.SpriteRenderer == null) {
+                Debug.LogError($"[HarvestCrop] Missing SpriteRenderer for {kvp.FertilizerType}");
                 continue;
             }
-            _fertilizerSpriteRenderers[pair.FertilizerType] = pair.SpriteRenderer;
+            _fertilizerSpriteRenderers[kvp.FertilizerType] = kvp.SpriteRenderer;
         }
     }
 
-    /// <summary>
-    /// Interacts with the crop by harvesting it.
-    /// </summary>
-    /// <param name="player">The player interacting with the crop.</param>
-    public void Interact(PlayerController player) {
-        CropsManager.Instance.HarvestCropServerRpc(new Vector3IntSerializable(_cropPosition));
-    }
+    // Called by other game systems to trigger harvesting over the network.
+    public void Interact(PlayerController player) => _cropsManager.HarvestCropServerRpc(new Vector3IntSerializable(_cropPosition));
 
-    /// <summary>
-    /// Sets the position of the crop.
-    /// </summary>
-    /// <param name="position">The position to set.</param>
-    public void SetCropPosition(Vector3Int position) {
-        _cropPosition = position;
-    }
+    // Set the crop's position so that networking and gameplay systems know where it is in the world.
+    public void SetCropPosition(Vector3Int position) => _cropPosition = position;
 
-    /// <summary>
-    /// Sets the fertilizer sprite for a given fertilizer type.
-    /// </summary>
-    /// <param name="fertilizerType">The type of fertilizer.</param>
-    /// <param name="color">The color of the sprite (optional).</param>
+    // Update the displayed fertilizer sprite for a given fertilizer type, optionally changing its color.
     public void SetFertilizerSprite(FertilizerSO.FertilizerTypes fertilizerType, Color? color = null) {
-        if (!_initialized) {
-            InitializeFertilizerRenderers();
-            _initialized = true;
+        if (_fertilizerSpriteRenderers == null) {
+            Debug.LogError("[HarvestCrop] Fertilizer renderers not initialized. Ensure Awake() was called properly.");
+            return;
         }
 
         if (_fertilizerSpriteRenderers.TryGetValue(fertilizerType, out var spriteRenderer)) {
             ToggleSprite(spriteRenderer, color);
+        } else {
+            Debug.LogWarning($"[HarvestCrop] No sprite renderer found for fertilizer type: {fertilizerType}");
         }
     }
 
-    /// <summary>
-    /// Toggles the visibility of a SpriteRenderer and sets its color.
-    /// </summary>
-    /// <param name="spriteRenderer">The SpriteRenderer to toggle.</param>
-    /// <param name="color">The color to set the SpriteRenderer to. If null, the color will be set to white.</param>
+    // Enable/disable a sprite renderer and apply the chosen color.
     private void ToggleSprite(SpriteRenderer spriteRenderer, Color? color) {
-        if (spriteRenderer == null) {
-            Debug.LogError("Attempted to toggle a non-existent SpriteRenderer.");
-            return;
-        }
+        if (spriteRenderer == null) return;
         spriteRenderer.enabled = !spriteRenderer.enabled;
         spriteRenderer.color = color ?? Color.white;
     }
 
+    // Placeholder for picking up items if the crop is part of a placed object with loot.
     public void PickUpItemsInPlacedObject(PlayerController player) { }
 
+    // Placeholder for any pre-load initialization with a specific item ID.
     public void InitializePreLoad(int itemId) { }
 
-    /// <summary>
-    /// Represents a pair of a fertilizer type and a sprite renderer for a list that is converted into a dictionary.
-    /// </summary>
-    [Serializable]
-    public class FertilizerSpriteRendererPair {
-        public FertilizerSO.FertilizerTypes FertilizerType;
-        public SpriteRenderer SpriteRenderer;
-    }
 }
