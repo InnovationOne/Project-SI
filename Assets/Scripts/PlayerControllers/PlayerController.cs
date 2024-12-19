@@ -12,6 +12,9 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerToolsAndWeaponController))]
 [RequireComponent(typeof(PlayerCameraController))]
 [RequireComponent(typeof(PlayerFishingController))]
+[RequireComponent(typeof(NetworkObject))]
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(BoxCollider2D))]
 public class PlayerController : NetworkBehaviour {
     public static PlayerController LocalInstance { get; private set; }
 
@@ -34,7 +37,7 @@ public class PlayerController : NetworkBehaviour {
     GameManager _gameManager;
 
 
-    private void Awake() {
+    void Awake() {
         if (IsOwner) {
             if (LocalInstance != null) {
                 Debug.LogError("There is more than one local instance of Player in the scene!");
@@ -58,7 +61,7 @@ public class PlayerController : NetworkBehaviour {
         RaindropController = GetComponentInChildren<RaindropController>();
     }
 
-    private void Start() {
+    void Start() {
         _gameManager = GameManager.Instance;
         _playerDataManager = PlayerDataManager.Instance;
     }

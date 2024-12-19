@@ -13,14 +13,11 @@ public class PlayerData {
     public Vector2 Position;
     public Vector2 LastDirection;
     public Vector2 RespawnPosition;
-    public Vector2 HospitalRespawnPosition;
 
     public int InventorySize;
     public string Inventory;
     public int ToolbeltSize;
     public int LastSelectedToolbeltSlot;
-    public string Wiki;
-    public string Craft;
 
     // Save in a local gamedata file
     public string Hotkeys;

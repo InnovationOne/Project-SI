@@ -208,7 +208,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
     #endregion -------------------- Day & Season Changes --------------------
 
-
     #region -------------------- Visualization --------------------
     // Updates ground tiles (dry/wet/plowed).
     void VisualizeTileChanges(CropTile tile) {
@@ -319,7 +318,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     }
 
     #endregion -------------------- Visualization --------------------
-
 
     #region -------------------- Plowing --------------------
     // Plow multiple tiles if possible.

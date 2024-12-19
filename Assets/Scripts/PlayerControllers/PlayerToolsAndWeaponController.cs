@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 // This class represents the character useing an item
 public class PlayerToolsAndWeaponController : NetworkBehaviour {
@@ -66,7 +65,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         StartCoroutine(PerformToolAction(toolAction, enumerator));
     }
 
-    private IEnumerator PerformToolAction(ToolActionSO toolAction, IEnumerator<ToolActionSO> enumerator) {
+    IEnumerator PerformToolAction(ToolActionSO toolAction, IEnumerator<ToolActionSO> enumerator) {
         // Apply the tool action to the tile map at the player's marked position
         toolAction.OnApplyToTileMap(_playerMarkerController.MarkedCellPosition, _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot());
 

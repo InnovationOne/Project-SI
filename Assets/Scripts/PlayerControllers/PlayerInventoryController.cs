@@ -3,69 +3,52 @@ using System.Collections.ObjectModel;
 using Unity.Netcode;
 using UnityEngine;
 
-/// <summary>
-/// Manages the player's inventory and provides methods for saving and loading player data.
-/// </summary>
+/// Manages the player's inventory.
 public class PlayerInventoryController : NetworkBehaviour, IPlayerDataPersistance {
-    // Immutable collection of possible inventory sizes.
-    private static readonly ReadOnlyCollection<int> _inventorySizes = Array.AsReadOnly(new int[] { 10, 20, 30 });
-    public ReadOnlyCollection<int> InventorySizes => _inventorySizes;
+    // Predefined inventory sizes (read-only)
+    static readonly ReadOnlyCollection<int> INVENTORY_SIZES = Array.AsReadOnly(new int[] { 10, 20, 30 });
+    public ReadOnlyCollection<int> InventorySizes => INVENTORY_SIZES;
 
-    // Current inventory size, defaulting to maximum size.
-    private int _currentInventorySize = 30;
+    // Current inventory size (default: largest)
+    int _currentInventorySize = INVENTORY_SIZES[^1];
     public int CurrentInventorySize => _currentInventorySize;
 
-    // Reference to the inventory container ScriptableObject.
-    [SerializeField] private ItemContainerSO _inventoryContainer;
+    // Inventory container (ScriptableObject reference)
+    [SerializeField] ItemContainerSO _inventoryContainer;
     public ItemContainerSO InventoryContainer => _inventoryContainer;
 
-    // Cached reference to InventoryUI to minimize property access overhead.
+    // Cached UI reference for faster access
     private InventoryUI _inventoryUI;
 
 
     private void Start() {
-        // Cache the InventoryUI reference
         _inventoryUI = InventoryUI.Instance;
-
         SetInventorySize(_currentInventorySize);
     }
 
-    /// <summary>
-    /// Sets the inventory size.
-    /// </summary>
-    /// <param name="inventorySize">The new inventory size.</param>
+    // Updates inventory size if valid and refreshes UI
     public void SetInventorySize(int inventorySize) {
-        if (inventorySize > _inventorySizes[^1]) {
-            Debug.LogError($"Cannot set inventory size higher than maximum allowed size {_inventorySizes[^1]}.");
+        if (inventorySize > INVENTORY_SIZES[^1]) {
+            Debug.LogError($"Inventory size can't exceed {INVENTORY_SIZES[^1]}.");
             return;
         }
 
-        if (_currentInventorySize == inventorySize) {
-            return; // No change needed
-        }
+        if (_currentInventorySize == inventorySize) return;
 
         _currentInventorySize = inventorySize;
-
-        if (_inventoryContainer != null) {
-            _inventoryUI.InventoryOrToolbeltSizeChanged();
-        }
+        _inventoryUI.InventoryOrToolbeltSizeChanged();
 
     }
 
-    #region Save and Load
+    // Saves inventory contents and size
     public void SavePlayer(PlayerData playerData) {
-        if (_inventoryContainer != null) {
-            playerData.Inventory = _inventoryContainer.SaveItemContainer();
-        }
+        playerData.Inventory = _inventoryContainer.SaveItemContainer();
         playerData.InventorySize = _currentInventorySize;
     }
 
+    // Loads inventory contents and size
     public void LoadPlayer(PlayerData playerData) {
         _currentInventorySize = playerData.InventorySize;
-
-        if (!string.IsNullOrEmpty(playerData.Inventory)) {
-            _inventoryContainer.LoadItemContainer(playerData.Inventory);
-        }
+        _inventoryContainer.LoadItemContainer(playerData.Inventory);
     }
-    #endregion
 }

@@ -5,49 +5,47 @@ using UnityEngine.EventSystems;
 using static ItemSlot;
 
 public class PlayerItemDragAndDropController : NetworkBehaviour {
-    // Cached references
-    private ItemSlot _dragItemSlot;
-    private PlayerInventoryController _playerInventoryController;
-    private DragItemUI _visual;
-    private InputManager _inputManager;
-    private ItemManager _itemManager;
-    private PlayerMovementController _playerMovementController;
+    ItemSlot _dragItemSlot;
+    PlayerInventoryController _playerInventoryController;
+    PlayerMovementController _playerMovementController;
+    ItemManager _itemManager;
+    ItemSpawnManager _itemSpawnManager;
+    InputManager _inputManager;
+    DragItemUI _dragItemUI;
 
-    // Reusable Vector3 to minimize allocations
-    private Vector3 _roundedPosition;
+    // Reused for position calculations
+    Vector3 _roundedPosition;
 
-    private void Awake() {
+    void Awake() {
         _dragItemSlot = new ItemSlot();
         _playerInventoryController = GetComponent<PlayerInventoryController>();
-        _itemManager = ItemManager.Instance;
         _playerMovementController = GetComponent<PlayerMovementController>();
     }
 
-    public override void OnNetworkSpawn() {
-        _visual = DragItemUI.Instance;
+    void Start() {
+        _itemManager = ItemManager.Instance;
+        _itemSpawnManager = ItemSpawnManager.Instance;
         _inputManager = InputManager.Instance;
+        _dragItemUI = DragItemUI.Instance;
     }
 
-    private void Update() {
-        if (_visual.gameObject.activeSelf && IsOwner) {
+    void Update() {
+        // Update dragged item visual only if active and owned by this client
+        if (IsOwner && _dragItemUI.gameObject.activeSelf) {
             UpdateVisualPosition();
         }
     }
 
-    /// <summary>
-    /// Updates the position of the drag visual based on the pointer position.
-    /// </summary>
-    private void UpdateVisualPosition() {
-        Vector3 pointerPosition = _inputManager.GetPointerPosition();
-
-        // Round the pointer position to the nearest integer values
+    // Positions the dragged item icon to the pointer's rounded position
+    void UpdateVisualPosition() {
+        var pointerPosition = _inputManager.GetPointerPosition();
         _roundedPosition.x = Mathf.RoundToInt(pointerPosition.x);
         _roundedPosition.y = Mathf.RoundToInt(pointerPosition.y);
-
-        _visual.transform.position = _roundedPosition;
+        _dragItemUI.transform.position = _roundedPosition;
     }
 
-    #region Left Click
+    #region -------------------- Left Click --------------------
+    // Handles a left-click input on a specified item slot (inventory or outside)
     public void OnLeftClick(ItemSlot itemSlot) {
         if (!EventSystem.current.IsPointerOverGameObject()) {
             PlaceItemOnMap(_dragItemSlot.Amount);
@@ -58,41 +56,41 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
         FinalizeDragAction();
     }
 
-    private void HandleLeftClickOnInventory(ItemSlot clickedItemSlot) {
-        if (_dragItemSlot.IsEmpty && clickedItemSlot.ItemId != EmptyItemId) {
-            PickUpItemSlot(clickedItemSlot);
-        } else if (clickedItemSlot.IsEmpty) {
-            PlaceItemSlotIntoInventory(clickedItemSlot);
-        } else if (_dragItemSlot.CanStackWith(clickedItemSlot)) {
-            HandleItemStacking(clickedItemSlot);
+    // Manages inventory logic when left-clicking inside the inventory area
+    void HandleLeftClickOnInventory(ItemSlot clickedSlot) {
+        if (_dragItemSlot.IsEmpty && clickedSlot.ItemId != EmptyItemId) {
+            PickUpItemSlot(clickedSlot);
+        } else if (clickedSlot.IsEmpty) {
+            clickedSlot.Set(_dragItemSlot);
+            _dragItemSlot.Clear();
+        } else if (_dragItemSlot.CanStackWith(clickedSlot)) {
+            HandleItemStacking(clickedSlot);
         } else {
-            SwitchItemSlots(clickedItemSlot);
+            SwitchItemSlots(clickedSlot);
         }
     }
 
-    /// <summary>
-    /// Handles stacking logic when items can be stacked.
-    /// </summary>
-    /// <param name="itemSlot">The target item slot.</param>
-    private void HandleItemStacking(ItemSlot targetItemSlot) {
+    // Stacks items if possible, or switches slots if already at max stack
+    void HandleItemStacking(ItemSlot targetItemSlot) {
         int maxStackTarget = _itemManager.GetMaxStackableAmount(targetItemSlot.ItemId);
         int maxStackDrag = _itemManager.GetMaxStackableAmount(_dragItemSlot.ItemId);
 
         if (targetItemSlot.Amount >= maxStackTarget || _dragItemSlot.Amount >= maxStackDrag) {
             SwitchItemSlots(targetItemSlot);
-        } else {
-            int availableSpace = maxStackTarget - targetItemSlot.Amount;
-            int amountToMove = Math.Min(availableSpace, _dragItemSlot.Amount);
-
-            int actualMoved = targetItemSlot.AddAmount(amountToMove, maxStackTarget);
-            _dragItemSlot.RemoveAmount(actualMoved);
+            return;
         }
+
+        int availableSpace = maxStackTarget - targetItemSlot.Amount;
+        int amountToMove = Math.Min(availableSpace, _dragItemSlot.Amount);
+        int moved = targetItemSlot.AddAmount(amountToMove, maxStackTarget);
+        _dragItemSlot.RemoveAmount(moved);
     }
-    #endregion
+    #endregion -------------------- Left Click --------------------
 
 
 
-    #region Right Click Handlers
+    #region -------------------- Right Click --------------------
+    // Handles a right-click input on a specified item slot (inventory or outside)
     public void OnRightClick(ItemSlot clickedItemSlot) {
         if (!EventSystem.current.IsPointerOverGameObject()) {
             int spawnAmount = _inputManager.IsShiftPressed()
@@ -105,155 +103,98 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
 
         FinalizeDragAction();
     }
-    #endregion
+    #endregion -------------------- Right Click --------------------
 
-    public int TryToAddItemToDragItem(ItemSlot sourceItemSlot) {
-        if (!CanAddToDragItem(sourceItemSlot)) {
+    #region -------------------- Drag Item --------------------
+    // Attempts to add items from a source slot into the currently dragged slot
+    public int TryToAddItemToDragItem(ItemSlot sourceSlot) {
+        if (!CanAddToDragItem(sourceSlot)) {
             int maxStack = _itemManager.GetMaxStackableAmount(_dragItemSlot.ItemId);
             int missingAmount = maxStack - _dragItemSlot.Amount;
 
-            if (missingAmount >= sourceItemSlot.Amount) {
-                int addedAmount = _dragItemSlot.AddAmount(sourceItemSlot.Amount, maxStack);
-                sourceItemSlot.RemoveAmount(addedAmount);
+            if (missingAmount >= sourceSlot.Amount) {
+                int added = _dragItemSlot.AddAmount(sourceSlot.Amount, maxStack);
+                sourceSlot.RemoveAmount(added);
             } else {
                 _dragItemSlot.AddAmount(missingAmount, maxStack);
-                sourceItemSlot.RemoveAmount(missingAmount);
+                sourceSlot.RemoveAmount(missingAmount);
             }
         }
 
-        // Return the amount of items that weren't added to the drag item slot.
-        return sourceItemSlot.Amount;
+        return sourceSlot.Amount;
     }
 
-    /// <summary>
-    /// Checks if an item can be added to the drag slot.
-    /// </summary>
-    /// <param name="sourceItemSlot">The item slot to check.</param>
-    /// <returns>True if the item can be added; otherwise, false.</returns>
-    private bool CanAddToDragItem(ItemSlot sourceItemSlot) {
-        if (_dragItemSlot.IsEmpty) {
-            return true;
-        }
+    // Checks if the dragged slot can accept items from another slot
+    bool CanAddToDragItem(ItemSlot sourceSlot) => _dragItemSlot.IsEmpty || _dragItemSlot.CanStackWith(sourceSlot);
 
-        return _dragItemSlot.CanStackWith(sourceItemSlot);
-    }
-
-    /// <summary>
-    /// Adds the drag item back into the backpack.
-    /// </summary>
-    /// <param name="lastSlotId">The ID of the last slot.</param>
+    // Places the currently dragged item slot back into a specific backpack slot
     public void AddDragItemBackIntoBackpack(int lastSlotId) {
         var backpackSlot = _playerInventoryController.InventoryContainer.ItemSlots[lastSlotId];
         backpackSlot.Set(_dragItemSlot);
         ClearDragItem();
     }
 
-    /// <summary>
-    /// Clears the drag item if its amount is zero or less.
-    /// </summary>
-    private void CheckToClearDragItem() {
+    // Wrap-up logic after drag actions, updating UI and icon
+    private void FinalizeDragAction() {
         if (_dragItemSlot.IsEmpty || _dragItemSlot.Amount <= 0) {
             ClearDragItem();
         }
-    }
 
-    /// <summary>
-    /// Clears the drag item and hides the visual.
-    /// </summary>
-    public void ClearDragItem() {
-        _dragItemSlot.Clear();
-        _visual.gameObject.SetActive(false);
-    }
-
-    /// <summary>
-    /// Finalizes the drag action by checking and updating the UI and icon.
-    /// </summary>
-    private void FinalizeDragAction() {
-        CheckToClearDragItem();
         _playerInventoryController.InventoryContainer.UpdateUI();
         UpdateIcon();
     }
 
-    /// <summary>
-    /// Updates the drag item's visual icon based on the current drag item slot.
-    /// </summary>
+    // Clears the dragged item and hides the visual
+    public void ClearDragItem() {
+        _dragItemSlot.Clear();
+        _dragItemUI.gameObject.SetActive(false);
+    }
+
+    // Updates the drag icon display based on the currently dragged item
     private void UpdateIcon() {
         if (_dragItemSlot.ItemId != EmptyItemId) {
-            _visual.gameObject.SetActive(true);
-            _visual.SetItemSlot(_dragItemSlot);
+            _dragItemUI.gameObject.SetActive(true);
+            _dragItemUI.SetItemSlot(_dragItemSlot);
         } else {
-            _visual.gameObject.SetActive(false);
+            _dragItemUI.gameObject.SetActive(false);
         }
     }
 
-    /// <summary>
-    /// Picks up an item slot into the drag slot.
-    /// </summary>
-    /// <param name="sourceItemSlot">The item slot to pick up.</param>
-    private void PickUpItemSlot(ItemSlot sourceItemSlot) {
-        _dragItemSlot.Set(sourceItemSlot);
-        sourceItemSlot.Clear();
+    // Moves an item's entire slot into the drag slot
+    private void PickUpItemSlot(ItemSlot sourceSlot) {
+        _dragItemSlot.Set(sourceSlot);
+        sourceSlot.Clear();
     }
 
-    /// <summary>
-    /// Places the drag item slot into the inventory slot.
-    /// </summary>
-    /// <param name="targetItemSlot">The inventory slot to place into.</param>
-    private void PlaceItemSlotIntoInventory(ItemSlot targetItemSlot) {
-        targetItemSlot.Set(_dragItemSlot);
-        _dragItemSlot.Clear();
-    }
+    // Swaps the contents of the dragged slot with the target slot
+    private void SwitchItemSlots(ItemSlot targetSlot) => _dragItemSlot.SwapWith(targetSlot);
 
-    /// <summary>
-    /// Switches the drag item slot with the target item slot.
-    /// </summary>
-    /// <param name="targetItemSlot">The target item slot.</param>
-    private void SwitchItemSlots(ItemSlot targetItemSlot) {
-        _dragItemSlot.SwapWith(targetItemSlot);
-    }
-
-    /// <summary>
-    /// Places items on the map by spawning them.
-    /// </summary>
-    /// <param name="spawnAmount">The amount of items to spawn.</param>
+    // Spawns items on the map when placing them outside the inventory
     private void PlaceItemOnMap(int spawnAmount) {
-        if (_dragItemSlot.IsEmpty || _dragItemSlot.Amount <= 0) {
-            return;
-        }
+        if (_dragItemSlot.IsEmpty || _dragItemSlot.Amount <= 0) return;
 
         var itemToSpawn = new ItemSlot(_dragItemSlot.ItemId, spawnAmount, _dragItemSlot.RarityId);
         Vector3 spawnPosition = transform.position;
         Vector2 motionDirection = _playerMovementController.LastMotionDirection;
-
-        ItemSpawnManager.Instance.SpawnItemServerRpc(
-            itemSlot: itemToSpawn,
-            initialPosition: spawnPosition,
-            motionDirection: motionDirection,
-            useInventoryPosition: true
-        );
-
+        _itemSpawnManager.SpawnItemServerRpc(itemToSpawn, spawnPosition, motionDirection, true);
         _dragItemSlot.RemoveAmount(spawnAmount);
     }
 
-    /// <summary>
-    /// Places items into the inventory slot.
-    /// </summary>
-    /// <param name="targetItemSlot">The inventory slot to place into.</param>
-    private void PlaceItemInInventory(ItemSlot targetItemSlot) {
-        if (_dragItemSlot.IsEmpty || _dragItemSlot.Amount <= 0) { 
-            return; 
-        }
+    // Places items into the inventory slot with possible stacking, triggered by right-click
+    private void PlaceItemInInventory(ItemSlot targetSlot) {
+        if (_dragItemSlot.IsEmpty || _dragItemSlot.Amount <= 0) return;
 
-        if (targetItemSlot.IsEmpty) {
-            targetItemSlot.Set(_dragItemSlot);
+        if (targetSlot.IsEmpty) {
+            targetSlot.Set(_dragItemSlot);
             _dragItemSlot.Clear();
-        } else if (_dragItemSlot.CanStackWith(targetItemSlot)) {
+        } else if (_dragItemSlot.CanStackWith(targetSlot)) {
             int transferAmount = _inputManager.IsShiftPressed()
                 ? Mathf.Min(_dragItemSlot.Amount, InputManager.SHIFT_KEY_AMOUNT)
                 : 1;
 
-            int actualMoved = targetItemSlot.AddAmount(transferAmount, _itemManager.GetMaxStackableAmount(targetItemSlot.ItemId));
+            int actualMoved = targetSlot.AddAmount(transferAmount, _itemManager.GetMaxStackableAmount(targetSlot.ItemId));
             _dragItemSlot.RemoveAmount(actualMoved);
         }
     }
+    #endregion -------------------- Drag Item --------------------
 }

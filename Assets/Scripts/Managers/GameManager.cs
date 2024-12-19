@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -7,7 +9,7 @@ using UnityEngine.SceneManagement;
 /// Manages game-wide functionalities, including player states and scene management.
 /// Implements a singleton pattern to ensure only one instance exists.
 /// </summary>
-public class GameManager : NetworkBehaviour {
+public class GameManager : NetworkBehaviour, IDataPersistance {
     public static GameManager Instance { get; private set; }
 
     [Header("Game Settings")]
@@ -195,7 +197,46 @@ public class GameManager : NetworkBehaviour {
             Debug.LogWarning("LocalInstance of Player is not set.");
         }
     }
+    #endregion
 
+    #region Save & Load
+    [Serializable]
+    public class PlayerDataList {
+        public List<PlayerData> players = new List<PlayerData>();
+    }
+
+    public void SaveData(GameData data) {
+        var playerControllers = FindObjectsByType<PlayerController>(FindObjectsSortMode.InstanceID);
+        var allPlayerData = new List<PlayerData>();
+
+        foreach (var pc in playerControllers) {
+            var dataPersistanceObjects = FindAllDataPersistanceObjects(pc);
+            var playerData = new PlayerData();
+
+            foreach (var persistence in dataPersistanceObjects) {
+                persistence.SavePlayer(playerData);
+            }
+
+            playerData.OwnerClientId = pc.OwnerClientId;
+            allPlayerData.Add(playerData);
+        }
+
+        var playerDataList = new PlayerDataList {
+            players = allPlayerData
+        };
+
+        string json = JsonUtility.ToJson(playerDataList, true);
+        data.PlayerData = json;
+    }
+
+    public void LoadData(GameData data) {
+        // TODO: Implement loading player data maybe with UI to select player
+    }
+
+    private List<IPlayerDataPersistance> FindAllDataPersistanceObjects(PlayerController pc) {
+        // Annahme: PlayerController ist ein MonoBehaviour und hat ein GameObject
+        IEnumerable<IPlayerDataPersistance> dataPersistanceObjects = pc.GetComponents<MonoBehaviour>().OfType<IPlayerDataPersistance>();
+        return new List<IPlayerDataPersistance>(dataPersistanceObjects);
+    }
     #endregion
 }
-

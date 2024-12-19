@@ -5,98 +5,88 @@ using System.Collections;
 using static WeatherManager;
 
 // This Script handles player movement, animations, and data persistance for a 2D character
-[RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(BoxCollider2D))]
 public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance {
     // Movement Directions
     public Vector2 LastMotionDirection { get; private set; } = Vector2.right;
 
     [Header("Movement Settings")]
-    [SerializeField] private float _walkSpeed = 2f;
-    [SerializeField] private float _runSpeed = 4f;
-    private const float MAX_DELAY_FOR_PLAYER_ROTATION = 0.2f;
+    [SerializeField] float _walkSpeed = 2f;
+    [SerializeField] float _runSpeed = 4f;
+    const float MAX_DELAY_FOR_PLAYER_ROTATION = 0.2f;
 
     [Header("Dash Settings")]
-    [SerializeField] private float _dashSpeedMultiplier = 3f; // How much faster than run speed
-    [SerializeField] private float _dashDuration = 0.2f;
-    [SerializeField] private float _dashCooldown = 1f;
+    [SerializeField] float _dashSpeedMultiplier = 3f; // How much faster than run speed
+    [SerializeField] float _dashDuration = 0.2f;
+    [SerializeField] float _dashCooldown = 1f;
 
     [Header("Visual Effects")]
-    [SerializeField] private GameObject _footprintPrefab;
-    [SerializeField] private float _effectSpawnInterval = 0.2f;
-    [SerializeField] private float _footprintSpread = 0.1f;
-    private float _effectSpawnTimer = 0f;
-    private const float EFFECT_FADE_OUT_TIMER = 1f;
-    private const float EFFECT_DESPAWN_TIMER = 5f;
+    [SerializeField] GameObject _footprintPrefab;
+    [SerializeField] float _effectSpawnInterval = 0.2f;
+    [SerializeField] float _footprintSpread = 0.1f;
+    const float EFFECT_FADE_OUT_TIMER = 1f;
+    const float EFFECT_DESPAWN_TIMER = 5f;
+    float _effectSpawnTimer = 0f;
 
-    private static readonly int MovingHash = Animator.StringToHash("Moving");
-    private static readonly int RunningHash = Animator.StringToHash("Running");
-    private static readonly int HorizontalHash = Animator.StringToHash("Horizontal");
-    private static readonly int VerticalHash = Animator.StringToHash("Vertical");
-    private static readonly int LastHorizontalHash = Animator.StringToHash("LastHorizontal");
-    private static readonly int LastVerticalHash = Animator.StringToHash("LastVertical");
-    private static readonly int DashingHash = Animator.StringToHash("Dashing");
+    static readonly int MovingHash = Animator.StringToHash("Moving");
+    static readonly int RunningHash = Animator.StringToHash("Running");
+    static readonly int HorizontalHash = Animator.StringToHash("Horizontal");
+    static readonly int VerticalHash = Animator.StringToHash("Vertical");
+    static readonly int LastHorizontalHash = Animator.StringToHash("LastHorizontal");
+    static readonly int LastVerticalHash = Animator.StringToHash("LastVertical");
+    static readonly int DashingHash = Animator.StringToHash("Dashing");
 
     // Movement State
-    private bool _canMoveAndTurn = true;
-    private bool _isRunning;
-    private Vector2 _inputDirection;
-    private float _timeSinceLastMovement;
+    bool _canMoveAndTurn = true;
+    bool _isRunning;
+    Vector2 _inputDirection;
+    float _timeSinceLastMovement;
 
     // Dash State
-    private bool _isDashing = false;
-    private float _dashTimeRemaining;
-    private float _dashCooldownRemaining;
-    private Vector2 _dashDirection = Vector2.zero;
+    bool _isDashing = false;
+    float _dashTimeRemaining;
+    float _dashCooldownRemaining;
+    Vector2 _dashDirection = Vector2.zero;
 
     // Components
-    private Rigidbody2D _rb2D;
-    private Animator _animator;
-    private InputManager _inputManager;
-    private BoxCollider2D _boxCollider;
+    Rigidbody2D _rb2D;
+    Animator _animator;
+    InputManager _inputManager;
+    BoxCollider2D _boxCollider;
+    AudioManager _audioManager;
 
     // Audio
-    private EventInstance _playerWalkGrassEvent;
-    private EventInstance _playerDashEvent;
+    EventInstance _playerWalkGrassEvent;
+    EventInstance _playerDashEvent;
 
 
-    private void Awake() {
+    void Awake() {
         _rb2D = GetComponent<Rigidbody2D>();
         _animator = GetComponentInChildren<Animator>();
         _boxCollider = GetComponent<BoxCollider2D>();
 
         // Initialize audio event
-        _playerWalkGrassEvent = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.PlayerWalkGrassSFX);
-        //TODO _playerDashEvent = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.PlayerDashSFX);
     }
 
-    private void Start() {
+    void Start() {
         _inputManager = InputManager.Instance;
-        if (_inputManager == null) {
-            Debug.LogError("InputManager instance not found!");
-            enabled = false;
-            return;
-        }
-
+        _audioManager = AudioManager.Instance;
+        _playerWalkGrassEvent = _audioManager.CreateEventInstance(FMODEvents.Instance.PlayerWalkGrassSFX);
+        //TODO _playerDashEvent = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.PlayerDashSFX);
         _inputManager.OnRunAction += ToggleRunState;
         _inputManager.OnDashAction += TryStartDash;
     }
 
-    private new void OnDestroy() {
-        _inputManager.OnRunAction -= ToggleRunState;
+    void OnDestroy() {
         _playerWalkGrassEvent.release();
         //TODO _playerDashEvent.release();
+        _inputManager.OnRunAction -= ToggleRunState;
+        _inputManager.OnDashAction -= TryStartDash;
     }
 
-    private void ToggleRunState() {
-        _isRunning = !_isRunning;
-    }
+    void ToggleRunState() => _isRunning = !_isRunning;
 
-    private void Update() {
-        if (!IsOwner) {
-            return;
-        }
-
+    void Update() {
+        if (!IsOwner) return;
         HandleInput();
         HandleDashTimers();
         UpdateAnimationState();
@@ -104,20 +94,15 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
         HandleRunningEffects();
     }
 
-    private void FixedUpdate() {
-        if (!IsOwner || !_canMoveAndTurn) {
-            return;
-        }
-
+    void FixedUpdate() {
+        if (!IsOwner || !_canMoveAndTurn) return;
         MoveCharacter();
     }
 
-    private void HandleInput() {
+    void HandleInput() {
         Vector2 newInputDirection = _inputManager.GetMovementVectorNormalized();
-
         bool directionChanged = newInputDirection != _inputDirection;
 
-        // Detect movement input changes
         if (directionChanged) {
             _inputDirection = newInputDirection;
             _animator.SetFloat(HorizontalHash, _inputDirection.x);
@@ -142,45 +127,36 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     }
 
     #region -------------------- Dashing --------------------
-
-    private void TryStartDash() {
+    void TryStartDash() {
         if (_dashCooldownRemaining > 0f || _isDashing) return;
 
-        // Direction for dash:
-        // If currently not moving but we have a last motion direction, dash in that direction.
         Vector2 dashDir = _inputDirection == Vector2.zero ? LastMotionDirection : _inputDirection;
-        if (dashDir == Vector2.zero) return; // if still zero, no dash
+        if (dashDir == Vector2.zero) return;
 
         StartDash(dashDir);
     }
 
-    private void StartDash(Vector2 direction) {
+    void StartDash(Vector2 direction) {
         _isDashing = true;
         _dashTimeRemaining = _dashDuration;
         _dashCooldownRemaining = _dashCooldown;
         _dashDirection = direction.normalized;
 
-        // Trigger dash animation
         _animator.SetBool(DashingHash, true);
-
-        // Audio feedback for dash
         _playerDashEvent.start();
 
         // (Optional) Trigger visual effects like motion blur or trails here.
 
-        // Notify server and other clients about the dash if needed
         PerformDashServerRpc();
     }
 
-    private void EndDash() {
+    void EndDash() {
         _isDashing = false;
         _animator.SetBool(DashingHash, false);
     }
 
     private void HandleDashTimers() {
-        if (_dashCooldownRemaining > 0f) {
-            _dashCooldownRemaining -= Time.deltaTime;
-        }
+        if (_dashCooldownRemaining > 0f) _dashCooldownRemaining -= Time.deltaTime;
 
         if (_isDashing) {
             _dashTimeRemaining -= Time.deltaTime;
@@ -189,14 +165,11 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
             }
         }
     }
-
     #endregion -------------------- Dashing --------------------
 
     #region -------------------- Movement --------------------
-
-    private void MoveCharacter() {
+    void MoveCharacter() {
         if (_isDashing) {
-            // While dashing, movement is overridden by dash speed
             float dashSpeed = _runSpeed * _dashSpeedMultiplier;
             _rb2D.linearVelocity = _dashDirection * dashSpeed;
         } else {
@@ -205,37 +178,29 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
         }
     }
 
-    private void UpdateAnimationState() {
+    void UpdateAnimationState() {
         bool isMoving = _inputDirection != Vector2.zero && !_isDashing;
         _animator.SetBool(MovingHash, isMoving);
         _animator.SetBool(RunningHash, _isRunning && !_isDashing);
     }
 
-    private float GetCurrentSpeed() {
+    float GetCurrentSpeed() {
         if (_isDashing) {
             return _runSpeed * _dashSpeedMultiplier;
         }
         return _animator.GetBool(MovingHash) ? (_isRunning ? _runSpeed : _walkSpeed) : 0f;
     }
 
-
     public void SetCanMoveAndTurn(bool canMove) {
         _canMoveAndTurn = canMove;
-        if (!_canMoveAndTurn) {
-            StopMoving();
-        }
-    }
-
-    private void StopMoving() {
-        if (_rb2D.linearVelocity != Vector2.zero) {
+        if (!_canMoveAndTurn && _rb2D.linearVelocity != Vector2.zero) {
             _rb2D.linearVelocity = Vector2.zero;
             _animator.SetBool(MovingHash, false);
         }
     }
 
-    private void UpdateSound() {
+    void UpdateSound() {
         bool isMoving = _rb2D.linearVelocity != Vector2.zero;
-
         _playerWalkGrassEvent.getPlaybackState(out PLAYBACK_STATE playbackState);
 
         if (isMoving && playbackState == PLAYBACK_STATE.STOPPED) {
@@ -244,19 +209,15 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
             _playerWalkGrassEvent.stop(STOP_MODE.ALLOWFADEOUT);
         }
     }
-
     #endregion -------------------- Movement --------------------
 
     #region -------------------- Running Effects --------------------
-    private void HandleRunningEffects() {
+    void HandleRunningEffects() {
         if (!IsOwner) return;
-
-        bool isMoving = _animator.GetBool(MovingHash) && !_isDashing;
-
-        if (isMoving) {
+        if (_animator.GetBool(MovingHash) && !_isDashing) {
             _effectSpawnTimer -= Time.deltaTime;
             if (_effectSpawnTimer <= 0f) {
-                SpawnRunningEffect();
+                SpawnFootprints();
                 _effectSpawnTimer = _effectSpawnInterval;
             }
         } else {
@@ -264,59 +225,61 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
         }
     }
 
-    private void SpawnRunningEffect() {
-        WeatherName currentWeather = Instance.CurrentWeather;
-        if (currentWeather != WeatherName.Rain && currentWeather != WeatherName.Thunder && currentWeather != WeatherName.Snow) return;
+    void SpawnFootprints() {
+        bool spawnAllowed = WeatherManager.Instance.CurrentWeather switch {
+            WeatherName.Rain => true,
+            WeatherName.Thunder => true,
+            WeatherName.Snow => true,
+            _ => false
+        };
+        if (!spawnAllowed) return;
+
         float offsetX = Random.Range(-_footprintSpread, _footprintSpread);
         float offsetY = Random.Range(-_footprintSpread, _footprintSpread);
         var spawnPosition = _boxCollider.bounds.center + new Vector3(offsetX, offsetY, 0f);
+
+        // TODO: Object pooling could be used here to avoid repeated instantiation
         var spawnedEffect = Instantiate(_footprintPrefab, spawnPosition, Quaternion.identity);
         StartCoroutine(FadeOutAndDestroy(spawnedEffect, EFFECT_DESPAWN_TIMER, EFFECT_FADE_OUT_TIMER));
     }
 
-    private IEnumerator FadeOutAndDestroy(GameObject obj, float delay, float fadeDuration) {
-        // Erst warten wir die vorgesehene Lebensdauer ab
+    IEnumerator FadeOutAndDestroy(GameObject obj, float delay, float fadeDuration) {
         yield return new WaitForSeconds(delay);
-
         if (!obj.TryGetComponent<SpriteRenderer>(out var sr)) {
-            // Falls kein SpriteRenderer vorhanden ist, direkt zerstören
             Destroy(obj);
             yield break;
         }
 
-        // Ausblenden über fadeDuration
-        Color initialColor = sr.color;
-        float startAlpha = initialColor.a;
+        var c = sr.color;
+        float startAlpha = c.a;
         float time = 0f;
 
         while (time < fadeDuration) {
             time += Time.deltaTime;
             float t = time / fadeDuration;
             float newAlpha = Mathf.Lerp(startAlpha, 0f, t);
-            sr.color = new Color(initialColor.r, initialColor.g, initialColor.b, newAlpha);
-            yield return null; // Warten auf nächsten Frame
+            sr.color = new Color(c.r, c.g, c.b, newAlpha);
+            yield return null;
         }
 
-        // Wenn komplett ausgeblendet, das Objekt zerstören
         Destroy(obj);
     }
     #endregion -------------------- Running Effects --------------------
 
     #region -------------------- Networking (Dash Synchronization) --------------------
     [ServerRpc]
-    private void PerformDashServerRpc() {
-        PerformDashClientRpc();
-    }
+    void PerformDashServerRpc() => PerformDashClientRpc();
 
     [ClientRpc]
-    private void PerformDashClientRpc() {
+    void PerformDashClientRpc() {
         if (IsOwner) return;
+
         _animator.SetBool(DashingHash, true);
         _playerDashEvent.start();
         StartCoroutine(RemoteDashEndRoutine(_dashDuration));
     }
 
-    private IEnumerator RemoteDashEndRoutine(float duration) {
+    IEnumerator RemoteDashEndRoutine(float duration) {
         yield return new WaitForSeconds(duration);
         _animator.SetBool(DashingHash, false);
     }

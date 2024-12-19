@@ -2,8 +2,9 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 
-// This script handels hp and energy of the player
+// Manages player's health and energy, supporting network synchronization and persistence
 public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPersistance {
+    // Events to notify listeners about health and energy updates
     public event Action<float> OnUpdateHealth;
     public event Action<float> OnUpdateMaxHealth;
     public event Action<float> OnUpdateEnergy;
@@ -38,17 +39,18 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
     // TODO Move _hospitalRespawnPosition to the hospital itself
     Vector2 _hospitalRespawnPosition;
-    PlayerController _localPlayer;
+    PlayerController _playerController;
     PlayerInventoryController _inventoryController;
+    TimeManager _timeManager;
 
     void Awake() {
-        _localPlayer = GetComponent<PlayerController>();
+        _playerController = GetComponent<PlayerController>();
         _inventoryController = GetComponent<PlayerInventoryController>();
     }
 
-
     void Start() {
-        TimeManager.Instance.OnNextDayStarted += HandleNextDayStarted;
+        _timeManager = TimeManager.Instance;
+        _timeManager.OnNextDayStarted += HandleNextDayStarted;
 
         OnUpdateHealth?.Invoke(_currentHealth);
         OnUpdateMaxHealth?.Invoke(_maxHealth);
@@ -56,16 +58,12 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
         OnUpdateMaxEnergy?.Invoke(_maxEnergy);
     }
 
-    new void OnDestroy() {
-        base.OnDestroy();
-
-        if (TimeManager.Instance != null) {
-            TimeManager.Instance.OnNextDayStarted -= HandleNextDayStarted;
-        }
+    void OnDestroy() {
+        _timeManager.OnNextDayStarted -= HandleNextDayStarted;
     }
 
     void FixedUpdate() {
-        if (IsOwner && _localPlayer.InBed) {
+        if (IsOwner && _playerController.InBed) {
             RegenerateHealthAndEnergy();
         }
     }
@@ -89,7 +87,6 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
         OnUpdateHealth?.Invoke(_currentHealth);
         OnUpdateEnergy?.Invoke(_currentEnergy);
     }
-
 
     #region Health
     /// <summary>
@@ -144,7 +141,6 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
     #endregion
 
-
     #region Energy
 
     /// <summary>
@@ -198,7 +194,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     /// <summary>
     /// Respawns the player at the hospital respawn position and restores their health to the value at respawn.
     /// </summary>
-    private void RespawnPlayer() {
+    void RespawnPlayer() {
         if (_hospitalRespawnPosition == Vector2.zero) {
             Debug.LogWarning("Hospital respawn position is not set.");
             return;
@@ -220,7 +216,6 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
         playerData.CurrentHp = _currentHealth;
         playerData.MaxEnergy = _maxEnergy;
         playerData.CurrentEnergy = _currentEnergy;
-        playerData.HospitalRespawnPosition = _hospitalRespawnPosition;
     }
 
     public void LoadPlayer(PlayerData playerData) {
@@ -229,8 +224,6 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
         _maxEnergy = playerData.MaxEnergy;
         _currentEnergy = Mathf.Clamp(playerData.CurrentEnergy, 0f, _maxEnergy);
-
-        _hospitalRespawnPosition = playerData.HospitalRespawnPosition;
 
         // Invoke events to update UI or other listeners
         OnUpdateMaxHealth?.Invoke(_maxHealth);
