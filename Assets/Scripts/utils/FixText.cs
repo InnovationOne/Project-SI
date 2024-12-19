@@ -1,64 +1,55 @@
+using System;
 using TMPro;
 using UnityEngine;
 
+// Ensures text always aligns cleanly on screen pixels for clarity on various DPI screens.
 public class FixText : MonoBehaviour {
-    private TextMeshProUGUI _text;
-    private string _lastText;
-    private bool _movedX;
-    private bool _movedY;
-    private float _dpi;
+    [SerializeField] TextMeshProUGUI _textComponent = null!;
 
+    string _lastText = string.Empty;
+    bool _movedX;
+    bool _movedY;
+    float _dpi;
 
-    private void Awake() {
-        _text = GetComponent<TextMeshProUGUI>();
-        _dpi = Screen.dpi;
+    void Awake() {
+        if (_textComponent == null) {
+            _textComponent = GetComponent<TextMeshProUGUI>();
+        }
+        _dpi = Screen.dpi == 0 ? 96f : Screen.dpi;
     }
 
-    private void Start() {
-        _lastText = _text.text;
+    void Start() {
+        _lastText = _textComponent.text;
         UpdatePosition();
     }
 
-    /// <summary>
-    /// This method is called every frame to check if the text has changed and update the position accordingly.
-    /// </summary>
-    private void Update() {
-        if (_lastText != _text.text) {
-            _lastText = _text.text;
-
+    void Update() {
+        if (!_lastText.Equals(_textComponent.text, StringComparison.Ordinal)) {
+            _lastText = _textComponent.text;
             UpdatePosition();
         }
     }
 
-    /// <summary>
-    /// Updates the position of the text element.
-    /// </summary>
-    private void UpdatePosition() {
-        Vector3 textPosition = _text.rectTransform.position;
+    void UpdatePosition() {
+        Vector3 pos = _textComponent.rectTransform.position;
 
         if (_movedX) {
-            textPosition.x -= 0.5f / Screen.dpi;
+            pos.x -= 0.5f / _dpi;
             _movedX = false;
         }
 
         if (_movedY) {
-            textPosition.y -= 0.5f / Screen.dpi;
+            pos.y -= 0.5f / _dpi;
             _movedY = false;
         }
 
-        textPosition.x = AdjustAxisPosition(textPosition.x, ref _movedX);
-        textPosition.y = AdjustAxisPosition(textPosition.y, ref _movedY);
+        pos.x = AdjustAxisPosition(pos.x, ref _movedX);
+        pos.y = AdjustAxisPosition(pos.y, ref _movedY);
 
-        _text.rectTransform.position = textPosition;
+        _textComponent.rectTransform.position = pos;
     }
 
-    /// <summary>
-    /// Adjusts the axis position based on the DPI (dots per inch) value.
-    /// </summary>
-    /// <param name="axisPosition">The original axis position.</param>
-    /// <param name="movedAxis">A reference boolean indicating if the axis was moved.</param>
-    /// <returns>The adjusted axis position.</returns>
-    private float AdjustAxisPosition(float axisPosition, ref bool movedAxis) {
+    float AdjustAxisPosition(float axisPosition, ref bool movedAxis) {
         float pixelPos = Mathf.Round(axisPosition * _dpi) / _dpi;
         if (Mathf.Abs(pixelPos - axisPosition) < 0.25f) {
             axisPosition += 0.5f / _dpi;
