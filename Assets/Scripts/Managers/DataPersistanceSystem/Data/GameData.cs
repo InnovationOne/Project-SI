@@ -6,6 +6,8 @@ public class GameData {
     [Header("General Data")]
     public long LastPlayed;
     public int TimePlayed;
+    public string Checksum;
+    public string GameVersion;
 
     [Header("Town Data")]
     public string TownName;

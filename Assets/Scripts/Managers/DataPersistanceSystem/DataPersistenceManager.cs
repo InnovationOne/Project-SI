@@ -1,36 +1,34 @@
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
 using System.Linq;
-using System;
+using UnityEngine;
 using Unity.Netcode;
+using System;
 
-
-//Manager for saving and loading game data
+// Manages data persistence, integrating with multiplayer (Netcode) and ensuring data is synced across connected players.
 public class DataPersistenceManager : NetworkBehaviour {
     public static DataPersistenceManager Instance { get; private set; }
 
     [Header("Debug Settings")]
-    [SerializeField] private bool _initializeDataIfNull = false;
+    [SerializeField] bool _initializeDataIfNull = false;
 
     [Header("File Storage Configuration")]
-    [SerializeField] private string _fileName;
-    [SerializeField] private bool _useEncryption;
+    [SerializeField] string _fileName = "data.emi";
+    [SerializeField] bool _useEncryption = false;
+    [SerializeField] bool _useCloudSaves = false;
 
-    private GameData _gameData;
-    private List<IDataPersistance> _dataPersistancesObjects;
-    private FileDataHandler _dataHandler;
+    // Selected profile ID synchronized across the network
+    string CurrentGameVersion => Application.version;
+    string _selectedProfileId;
+    GameData _gameData;
+    List<IDataPersistance> _dataPersistenceObjects;
+    FileDataHandler _dataHandler;
+    ICloudSaveProvider _cloudSaveProvider;
 
-    // Id of the selected save
-    private string _selectedProfileId = "";
-
-
-    private void Awake() {
-        if (Instance != null) {
-            Debug.LogError("Found more than one Data Persistence Manager in the scene.");
+    void Awake() {
+        if (Instance != null && Instance != this) {
+            Debug.LogError("Multiple instances of DataPersistenceManager found. Destroying this one.");
             Destroy(this);
-        } else {
-            Instance = this;
+            return;
         }
 
         Instance = this;
@@ -38,136 +36,134 @@ public class DataPersistenceManager : NetworkBehaviour {
 
         _dataHandler = new FileDataHandler(Application.persistentDataPath, _fileName, _useEncryption);
 
+        if (_useCloudSaves) {
+            _cloudSaveProvider = new SteamCloudSaveProvider();
+        } else {
+            _cloudSaveProvider = null;
+        }
+
         InitializeSelectedProfileId();
-
-        _dataPersistancesObjects = FindAllDataPersistanceObjects();
-        // TODO: LoadGame();
+        _dataPersistenceObjects = FindAllDataPersistanceObjects();
     }
 
-    public override void OnNetworkSpawn() {
-        _dataPersistancesObjects = FindAllDataPersistanceObjects();
-        LoadGame();
-    }
-
-    public override void OnNetworkDespawn() {
-        SaveGame();
-    }
-
-    /*
-    private void OnEnable() {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    private void OnDisable() {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-    
-    // When the scene is loaded
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-        _dataPersistancesObjects = FindAllDataPersistanceObjects();
-        LoadGame();
-    }*/
-
-    public void ChangeSelectedProfile(string newProfileId) {
-        //Update the profile to use for saving and loading
-        _selectedProfileId = newProfileId;
-
-        //Load the game, which use that profile, updating our game data accordingly
-        LoadGame();
-    }
-
-    // Starts a new game
-    public void NewGame(GameData newGameData) {
-        if (newGameData == null)
-            _gameData = new GameData();
-        else
-            _gameData = newGameData;
-
-
-        _selectedProfileId = _dataHandler.FindNextProfileID();
-    }
-
-    // Load data from gameDataObject
-    private void LoadGame() {
-        //Load and save data from a file using data handler
-        _gameData = _dataHandler.Load(_selectedProfileId);
-
-        //Start a new game if the data is null and we're configured to initialize data for debugging purposes
-        if (_gameData == null && _initializeDataIfNull)
-            NewGame(null);
-
-        if (_gameData == null) {
-            Debug.Log("No data was found. A new Game needs to be started befor data can be loaded.");
-            return;
-        }
-
-        //Push loaded data to all scripts that need it
-        foreach (IDataPersistance dataPersistanceObj in _dataPersistancesObjects)
-            dataPersistanceObj.LoadData(_gameData);
-    }
-
-    // Save data to gameDataObject
-    public void SaveGame() {
-        //When there is no data to save
-        if (_gameData == null) {
-            Debug.LogWarning("No data was found. A new Game needs to be started befor we can save data.");
-            return;
-        }
-
-        //Pass data to other scripts to be updated
-        foreach (IDataPersistance dataPersistanceObj in _dataPersistancesObjects)
-            dataPersistanceObj.SaveData(_gameData);
-
-        //Timestamp the data so we know when it was last saved
-        _gameData.LastPlayed = DateTime.Now.ToBinary();
-
-        //Save data to the file
-        _dataHandler.Save(_gameData, _selectedProfileId);
-    }
-
-    // Find all scripts that save or load
-    private List<IDataPersistance> FindAllDataPersistanceObjects() {
-        IEnumerable<IDataPersistance> dataPersistanceObjects = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.InstanceID).OfType<IDataPersistance>();
-
-        return new List<IDataPersistance>(dataPersistanceObjects);
-    }
-
-    // For testing
+    // Ensures data is saved when the application quits (TODO: For testing)
     private void OnApplicationQuit() {
         SaveGame();
     }
 
-    // Checks if there is data to load
-    public bool HasGameData() {
-        return _gameData != null;
+    // Finds all objects in the scene that implement IDataPersistance
+    private List<IDataPersistance> FindAllDataPersistanceObjects() {
+        var objs = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.InstanceID).OfType<IDataPersistance>();
+        return new List<IDataPersistance>(objs);
     }
 
-    // Returns a dictionary with all saved profiles
-    public Dictionary<string, GameData> GetAllProfilesGameData() {
-        return _dataHandler.LoadAllProfiles();
-    }
+    // Checks if game data is currently loaded
+    public bool HasGameData() => _gameData != null;
 
-    // Duplicates a file
-    public void DuplicateFile(string profileId) {
-        _dataHandler.DuplicateFile(profileId);
-    }
+    // Retrieves all available profiles' game data
+    public Dictionary<string, GameData> GetAllProfilesGameData() => _dataHandler.LoadAllProfiles();
 
-    // Deletes a file
-    public void DeleteFile(string profileId) {
-        _dataHandler.DeleteFile(profileId);
-
-        InitializeSelectedProfileId();
-
+    // Changes the selected profile ID
+    public void ChangeSelectedProfile(string newProfileId) {
+        _selectedProfileId = newProfileId;
         LoadGame();
     }
 
-    // Sets the most recently selected profle
-    private void InitializeSelectedProfileId() {
-        _selectedProfileId = _dataHandler.GetMostRecentlyPlayedProfileId();
+    // Starts a new game with optional initial data
+    public void NewGame(GameData newGameData = null) {
+        _gameData = newGameData ?? new GameData();
+        _gameData.GameVersion = CurrentGameVersion;
+        _selectedProfileId = _dataHandler.FindNextProfileID();
     }
 
-    // Opens the save folder for the profileId
-    public void OpenFileInExplorer(string profileId) {
-        _dataHandler.OpenFileInExplorer(profileId);
+    // Loads game data from the selected profile
+    private void LoadGame() {
+        if (string.IsNullOrEmpty(_selectedProfileId)) {
+            if (_initializeDataIfNull) {
+                NewGame();
+            } else {
+                Debug.Log("No profile selected or data uninitialized.");
+                return;
+            }
+        }
+
+        // Attempt to load from cloud first if enabled
+        if (_useCloudSaves && _cloudSaveProvider.HasCloudSave(_selectedProfileId)) {
+            string cloudData = _cloudSaveProvider.Download(_selectedProfileId);
+            if (!string.IsNullOrEmpty(cloudData)) {
+                _gameData = JsonUtility.FromJson<GameData>(cloudData);
+                if (_gameData == null && _initializeDataIfNull) {
+                    NewGame();
+                }
+            }
+        } else {
+            _gameData = _dataHandler.Load(_selectedProfileId);
+            if (_gameData == null && _initializeDataIfNull) {
+                NewGame();
+            }
+        }
+
+        if (_gameData == null) {
+            Debug.Log("No existing data found. Start a new game before loading.");
+            return;
+        }
+
+        // Migrate if versions differ
+        MigrateGameData(_gameData);
+
+        foreach (IDataPersistance dataPersistenceObj in _dataPersistenceObjects) {
+            dataPersistenceObj.LoadData(_gameData);
+        }
+    }
+
+    // Saves the current game data to disk
+    public void SaveGame() {
+        if (_gameData == null) {
+            Debug.LogWarning("No data to save. Start a new game first.");
+            return;
+        }
+
+        foreach (IDataPersistance dataPersistenceObj in _dataPersistenceObjects) {
+            dataPersistenceObj.SaveData(_gameData);
+        }
+
+        _gameData.LastPlayed = DateTime.Now.ToBinary();
+        _gameData.GameVersion = CurrentGameVersion;
+        _dataHandler.Save(_gameData, _selectedProfileId);
+
+        if (_useCloudSaves && _cloudSaveProvider != null) {
+            string jsonData = JsonUtility.ToJson(_gameData, true);
+            _cloudSaveProvider.Upload(_selectedProfileId, jsonData);
+        }
+    }
+
+    // Duplicates a profile's data file to a new profile ID
+    public void DuplicateFile(string profileId) => _dataHandler.DuplicateFile(profileId);
+
+    // Deletes a profile and updates the currently selected profile
+    public void DeleteFile(string profileId) {
+        _dataHandler.DeleteFile(profileId);
+        InitializeSelectedProfileId();
+        LoadGame();
+    }
+
+    // Initializes the selected profile ID from the most recently played profile
+    private void InitializeSelectedProfileId() {
+        string recentId = _dataHandler.GetMostRecentlyPlayedProfileId();
+        _selectedProfileId = recentId ?? _dataHandler.FindNextProfileID();
+    }
+
+    // Opens a given profile's save file in the system file explorer
+    public void OpenFileInExplorer(string profileId) => _dataHandler.OpenFileInExplorer(profileId);
+
+    private void MigrateGameData(GameData data) {
+        // If the loaded data's version is different from the current Application.version,
+        // run migration steps. Here we just log a message and assume compatibility.
+        // Actual migration logic depends on how versions differ.
+        if (data.GameVersion != CurrentGameVersion) {
+            Debug.Log($"Migrating save data from version {data.GameVersion} to {CurrentGameVersion}.");
+            // Implement migration logic as needed here.
+            data.GameVersion = CurrentGameVersion;
+        }
     }
 }

@@ -2,256 +2,277 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.IO;
+using System.Text;
+using System.Security.Cryptography;
 
-public class FileDataHandler
-{
-    private string _dataDirPath = ""; //Path to save data
-    private string _dataFileName = ""; //File to save to
-    private bool _useEncryption = false;
-    private readonly string _encryptionCodeWord = "UHeotgrzkDwfxuNvJtbrURNGLMyhRF";
-    private readonly string _backupExtention = ".bak";
+// Represents the data file handler responsible for loading and saving game data.
+public class FileDataHandler {
+    // Directory and filename for data storage
+    readonly string _dataDirPath;
+    readonly string _dataFileName;
 
-    public FileDataHandler (string dataDirPath, string dataFileName, bool useEncryption)
-    {
+    // Encryption parameters
+    // TODO: Do not hardcode the key in production code
+    readonly bool _useEncryption = false;
+    static readonly byte[] AES_KEY = Encoding.UTF8.GetBytes("GsYSSZ7Z5Ka4B70QsP7DqtykZJub/CH7tIIjwHeotlM=");
+    const string BACKUP_EXTENTION = ".bak";
+
+    // Constructor sets up directories, filenames, and encryption settings
+    public FileDataHandler(string dataDirPath, string dataFileName, bool useEncryption) {
         _dataDirPath = dataDirPath;
         _dataFileName = dataFileName;
         _useEncryption = useEncryption;
+
+        if (_useEncryption && AES_KEY.Length != 32) {
+            throw new ArgumentException("AES_KEY must be 32 bytes for AES-256 encryption.");
+        }
     }
 
-    // Loads a Game Data object
-    public GameData Load(string profileId, bool allowRestoreFromBackup = true)
-    {
-        //If profileId is null
-        if (profileId == null)
-            return null;
+    // Loads game data for a given profile; optionally attempts rollback from backup on failure
+    public GameData Load(string profileId, bool allowRestoreFromBackup = true) {
+        if (string.IsNullOrEmpty(profileId)) return null;
 
-        //Combines the pathes due to divernt OS's having different path seperators
         string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName);
+        if (!File.Exists(fullPath)) return null;
         GameData loadedData = null;
-        if (File.Exists(fullPath))
-        {
-            try
-            {
-                //Load the serialized data from the file
-                string dataToLoad = "";
-                using (FileStream stream = new FileStream(fullPath, FileMode.Open))
-                    using (StreamReader reader = new StreamReader(stream))
-                        dataToLoad = reader.ReadToEnd();
 
-                //Optional decrypt the data
-                if (_useEncryption)
-                    dataToLoad = EncryptDecrypt(dataToLoad);
-
-                //Deserialize data from JSON back into the C# object
-                loadedData = JsonUtility.FromJson<GameData>(dataToLoad);
+        try {
+            string dataToLoad;
+            using (var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read))
+            using (var reader = new StreamReader(stream)) {
+                dataToLoad = reader.ReadToEnd();
             }
-            catch (Exception e)
-            {
-                //Since we're calling Load(..) recursively, we need to account for the case where the rollback succeeds,
-                //but data is still failinf to load for some other reason, which without this check may cause an infinit recursion loop
-                if (allowRestoreFromBackup)
-                {
-                    Debug.LogWarning("Failed to load data file. Atte,pting to roll back.\n" + e);
-                    bool rollbackSuccess = AttemptRollback(fullPath);
-                    if (rollbackSuccess)
-                        loadedData = Load(profileId, false);
+
+            if (_useEncryption) {
+                dataToLoad = Decrypt(dataToLoad);
+            }
+
+            // Deserialize
+            loadedData = JsonUtility.FromJson<GameData>(dataToLoad);
+            // Verify checksum
+            if (!ValidateChecksum(dataToLoad, loadedData.Checksum)) {
+                throw new Exception("Checksum validation failed. Save file may be corrupted or tampered with.");
+            }
+        } catch (Exception e) {
+            if (allowRestoreFromBackup) {
+                Debug.LogWarning("Failed to load data file. Attempting rollback.\n" + e);
+                bool rollbackSuccess = AttemptRollback(fullPath);
+                if (rollbackSuccess) {
+                    return Load(profileId, false);
                 }
-                //If we hit this else block, one possibility is that the backup file is also currupt
-                else
-                    Debug.LogError("Error occured when trying to load file at path: " + fullPath + " and backup did not work.\n" + e);
+            } else {
+                Debug.LogError("Could not load or restore data: " + fullPath + "\n" + e);
             }
         }
+
         return loadedData;
     }
 
-    // Saves a Game Data object
-    public void Save(GameData data, string profileId)
-    {
-        //If profileId is null
-        if (profileId == null)
-            return;
+    // Saves the provided GameData object to disk, creates a backup on success
+    public void Save(GameData data, string profileId) {
+        if (data == null || string.IsNullOrEmpty(profileId)) return;
 
-        //Combines the pathes due to divernt OS's having different path seperators
         string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName);
-        string backupFilePath = fullPath + _backupExtention;
-        try
-        {
-            //Create the directory the file will be written to if it doesn't already exist
-            Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+        string backupFilePath = fullPath + BACKUP_EXTENTION;
 
-            //Serialize the C# game data object into JSON
+        try {
+            Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+            // Compute checksum
+            string jsonData = JsonUtility.ToJson(data, true);
+            string checksum = ComputeChecksum(jsonData);
+            data.Checksum = checksum;
+            // Re-serialize with checksum
             string dataToStore = JsonUtility.ToJson(data, true);
 
-            //Optional encryption the data
-            if (_useEncryption)
-                dataToStore = EncryptDecrypt(dataToStore);
+            if (_useEncryption) {
+                dataToStore = Encrypt(dataToStore);
+            }
 
-            //Write the seriaized data to the file
-            using (FileStream stream = new FileStream(fullPath, FileMode.Create))
-                using (StreamWriter writer = new StreamWriter(stream))
-                    writer.Write(dataToStore);
+            // Write data to file
+            using (var stream = new FileStream(fullPath, FileMode.Create, FileAccess.Write))
+            using (var writer = new StreamWriter(stream)) {
+                writer.Write(dataToStore);
+            }
 
-            //Verify the newly saved file can be loaded successfully
-            GameData verifiedGameDate = Load(profileId);
-            //If the data can be verified, back it up
-            if (verifiedGameDate != null)
+            // Verify
+            GameData verifiedData = Load(profileId);
+            if (verifiedData != null) {
                 File.Copy(fullPath, backupFilePath, true);
-            //Otherwise something went wrong
-            else
-                throw new Exception("Save file could not be verified and backup could not be created.");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error occured when trying to save data to file: " + fullPath + "\n" + e);
+            } else {
+                throw new Exception("Verification failed, backup not created.");
+            }
+        } catch (Exception e) {
+            Debug.LogError("Error saving data: " + fullPath + "\n" + e);
         }
     }
 
-    // Maps all savefiles to a string id
-    public Dictionary<string, GameData> LoadAllProfiles()
-    {
-        Dictionary<string, GameData> profileDictionary = new Dictionary<string, GameData>();
-
-        //Loop over all directory names in the data directory path
-        IEnumerable<DirectoryInfo> dirInfos = new DirectoryInfo(_dataDirPath).EnumerateDirectories();
-        foreach (DirectoryInfo dirInfo in dirInfos)
-        {
+    // Loads all profiles found in the data directory and returns them as a dictionary
+    public Dictionary<string, GameData> LoadAllProfiles() {
+        var profileDictionary = new Dictionary<string, GameData>();
+        var directories = new DirectoryInfo(_dataDirPath).EnumerateDirectories();
+        foreach (var dirInfo in directories) {
             string profileId = dirInfo.Name;
-
-            //Check if the data file exists, if not then this folder isn't a profile and should be skipped
             string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName);
-            if (!File.Exists(fullPath))
-            {
-                Debug.LogWarning("Skipping directory when loading all profiles because it doesn't contain data: " 
-                    + profileId);
+
+            if (!File.Exists(fullPath)) {
+                Debug.LogWarning("Skipping directory without data: " + profileId);
                 continue;
             }
 
-            //Load the game data for this profile and put it in the dictionary
             GameData profileData = Load(profileId);
-
-            //Check if data isn't null, because if it is then something went wrong
-            if (profileData != null)
+            if (profileData != null) {
                 profileDictionary.Add(profileId, profileData);
-            else
-                Debug.LogError("Tried to load profile but somethink went wrong. ProfileId: " + profileId);
+            } else {
+                Debug.LogError("Failed to load profile data: " + profileId);
+            }
         }
 
         return profileDictionary;
     }
 
-    // Returns the most recently played profile
-    public string GetMostRecentlyPlayedProfileId()
-    {
+    // Identifies the most recently played profile by comparing their timestamps
+    public string GetMostRecentlyPlayedProfileId() {
+        var allProfiles = LoadAllProfiles();
         string mostRecentProfileId = null;
 
-        Dictionary<string, GameData> profilesGameData = LoadAllProfiles();
-        foreach (KeyValuePair<string, GameData> pair in profilesGameData)
-        {
-            string profileId = pair.Key;
-            GameData gameData = pair.Value;
+        foreach (var kvp in allProfiles) {
+            string profileId = kvp.Key;
+            GameData data = kvp.Value;
+            if (data == null) continue;
 
-            //Skip entry when if game data is null
-            if (gameData == null)
-                continue;
-
-            //If this is the first data, it's the most recent so far
-            if (mostRecentProfileId == null)
+            if (mostRecentProfileId == null) {
                 mostRecentProfileId = profileId;
-            //Otherwise, compare to see which date is the most recent
-            else
-            {
-                DateTime mostRecentDateTime = DateTime.FromBinary(profilesGameData[mostRecentProfileId].LastPlayed);
-                DateTime newDateTime = DateTime.FromBinary(gameData.LastPlayed);
-
-                //The greater DateTime value is the most recent
-                if (newDateTime > mostRecentDateTime)
+            } else {
+                DateTime currentMostRecent = DateTime.FromBinary(allProfiles[mostRecentProfileId].LastPlayed);
+                DateTime candidate = DateTime.FromBinary(data.LastPlayed);
+                if (candidate > currentMostRecent) {
                     mostRecentProfileId = profileId;
+                }
             }
         }
 
         return mostRecentProfileId;
     }
 
-    // Duplicates a file
-    public void DuplicateFile(string profileId)
-    {
+    // Duplicates a profile's data file into a new profile
+    public void DuplicateFile(string profileId) {
+        if (string.IsNullOrEmpty(profileId)) return;
+
         string sourcePath = Path.Combine(_dataDirPath, profileId, _dataFileName);
-        string destinationPath = Path.Combine(_dataDirPath, FindNextProfileID(), _dataFileName);
+        if (!File.Exists(sourcePath)) return;
 
-        //Create the new directory
+        string nextProfileId = FindNextProfileID();
+        string destinationPath = Path.Combine(_dataDirPath, nextProfileId, _dataFileName);
         Directory.CreateDirectory(Path.GetDirectoryName(destinationPath));
-
-        //Copy file to new path
-        File.Copy(sourcePath, destinationPath);        
+        File.Copy(sourcePath, destinationPath);
     }
 
-    // Deletes a file
-    public void DeleteFile(string profileId)
-    {
+    // Deletes a profile directory and data
+    public void DeleteFile(string profileId) {
+        if (string.IsNullOrEmpty(profileId)) return;
         string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName);
-        Directory.Delete(Path.GetDirectoryName(fullPath), true);
+        string directoryPath = Path.GetDirectoryName(fullPath);
+        if (Directory.Exists(directoryPath)) {
+            Directory.Delete(directoryPath, true);
+        }
     }
 
-    // Opens the save folder for the profileId
-    public void OpenFileInExplorer(string profileId)
-    {
-        string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName);
-        fullPath = fullPath.Replace(@"/", @"\");
+    // Opens the specified profile's save file location in the system file explorer
+    public void OpenFileInExplorer(string profileId) {
+        if (string.IsNullOrEmpty(profileId)) return;
+        string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName).Replace("/", "\\");
         System.Diagnostics.Process.Start("explorer.exe", "/select," + fullPath);
     }
 
-    // Finds the next unused profile id in the saves folder
-    public string FindNextProfileID()
-    {
-        GameData gameData = null;
-        Dictionary<string, GameData> profilesGameData = DataPersistenceManager.Instance.GetAllProfilesGameData();
-
+    // Finds the next available numeric profile ID by checking existing profiles
+    public string FindNextProfileID() {
+        var profilesGameData = DataPersistenceManager.Instance.GetAllProfilesGameData();
         int i = 0;
-        bool notFound = false;
-        while (!notFound)
-        {
-            if (profilesGameData.TryGetValue(i.ToString(), out gameData))
-                i++;
-            else
-                notFound = true;
+        while (profilesGameData.ContainsKey(i.ToString())) {
+            i++;
         }
-
         return i.ToString();
     }
 
-    // XOR Encrypts / Decrypts data
-    private string EncryptDecrypt(string data)
-    {
-        string modifiedData = "";
-        for (int i = 0; i < data.Length; i++)
-            modifiedData += (char)(data[i] ^ _encryptionCodeWord[i % _encryptionCodeWord.Length]);
-        return modifiedData;
+    // Encrypts the plaintext using AES and returns a Base64 string containing IV + ciphertext
+    string Encrypt(string plainText) {
+        using Aes aes = Aes.Create();
+        aes.Key = AES_KEY;
+        aes.Mode = CipherMode.CBC;
+        aes.Padding = PaddingMode.PKCS7;
+        aes.GenerateIV(); // Generates a new IV for each encryption
+
+        using MemoryStream memoryStream = new();
+        // Prepend IV to the ciphertext
+        memoryStream.Write(aes.IV, 0, aes.IV.Length);
+
+        using CryptoStream cryptoStream = new(memoryStream, aes.CreateEncryptor(), CryptoStreamMode.Write);
+        using StreamWriter writer = new(cryptoStream);
+        writer.Write(plainText);
+        writer.Flush();
+        cryptoStream.FlushFinalBlock();
+
+        byte[] encryptedBytes = memoryStream.ToArray();
+        return Convert.ToBase64String(encryptedBytes);
     }
 
-    // Try loading the backup data
-    private bool AttemptRollback(string fullPath)
-    {
-        bool success = false;
-        string backupFilePath = fullPath + _backupExtention;
-        try
-        {
-            //If the file exists, attempt to roll back to it by overwriting the original file
-            if (File.Exists(backupFilePath))
-            {
-                File.Copy(backupFilePath, fullPath, true);
-                success = true;
-                Debug.LogWarning("Had to roll back to backup file at: " + backupFilePath);
-            }
-            //Otherwise, we don't have a backup file yet
-            else
-                throw new Exception("Tried to roll back, but no backup file exists to roll back to.");
+    // Decrypts the Base64 string containing IV + ciphertext and returns the plaintext
+    string Decrypt(string cipherText) {
+        byte[] cipherBytesWithIV = Convert.FromBase64String(cipherText);
 
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Error occured when tying to roll back to backup file at: " + backupFilePath + "\n" + e);
+        using Aes aes = Aes.Create();
+        aes.Key = AES_KEY;
+        aes.Mode = CipherMode.CBC;
+        aes.Padding = PaddingMode.PKCS7;
+
+        // Extract IV
+        byte[] iv = new byte[aes.BlockSize / 8];
+        Array.Copy(cipherBytesWithIV, 0, iv, 0, iv.Length);
+        aes.IV = iv;
+
+        // Extract ciphertext
+        int cipherTextStartIndex = iv.Length;
+        int cipherTextLength = cipherBytesWithIV.Length - cipherTextStartIndex;
+        byte[] cipherBytes = new byte[cipherTextLength];
+        Array.Copy(cipherBytesWithIV, cipherTextStartIndex, cipherBytes, 0, cipherTextLength);
+
+        using MemoryStream memoryStream = new(cipherBytes);
+        using CryptoStream cryptoStream = new(memoryStream, aes.CreateDecryptor(), CryptoStreamMode.Read);
+        using StreamReader reader = new(cryptoStream);
+        string plainText = reader.ReadToEnd();
+        return plainText;
+    }
+
+    // Attempts to roll back to a backup file if loading fails
+    bool AttemptRollback(string fullPath) {
+        string backupFilePath = fullPath + BACKUP_EXTENTION;
+        if (!File.Exists(backupFilePath)) {
+            Debug.LogError("No backup file available for rollback: " + backupFilePath);
+            return false;
         }
 
-        return success;
+        try {
+            File.Copy(backupFilePath, fullPath, true);
+            Debug.LogWarning("Rolled back to backup file: " + backupFilePath);
+            return true;
+        } catch (Exception e) {
+            Debug.LogError("Failed to roll back from backup: " + backupFilePath + "\n" + e);
+            return false;
+        }
+    }
+
+    // Compute a checksum of the data to ensure integrity
+    string ComputeChecksum(string data) {
+        using var md5 = MD5.Create();
+        byte[] bytes = Encoding.UTF8.GetBytes(data);
+        byte[] hashBytes = md5.ComputeHash(bytes);
+        return Convert.ToBase64String(hashBytes);
+    }
+
+    // Validate the loaded data against its checksum
+    bool ValidateChecksum(string jsonData, string expectedChecksum) {
+        if (string.IsNullOrEmpty(expectedChecksum)) return false;
+        string computed = ComputeChecksum(jsonData);
+        return computed == expectedChecksum;
     }
 }
