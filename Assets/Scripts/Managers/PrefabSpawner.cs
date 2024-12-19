@@ -46,10 +46,12 @@ public class PrefabSpawner : NetworkBehaviour {
         ExtractPolygonPoints();
     }
 
-    void OnDestroy() {
+    new void OnDestroy() {
         if (_polygonPoints.IsCreated) {
             _polygonPoints.Dispose();
         }
+
+        base.OnDestroy();
     }
 
     private void Update() {

@@ -33,8 +33,9 @@ public class ItemConverter : PlaceableObject {
         GetComponent<TimeAgent>().OnMinuteTimeTick += ItemConverterProcess;
     }
 
-    private void OnDestroy() {
+    private new void OnDestroy() {
         GetComponent<TimeAgent>().OnMinuteTimeTick -= ItemConverterProcess;
+        base.OnDestroy();
     }
 
     /// <summary>

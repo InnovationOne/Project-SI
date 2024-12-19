@@ -324,7 +324,7 @@ public class InputManager : NetworkBehaviour {
     /// <summary>
     /// Cleans up event subscriptions to prevent memory leaks.
     /// </summary>
-    private void OnDestroy() {
+    private new void OnDestroy() {
         // Unsubscribe from player input actions
         _playerInputActions.Player.Run.performed -= Run_performed;
         _playerInputActions.Player.Dash.performed -= Dash_performed;
@@ -373,5 +373,7 @@ public class InputManager : NetworkBehaviour {
 
         // Dispose input actions
         _playerInputActions.Dispose();
+
+        base.OnDestroy();
     }
 }

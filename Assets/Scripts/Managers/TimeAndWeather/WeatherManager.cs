@@ -304,11 +304,11 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
         UpdateUIWeather();
     }
 
-    private void OnDestroy() {
-        base.OnDestroy();
+    private new void OnDestroy() {
         if (IsServer && _timeManager != null) {
             _timeManager.OnNextDayStarted -= HandleNextDayStarted;
             _timeManager.OnNextSeasonStarted -= HandleNextSeasonStarted;
         }
+        base.OnDestroy();
     }
 }

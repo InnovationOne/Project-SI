@@ -105,8 +105,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    void OnDestroy() {
+    new void OnDestroy() {
         CropTiles.OnListChanged -= OnCropTilesListChanged;
+        base.OnDestroy();
     }
 
     public override void OnNetworkDespawn() {

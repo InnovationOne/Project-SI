@@ -316,7 +316,7 @@ public class PlayerFishingController : MonoBehaviour {
             biteRateAdjustment = 1 - (_fishingRod.BiteRate[rarityId] / 100f);
         }
 
-        float timeToBite = UnityEngine.Random.Range(TIME_TO_BITE_MIN, TIME_TO_BITE_MAX) * biteRateAdjustment;
+        float timeToBite = UnityEngine.Random.Range(MIN_TIME_TO_BITE, MAX_TIME_TO_BITE) * biteRateAdjustment;
         yield return new WaitForSeconds(timeToBite);
 
         _currentFish = _fishDatabaseSO.GetFish(_fishingRod, _bobberTileId, CatchingMethod.FishingRod);

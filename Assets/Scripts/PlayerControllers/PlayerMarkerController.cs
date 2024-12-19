@@ -65,7 +65,6 @@ public class PlayerMarkerController : NetworkBehaviour {
     void Start() {
         // Cache references to other systems for quick access
         _cropsManager = CropsManager.Instance;
-        _tilemapManager = TilemapManager.Instance;
         _inputManager = InputManager.Instance;
 
         // Subscribe to relevant events

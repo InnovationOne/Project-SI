@@ -20,6 +20,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
 
     // Dictionary to track player sleeping states; only accessed on the server
     private Dictionary<ulong, bool> _playerSleepingDict;
+    public List<PlayerController> PlayerControllers { get; private set; } = new();
 
     // Cached references for performance optimization
     private NetworkManager _networkManager;
@@ -173,7 +174,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         Debug.Log("All players are sleeping. Transitioning to the next day.");
 
         // Reset all players' sleeping states
-        List<ulong> clientIds = new List<ulong>(_playerSleepingDict.Keys);
+        List<ulong> clientIds = new(_playerSleepingDict.Keys);
         foreach (ulong clientId in clientIds) {
             _playerSleepingDict[clientId] = false;
         }
@@ -197,19 +198,25 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
             Debug.LogWarning("LocalInstance of Player is not set.");
         }
     }
+
+    public void AddPlayer(PlayerController playerController) {
+        PlayerControllers.Add(playerController);
+    }
+
+    public void RemovePlayer(PlayerController playerController) {
+        PlayerControllers.Remove(playerController);
+    }
     #endregion
 
     #region Save & Load
     [Serializable]
     public class PlayerDataList {
-        public List<PlayerData> players = new List<PlayerData>();
+        public List<PlayerData> _players = new();
     }
 
     public void SaveData(GameData data) {
-        var playerControllers = FindObjectsByType<PlayerController>(FindObjectsSortMode.InstanceID);
         var allPlayerData = new List<PlayerData>();
-
-        foreach (var pc in playerControllers) {
+        foreach (var pc in PlayerControllers) {
             var dataPersistanceObjects = FindAllDataPersistanceObjects(pc);
             var playerData = new PlayerData();
 
@@ -222,7 +229,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         }
 
         var playerDataList = new PlayerDataList {
-            players = allPlayerData
+            _players = allPlayerData
         };
 
         string json = JsonUtility.ToJson(playerDataList, true);

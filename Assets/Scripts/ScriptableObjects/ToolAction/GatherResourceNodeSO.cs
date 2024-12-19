@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Tool action for gathering resources from resource nodes.
-/// </summary>
+// Tool action for gathering resources from resource nodes.
 [CreateAssetMenu(menuName = "Tool Action/Gather Resource Node")]
 public class GatherResourceNodeSO : ToolActionSO {
 
@@ -13,6 +11,7 @@ public class GatherResourceNodeSO : ToolActionSO {
 
     HashSet<ResourceNodeType> _canHitNodesOfType;
     ItemManager _itemManager;
+    PlayerToolsAndWeaponController _playerToolsAndWeaponController;
     bool _init = false;
 
     void OnEnable() => _init = false;
@@ -21,6 +20,7 @@ public class GatherResourceNodeSO : ToolActionSO {
         if (_init) return;
         _canHitNodesOfType = new HashSet<ResourceNodeType>(_canHitNodesOfTypeArray);
         _itemManager = ItemManager.Instance;
+        _playerToolsAndWeaponController = PlayerController.LocalInstance.PlayerToolsAndWeaponController;
         _init = true;
     }
 
@@ -33,21 +33,21 @@ public class GatherResourceNodeSO : ToolActionSO {
         var colliders = Physics2D.OverlapAreaAll(bottomLeft, topRight, _resourceNodeLayerMask);
         if (colliders.Length == 0) {
             Debug.LogWarning("No resource nodes found.");
-            PlayerController.LocalInstance.PlayerToolsAndWeaponController.ClientCallbackClientRpc(false);
+            _playerToolsAndWeaponController.ClientCallbackClientRpc(false);
             return;
         }
 
         var tool = _itemManager.ItemDatabase[itemSlot.ItemId] as AxePickaxeToolSO;
         if (tool == null) {
             Debug.LogError($"No valid AxePickaxeToolSO found for ItemId: {itemSlot.ItemId}");
-            PlayerController.LocalInstance.PlayerToolsAndWeaponController.ClientCallbackClientRpc(false);
+            _playerToolsAndWeaponController.ClientCallbackClientRpc(false);
             return;
         }
 
         int rarityIndex = itemSlot.RarityId - 1;
         if (rarityIndex < 0 || rarityIndex >= tool.DamageOnAction.Length) {
             Debug.LogError($"Invalid RarityId: {itemSlot.RarityId} for tool ItemId: {itemSlot.ItemId}");
-            PlayerController.LocalInstance.PlayerToolsAndWeaponController.ClientCallbackClientRpc(false);
+            _playerToolsAndWeaponController.ClientCallbackClientRpc(false);
             return;
         }
 
@@ -64,7 +64,7 @@ public class GatherResourceNodeSO : ToolActionSO {
 
         if (!hitSomething) {
             Debug.LogWarning("No valid resource nodes of the allowed types hit by the tool.");
-            PlayerController.LocalInstance.PlayerToolsAndWeaponController.ClientCallbackClientRpc(false);
+            _playerToolsAndWeaponController.ClientCallbackClientRpc(false);
         }
     }
 }

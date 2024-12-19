@@ -28,9 +28,10 @@ public class TimeAgent : NetworkBehaviour {
     // Invoked by TimeManager every minute.
     public void InvokeMinute() => OnMinuteTimeTick?.Invoke();
 
-    void OnDestroy() {
+    new void OnDestroy() {
         if (IsServer && _timeManager != null) {
             UnsubscribeFromTimeManager();
         }
+        base.OnDestroy();
     }
 }

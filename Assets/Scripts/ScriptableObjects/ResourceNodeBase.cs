@@ -84,11 +84,12 @@ public abstract class ResourceNodeBase : NetworkBehaviour {
         InitializeClient();
     }
 
-    private void OnDestroy() {
+    private new void OnDestroy() {
         if (IsServer) {
             UnsubscribeServerEvents();
         }
         UnsubscribeClientEvents();
+        base.OnDestroy();
     }
 
     protected virtual void InitializeServer() {

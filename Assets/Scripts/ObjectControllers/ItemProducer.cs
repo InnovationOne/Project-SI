@@ -21,7 +21,10 @@ public class ItemProducer : PlaceableObject {
     /// </summary>
     private void Start() => GetComponent<TimeAgent>().OnMinuteTimeTick += ItemProducerProcess;
 
-    private void OnDestroy() => GetComponent<TimeAgent>().OnMinuteTimeTick -= ItemProducerProcess;
+    private new void OnDestroy() { 
+        GetComponent<TimeAgent>().OnMinuteTimeTick -= ItemProducerProcess; 
+        base.OnDestroy();
+    }
 
     /// <summary>
     /// Initializes the item producer with a specific item identifier.

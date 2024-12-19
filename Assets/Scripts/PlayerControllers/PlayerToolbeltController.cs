@@ -70,9 +70,7 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
         Initialize();
     }
 
-    void OnDestroy() {
-        base.OnDestroy();
-
+    new void OnDestroy() {
         // Unsubscribe UI events
         if (_toolbeltUI != null) {
             _toolbeltUI.OnToolbeltSlotLeftClick -= OnToolbeltSlotLeftClick;
@@ -90,6 +88,8 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
 
         // Unsubscribe pause menu events
         _pauseGameManager.OnShowLocalPauseGame -= OnTogglePauseMenu;
+
+        base.OnDestroy();
     }
 
     // Sets initial visual state for toolbelt

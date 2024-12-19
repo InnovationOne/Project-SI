@@ -137,9 +137,7 @@ public abstract class AdjustingObject : PlaceableObject {
         UpdateNeighborConnections(false);
         // Additional pick up logic can be implemented here
     }
-    public virtual void Interact(PlayerController player) {
-        
-    }
+    public virtual void Interact(PlayerController player) { }
 
     /// <summary>
     /// Compares two boolean arrays for equality.

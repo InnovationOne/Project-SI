@@ -19,8 +19,9 @@ public class PlayerInteractController : NetworkBehaviour {
         _inputManager.OnInteractAction += HandleInteractAction;
     }
 
-    void OnDestroy() {
+    new void OnDestroy() {
         _inputManager.OnInteractAction -= HandleInteractAction;
+        base.OnDestroy();
     }
 
     void Update() {

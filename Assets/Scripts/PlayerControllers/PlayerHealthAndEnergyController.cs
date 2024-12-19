@@ -58,8 +58,9 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
         OnUpdateMaxEnergy?.Invoke(_maxEnergy);
     }
 
-    void OnDestroy() {
+    new void OnDestroy() {
         _timeManager.OnNextDayStarted -= HandleNextDayStarted;
+        base.OnDestroy();
     }
 
     void FixedUpdate() {

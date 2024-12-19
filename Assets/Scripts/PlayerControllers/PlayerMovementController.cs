@@ -76,11 +76,13 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
         _inputManager.OnDashAction += TryStartDash;
     }
 
-    void OnDestroy() {
+    new void OnDestroy() {
         _playerWalkGrassEvent.release();
         //TODO _playerDashEvent.release();
         _inputManager.OnRunAction -= ToggleRunState;
         _inputManager.OnDashAction -= TryStartDash;
+
+        base.OnDestroy();
     }
 
     void ToggleRunState() => _isRunning = !_isRunning;

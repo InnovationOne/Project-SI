@@ -28,8 +28,9 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         _inputManager.OnLeftClickAction += HandleLeftClick;
     }
 
-    void OnDestroy() {
+    new void OnDestroy() {
         _inputManager.OnLeftClickAction -= HandleLeftClick;
+        base.OnDestroy();
     }
 
     void HandleLeftClick() {

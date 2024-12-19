@@ -42,7 +42,10 @@ public class Rose : PlaceableObject {
     #region Initialization
     private void Start() => TimeManager.Instance.OnNextDayStarted += OnNextDayStarted;
 
-    private void OnDestroy() => TimeManager.Instance.OnNextDayStarted -= OnNextDayStarted;
+    private new void OnDestroy() {
+        TimeManager.Instance.OnNextDayStarted -= OnNextDayStarted;
+        base.OnDestroy();
+    } 
 
 
     /// <summary>

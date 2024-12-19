@@ -33,7 +33,6 @@ public class PlayerController : NetworkBehaviour {
 
     public bool InBed { get; private set; }
 
-    PlayerDataManager _playerDataManager;
     GameManager _gameManager;
 
 
@@ -63,16 +62,13 @@ public class PlayerController : NetworkBehaviour {
 
     void Start() {
         _gameManager = GameManager.Instance;
-        _playerDataManager = PlayerDataManager.Instance;
     }
 
     public override void OnNetworkSpawn() {
-        _playerDataManager.AddPlayer(this);
         _gameManager.AddPlayerToSleepingDict(OwnerClientId);
     }
 
     public override void OnNetworkDespawn() {
-        _playerDataManager.RemovePlayer(this);
         _gameManager.RemovePlayerFromSleepingDict(OwnerClientId);
     }
 

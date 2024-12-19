@@ -20,7 +20,7 @@ public class ItemSpawnManager : NetworkBehaviour {
     const float CIRCLE_SPREAD_AMOUNT = 0.6f;
     const float LINE_SPREAD_AMOUNT = 0.15f;
     const float TREE_HEIGHT = 2f;
-    const float LEAN_MOVE_TIME = 0.75f; // Ensure synchronization with PickUpItem.cs
+    public const float LEAN_MOVE_TIME = 0.75f;
     const float DEFAULT_END_POSITION_Z_MULTIPLIER = 0.0001f;
 
 
