@@ -5,7 +5,7 @@ using UnityEngine.Rendering.Universal;
 using System.Collections.Generic;
 
 public class WeatherManager : NetworkBehaviour, IDataPersistance {
-    public enum WeatherName { Sun, Clouds, Wind, Rain, Thunder, Snow, Event, Marriage }
+    public enum WeatherName { Sun, Cloudy, Wind, Rain, Thunder, Snow, Event, Wedding, None }
 
     public static WeatherManager Instance { get; private set; }
 
@@ -190,7 +190,7 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
             if (probability < cumulative) {
                 return i switch {
                     0 => WeatherName.Sun,
-                    1 => (UnityEngine.Random.value < 0.5f ? WeatherName.Clouds : WeatherName.Wind),
+                    1 => (UnityEngine.Random.value < 0.5f ? WeatherName.Cloudy : WeatherName.Wind),
                     2 => DetermineRainOrSnow(),
                     3 => WeatherName.Thunder,
                     _ => WeatherName.Sun
@@ -228,7 +228,7 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     float GetTodaysGlobalLightIntensity() {
         var w = (WeatherName)_weatherForecast[0];
         return w switch {
-            WeatherName.Clouds or WeatherName.Wind => CLOUDS_WIND_LIGHT,
+            WeatherName.Cloudy or WeatherName.Wind => CLOUDS_WIND_LIGHT,
             WeatherName.Snow or WeatherName.Rain => RAIN_SNOW_LIGHT,
             WeatherName.Thunder => THUNDER_LIGHT,
             _ => 1f
