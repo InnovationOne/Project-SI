@@ -4,6 +4,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 /// Manages the player's inventory.
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerInventoryController : NetworkBehaviour, IPlayerDataPersistance {
     // Predefined inventory sizes (read-only)
     static readonly ReadOnlyCollection<int> INVENTORY_SIZES = Array.AsReadOnly(new int[] { 10, 20, 30 });

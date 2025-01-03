@@ -68,19 +68,22 @@ public class FileDataHandler {
         return loadedData;
     }
 
-    // Saves the provided GameData object to disk, creates a backup on success
+    // Saves the provided GameData object to disk, creates a backup after saving
     public void Save(GameData data, string profileId) {
         if (data == null || string.IsNullOrEmpty(profileId)) return;
 
         string fullPath = Path.Combine(_dataDirPath, profileId, _dataFileName);
         string backupFilePath = fullPath + BACKUP_EXTENTION;
+        string tempFilePath = fullPath + ".tmp";
 
         try {
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+
             // Compute checksum
             string jsonData = JsonUtility.ToJson(data, true);
             string checksum = ComputeChecksum(jsonData);
             data.Checksum = checksum;
+
             // Re-serialize with checksum
             string dataToStore = JsonUtility.ToJson(data, true);
 
@@ -88,21 +91,36 @@ public class FileDataHandler {
                 dataToStore = Encrypt(dataToStore);
             }
 
-            // Write data to file
-            using (var stream = new FileStream(fullPath, FileMode.Create, FileAccess.Write))
+            // Backup existing data before saving new data
+            if (File.Exists(fullPath)) {
+                File.Copy(fullPath, backupFilePath, true);
+            }
+
+            // Write data to temporary file 
+            using (var stream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write))
             using (var writer = new StreamWriter(stream)) {
                 writer.Write(dataToStore);
             }
 
-            // Verify
-            GameData verifiedData = Load(profileId);
-            if (verifiedData != null) {
-                File.Copy(fullPath, backupFilePath, true);
-            } else {
-                throw new Exception("Verification failed, backup not created.");
-            }
+            // Replace original file with temporary file
+            File.Copy(tempFilePath, fullPath, true);
+            File.Delete(tempFilePath);
+
+            // Verify save by loading the data, save to backup if successful
+            GameData verifiedData = Load(profileId) ?? throw new Exception("Verification failed, backup not created.");
+            File.Copy(fullPath, backupFilePath, true);
+
         } catch (Exception e) {
             Debug.LogError("Error saving data: " + fullPath + "\n" + e);
+
+            if (File.Exists(backupFilePath)) {
+                try {
+                    File.Copy(backupFilePath, fullPath, true);
+                    Debug.LogWarning("Restored data from backup due to save failure.");
+                } catch (Exception restoreEx) {
+                    Debug.LogError("Failed to restore data from backup: " + backupFilePath + "\n" + restoreEx);
+                }
+            }
         }
     }
 
@@ -263,16 +281,25 @@ public class FileDataHandler {
 
     // Compute a checksum of the data to ensure integrity
     string ComputeChecksum(string data) {
-        using var md5 = MD5.Create();
+        using var sha256 = SHA256.Create();
         byte[] bytes = Encoding.UTF8.GetBytes(data);
-        byte[] hashBytes = md5.ComputeHash(bytes);
+        byte[] hashBytes = sha256.ComputeHash(bytes);
         return Convert.ToBase64String(hashBytes);
     }
 
     // Validate the loaded data against its checksum
     bool ValidateChecksum(string jsonData, string expectedChecksum) {
         if (string.IsNullOrEmpty(expectedChecksum)) return false;
-        string computed = ComputeChecksum(jsonData);
-        return computed == expectedChecksum;
+
+        GameData data = JsonUtility.FromJson<GameData>(jsonData);
+        if (data == null) return false;
+
+        string originalChecksum = data.Checksum;
+        data.Checksum = "";
+
+        string jsonWithoutChecksum = JsonUtility.ToJson(data, true);
+        string computedChecksum = ComputeChecksum(jsonWithoutChecksum);
+        data.Checksum = originalChecksum;
+        return computedChecksum == expectedChecksum;
     }
 }

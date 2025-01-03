@@ -5,6 +5,7 @@ using System.Collections;
 using static WeatherManager;
 
 // This Script handles player movement, animations, and data persistance for a 2D character
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance {
     // Movement Directions
     public Vector2 LastMotionDirection { get; private set; } = Vector2.right;

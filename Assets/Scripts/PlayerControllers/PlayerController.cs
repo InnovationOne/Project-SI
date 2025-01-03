@@ -35,8 +35,10 @@ public class PlayerController : NetworkBehaviour {
 
     GameManager _gameManager;
 
+    public override void OnNetworkSpawn() {
+        _gameManager = GameManager.Instance;
+        _gameManager.AddPlayerToSleepingDict(OwnerClientId);
 
-    void Awake() {
         if (IsOwner) {
             if (LocalInstance != null) {
                 Debug.LogError("There is more than one local instance of Player in the scene!");
@@ -58,14 +60,6 @@ public class PlayerController : NetworkBehaviour {
         PlayerFishingController = GetComponent<PlayerFishingController>();
 
         RaindropController = GetComponentInChildren<RaindropController>();
-    }
-
-    void Start() {
-        _gameManager = GameManager.Instance;
-    }
-
-    public override void OnNetworkSpawn() {
-        _gameManager.AddPlayerToSleepingDict(OwnerClientId);
     }
 
     public override void OnNetworkDespawn() {

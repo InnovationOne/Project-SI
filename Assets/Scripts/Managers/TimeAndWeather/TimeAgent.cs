@@ -1,10 +1,12 @@
 using System;
 using Unity.Netcode;
+using UnityEngine;
 
 /// <summary>
 /// Attaches to objects that need to react to in-game minute ticks.
 /// Only the server should manage TimeAgents.
 /// </summary>
+[RequireComponent(typeof(NetworkObject))]
 public class TimeAgent : NetworkBehaviour {
     public event Action OnMinuteTimeTick;
     TimeManager _timeManager;

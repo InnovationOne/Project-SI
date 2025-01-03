@@ -1,7 +1,9 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
-public class Store : MonoBehaviour, IInteractable {
+[RequireComponent(typeof(NetworkObject))]
+public class Store : NetworkBehaviour, IInteractable {
     [SerializeField] protected ItemContainerSO _storeContainer;
     [SerializeField] protected StoreVisual _storeVisual;
 

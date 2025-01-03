@@ -6,6 +6,7 @@ using UnityEngine;
 /// <summary>
 /// Controls the player's toolbelt, handling tool selection, toolbelt size, and interactions.
 /// </summary>
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance {
     // Notifies changes in toolbelt setup and toggle actions
     public event Action OnToolbeltChanged;

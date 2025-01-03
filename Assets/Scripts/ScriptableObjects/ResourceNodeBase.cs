@@ -18,6 +18,7 @@ public enum ResourceNodeType {
 /// Manages common logic like HP, hitting, dropping items, and network sync.
 /// </summary>
 [RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(NetworkObject))]
 public abstract class ResourceNodeBase : NetworkBehaviour {
     // Serialized Fields
     [Header("Node Settings")]

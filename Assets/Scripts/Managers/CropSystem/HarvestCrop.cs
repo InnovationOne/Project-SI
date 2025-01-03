@@ -9,6 +9,7 @@ public class FertilizerSpriteRendererPair {
     public SpriteRenderer SpriteRenderer;
 }
 
+[RequireComponent(typeof(NetworkObject))]
 public class HarvestCrop : NetworkBehaviour, IInteractable {
     [SerializeField] List<FertilizerSpriteRendererPair> _fertilizerSpriteRenderersList = new();
 

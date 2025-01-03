@@ -25,6 +25,7 @@ public class SpawnablePrefab {
 }
 
 [RequireComponent(typeof(PolygonCollider2D))]
+[RequireComponent(typeof(NetworkObject))]
 public class PrefabSpawner : NetworkBehaviour {
     [SerializeField] Tilemap _targetTilemap;
     [SerializeField] List<SpawnablePrefab> _prefabsToSpawn = new(); 

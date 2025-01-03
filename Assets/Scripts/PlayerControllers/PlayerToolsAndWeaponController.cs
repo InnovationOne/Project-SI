@@ -4,6 +4,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 // This class represents the character useing an item
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerToolsAndWeaponController : NetworkBehaviour {
     PlayerMarkerController _playerMarkerController;
     PlayerToolbeltController _playerToolbeltController;

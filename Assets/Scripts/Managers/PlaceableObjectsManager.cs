@@ -4,6 +4,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+[RequireComponent(typeof(NetworkObject))]
 public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     public static PlaceableObjectsManager Instance { get; private set; }
 

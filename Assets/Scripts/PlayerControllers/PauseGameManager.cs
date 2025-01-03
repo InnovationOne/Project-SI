@@ -4,6 +4,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 
+[RequireComponent(typeof(NetworkObject))]
 public class PauseGameManager : NetworkBehaviour {
     public static PauseGameManager Instance { get; private set; }
 

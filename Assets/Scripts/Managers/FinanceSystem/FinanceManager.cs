@@ -5,6 +5,7 @@ using Unity.Netcode;
 /// <summary>
 /// Manages money for farm and town, syncing changes across the network.
 /// </summary>
+[RequireComponent(typeof(NetworkObject))]
 public class FinanceManager : NetworkBehaviour, IDataPersistance {
     public static FinanceManager Instance { get; private set; }
 

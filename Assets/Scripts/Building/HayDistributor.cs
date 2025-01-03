@@ -1,9 +1,11 @@
+using Unity.Netcode;
 using UnityEngine;
 
 /// <summary>
 /// Verteilt Heu vom Silo zur Futterbank. Manuell oder automatisch.
 /// </summary>
-public class HayDistributor : MonoBehaviour, IInteractable {
+[RequireComponent(typeof(NetworkObject))]
+public class HayDistributor : NetworkBehaviour, IInteractable {
     [SerializeField] private ItemSO _hayItem;
 
     private const int MAX_HAY_CAPACITY = 20;
@@ -14,10 +16,18 @@ public class HayDistributor : MonoBehaviour, IInteractable {
     private PlayerToolbeltController _pTC;
     private PlayerInventoryController _pIC;
 
-    private void Start() {
+    public override void OnNetworkSpawn() {
+        base.OnNetworkSpawn();
+
         _pTC = PlayerController.LocalInstance.PlayerToolbeltController;
         _pIC = PlayerController.LocalInstance.PlayerInventoryController;
         TimeManager.Instance.OnNextDayStarted += OnNextDay;
+    }
+
+    public override void OnNetworkDespawn() {
+        base.OnNetworkDespawn();
+
+        TimeManager.Instance.OnNextDayStarted -= OnNextDay;
     }
 
     public void Interact(PlayerController player) {

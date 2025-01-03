@@ -11,7 +11,9 @@ public class AnimalStore : Store {
     private ItemManager _iM;
     private NetworkSpawnManager _nSM;
 
-    void Start() {
+    public override void OnNetworkSpawn() {
+        base.OnNetworkSpawn();
+
         _pIC = PlayerController.LocalInstance.PlayerInventoryController;
         _fM = FinanceManager.Instance;
         _pOM = PlaceableObjectsManager.Instance;

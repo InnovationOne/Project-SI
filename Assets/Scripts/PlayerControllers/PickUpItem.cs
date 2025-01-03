@@ -5,6 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Manages the behavior of item prefabs placed on the map, including animations, movement, and network synchronization.
 /// </summary>
+[RequireComponent(typeof(NetworkObject))]
 public class PickUpItem : NetworkBehaviour {
     const float DEFAULT_PARABOLA_Z = 5f;
     const float DEFAULT_END_POSITION_Z_MULTIPLIER = 0.0001f;

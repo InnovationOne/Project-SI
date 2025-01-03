@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 /// <summary>
 /// Manages recipes and provides methods for retrieving and saving recipe data.
 /// </summary>
+[RequireComponent(typeof(NetworkObject))]
 public class RecipeManager : NetworkBehaviour, IDataPersistance {
     /// <summary>
     /// Singleton instance of the RecipeManager.

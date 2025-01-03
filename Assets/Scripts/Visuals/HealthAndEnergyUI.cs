@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(NetworkObject))]
 public class HealthAndEnergyUI : NetworkBehaviour {
     [SerializeField] private Slider _healthSlider;
     [SerializeField] private Slider _healthSliderShrink;
@@ -18,18 +19,18 @@ public class HealthAndEnergyUI : NetworkBehaviour {
     private float _energyUsedShrinkTimer;
     private float _shrinkSpeed = 90f;
 
-    private PlayerHealthAndEnergyController _playerController;
+    private PlayerHealthAndEnergyController _playerHealthAndEnergyController;
 
 
     /// <summary>
     /// Subscribes to the player's health and energy events.
     /// </summary>
     public override void OnNetworkSpawn() {
-        _playerController = PlayerController.LocalInstance.PlayerHealthAndEnergyController;
-        _playerController.OnUpdateHealth += ChangeHp;
-        _playerController.OnUpdateMaxHealth += ChangeMaxHp;
-        _playerController.OnUpdateEnergy += ChangeEnergy;
-        _playerController.OnUpdateMaxEnergy += ChangeMaxEnergy;
+        _playerHealthAndEnergyController = PlayerController.LocalInstance.PlayerHealthAndEnergyController;
+        _playerHealthAndEnergyController.OnUpdateHealth += ChangeHp;
+        _playerHealthAndEnergyController.OnUpdateMaxHealth += ChangeMaxHp;
+        _playerHealthAndEnergyController.OnUpdateEnergy += ChangeEnergy;
+        _playerHealthAndEnergyController.OnUpdateMaxEnergy += ChangeMaxEnergy;
     }
 
     /// <summary>
@@ -37,10 +38,10 @@ public class HealthAndEnergyUI : NetworkBehaviour {
     /// It unsubscribes the event handlers from the player controller's events.
     /// </summary>
     private new void OnDestroy() {
-        //_playerController.OnUpdateHealth -= ChangeHp; // Beim beenden ne null ref exeption. Sollte aber nicht stören. 
-        //_playerController.OnUpdateMaxHealth -= ChangeMaxHp;
-        //_playerController.OnUpdateEnergy -= ChangeEnergy;
-        //_playerController.OnUpdateMaxEnergy -= ChangeMaxEnergy;
+        _playerHealthAndEnergyController.OnUpdateHealth -= ChangeHp; // Beim beenden ne null ref exeption. Sollte aber nicht stören. 
+        _playerHealthAndEnergyController.OnUpdateMaxHealth -= ChangeMaxHp;
+        _playerHealthAndEnergyController.OnUpdateEnergy -= ChangeEnergy;
+        _playerHealthAndEnergyController.OnUpdateMaxEnergy -= ChangeMaxEnergy;
     }
 
     /// <summary>

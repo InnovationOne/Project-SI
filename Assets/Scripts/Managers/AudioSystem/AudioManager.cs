@@ -33,7 +33,7 @@ public class AudioManager : MonoBehaviour {
             Destroy(Instance);
         }
         Instance = this;
-        DontDestroyOnLoad(this.gameObject);
+        DontDestroyOnLoad(gameObject);
 
         _eventInstances = new List<EventInstance>();
 

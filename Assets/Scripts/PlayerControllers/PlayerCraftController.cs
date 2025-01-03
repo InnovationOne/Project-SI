@@ -2,6 +2,7 @@ using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerCraftController : NetworkBehaviour {
     [Header("Recipe Container")]
     [SerializeField] private RecipeContainer _recipeContainer;

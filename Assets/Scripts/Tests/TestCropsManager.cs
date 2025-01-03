@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using Unity.Netcode;
 
+[RequireComponent(typeof(NetworkObject))]
 public class TestCropsManager : NetworkBehaviour {
     public static TestCropsManager Instance;
 

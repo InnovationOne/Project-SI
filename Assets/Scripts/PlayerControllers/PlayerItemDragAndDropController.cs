@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using static ItemSlot;
 
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerItemDragAndDropController : NetworkBehaviour {
     ItemSlot _dragItemSlot;
     PlayerInventoryController _playerInventoryController;

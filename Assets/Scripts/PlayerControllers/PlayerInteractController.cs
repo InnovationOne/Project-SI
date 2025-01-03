@@ -1,6 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerInteractController : NetworkBehaviour {
     const float MAX_INTERACT_DISTANCE = 0.4f;
 

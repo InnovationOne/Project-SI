@@ -4,6 +4,7 @@ using UnityEngine.Tilemaps;
 using UnityEngine.UIElements;
 
 
+[RequireComponent(typeof(NetworkObject))]
 public class ItemSpawnManager : NetworkBehaviour {
     public static ItemSpawnManager Instance { get; private set; }
 

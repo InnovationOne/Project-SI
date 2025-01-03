@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 // Highlights the polygon defined by a PolygonCollider2D using a LineRenderer, syncs data via netcode.
 [RequireComponent(typeof(PolygonCollider2D))]
+[RequireComponent(typeof(NetworkObject))]
 public class DrawPolygonCollider2D : NetworkBehaviour
 {
     [SerializeField] GameObject _linePrefab;

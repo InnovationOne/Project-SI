@@ -4,6 +4,7 @@ using System;
 using UnityEngine.Rendering.Universal;
 using System.Collections.Generic;
 
+[RequireComponent(typeof(NetworkObject))]
 public class WeatherManager : NetworkBehaviour, IDataPersistance {
     public enum WeatherName { Sun, Cloudy, Wind, Rain, Thunder, Snow, Event, Wedding, None }
 

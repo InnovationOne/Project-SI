@@ -761,6 +761,133 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             ]
         },
         {
+            ""name"": ""Fishing"",
+            ""id"": ""16054063-ad31-4e35-b01c-5787650b61e0"",
+            ""actions"": [
+                {
+                    ""name"": ""FishingOffset"",
+                    ""type"": ""Value"",
+                    ""id"": ""0f996a22-029b-414c-9012-32b19fee1a86"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": ""WASD"",
+                    ""id"": ""2f55eb2c-3784-46a5-976c-1ba47856e40c"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FishingOffset"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""acd664c8-dfd4-42bf-a42e-f58fb0c77f78"",
+                    ""path"": ""<Keyboard>/w"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FishingOffset"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""593a3df0-a761-4f7d-a5e0-5e2e1535428f"",
+                    ""path"": ""<Keyboard>/s"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FishingOffset"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""8b53db38-0c93-4703-af25-1ebf69aad9b9"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FishingOffset"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""3b7254ee-d5ff-4b4d-b34c-c6a8ddee093a"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FishingOffset"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""Arrows"",
+                    ""id"": ""c30ca337-47ce-4509-9f3a-2ee2fe133057"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FishingOffset"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""fa8f9cda-e877-46e4-95f3-337a38e05bba"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FishingOffset"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""567ca177-077a-4bcf-91f2-8aebc01c5f72"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FishingOffset"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""456713b3-f473-4bfa-aeb6-a0d5c2913ba7"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FishingOffset"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""a04a7bd5-b0b3-451f-a712-4d07f487a3a3"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""FishingOffset"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                }
+            ]
+        },
+        {
             ""name"": ""DebugConsole"",
             ""id"": ""3d5c2138-c042-4ac6-8499-a2d8daa8ff2e"",
             ""actions"": [
@@ -1050,6 +1177,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_RotateCWObj = m_Player.FindAction("RotateCWObj", throwIfNotFound: true);
         m_Player_VMirrorObj = m_Player.FindAction("VMirrorObj", throwIfNotFound: true);
         m_Player_HMirrorObj = m_Player.FindAction("HMirrorObj", throwIfNotFound: true);
+        // Fishing
+        m_Fishing = asset.FindActionMap("Fishing", throwIfNotFound: true);
+        m_Fishing_FishingOffset = m_Fishing.FindAction("FishingOffset", throwIfNotFound: true);
         // DebugConsole
         m_DebugConsole = asset.FindActionMap("DebugConsole", throwIfNotFound: true);
         m_DebugConsole_CheatConsole = m_DebugConsole.FindAction("CheatConsole", throwIfNotFound: true);
@@ -1067,6 +1197,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     ~@PlayerInputActions()
     {
         UnityEngine.Debug.Assert(!m_Player.enabled, "This will cause a leak and performance issues, PlayerInputActions.Player.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Fishing.enabled, "This will cause a leak and performance issues, PlayerInputActions.Fishing.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_DebugConsole.enabled, "This will cause a leak and performance issues, PlayerInputActions.DebugConsole.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Dialogue.enabled, "This will cause a leak and performance issues, PlayerInputActions.Dialogue.Disable() has not been called.");
     }
@@ -1373,6 +1504,52 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     }
     public PlayerActions @Player => new PlayerActions(this);
 
+    // Fishing
+    private readonly InputActionMap m_Fishing;
+    private List<IFishingActions> m_FishingActionsCallbackInterfaces = new List<IFishingActions>();
+    private readonly InputAction m_Fishing_FishingOffset;
+    public struct FishingActions
+    {
+        private @PlayerInputActions m_Wrapper;
+        public FishingActions(@PlayerInputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @FishingOffset => m_Wrapper.m_Fishing_FishingOffset;
+        public InputActionMap Get() { return m_Wrapper.m_Fishing; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(FishingActions set) { return set.Get(); }
+        public void AddCallbacks(IFishingActions instance)
+        {
+            if (instance == null || m_Wrapper.m_FishingActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_FishingActionsCallbackInterfaces.Add(instance);
+            @FishingOffset.started += instance.OnFishingOffset;
+            @FishingOffset.performed += instance.OnFishingOffset;
+            @FishingOffset.canceled += instance.OnFishingOffset;
+        }
+
+        private void UnregisterCallbacks(IFishingActions instance)
+        {
+            @FishingOffset.started -= instance.OnFishingOffset;
+            @FishingOffset.performed -= instance.OnFishingOffset;
+            @FishingOffset.canceled -= instance.OnFishingOffset;
+        }
+
+        public void RemoveCallbacks(IFishingActions instance)
+        {
+            if (m_Wrapper.m_FishingActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IFishingActions instance)
+        {
+            foreach (var item in m_Wrapper.m_FishingActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_FishingActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public FishingActions @Fishing => new FishingActions(this);
+
     // DebugConsole
     private readonly InputActionMap m_DebugConsole;
     private List<IDebugConsoleActions> m_DebugConsoleActionsCallbackInterfaces = new List<IDebugConsoleActions>();
@@ -1558,6 +1735,10 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnRotateCWObj(InputAction.CallbackContext context);
         void OnVMirrorObj(InputAction.CallbackContext context);
         void OnHMirrorObj(InputAction.CallbackContext context);
+    }
+    public interface IFishingActions
+    {
+        void OnFishingOffset(InputAction.CallbackContext context);
     }
     public interface IDebugConsoleActions
     {

@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 // Manages player's health and energy, supporting network synchronization and persistence
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPersistance {
     // Events to notify listeners about health and energy updates
     public event Action<float> OnUpdateHealth;

@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.Netcode;
 using System;
 
+[RequireComponent(typeof(NetworkObject))]
 public class TimeManager : NetworkBehaviour, IDataPersistance {
     public enum ShortDayName { Mon, Tue, Wed, Thu, Fri, Sat, Sun }
     public enum TimeOfDay { Morning, Noon, Afternoon, Evening, Night }

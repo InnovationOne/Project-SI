@@ -1,11 +1,13 @@
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 
 /// <summary>
 /// Brutkasten: Eier hineinlegen, nach 10080 Minuten (7 Tage) Küken ausbrüten, 
 /// falls Platz im Stall vorhanden.
 /// </summary>
-public class Incubator : MonoBehaviour, IInteractable {
+[RequireComponent(typeof(NetworkObject))]
+public class Incubator : NetworkBehaviour, IInteractable {
     private int _eggItemID = 0;
     private const float INCUBATION_TIME = 10080f; // Minutes
     private float _elapsedTime = 0f;
@@ -18,12 +20,13 @@ public class Incubator : MonoBehaviour, IInteractable {
 
     public float MaxDistanceToPlayer => 2f;
 
-    private void Start() {
+    public override void OnNetworkSpawn() {
+        base.OnNetworkSpawn();
+
         _pTC = PlayerController.LocalInstance.PlayerToolbeltController;
         _pIC = PlayerController.LocalInstance.PlayerInventoryController;
         _parentStall = GetComponentInParent<Building>();
-
-    } 
+    }
 
     public void Interact(PlayerController player) {
         foreach(var ItemSO in _hatchableEggs) {

@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 // This script manages the item databases
+[RequireComponent(typeof(NetworkObject))]
 public class ItemManager : NetworkBehaviour {
     public static ItemManager Instance { get; private set; }
 

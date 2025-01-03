@@ -1,4 +1,3 @@
-using Ink.Parsed;
 using System;
 using System.Collections;
 using TMPro;
@@ -53,6 +52,7 @@ public class PlayerFishingController : MonoBehaviour {
     const float TIME_TO_CATCH_FISH = 4.5f;
     const float TIME_TO_START_MINIGAME = 0.8f;
     const float COOLDOWN_TO_FISH_AGAIN = 0.8f;
+    const float MAX_OFFSET_DISTANCE = 1.0f;
 
     enum TileType {
         Invalid = -1,
@@ -195,7 +195,7 @@ public class PlayerFishingController : MonoBehaviour {
 
         switch (_currentState) {
             case FishingState.Idle:
-                _playerController.PlayerMovementController.SetCanMoveAndTurn(false);
+                _inputManager.EnableFishingActionMap();
                 StartCastingPreview();
                 break;
 
@@ -257,7 +257,7 @@ public class PlayerFishingController : MonoBehaviour {
     }
 
     void UpdatePreviewThrowArc() {
-        Vector3 castPos = GetCastPostion();
+        Vector3 castPos = GetCastPosition();
         _bobberInstance.transform.position = castPos;
 
         for (int i = 0; i < SEGMENT_COUNT; i++) {
@@ -275,7 +275,7 @@ public class PlayerFishingController : MonoBehaviour {
     }
 
     IEnumerator CastLine() {
-        Vector3 castPos = GetCastPostion();
+        Vector3 castPos = GetCastPosition();
 
         // Animate the bobber moving along the casting arc
         for (int i = 0; i < SEGMENT_COUNT; i++) {
@@ -305,7 +305,12 @@ public class PlayerFishingController : MonoBehaviour {
         _castLineCoroutine = null;
     }
 
-    Vector3 GetCastPostion() => _fishingRodTip + (Vector3)_playerMovementController.LastMotionDirection.normalized * _currentCastingDistance;
+    Vector3 GetCastPosition() {
+        Vector2 direction = _playerMovementController.LastMotionDirection.normalized;
+        Vector2 offset = _inputManager.GetFishingOffsetNormalized() * MAX_OFFSET_DISTANCE;
+        Vector3 finalPos = _fishingRodTip + (Vector3)direction * _currentCastingDistance + (Vector3)offset;
+        return finalPos;
+    }
     #endregion -------------------- State Handlers --------------------
 
     #region -------------------- Fishing --------------------
@@ -424,7 +429,7 @@ public class PlayerFishingController : MonoBehaviour {
             _waitForFishCoroutine = null;
         }
 
-        _playerMovementController.SetCanMoveAndTurn(true);
+        _inputManager.EnablePlayerActionMap();
     }
 
     private void ResetBitingState() {

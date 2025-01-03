@@ -9,6 +9,7 @@ using UnityEngine.Timeline;
 /// Manages player markers on the marker tilemap, supporting single and area markers.
 /// Utilizes Unity's Multiplayer System for networked synchronization.
 /// </summary>
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerMarkerController : NetworkBehaviour {
     // Constants for readability
     const string MARKER_TILEMAP_TAG = "MarkerTilemap";

@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 /// Manages game-wide functionalities, including player states and scene management.
 /// Implements a singleton pattern to ensure only one instance exists.
 /// </summary>
+[RequireComponent(typeof(NetworkObject))]
 public class GameManager : NetworkBehaviour, IDataPersistance {
     public static GameManager Instance { get; private set; }
 
@@ -119,7 +120,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     public void AddPlayerToSleepingDict(ulong clientId) {
         if (!_playerSleepingDict.ContainsKey(clientId)) {
             _playerSleepingDict[clientId] = false;
-            Debug.Log($"Added player {clientId} to sleeping dictionary.");
+            //Debug.Log($"Added player {clientId} to sleeping dictionary.");
         }
     }
 
@@ -130,7 +131,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     public void RemovePlayerFromSleepingDict(ulong clientId) {
         if (_playerSleepingDict.ContainsKey(clientId)) {
             _playerSleepingDict.Remove(clientId);
-            Debug.Log($"Removed player {clientId} from sleeping dictionary.");
+            //Debug.Log($"Removed player {clientId} from sleeping dictionary.");
         }
     }
 

@@ -8,6 +8,7 @@ using UnityEngine.InputSystem;
 /// Handles custom input actions and manages input-related events.
 /// Utilizes modern C# features and optimizes for performance and memory usage.
 /// </summary>
+[RequireComponent(typeof(NetworkObject))]
 public class InputManager : NetworkBehaviour {
     // Singleton Instance
     public static InputManager Instance { get; private set; }
@@ -258,6 +259,10 @@ public class InputManager : NetworkBehaviour {
         return _playerInputActions.Player.Movement.ReadValue<Vector2>().normalized;
     }
 
+    public Vector2 GetFishingOffsetNormalized() {
+        return _playerInputActions.Fishing.FishingOffset.ReadValue<Vector2>().normalized;
+    }
+
     /// <summary>
     /// Retrieves the mouse wheel input vector.
     /// </summary>
@@ -292,22 +297,18 @@ public class InputManager : NetworkBehaviour {
 
     #region Action Map Management
 
-    /// <summary>
-    /// Enables the Debug Console action map and disables the Player action map.
-    /// </summary>
     public void EnableDebugConsoleActionMap() {
         _playerInputActions.Player.Disable();
         _playerInputActions.Dialogue.Disable();
+        _playerInputActions.Fishing.Disable();
 
         _playerInputActions.DebugConsole.Enable();
     }
 
-    /// <summary>
-    /// Enables the Player action map and disables the Debug Console action map.
-    /// </summary>
     public void EnablePlayerActionMap() {
         _playerInputActions.DebugConsole.Disable();
         _playerInputActions.Dialogue.Disable();
+        _playerInputActions.Fishing.Disable();
 
         _playerInputActions.Player.Enable();
     }
@@ -315,8 +316,17 @@ public class InputManager : NetworkBehaviour {
     public void EnableDialogueActionMap() {
         _playerInputActions.DebugConsole.Disable();
         _playerInputActions.Player.Disable();
+        _playerInputActions.Fishing.Disable();
 
         _playerInputActions.Dialogue.Enable();
+    }
+
+    public void EnableFishingActionMap() {
+        _playerInputActions.DebugConsole.Disable();
+        _playerInputActions.Player.Disable();
+        _playerInputActions.Dialogue.Disable();
+
+        _playerInputActions.Fishing.Enable();
     }
 
     #endregion

@@ -3,8 +3,10 @@ using System.Linq;
 using UnityEngine;
 using Unity.Netcode;
 using System;
+using UnityEngine.SceneManagement;
 
 // Manages data persistence, integrating with multiplayer (Netcode) and ensuring data is synced across connected players.
+[RequireComponent(typeof(NetworkObject))]
 public class DataPersistenceManager : NetworkBehaviour {
     public static DataPersistenceManager Instance { get; private set; }
 
@@ -16,7 +18,6 @@ public class DataPersistenceManager : NetworkBehaviour {
     [SerializeField] bool _useEncryption = false;
     [SerializeField] bool _useCloudSaves = false;
 
-    // Selected profile ID synchronized across the network
     string CurrentGameVersion => Application.version;
     string _selectedProfileId;
     GameData _gameData;
@@ -46,13 +47,28 @@ public class DataPersistenceManager : NetworkBehaviour {
         _dataPersistenceObjects = FindAllDataPersistanceObjects();
     }
 
+    void Start() {
+        //SceneManager.sceneLoaded += OnSceneLoaded;
+        LoadGame();
+    }
+
+    void OnDestroy() {
+        //SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    /*
+    // When the scene is loaded
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
+        LoadGame();
+    }*/
+
     // Ensures data is saved when the application quits (TODO: For testing)
-    private void OnApplicationQuit() {
+    void OnApplicationQuit() {
         SaveGame();
     }
 
     // Finds all objects in the scene that implement IDataPersistance
-    private List<IDataPersistance> FindAllDataPersistanceObjects() {
+    List<IDataPersistance> FindAllDataPersistanceObjects() {
         var objs = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.InstanceID).OfType<IDataPersistance>();
         return new List<IDataPersistance>(objs);
     }
@@ -77,7 +93,7 @@ public class DataPersistenceManager : NetworkBehaviour {
     }
 
     // Loads game data from the selected profile
-    private void LoadGame() {
+    void LoadGame() {
         if (string.IsNullOrEmpty(_selectedProfileId)) {
             if (_initializeDataIfNull) {
                 NewGame();
@@ -148,7 +164,7 @@ public class DataPersistenceManager : NetworkBehaviour {
     }
 
     // Initializes the selected profile ID from the most recently played profile
-    private void InitializeSelectedProfileId() {
+    void InitializeSelectedProfileId() {
         string recentId = _dataHandler.GetMostRecentlyPlayedProfileId();
         _selectedProfileId = recentId ?? _dataHandler.FindNextProfileID();
     }
@@ -156,7 +172,7 @@ public class DataPersistenceManager : NetworkBehaviour {
     // Opens a given profile's save file in the system file explorer
     public void OpenFileInExplorer(string profileId) => _dataHandler.OpenFileInExplorer(profileId);
 
-    private void MigrateGameData(GameData data) {
+    void MigrateGameData(GameData data) {
         // If the loaded data's version is different from the current Application.version,
         // run migration steps. Here we just log a message and assume compatibility.
         // Actual migration logic depends on how versions differ.

@@ -19,7 +19,7 @@ public class ClockUI : MonoBehaviour {
 
     const int NUM_DIGITS = 8;
 
-    void OnEnable() {
+    void Start() {
         TimeManager.Instance.OnUpdateUITime += HandleTimeUpdate;
         TimeManager.Instance.OnUpdateUIDate += HandleDateUpdate;
         WeatherManager.Instance.OnUpdateUIWeather += HandleWeatherUpdate;
@@ -28,7 +28,7 @@ public class ClockUI : MonoBehaviour {
         PauseGameManager.Instance.OnShowLocalPauseGame += TogglePauseMenu;
     }
 
-    void OnDisable() {
+    void OnDestroy() {
         if (TimeManager.Instance != null) {
             TimeManager.Instance.OnUpdateUITime -= HandleTimeUpdate;
             TimeManager.Instance.OnUpdateUIDate -= HandleDateUpdate;

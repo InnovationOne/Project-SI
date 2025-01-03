@@ -8,6 +8,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 
+[RequireComponent(typeof(NetworkObject))]
 public class DialogueManager : NetworkBehaviour, IDataPersistance {
     public static DialogueManager Instance { get; private set; }
 
@@ -411,7 +412,6 @@ public class DialogueManager : NetworkBehaviour, IDataPersistance {
     }
 
     public void SaveData(GameData data) {
-        return;
         _dialogueVariables.SaveData(data);
     }
     #endregion
