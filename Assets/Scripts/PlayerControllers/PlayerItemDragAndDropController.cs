@@ -24,9 +24,9 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
     }
 
     void Start() {
-        _itemManager = ItemManager.Instance;
-        _itemSpawnManager = ItemSpawnManager.Instance;
-        _inputManager = InputManager.Instance;
+        _itemManager = GameManager.Instance.ItemManager;
+        _itemSpawnManager = GameManager.Instance.ItemSpawnManager;
+        _inputManager = GameManager.Instance.InputManager;
         _dragItemUI = DragItemUI.Instance;
     }
 

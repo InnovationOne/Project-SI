@@ -50,7 +50,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     }
 
     void Start() {
-        _timeManager = TimeManager.Instance;
+        _timeManager = GameManager.Instance.TimeManager;
         _timeManager.OnNextDayStarted += HandleNextDayStarted;
 
         OnUpdateHealth?.Invoke(_currentHealth);

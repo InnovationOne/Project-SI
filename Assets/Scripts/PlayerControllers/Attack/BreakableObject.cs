@@ -8,7 +8,7 @@ public class BreakableObject : MonoBehaviour, IDamageable {
         _hp -= amount;
 
         if (_hp <= 0) {
-            ItemSpawnManager.Instance.SpawnItemServerRpc(
+            GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
                 itemSlot: _itemSlot,
                 initialPosition: transform.position,
                 motionDirection: Vector2.zero,

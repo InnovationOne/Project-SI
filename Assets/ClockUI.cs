@@ -5,9 +5,9 @@ using UnityEngine.UI;
 
 public class ClockUI : MonoBehaviour {
     [Header("Date and Time")]
-    [SerializeField] TextMeshProUGUI _dateDateText;
-    [SerializeField] TextMeshProUGUI _timeDateText;
-    [SerializeField] TextMeshProUGUI _timeClockText;
+    [SerializeField] TextMeshProUGUI _dayText;
+    [SerializeField] TextMeshProUGUI _dateText;
+    [SerializeField] TextMeshProUGUI _timeText;
 
     [Header("Weather")]
     [SerializeField] Image[] _weatherForecastImages;
@@ -20,39 +20,30 @@ public class ClockUI : MonoBehaviour {
     const int NUM_DIGITS = 8;
 
     void Start() {
-        TimeManager.Instance.OnUpdateUITime += HandleTimeUpdate;
-        TimeManager.Instance.OnUpdateUIDate += HandleDateUpdate;
-        WeatherManager.Instance.OnUpdateUIWeather += HandleWeatherUpdate;
-        FinanceManager.Instance.OnFarmMoneyChanged += UpdateFarmMoney;
-        FinanceManager.Instance.OnTownMoneyChanged += UpdateTownMoney;
-        PauseGameManager.Instance.OnShowLocalPauseGame += TogglePauseMenu;
+        GameManager.Instance.TimeManager.OnUpdateUITime += HandleTimeUpdate;
+        GameManager.Instance.TimeManager.OnUpdateUIDate += HandleDateUpdate;
+        GameManager.Instance.WeatherManager.OnUpdateUIWeather += HandleWeatherUpdate;
+        GameManager.Instance.FinanceManager.OnFarmMoneyChanged += UpdateFarmMoney;
+        GameManager.Instance.FinanceManager.OnTownMoneyChanged += UpdateTownMoney;
+        GameManager.Instance.PauseGameManager.OnShowLocalPauseGame += TogglePauseMenu;
     }
 
     void OnDestroy() {
-        if (TimeManager.Instance != null) {
-            TimeManager.Instance.OnUpdateUITime -= HandleTimeUpdate;
-            TimeManager.Instance.OnUpdateUIDate -= HandleDateUpdate;
-        }
-
-        if (WeatherManager.Instance != null) {
-            WeatherManager.Instance.OnUpdateUIWeather -= HandleWeatherUpdate;
-        }
-
-        if (FinanceManager.Instance != null) {
-            FinanceManager.Instance.OnFarmMoneyChanged -= UpdateFarmMoney;
-            FinanceManager.Instance.OnTownMoneyChanged -= UpdateTownMoney;
-        }
-
-        if (PauseGameManager.Instance != null) {
-            PauseGameManager.Instance.OnShowLocalPauseGame -= TogglePauseMenu;
+        if (GameManager.Instance != null) {
+            GameManager.Instance.TimeManager.OnUpdateUITime -= HandleTimeUpdate;
+            GameManager.Instance.TimeManager.OnUpdateUIDate -= HandleDateUpdate;
+            GameManager.Instance.WeatherManager.OnUpdateUIWeather -= HandleWeatherUpdate;
+            GameManager.Instance.FinanceManager.OnFarmMoneyChanged -= UpdateFarmMoney;
+            GameManager.Instance.FinanceManager.OnTownMoneyChanged -= UpdateTownMoney;
+            GameManager.Instance.PauseGameManager.OnShowLocalPauseGame -= TogglePauseMenu;
         }
     }
 
     // Displays the current hour and minute in two UI text fields.
     private void HandleTimeUpdate(int currentHour, int currentMinute) {
         string timeString = $"{currentHour:00}:{currentMinute:00}";
-        _timeDateText.text = timeString;
-        _timeClockText.text = timeString;
+        _dateText.text = timeString;
+        _timeText.text = timeString;
     }
 
     // Displays the current day, season, and year in the date UI text field.
@@ -62,7 +53,7 @@ public class ClockUI : MonoBehaviour {
         var seasonName = (TimeManager.SeasonName)currentSeason;
 
         // Format date
-        _dateDateText.text = $"{dayName} {currentDay + 1}. {seasonName}\nYear {currentYear + 1}";
+        _dayText.text = dayName.ToString();
     }
 
     // Toggles this UI object's visibility, primarily for the pause menu.

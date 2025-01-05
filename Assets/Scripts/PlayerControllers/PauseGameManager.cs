@@ -6,8 +6,6 @@ using UnityEngine;
 
 [RequireComponent(typeof(NetworkObject))]
 public class PauseGameManager : NetworkBehaviour {
-    public static PauseGameManager Instance { get; private set; }
-
     public event Action OnShowLocalPauseGame;
     public event Action OnHideLocalPauseGame;
     public event Action OnShowPauseGame;
@@ -23,12 +21,6 @@ public class PauseGameManager : NetworkBehaviour {
 
 
     private void Awake() {
-        if (Instance != null) {
-            Debug.LogError("There is more than one local instance of PauseGameManager in the scene!");
-            return;
-        }
-        Instance = this;
-
         playerPausedDict = new Dictionary<ulong, bool>();
     }
 
@@ -57,7 +49,7 @@ public class PauseGameManager : NetworkBehaviour {
     }
 
     private void Start() {
-        InputManager.Instance.OnEscapeAction += InputManager_TogglePauseGame;
+        GameManager.Instance.InputManager.OnEscapeAction += InputManager_TogglePauseGame;
 
         PauseGamePanel.Instance.OnResumeGameButtonPressed += InputManager_TogglePauseGame;
         PauseGamePanel.Instance.OnOptionsButtonPressed += PauseGamePanel_OnOptionsButtonPressed;

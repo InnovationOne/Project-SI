@@ -21,9 +21,9 @@ public class PlayerCraftController : NetworkBehaviour {
         // Cache component references
         _inventoryController = GetComponent<PlayerInventoryController>();
         _movementController = GetComponent<PlayerMovementController>();
-        _recipeManager = RecipeManager.Instance;
+        _recipeManager = GameManager.Instance.RecipeManager;
         _craftVisual = CraftVisual.Instance;
-        _itemSpawnManager = ItemSpawnManager.Instance;
+        _itemSpawnManager = GameManager.Instance.ItemSpawnManager;
     }
 
 

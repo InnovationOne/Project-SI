@@ -31,5 +31,5 @@ public class Bed : MonoBehaviour, IInteractable {
     /// <summary>
     /// Represents a ScriptableObject for objects in the game.
     /// </summary>
-    private ObjectSO GetObjectSO() => ItemManager.Instance.ItemDatabase[_itemId] as ObjectSO;
+    private ObjectSO GetObjectSO() => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as ObjectSO;
 }

@@ -17,8 +17,8 @@ public class DoorController : MonoBehaviour {
     private WeatherManager _weatherManager;
 
     private void Start() {
-        _timeManager = TimeManager.Instance;
-        _weatherManager = WeatherManager.Instance;
+        _timeManager = GameManager.Instance.TimeManager;
+        _weatherManager = GameManager.Instance.WeatherManager;
     }
 
     public void OpenDoor() {

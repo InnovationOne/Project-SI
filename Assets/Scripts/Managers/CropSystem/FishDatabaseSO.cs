@@ -223,7 +223,7 @@ public class FishDatabaseSO : ScriptableObject {
     /// Retrieves a fish based on the fishing conditions
     /// </summary>
     public FishSO GetFish(FishingRodToolSO fishingRod, int tileId, CatchingMethod catchingMethod) {
-        var timeManager = TimeManager.Instance;
+        var timeManager = GameManager.Instance.TimeManager;
         var currentSeason = timeManager.CurrentDate.Value.Season;
         var currentTimeOfDay = timeManager.CurrentTimeOfDay;
 

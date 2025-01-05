@@ -78,7 +78,7 @@ public class ItemSlot : INetworkSerializable {
     public bool CanStackWith(ItemSlot other) {
         if (IsEmpty || other.IsEmpty) return false;
         if (_itemId != other._itemId || _rarityId != other._rarityId) return false;
-        int maxStack = ItemManager.Instance.GetMaxStackableAmount(_itemId);
+        int maxStack = GameManager.Instance.ItemManager.GetMaxStackableAmount(_itemId);
         return _amount < maxStack;
     }
 

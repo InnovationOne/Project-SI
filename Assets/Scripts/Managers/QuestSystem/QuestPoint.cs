@@ -20,13 +20,13 @@ public class QuestPoint : MonoBehaviour {
     }
 
     private void Start() {
-        EventsManager.Instance.QuestEvents.OnQuestStateChange += EventsManager_OnQuestStateChange;
-        InputManager.Instance.OnInteractAction += InputManager_OnInteractAction;
+        GameManager.Instance.EventsManager.QuestEvents.OnQuestStateChange += EventsManager_OnQuestStateChange;
+        GameManager.Instance.InputManager.OnInteractAction += InputManager_OnInteractAction;
     }
 
     private void OnDestroy() {
-        EventsManager.Instance.QuestEvents.OnQuestStateChange -= EventsManager_OnQuestStateChange;
-        InputManager.Instance.OnInteractAction -= InputManager_OnInteractAction;
+        GameManager.Instance.EventsManager.QuestEvents.OnQuestStateChange -= EventsManager_OnQuestStateChange;
+        GameManager.Instance.InputManager.OnInteractAction -= InputManager_OnInteractAction;
     }
 
     private void InputManager_OnInteractAction() {
@@ -35,9 +35,9 @@ public class QuestPoint : MonoBehaviour {
         }
 
         if (_currentQuestState.Equals(QuestState.CAN_START) && _startPoint) {
-            EventsManager.Instance.QuestEvents.StartQuest(_questId);
+            GameManager.Instance.EventsManager.QuestEvents.StartQuest(_questId);
         } else if (_currentQuestState.Equals(QuestState.CAN_FINISH) && _finishPoint) {
-            EventsManager.Instance.QuestEvents.FinishQuest(_questId);
+            GameManager.Instance.EventsManager.QuestEvents.FinishQuest(_questId);
         }
     }
 

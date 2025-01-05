@@ -19,7 +19,7 @@ public class GatherResourceNodeSO : ToolActionSO {
     void InitIfNeeded() {
         if (_init) return;
         _canHitNodesOfType = new HashSet<ResourceNodeType>(_canHitNodesOfTypeArray);
-        _itemManager = ItemManager.Instance;
+        _itemManager = GameManager.Instance.ItemManager;
         _playerToolsAndWeaponController = PlayerController.LocalInstance.PlayerToolsAndWeaponController;
         _init = true;
     }

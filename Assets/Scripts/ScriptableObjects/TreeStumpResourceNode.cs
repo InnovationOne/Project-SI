@@ -47,7 +47,7 @@ public class TreeStumpResourceNode : ResourceNodeBase {
         var spawnPos = new Vector2(transform.position.x + _boxCollider2D.offset.x,
                                    transform.position.y + _boxCollider2D.offset.y);
 
-        ItemSpawnManager.Instance.SpawnItemServerRpc(
+        GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
             new ItemSlot(_itemSO.ItemId, dropCount, _rarityID),
             spawnPos,
             _playerMovementController.LastMotionDirection,

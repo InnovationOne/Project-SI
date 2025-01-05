@@ -22,10 +22,10 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     void Start() {
         _playerMarkerController = GetComponent<PlayerMarkerController>();
         _playerToolbeltController = GetComponent<PlayerToolbeltController>();
-        _itemManager = ItemManager.Instance;
+        _itemManager = GameManager.Instance.ItemManager;
         _inventoryMasterUI = InventoryMasterUI.Instance;
 
-        _inputManager = InputManager.Instance;
+        _inputManager = GameManager.Instance.InputManager;
         _inputManager.OnLeftClickAction += HandleLeftClick;
     }
 

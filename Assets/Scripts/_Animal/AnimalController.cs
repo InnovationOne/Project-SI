@@ -50,7 +50,7 @@ public class AnimalController : MonoBehaviour, IInteractable {
 
     public void Interact(PlayerController player) {
         var currentItemId = PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId;
-        var currentItem = ItemManager.Instance.ItemDatabase[currentItemId];
+        var currentItem = GameManager.Instance.ItemManager.ItemDatabase[currentItemId];
 
         if (currentItem == _animalData.FeedItem && !_wasFed) {
             _wasFed = true;

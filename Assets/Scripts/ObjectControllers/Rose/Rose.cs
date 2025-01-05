@@ -40,10 +40,10 @@ public class Rose : PlaceableObject {
 
 
     #region Initialization
-    private void Start() => TimeManager.Instance.OnNextDayStarted += OnNextDayStarted;
+    private void Start() => GameManager.Instance.TimeManager.OnNextDayStarted += OnNextDayStarted;
 
     private new void OnDestroy() {
-        TimeManager.Instance.OnNextDayStarted -= OnNextDayStarted;
+        GameManager.Instance.TimeManager.OnNextDayStarted -= OnNextDayStarted;
         base.OnDestroy();
     } 
 
@@ -148,7 +148,7 @@ public class Rose : PlaceableObject {
         for (int x = -2; x <= 2; x++) {
             for (int y = -2; y <= 2; y++) {
                 var pos = new Vector3Int(_localPosition.x + x, _localPosition.y + y);
-                PlaceableObjectData? placeableObjectData = PlaceableObjectsManager.Instance.GetCropTileAtPosition(pos);
+                PlaceableObjectData? placeableObjectData = GameManager.Instance.PlaceableObjectsManager.GetCropTileAtPosition(pos);
                 if (placeableObjectData.HasValue) {
                     roses.Add(PartnerRoseSO(placeableObjectData.Value.ObjectId));
                 }                
@@ -163,13 +163,13 @@ public class Rose : PlaceableObject {
     private IEnumerator DestroyObjectsCoroutine() {
         foreach (var position in spiralPositions) {
             Vector3Int pos = new Vector3Int(_localPosition.x + position.x, _localPosition.y + position.y);
-            PlaceableObjectData? placeableObjectData = PlaceableObjectsManager.Instance.GetCropTileAtPosition(pos);
+            PlaceableObjectData? placeableObjectData = GameManager.Instance.PlaceableObjectsManager.GetCropTileAtPosition(pos);
 
 
             if (placeableObjectData.HasValue) {
                 PlaceableObjectData placeableObject = placeableObjectData.Value;
                 var objectId = placeableObject.ObjectId;
-                if (ItemManager.Instance.ItemDatabase[objectId] != null) {
+                if (GameManager.Instance.ItemManager.ItemDatabase[objectId] != null) {
                     if (position == spiralPositions[^1]) {
                         //PlaceableObjectsManager.Instance.PlaceObjectOnMapDelayed(pos, _destroyRoseDelay);
                     }
@@ -186,7 +186,7 @@ public class Rose : PlaceableObject {
     private void LookForPartner() {
         foreach (var position in possiblePartnerPositions) {
             Vector3Int partnerPosition = _localPosition + position;
-            PlaceableObjectData? placeableObjectData = PlaceableObjectsManager.Instance.GetCropTileAtPosition(partnerPosition);
+            PlaceableObjectData? placeableObjectData = GameManager.Instance.PlaceableObjectsManager.GetCropTileAtPosition(partnerPosition);
             if (!placeableObjectData.HasValue) {
                 Debug.LogWarning("No partner found at position: " + partnerPosition);
             }
@@ -326,7 +326,7 @@ public class Rose : PlaceableObject {
     /// <summary>
     /// Gets the RoseSO associated with this Rose instance.
     /// </summary>
-    private RoseSO RoseSO => ItemManager.Instance.ItemDatabase[ItemId] as RoseSO;
+    private RoseSO RoseSO => GameManager.Instance.ItemManager.ItemDatabase[ItemId] as RoseSO;
 
     [NonSerialized] private float _maxDistanceToPlayer;
     public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
@@ -334,7 +334,7 @@ public class Rose : PlaceableObject {
     /// <summary>
     /// Gets the RoseSO associated with the partner Rose.
     /// </summary>
-    private RoseSO PartnerRoseSO(int partnerItemId) => ItemManager.Instance.ItemDatabase[partnerItemId] as RoseSO;
+    private RoseSO PartnerRoseSO(int partnerItemId) => GameManager.Instance.ItemManager.ItemDatabase[partnerItemId] as RoseSO;
 
     #region Save & Load
     public class RoseData {

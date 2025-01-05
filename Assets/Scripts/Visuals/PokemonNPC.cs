@@ -14,7 +14,7 @@ public class PokemonNPC : MonoBehaviour
     private void Update()
     {
         // Get the pokemon name
-        string pokemonName = ((Ink.Runtime.StringValue)DialogueManager.Instance.GetVariableState("pokemon_name")).value;
+        string pokemonName = ((Ink.Runtime.StringValue)GameManager.Instance.DialogueManager.GetVariableState("pokemon_name")).value;
 
         // Change the color of the cue
         switch (pokemonName)

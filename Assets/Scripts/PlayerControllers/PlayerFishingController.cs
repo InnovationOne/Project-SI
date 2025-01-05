@@ -125,8 +125,8 @@ public class PlayerFishingController : MonoBehaviour {
     void Start() {
         // Retrieve the fishing tilemap reference
         _fishingTilemap = GameObject.FindGameObjectWithTag(FISHING_TILEMAP_TAG).GetComponent<Tilemap>();
-        _audioManager = AudioManager.Instance;
-        _inputManager = InputManager.Instance;
+        _audioManager = GameManager.Instance.AudioManager;
+        _inputManager = GameManager.Instance.InputManager;
         _inputManager.OnLeftClickAction += OnLeftClickAction;
         _inputManager.OnLeftClickStarted += OnLeftClickStarted;
         _inputManager.OnLeftClickCanceled += OnLeftClickCanceled;
@@ -300,7 +300,7 @@ public class PlayerFishingController : MonoBehaviour {
         }
         _bobberTileId = (int)tileType;
 
-        _audioManager.PlayOneShot(FMODEvents.Instance.WaterDropSFX, transform.position);
+        _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.WaterDropSFX, transform.position);
         _waitForFishCoroutine ??= StartCoroutine(WaitForFish());
         _castLineCoroutine = null;
     }
@@ -332,7 +332,7 @@ public class PlayerFishingController : MonoBehaviour {
         }
 
         _fishIsBiting = true;
-        _audioManager.PlayOneShot(FMODEvents.Instance.FishBitSFX, transform.position);
+        _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.FishBitSFX, transform.position);
         _alertPopup.enabled = true;
         _waitForFishCoroutine = null;
     }

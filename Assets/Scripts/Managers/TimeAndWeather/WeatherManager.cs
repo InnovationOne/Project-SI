@@ -8,8 +8,6 @@ using System.Collections.Generic;
 public class WeatherManager : NetworkBehaviour, IDataPersistance {
     public enum WeatherName { Sun, Cloudy, Wind, Rain, Thunder, Snow, Event, Wedding, None }
 
-    public static WeatherManager Instance { get; private set; }
-
     public event Action<int[], int> OnUpdateUIWeather;
     public event Action<int> OnChangeRainIntensity;
     public event Action OnThunderStrike;
@@ -53,12 +51,6 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
 
 
     void Awake() {
-        if (Instance != null && Instance != this) {
-            Debug.LogError("Multiple instances of WeatherManager detected.");
-            return;
-        }
-        Instance = this;
-
         _weatherForecast = new NetworkList<int>(new List<int> {
             (int)WeatherName.Rain,
             (int)WeatherName.Thunder,
@@ -69,7 +61,7 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     }
 
     void Start() {
-        _timeManager = TimeManager.Instance;
+        _timeManager = GameManager.Instance.TimeManager;
         InitializeAudio();
     }
 
@@ -95,8 +87,8 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     void InitializeThunderTimer() => _nextThunderTime = UnityEngine.Random.Range(MIN_TIME_BETWEEN_THUNDER, MAX_TIME_BETWEEN_THUNDER);
 
     void InitializeAudio() {
-        _audioManager = AudioManager.Instance;
-        _fmodEvents = FMODEvents.Instance;
+        _audioManager = GameManager.Instance.AudioManager;
+        _fmodEvents = GameManager.Instance.FMODEvents;
 
         _audioManager.InitializeAmbience(_fmodEvents.WeatherAmbience);
         _audioManager.InitializeMusic(_fmodEvents.SeasonTheme);

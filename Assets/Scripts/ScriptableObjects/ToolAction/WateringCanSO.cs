@@ -5,7 +5,7 @@ using UnityEngine;
 public class WateringCanSO : ToolActionSO {
     public override void OnApplyToTileMap(Vector3Int position, ItemSlot itemSlot) {
         int rarityIndex = itemSlot.RarityId - 1;
-        if (ItemManager.Instance.ItemDatabase[itemSlot.ItemId] is AreaToolSO areaTool) {
+        if (GameManager.Instance.ItemManager.ItemDatabase[itemSlot.ItemId] is AreaToolSO areaTool) {
             int energyCost = areaTool.EnergyOnAction[rarityIndex];
             Area[] area = areaTool.Area;
 

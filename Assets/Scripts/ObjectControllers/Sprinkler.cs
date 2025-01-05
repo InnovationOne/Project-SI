@@ -10,11 +10,11 @@ public class Sprinkler : MonoBehaviour {
     private int _itemId;
 
     private void Start() {
-        TimeManager.Instance.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
+        GameManager.Instance.TimeManager.OnNextDayStarted += TimeAndWeatherManager_OnNextDayStarted;
     }
 
     private void OnDestroy() {
-        TimeManager.Instance.OnNextDayStarted -= TimeAndWeatherManager_OnNextDayStarted;
+        GameManager.Instance.TimeManager.OnNextDayStarted -= TimeAndWeatherManager_OnNextDayStarted;
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ public class Sprinkler : MonoBehaviour {
     private void TimeAndWeatherManager_OnNextDayStarted() {
         List<Vector3Int> positionsToWater = CalculateWateringPositions();
         Vector3IntSerializable[] positionsSerializable = positionsToWater.Select(v => new Vector3IntSerializable(v)).ToArray();
-        CropsManager.Instance.WaterCropTileServerRpc(positionsSerializable, 0);
+        GameManager.Instance.CropsManager.WaterCropTileServerRpc(positionsSerializable, 0);
     }
 
     /// <summary>
@@ -69,5 +69,5 @@ public class Sprinkler : MonoBehaviour {
     /// <summary>
     /// Gets the SprinklerSO associated with this Sprinkler instance.
     /// </summary>
-    private SprinklerSO SprinklerSO => ItemManager.Instance.ItemDatabase[_itemId] as SprinklerSO;
+    private SprinklerSO SprinklerSO => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as SprinklerSO;
 }

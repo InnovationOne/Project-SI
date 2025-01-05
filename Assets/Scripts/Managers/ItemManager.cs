@@ -1,23 +1,12 @@
-using System;
-using Unity.Netcode;
 using UnityEngine;
 
 // This script manages the item databases
-[RequireComponent(typeof(NetworkObject))]
-public class ItemManager : NetworkBehaviour {
-    public static ItemManager Instance { get; private set; }
-
+public class ItemManager : MonoBehaviour {
     [SerializeField] ItemDatabaseSO _itemDatabase;
     public ItemDatabaseSO ItemDatabase => _itemDatabase;
 
 
     void Awake() {
-        if (Instance != null) {
-            throw new Exception("Found more than one ItemManager in the scene.");
-        } else {
-            Instance = this;
-        }
-
         ItemDatabase.InitializeItems();
     }
 

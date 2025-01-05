@@ -13,8 +13,8 @@ public class SellChest : MonoBehaviour, IInteractable {
 
     public void Interact(PlayerController character) {
 
-        if (ItemManager.Instance.ItemDatabase[PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId] != null 
-            && ItemManager.Instance.ItemDatabase[PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId].CanBeSold) {
+        if (GameManager.Instance.ItemManager.ItemDatabase[PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId] != null 
+            && GameManager.Instance.ItemManager.ItemDatabase[PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId].CanBeSold) {
 
             var itemSlot = character.GetComponent<PlayerToolbeltController>().GetCurrentlySelectedToolbeltItemSlot();
             _sellBoxContainer.AddItem(itemSlot, false);

@@ -19,7 +19,7 @@ public class Building : PlaceableObject {
     [SerializeField] private BoxCollider2D _doorCollider;
 
     private void Start() {
-        TimeManager.Instance.OnNextDayStarted += OnNextDay;
+        GameManager.Instance.TimeManager.OnNextDayStarted += OnNextDay;
     }
 
     private void OnNextDay() {

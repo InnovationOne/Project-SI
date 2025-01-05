@@ -6,7 +6,7 @@ public class NPC : MonoBehaviour, IInteractable {
     public NPCDailyRoutine[] DailyRoutines;
 
     private int _locationId;
-    private int _weekDay => TimeManager.Instance.CurrentDate.Value.Day % TimeManager.DAYS_PER_WEEK;
+    private int _weekDay => GameManager.Instance.TimeManager.CurrentDate.Value.Day % TimeManager.DAYS_PER_WEEK;
 
     public float MaxDistanceToPlayer => 0f;
 
@@ -21,7 +21,7 @@ public class NPC : MonoBehaviour, IInteractable {
     }
 
     private void CheckAndUpdateLocation() {
-        if (DailyRoutines[_weekDay].Locations[_locationId].LeaveTimeInvoke > TimeManager.Instance.TotalTimeAgentInvokesThisDay) {
+        if (DailyRoutines[_weekDay].Locations[_locationId].LeaveTimeInvoke > GameManager.Instance.TimeManager.TotalTimeAgentInvokesThisDay) {
             _locationId++;
         }
 

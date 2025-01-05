@@ -27,7 +27,7 @@ public class RaindropController : MonoBehaviour {
     }
 
     void Start() {
-        _weatherManager = WeatherManager.Instance;
+        _weatherManager = GameManager.Instance.WeatherManager;
         _weatherManager.OnChangeRainIntensity += OnChangeRainIntensity;
     }
 

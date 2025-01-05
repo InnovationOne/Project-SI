@@ -18,7 +18,7 @@ public class DebugUI : MonoBehaviour {
     }
 
     private void Start() {
-        var inputManager = InputManager.Instance;
+        var inputManager = GameManager.Instance.InputManager;
         inputManager.DebugConsole_OnCheatConsoleAction += ToggleCheatConsole;
         inputManager.DebugConsole_OnDebugConsoleAction += ToggleDebugConsole;
         inputManager.Player_OnDebugConsoleAction += ToggleDebugConsole;
@@ -45,10 +45,10 @@ public class DebugUI : MonoBehaviour {
         _image.gameObject.SetActive(isActive);
 
         if (isActive) {
-            InputManager.Instance.EnableDebugConsoleActionMap();
+            GameManager.Instance.InputManager.EnableDebugConsoleActionMap();
         } else {
             _cheatConsole.gameObject.SetActive(false);
-            InputManager.Instance.EnablePlayerActionMap();
+            GameManager.Instance.InputManager.EnablePlayerActionMap();
         }
     }
 
@@ -77,11 +77,11 @@ public class DebugUI : MonoBehaviour {
             string ingameDateTime = string.Empty;
 
             // Get weather
-            string weather = WeatherManager.Instance.CurrentWeather.ToString();
+            string weather = GameManager.Instance.WeatherManager.CurrentWeather.ToString();
 
             // Get farm stats
-            int farmMoney = FinanceManager.Instance.GetMoneyFarm;
-            int townMoney = FinanceManager.Instance.GetMoneyTown;
+            int farmMoney = GameManager.Instance.FinanceManager.GetMoneyFarm;
+            int townMoney = GameManager.Instance.FinanceManager.GetMoneyTown;
 
             // Get player stats
             float playerHealth = PlayerController.LocalInstance.PlayerHealthAndEnergyController.CurrentHealth;

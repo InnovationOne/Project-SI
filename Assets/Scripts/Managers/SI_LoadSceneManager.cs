@@ -1,7 +1,6 @@
 using UnityEngine.SceneManagement;
 using UnityEngine;
 public class SI_LoadSceneManager : MonoBehaviour {
-
     public Scene TargetScene { get; private set; }
 
     public enum Scene {

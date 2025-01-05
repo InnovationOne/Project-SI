@@ -1,13 +1,9 @@
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.UIElements;
-
 
 [RequireComponent(typeof(NetworkObject))]
 public class ItemSpawnManager : NetworkBehaviour {
-    public static ItemSpawnManager Instance { get; private set; }
-
     public enum SpreadType {
         Circle, 
         Line, 
@@ -24,14 +20,6 @@ public class ItemSpawnManager : NetworkBehaviour {
     public const float LEAN_MOVE_TIME = 0.75f;
     const float DEFAULT_END_POSITION_Z_MULTIPLIER = 0.0001f;
 
-
-    void Awake() {
-        if (Instance != null) {
-            Debug.LogError("Multiple ItemSpawnManager instances!");
-            return;
-        }
-        Instance = this;
-    }
 
     [ServerRpc(RequireOwnership = false)]
     public void SpawnItemServerRpc(

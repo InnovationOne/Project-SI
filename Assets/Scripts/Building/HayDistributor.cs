@@ -21,13 +21,13 @@ public class HayDistributor : NetworkBehaviour, IInteractable {
 
         _pTC = PlayerController.LocalInstance.PlayerToolbeltController;
         _pIC = PlayerController.LocalInstance.PlayerInventoryController;
-        TimeManager.Instance.OnNextDayStarted += OnNextDay;
+        GameManager.Instance.TimeManager.OnNextDayStarted += OnNextDay;
     }
 
     public override void OnNetworkDespawn() {
         base.OnNetworkDespawn();
 
-        TimeManager.Instance.OnNextDayStarted -= OnNextDay;
+        GameManager.Instance.TimeManager.OnNextDayStarted -= OnNextDay;
     }
 
     public void Interact(PlayerController player) {

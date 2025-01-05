@@ -45,8 +45,8 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
     void Start() {
         _toolbeltUI = ToolbeltUI.Instance;
         _inventoryUI = InventoryUI.Instance;
-        _inputManager = InputManager.Instance;
-        _pauseGameManager = PauseGameManager.Instance;
+        _inputManager = GameManager.Instance.InputManager;
+        _pauseGameManager = GameManager.Instance.PauseGameManager;
         _playerMovement = GetComponent<PlayerMovementController>();
         _inventoryController = GetComponent<PlayerInventoryController>();
 
@@ -166,7 +166,7 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
         if (toolbeltItem == null) return;
 
         var itemSlot = new ItemSlot(toolbeltItem.ItemId, 1, toolbeltItem.RarityId);
-        ItemSpawnManager.Instance.SpawnItemServerRpc(
+        GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
             itemSlot,
             transform.position,
             _playerMovement.LastMotionDirection,

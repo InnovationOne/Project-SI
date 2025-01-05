@@ -58,7 +58,7 @@ public class ItemContainerSO : ScriptableObject {
             return 0;
         }
 
-        var itemSO = ItemManager.Instance.ItemDatabase[itemSlot.ItemId];
+        var itemSO = GameManager.Instance.ItemManager.ItemDatabase[itemSlot.ItemId];
         if (itemSO == null) {
             Debug.LogError($"No valid ItemSO found for itemId {itemSlot.ItemId} in AddItem.");
             return 0;
@@ -75,7 +75,7 @@ public class ItemContainerSO : ScriptableObject {
         // First try to stack on existing similar items.
         foreach (var slot in slots) {
             if (slot.CanStackWith(itemSlot)) {
-                int maxStack = ItemManager.Instance.GetMaxStackableAmount(slot.ItemId);
+                int maxStack = GameManager.Instance.ItemManager.GetMaxStackableAmount(slot.ItemId);
                 int addable = Mathf.Min(maxStack - slot.Amount, itemSlot.Amount);
                 slot.AddAmount(addable, maxStack);
                 itemSlot.RemoveAmount(addable);
@@ -89,7 +89,7 @@ public class ItemContainerSO : ScriptableObject {
 
     int AddToEmpty(ItemSlot itemSlot, bool skipToolbelt) {
         var slots = GetRelevantSlots(skipToolbelt);
-        int maxStack = ItemManager.Instance.GetMaxStackableAmount(itemSlot.ItemId);
+        int maxStack = GameManager.Instance.ItemManager.GetMaxStackableAmount(itemSlot.ItemId);
 
         foreach (var slot in slots) {
             if (slot.IsEmpty) {
@@ -117,7 +117,7 @@ public class ItemContainerSO : ScriptableObject {
             Debug.LogError("Invalid itemId or amount.");
         }
 
-        var itemSO = ItemManager.Instance.ItemDatabase[itemSlot.ItemId];
+        var itemSO = GameManager.Instance.ItemManager.ItemDatabase[itemSlot.ItemId];
         int remaining = itemSO.IsStackable ? CheckExisting(itemSlot, itemSO, skipToolbelt) : CheckEmpty(itemSlot, itemSO, skipToolbelt);
 
         return remaining <= 0;
@@ -237,9 +237,9 @@ public class ItemContainerSO : ScriptableObject {
 
         var itemSlots = _itemSlots
             .Skip(toolbeltSize)
-            .Where(slot => ItemManager.Instance.ItemDatabase[slot.ItemId] != null)
+            .Where(slot => GameManager.Instance.ItemManager.ItemDatabase[slot.ItemId] != null)
             .Select(slot => new ItemSlot(slot.ItemId, slot.Amount, slot.RarityId))
-            .OrderBy(slot => ItemManager.Instance.ItemDatabase[slot.ItemId].ItemType)
+            .OrderBy(slot => GameManager.Instance.ItemManager.ItemDatabase[slot.ItemId].ItemType)
             .ThenBy(slot => slot.RarityId)
             .ToList();
 

@@ -65,8 +65,8 @@ public class PlayerMarkerController : NetworkBehaviour {
 
     void Start() {
         // Cache references to other systems for quick access
-        _cropsManager = CropsManager.Instance;
-        _inputManager = InputManager.Instance;
+        _cropsManager = GameManager.Instance.CropsManager;
+        _inputManager = GameManager.Instance.InputManager;
 
         // Subscribe to relevant events
         _toolbeltController.OnToolbeltChanged += HandleToolbeltChanged;
@@ -235,7 +235,7 @@ public class PlayerMarkerController : NetworkBehaviour {
         // Update the single marker position for quick actions like placing a single object
         MarkedCellPosition = position;
         int id = _toolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId;
-        var itemSO = ItemManager.Instance.ItemDatabase[id];
+        var itemSO = GameManager.Instance.ItemManager.ItemDatabase[id];
 
         // If the selected item is placeable, show a highlight instead of a tile
         if (itemSO is ObjectSO objectSO && objectSO.ObjectRotationSprites != null && objectSO.ObjectRotationSprites.Length > 0 && itemSO.ItemType == ItemSO.ItemTypes.PlaceableObject) {
@@ -287,7 +287,7 @@ public class PlayerMarkerController : NetworkBehaviour {
 
         // Cycle through available rotation sprites when rotating highlight
         int id = _toolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId;
-        ItemSO itemSO = ItemManager.Instance.ItemDatabase[id];
+        ItemSO itemSO = GameManager.Instance.ItemManager.ItemDatabase[id];
         if (itemSO is ObjectSO objectSO && objectSO.ObjectRotationSprites.Length > 1) {
             HighlightId++;
             if (HighlightId >= objectSO.ObjectRotationSprites.Length) {

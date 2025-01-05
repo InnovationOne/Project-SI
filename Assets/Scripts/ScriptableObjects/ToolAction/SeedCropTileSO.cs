@@ -4,7 +4,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Tool Action/Seed")]
 public class SeedCropTileSO : ToolActionSO {
     public override void OnApplyToTileMap(Vector3Int position, ItemSlot itemSlot) {
-        CropsManager.Instance.SeedTileServerRpc(
+        GameManager.Instance.CropsManager.SeedTileServerRpc(
             new Vector3IntSerializable(position),
             itemSlot.ItemId
         );

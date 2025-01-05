@@ -48,12 +48,12 @@ public class PickUpItem : NetworkBehaviour {
     }
 
     void Start() {
-        _timeManager = TimeManager.Instance;
-        _itemManager = ItemManager.Instance;
-        _dragItemUI = DragItemUI.Instance;
-        _eventsManager = EventsManager.Instance;
-        _timeManager.OnNextDayStarted += OnNextDay;
         _gameManager = GameManager.Instance;
+        _timeManager = _gameManager.TimeManager;
+        _itemManager = _gameManager.ItemManager;
+        _dragItemUI = DragItemUI.Instance;
+        _eventsManager = _gameManager.EventsManager;
+        _timeManager.OnNextDayStarted += OnNextDay;
 
         _canPickUpTimer = ItemSpawnManager.LEAN_MOVE_TIME;
     }

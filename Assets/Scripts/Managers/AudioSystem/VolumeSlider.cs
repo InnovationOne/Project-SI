@@ -13,24 +13,29 @@ public class VolumeSlider : MonoBehaviour
     [Header("Type")]
     [SerializeField] private VolumeType _volumeType;
     private Slider _slider;
+    private AudioManager _audioManager;
 
     private void Awake() {
         _slider = GetComponentInChildren<Slider>();
     }
 
+    private void Start() {
+        _audioManager = GameManager.Instance.AudioManager;
+    }
+
     private void Update() {
         switch (_volumeType) {
             case VolumeType.Master:
-                _slider.value = AudioManager.Instance.MasterVolume;
+                _slider.value = _audioManager.MasterVolume;
                 break;
             case VolumeType.Music:
-                _slider.value = AudioManager.Instance.MusicVolume;
+                _slider.value = _audioManager.MusicVolume;
                 break;
             case VolumeType.Ambience:
-                _slider.value = AudioManager.Instance.AmbienceVolume;
+                _slider.value = _audioManager.AmbienceVolume;
                 break;
             case VolumeType.SFX:
-                _slider.value = AudioManager.Instance.SFXVolume;
+                _slider.value = _audioManager.SFXVolume;
                 break;
             default:
                 Debug.LogWarning("Volume Type is not supported: " + _volumeType);
@@ -41,16 +46,16 @@ public class VolumeSlider : MonoBehaviour
     public void OnSliderVolumeChanged() {
         switch (_volumeType) {
             case VolumeType.Master:
-                AudioManager.Instance.MasterVolume = _slider.value;
+                _audioManager.MasterVolume = _slider.value;
                 break;
             case VolumeType.Music:
-                AudioManager.Instance.MusicVolume = _slider.value;
+                _audioManager.MusicVolume = _slider.value;
                 break;
             case VolumeType.Ambience:
-                AudioManager.Instance.AmbienceVolume = _slider.value;
+                _audioManager.AmbienceVolume = _slider.value;
                 break;
             case VolumeType.SFX:
-                AudioManager.Instance.SFXVolume = _slider.value;
+                _audioManager.SFXVolume = _slider.value;
                 break;
             default:
                 Debug.LogWarning("Volume Type is not supported: " + _volumeType);

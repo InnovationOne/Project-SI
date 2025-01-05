@@ -19,19 +19,19 @@ public class DialogueTrigger : MonoBehaviour {
     }
 
     private void Start() {
-        InputManager.Instance.OnInteractAction += InputManager_OnInteractAction;
+        GameManager.Instance.InputManager.OnInteractAction += InputManager_OnInteractAction;
     }
 
     private void InputManager_OnInteractAction() {
         // Check if the player is in range and if no dialogue is playing
-        if (_playerInRange && !DialogueManager.Instance.DialogueIsPlaying) {
-            DialogueManager.Instance.EnterDialogueMode(_inkJSON);
+        if (_playerInRange && !GameManager.Instance.DialogueManager.DialogueIsPlaying) {
+            GameManager.Instance.DialogueManager.EnterDialogueMode(_inkJSON);
         }
     }
 
     private void Update() {
         // Check if the player is in range and if no dialogue is playing
-        if (_playerInRange && !DialogueManager.Instance.DialogueIsPlaying) {
+        if (_playerInRange && !GameManager.Instance.DialogueManager.DialogueIsPlaying) {
             // Activate the pop-up over the NPC
             _visualCue.SetActive(true);
         } else {

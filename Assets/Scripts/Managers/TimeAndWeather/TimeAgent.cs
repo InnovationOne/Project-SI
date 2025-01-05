@@ -14,7 +14,7 @@ public class TimeAgent : NetworkBehaviour {
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
         if (IsServer) {
-            _timeManager = TimeManager.Instance;
+            _timeManager = GameManager.Instance.TimeManager;
             if (_timeManager != null) {
                 SubscribeToTimeManager();
             }

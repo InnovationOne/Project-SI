@@ -198,7 +198,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
         }
 
         if (_currentTime >= TIME_TO_SHOW_ITEM_INFO && !_itemInfo.gameObject.activeSelf) {
-            _itemNameText.text = ItemManager.Instance.ItemDatabase[_itemSlotForShowInfo.ItemId].ItemName;
+            _itemNameText.text = GameManager.Instance.ItemManager.ItemDatabase[_itemSlotForShowInfo.ItemId].ItemName;
 
             StringBuilder itemSlotInfoStringBuilder = new();
             //int rarityOffset = 0;

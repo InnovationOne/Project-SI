@@ -25,7 +25,7 @@ public class HarvestCrop : NetworkBehaviour, IInteractable {
     }
 
     private void Start() {
-        _cropsManager = CropsManager.Instance;
+        _cropsManager = GameManager.Instance.CropsManager;
     }
 
     // Build the dictionary from the serialized list for quick runtime lookups.

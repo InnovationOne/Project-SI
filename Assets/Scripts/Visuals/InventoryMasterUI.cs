@@ -68,7 +68,7 @@ public class InventoryMasterUI : MonoBehaviour {
     }
 
     void Start() {
-        _iM = InputManager.Instance;
+        _iM = GameManager.Instance.InputManager;
         _iUI = InventoryUI.Instance;
         _tUI = ToolbeltUI.Instance;
         SubscribeToInputEvents();

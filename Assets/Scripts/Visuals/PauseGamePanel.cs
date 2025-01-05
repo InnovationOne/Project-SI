@@ -35,10 +35,10 @@ public class PauseGamePanel : MonoBehaviour {
     }
 
     private void Start() {
-        PauseGameManager.Instance.OnShowLocalPauseGame += PauseMenuManager_ShowLocalPauseGamePanel;
-        PauseGameManager.Instance.OnHideLocalPauseGame += PauseMenuManager_HideLocalPauseGamePanel;
-        PauseGameManager.Instance.OnShowPauseGame += PauseMenuManager_ShowPauseGamePanel;
-        PauseGameManager.Instance.OnHidePauseGame += PauseMenuManager_HidePauseGamePanel;
+        GameManager.Instance.PauseGameManager.OnShowLocalPauseGame += PauseMenuManager_ShowLocalPauseGamePanel;
+        GameManager.Instance.PauseGameManager.OnHideLocalPauseGame += PauseMenuManager_HideLocalPauseGamePanel;
+        GameManager.Instance.PauseGameManager.OnShowPauseGame += PauseMenuManager_ShowPauseGamePanel;
+        GameManager.Instance.PauseGameManager.OnHidePauseGame += PauseMenuManager_HidePauseGamePanel;
 
         gameObject.SetActive(false);
         _localPauseGamePanel.gameObject.SetActive(false);
@@ -57,7 +57,7 @@ public class PauseGamePanel : MonoBehaviour {
     private void PauseMenuManager_HideLocalPauseGamePanel() {
         _localPauseGamePanel.gameObject.SetActive(false);
 
-        if (PauseGameManager.Instance.IsGamePaused.Value) {
+        if (GameManager.Instance.PauseGameManager.IsGamePaused.Value) {
             _pauseGamePanel.gameObject.SetActive(true);
             return;
         }

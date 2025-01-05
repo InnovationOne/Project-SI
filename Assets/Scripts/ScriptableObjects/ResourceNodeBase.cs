@@ -94,12 +94,12 @@ public abstract class ResourceNodeBase : NetworkBehaviour {
     }
 
     protected virtual void InitializeServer() {
-        _timeManager = TimeManager.Instance;
+        _timeManager = GameManager.Instance.TimeManager;
         _playerToolbeltController = PlayerController.LocalInstance.PlayerToolbeltController;
-        _cropsManager = CropsManager.Instance;
+        _cropsManager = GameManager.Instance.CropsManager;
         _playerMovementController = PlayerController.LocalInstance.PlayerMovementController;
-        _audioManager = AudioManager.Instance;
-        _fmodEvents = FMODEvents.Instance;
+        _audioManager = GameManager.Instance.AudioManager;
+        _fmodEvents = GameManager.Instance.FMODEvents;
 
         ResetHealth();
 

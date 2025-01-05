@@ -5,10 +5,6 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Manages game-wide functionalities, including player states and scene management.
-/// Implements a singleton pattern to ensure only one instance exists.
-/// </summary>
 [RequireComponent(typeof(NetworkObject))]
 public class GameManager : NetworkBehaviour, IDataPersistance {
     public static GameManager Instance { get; private set; }
@@ -23,7 +19,25 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     private Dictionary<ulong, bool> _playerSleepingDict;
     public List<PlayerController> PlayerControllers { get; private set; } = new();
 
-    // Cached references for performance optimization
+    // Cached references
+    public CropsManager CropsManager;
+    public DialogueManager DialogueManager;
+    public FinanceManager FinanceManager;
+    public InputManager InputManager;
+    public ItemManager ItemManager;
+    public ItemSpawnManager ItemSpawnManager;
+    public SI_LoadSceneManager LoadSceneManager;
+    public QuestManager QuestManager;
+    public TimeManager TimeManager;
+    public RecipeManager RecipeManager;
+    public PauseGameManager PauseGameManager;
+    public PlaceableObjectsManager PlaceableObjectsManager;
+    public EventsManager EventsManager;
+    public AudioManager AudioManager;
+    public FMODEvents FMODEvents;
+    public WeatherManager WeatherManager;
+
+
     private NetworkManager _networkManager;
     private TestNetcodeUI _testNetcodeUI;
 
@@ -39,6 +53,23 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
 
         // Initialize the network-synchronized dictionary
         _playerSleepingDict = new Dictionary<ulong, bool>();
+
+        CropsManager = GetComponent<CropsManager>();
+        DialogueManager = GetComponent<DialogueManager>();
+        FinanceManager = GetComponent<FinanceManager>();
+        InputManager = GetComponent<InputManager>();
+        ItemManager = GetComponent<ItemManager>();
+        ItemSpawnManager = GetComponent<ItemSpawnManager>();
+        LoadSceneManager = GetComponent<SI_LoadSceneManager>();
+        QuestManager = GetComponent<QuestManager>();
+        TimeManager = GetComponent<TimeManager>();
+        RecipeManager = GetComponent<RecipeManager>();
+        PauseGameManager = GetComponent<PauseGameManager>();
+        PlaceableObjectsManager = GetComponent<PlaceableObjectsManager>();
+        EventsManager = GetComponent<EventsManager>();
+        AudioManager = GetComponent<AudioManager>();
+        FMODEvents = GetComponent<FMODEvents>();
+        WeatherManager = GetComponent<WeatherManager>();
     }
 
     private void Start() {
@@ -183,7 +214,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         // Notify all clients to wake up
         SetAllPlayersAwakeClientRpc();
 
-        TimeManager.Instance.StartNextDay();
+        TimeManager.StartNextDay();
         Debug.Log("Next day started.");
     }
 

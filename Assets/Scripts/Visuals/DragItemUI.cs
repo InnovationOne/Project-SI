@@ -22,9 +22,9 @@ public class DragItemUI : MonoBehaviour {
 
     public void SetItemSlot(ItemSlot itemSlot) {
         _itemIconImage.gameObject.SetActive(true);
-        _itemIconImage.sprite = ItemManager.Instance.ItemDatabase[itemSlot.ItemId].ItemIcon;
+        _itemIconImage.sprite = GameManager.Instance.ItemManager.ItemDatabase[itemSlot.ItemId].ItemIcon;
 
-        if (ItemManager.Instance.ItemDatabase[itemSlot.ItemId].IsStackable) {
+        if (GameManager.Instance.ItemManager.ItemDatabase[itemSlot.ItemId].IsStackable) {
             _itemAmountBackgroundImage.gameObject.SetActive(true);
             _itemAmountText.text = itemSlot.Amount.ToString();
         } else {

@@ -69,9 +69,9 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     }
 
     void Start() {
-        _inputManager = InputManager.Instance;
-        _audioManager = AudioManager.Instance;
-        _playerWalkGrassEvent = _audioManager.CreateEventInstance(FMODEvents.Instance.PlayerWalkGrassSFX);
+        _inputManager = GameManager.Instance.InputManager;
+        _audioManager = GameManager.Instance.AudioManager;
+        _playerWalkGrassEvent = _audioManager.CreateEventInstance(GameManager.Instance.FMODEvents.PlayerWalkGrassSFX);
         //TODO _playerDashEvent = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.PlayerDashSFX);
         _inputManager.OnRunAction += ToggleRunState;
         _inputManager.OnDashAction += TryStartDash;
@@ -229,7 +229,7 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     }
 
     void SpawnFootprints() {
-        bool spawnAllowed = WeatherManager.Instance.CurrentWeather switch {
+        bool spawnAllowed = GameManager.Instance.WeatherManager.CurrentWeather switch {
             WeatherName.Rain => true,
             WeatherName.Thunder => true,
             WeatherName.Snow => true,

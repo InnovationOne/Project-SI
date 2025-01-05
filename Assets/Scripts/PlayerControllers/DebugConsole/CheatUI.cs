@@ -67,28 +67,28 @@ public class CheatUI : MonoBehaviour {
     private void InitializeCommands() {
         // Crops Manager
         REMOVE_ALL_CROPS = new DebugCommand("remove_all_crops", "Removes all crops from the farm.", "remove_all_crops", () => {
-            CropsManager.Instance.CropTiles.Clear();
+            GameManager.Instance.CropsManager.CropTiles.Clear();
         });
         _commandDictionary.Add(REMOVE_ALL_CROPS.CommandId, REMOVE_ALL_CROPS);
 
         // Finanz Manager
         ADD_FARM_MONEY = new DebugCommand<int>("add_farm_money", "Adds money to the farm's account.", "add_farm_money <amount>", (int amount) => {
-            FinanceManager.Instance.AddMoneyServerRpc(amount, true);
+            GameManager.Instance.FinanceManager.AddMoneyServerRpc(amount, true);
         });
         _commandDictionary.Add(ADD_FARM_MONEY.CommandId, ADD_FARM_MONEY);
 
         REMOVE_FARM_MONEY = new DebugCommand<int>("remove_farm_money", "Removes money from the town's account.", "remove_farm_money <amount>", (int amount) => {
-            FinanceManager.Instance.RemoveMoneyServerRpc(amount, true);
+            GameManager.Instance.FinanceManager.RemoveMoneyServerRpc(amount, true);
         });
         _commandDictionary.Add(REMOVE_FARM_MONEY.CommandId, REMOVE_FARM_MONEY);
 
         ADD_TOWN_MONEY = new DebugCommand<int>("add_town_money", "Adds money to the farm's account.", "add_town_money <amount>", (int amount) => {
-            FinanceManager.Instance.AddMoneyServerRpc(amount, false);
+            GameManager.Instance.FinanceManager.AddMoneyServerRpc(amount, false);
         });
         _commandDictionary.Add(ADD_TOWN_MONEY.CommandId, ADD_TOWN_MONEY);
 
         REMOVE_TOWN_MONEY = new DebugCommand<int>("remove_town_money", "Removes money from the town's account.", "remove_town_money <amount>", (int amount) => {
-            FinanceManager.Instance.RemoveMoneyServerRpc(amount, false);
+            GameManager.Instance.FinanceManager.RemoveMoneyServerRpc(amount, false);
         });
         _commandDictionary.Add(REMOVE_TOWN_MONEY.CommandId, REMOVE_TOWN_MONEY);
 
@@ -110,44 +110,44 @@ public class CheatUI : MonoBehaviour {
 
         // Time and Weather Manager
         START_NEXT_DAY = new DebugCommand("start_next_day", "Starts the next day.", "start_next_day", () => {
-            TimeManager.Instance.CheatStartNextDay();
+            GameManager.Instance.TimeManager.CheatStartNextDay();
         });
         _commandDictionary.Add(START_NEXT_DAY.CommandId, START_NEXT_DAY);
 
         SET_TIME = new DebugCommand<int, int>("set_time", "Sets the time to given hour and minute values.", "set_time <hour> <minute>", (int hour, int minute) => {
-            TimeManager.Instance.CheatSetTime(hour, minute);
+            GameManager.Instance.TimeManager.CheatSetTime(hour, minute);
         });
         _commandDictionary.Add(SET_TIME.CommandId, SET_TIME);
 
         SET_DAY = new DebugCommand<int>("set_day", "Sets the day to the given value.", "set_day <day>", (int day) => {
-            TimeManager.Instance.CheatSetDay(day);
+            GameManager.Instance.TimeManager.CheatSetDay(day);
         });
         _commandDictionary.Add(SET_DAY.CommandId, SET_DAY);
 
         SET_SEASON = new DebugCommand<int>("set_season", "Sets the season to the given value.", "set_season <season_id>", (int seasonId) => {
-            TimeManager.Instance.CheatSetSeason(seasonId);
+            GameManager.Instance.TimeManager.CheatSetSeason(seasonId);
         });
         _commandDictionary.Add(SET_SEASON.CommandId, SET_SEASON);
 
         SET_YEAR = new DebugCommand<int>("set_year", "Sets the year to the given value.", "set_year <year>", (int year) => {
-            TimeManager.Instance.CheatSetYear(year);
+            GameManager.Instance.TimeManager.CheatSetYear(year);
         });
         _commandDictionary.Add(SET_YEAR.CommandId, SET_YEAR);
 
         SET_DATE = new DebugCommand<int, int, int>("set_date", "Sets the date to the given year, season and day values.", "set_date <year> <season_id> <day>", (int year, int seasonId, int day) => {
-            TimeManager.Instance.CheatSetDate(year, seasonId, day);
+            GameManager.Instance.TimeManager.CheatSetDate(year, seasonId, day);
         });
         _commandDictionary.Add(SET_DATE.CommandId, SET_DATE);
 
         SET_WEATHER = new DebugCommand<int>("set_weather", "Sets the weather to the given value.", "set_weather <weather_id>", (int weatherId) => {
-            WeatherManager.Instance.CheatSetWeather(weatherId);
+            GameManager.Instance.WeatherManager.CheatSetWeather(weatherId);
         });
         _commandDictionary.Add(SET_WEATHER.CommandId, SET_WEATHER);
 
         // Placeable Objects Manager
         REMOVE_ALL_OBJECTS = new DebugCommand("remove_all_objects", "Removes all placeable objects from the farm.", "remove_all_objects", () => {
-            foreach (var placeableObject in PlaceableObjectsManager.Instance.PlaceableObjects) {
-                PlaceableObjectsManager.Instance.PickUpObjectServerRpc(new Vector3IntSerializable(placeableObject.Position));
+            foreach (var placeableObject in GameManager.Instance.PlaceableObjectsManager.PlaceableObjects) {
+                GameManager.Instance.PlaceableObjectsManager.PickUpObjectServerRpc(new Vector3IntSerializable(placeableObject.Position));
             }
         });
         _commandDictionary.Add(REMOVE_ALL_OBJECTS.CommandId, REMOVE_ALL_OBJECTS);
@@ -189,17 +189,17 @@ public class CheatUI : MonoBehaviour {
     }
 
     private void Start() {
-        InputManager.Instance.DebugConsole_OnEnterAction += OnEnter;
-        InputManager.Instance.DebugConsole_OnArrowUpAction += OnArrowUp;
-        InputManager.Instance.DebugConsole_OnArrowDownAction += OnArrowDown;
+        GameManager.Instance.InputManager.DebugConsole_OnEnterAction += OnEnter;
+        GameManager.Instance.InputManager.DebugConsole_OnArrowUpAction += OnArrowUp;
+        GameManager.Instance.InputManager.DebugConsole_OnArrowDownAction += OnArrowDown;
         _inputField.onValueChanged.AddListener(UpdateAutoCompleteSuggestions);
         ShowHelp();
     }
 
     private void OnDestroy() {
-        InputManager.Instance.DebugConsole_OnEnterAction -= OnEnter;
-        InputManager.Instance.DebugConsole_OnArrowUpAction -= OnArrowUp;
-        InputManager.Instance.DebugConsole_OnArrowDownAction -= OnArrowDown;
+        GameManager.Instance.InputManager.DebugConsole_OnEnterAction -= OnEnter;
+        GameManager.Instance.InputManager.DebugConsole_OnArrowUpAction -= OnArrowUp;
+        GameManager.Instance.InputManager.DebugConsole_OnArrowDownAction -= OnArrowDown;
         _inputField.onValueChanged.RemoveListener(UpdateAutoCompleteSuggestions);
     }
 

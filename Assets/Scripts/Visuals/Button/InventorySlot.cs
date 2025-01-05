@@ -25,7 +25,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
     }
 
     private void Start() {
-        _itemManager = ItemManager.Instance;
+        _itemManager = GameManager.Instance.ItemManager;
         if (_itemManager == null) {
             Debug.LogError("ItemManager instance is not available.");
         }

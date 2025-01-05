@@ -1,7 +1,7 @@
 using UnityEngine;
 
 public class Fence : AdjustingObject {
-    private FenceSO FenceSO => ItemManager.Instance.ItemDatabase[_itemId] as FenceSO;
+    private FenceSO FenceSO => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as FenceSO;
 
     protected override void UpdateVisualBasedOnNeighbors() {
         base.UpdateVisualBasedOnNeighbors();

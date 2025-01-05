@@ -257,13 +257,13 @@ public class PrefabSpawner : NetworkBehaviour {
                 initialGrowthTimer = UnityEngine.Random.Range(prefabData.InitialGrowthTimeRange.x, prefabData.InitialGrowthTimeRange.y + 1);
 
                 // Clamp the initialGrowthTimer to CropSO's DaysToGrow
-                if (ItemManager.Instance.ItemDatabase[seedItemId] is SeedSO seedSo && seedSo.CropToGrow != null) {
+                if (GameManager.Instance.ItemManager.ItemDatabase[seedItemId] is SeedSO seedSo && seedSo.CropToGrow != null) {
                     initialGrowthTimer = Mathf.Clamp(initialGrowthTimer, 0, seedSo.CropToGrow.DaysToGrow);
                 }
             }
 
             // Directly call the CropsManager to handle seeding and spawning the tree
-            CropsManager.Instance.SeedTileServerRpc(new Vector3IntSerializable(tilePosition), seedItemId, initialGrowthTimer);
+            GameManager.Instance.CropsManager.SeedTileServerRpc(new Vector3IntSerializable(tilePosition), seedItemId, initialGrowthTimer);
         } else {
             // For non-tree prefabs, proceed with the normal network instantiation and spawning
             GameObject networkedPrefab = Instantiate(prefab, position, Quaternion.identity, transform);

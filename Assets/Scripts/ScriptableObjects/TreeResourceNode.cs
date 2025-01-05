@@ -64,7 +64,7 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
         if (_doneGrowing && Random.value < PROBABILITY_TO_SEED) {
             var seedItemSlot = new ItemSlot(_seedToDrop.ItemId, 1, 0);
             var spawnPosition = GetRandomAdjacentPosition(Vector3Int.FloorToInt(transform.position));
-            ItemSpawnManager.Instance.SpawnItemServerRpc(
+            GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
                 seedItemSlot, 
                 spawnPosition, 
                 Vector2.zero, 
@@ -87,7 +87,7 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
 
     void SpawnBeeNest() {
         var beeNestSlot = new ItemSlot(_beeNest.ItemId, 1, 0);
-        ItemSpawnManager.Instance.SpawnItemServerRpc(
+        GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
             beeNestSlot, 
             transform.position, 
             Vector2.zero, 
@@ -110,7 +110,7 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
         var itemSlot = new ItemSlot(_itemSO.ItemId, dropCount, _rarityID);
         var motionDirection = _playerMovementController.LastMotionDirection;
 
-        ItemSpawnManager.Instance.SpawnItemServerRpc(
+        GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
             itemSlot, 
             spawnPos, 
             motionDirection, 
@@ -133,15 +133,15 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
             if (cropTile.IsCropHarvestable(db)) {
                 Harvest(cropTile);
             } else if (cropTile.IsStruckByLightning) {
-                ItemSpawnManager.Instance.SpawnItemServerRpc(
-                    new ItemSlot(_coal.ItemId, CropsManager.Instance.CalculateItemCount(cropTile), 0),
+                GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
+                    new ItemSlot(_coal.ItemId, GameManager.Instance.CropsManager.CalculateItemCount(cropTile), 0),
                     new Vector2(cropTile.CropPosition.x, cropTile.CropPosition.y) + cropTile.SpriteRendererOffset,
                     Vector2.zero,
                     spreadType: ItemSpawnManager.SpreadType.Circle);
             } else if (Random.value < PROBABILITY_TO_SEED_AFTER_SHAKE) {
                 var itemId = db[cropTile.CropId].ItemForSeeding.ItemId;
-                ItemSpawnManager.Instance.SpawnItemServerRpc(
-                    new ItemSlot(itemId, CropsManager.Instance.CalculateItemCount(cropTile), 0),
+                GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
+                    new ItemSlot(itemId, GameManager.Instance.CropsManager.CalculateItemCount(cropTile), 0),
                     new Vector2(cropTile.CropPosition.x, cropTile.CropPosition.y) + cropTile.SpriteRendererOffset,
                     Vector2.zero,
                     spreadType: ItemSpawnManager.SpreadType.Circle);
@@ -153,7 +153,7 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
 
     void Harvest(CropTile cropTile) {
         var harvestPos = cropTile.CropPosition + Vector3Int.FloorToInt(cropTile.SpriteRendererOffset);
-        CropsManager.Instance.HarvestTreeServerRpc(new Vector3IntSerializable(harvestPos));
+        GameManager.Instance.CropsManager.HarvestTreeServerRpc(new Vector3IntSerializable(harvestPos));
     }
 
     public void PickUpItemsInPlacedObject(PlayerController player) { }

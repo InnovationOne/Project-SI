@@ -81,7 +81,7 @@ public class Chest : PlaceableObject {
         foreach (ItemSlot itemSlot in _itemContainer.ItemSlots) {
             int remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(itemSlot, false);
             if (remainingAmount > 0) {
-                ItemSpawnManager.Instance.SpawnItemServerRpc(
+                GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
                     itemSlot: itemSlot,
                     initialPosition: transform.position,
                     motionDirection: PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
@@ -93,7 +93,7 @@ public class Chest : PlaceableObject {
     /// <summary>
     /// Represents a chest scriptable object.
     /// </summary>
-    private ChestSO ChestSO => ItemManager.Instance.ItemDatabase[_itemId] as ChestSO;
+    private ChestSO ChestSO => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as ChestSO;
 
 
     #region Save & Load

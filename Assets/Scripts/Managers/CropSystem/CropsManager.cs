@@ -14,8 +14,6 @@ using static FertilizerSO;
 /// </summary>
 [RequireComponent(typeof(NetworkObject))]
 public class CropsManager : NetworkBehaviour, IDataPersistance {
-    public static CropsManager Instance { get; private set; }
-
     [Header("Debug: Save and Load")]
     [SerializeField] bool _saveCrops = true;
     [SerializeField] bool _loadCrops = true;
@@ -57,7 +55,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     const float PROBABILITY_OF_THUNDER_STRIKE = 0.01f;
 
     // References
-    Tilemap _targetTilemap;
+    [SerializeField] Tilemap _targetTilemap;
     PlaceableObjectsManager _placeableObjectsManager;
 
     public NetworkList<CropTile> CropTiles { get; private set; }
@@ -68,15 +66,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
 
     void Awake() {
-        if (Instance != null) {
-            Debug.LogError("More than one CropsManager instance in the scene!");
-            return;
-        }
-        Instance = this;
-
-        // Initialize Tilemap
-        _targetTilemap = GetComponent<Tilemap>();
-
         // Initialize JSON settings
         JsonConvert.DefaultSettings = () => new JsonSerializerSettings {
             Converters = { new Vector3Converter() },
@@ -91,17 +80,17 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     }
 
     void Start() {
-        _placeableObjectsManager = PlaceableObjectsManager.Instance;
+        _placeableObjectsManager = GameManager.Instance.PlaceableObjectsManager;
     }
 
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
 
         if (IsServer) {
-            TimeManager.Instance.OnNextDayStarted += OnNextDayStarted;
-            TimeManager.Instance.OnNextSeasonStarted += OnNextSeasonStarted;
-            WeatherManager.Instance.OnChangeRainIntensity += OnChangeRainIntensity;
-            WeatherManager.Instance.OnThunderStrike += OnThunderStrike;
+            GameManager.Instance.TimeManager.OnNextDayStarted += OnNextDayStarted;
+            GameManager.Instance.TimeManager.OnNextSeasonStarted += OnNextSeasonStarted;
+            GameManager.Instance.WeatherManager.OnChangeRainIntensity += OnChangeRainIntensity;
+            GameManager.Instance.WeatherManager.OnThunderStrike += OnThunderStrike;
         }
     }
 
@@ -114,10 +103,10 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         base.OnNetworkDespawn();
 
         if (IsServer) {
-            TimeManager.Instance.OnNextDayStarted -= OnNextDayStarted;
-            TimeManager.Instance.OnNextSeasonStarted -= OnNextSeasonStarted;
-            WeatherManager.Instance.OnChangeRainIntensity -= OnChangeRainIntensity;
-            WeatherManager.Instance.OnThunderStrike -= OnThunderStrike;
+            GameManager.Instance.TimeManager.OnNextDayStarted -= OnNextDayStarted;
+            GameManager.Instance.TimeManager.OnNextSeasonStarted -= OnNextSeasonStarted;
+            GameManager.Instance.WeatherManager.OnChangeRainIntensity -= OnChangeRainIntensity;
+            GameManager.Instance.WeatherManager.OnThunderStrike -= OnThunderStrike;
         }
     }
 
@@ -295,7 +284,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         var prefabInstance = Instantiate(isTree ? _cropsTreeSpritePrefab : _cropsSpritePrefab, transform);
         var harvestCrop = prefabInstance.GetComponent<HarvestCrop>();
 
-        if (isTree && ItemManager.Instance.ItemDatabase[itemId] is SeedSO seedSOForTree) {
+        if (isTree && GameManager.Instance.ItemManager.ItemDatabase[itemId] is SeedSO seedSOForTree) {
             var resourceNode = prefabInstance.GetComponent<ResourceNodeBase>();
             resourceNode.SetSeed(seedSOForTree);
         }
@@ -386,7 +375,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [ServerRpc(RequireOwnership = false)]
     public void SeedTileServerRpc(Vector3IntSerializable posSer, int itemId, int initialGrowthTimer = 0, ServerRpcParams serverRpcParams = default) {
         var pos = posSer.ToVector3Int();
-        if (ItemManager.Instance.ItemDatabase[itemId] is not SeedSO seedSO) {
+        if (GameManager.Instance.ItemManager.ItemDatabase[itemId] is not SeedSO seedSO) {
             HandleClientCallback(serverRpcParams, false);
             return;
         }
@@ -399,7 +388,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         bool isTree = cropToGrow.IsTree;
         bool canSeed = (isTree && CanPlowTile(pos)) || IsPositionPlowed(pos);
-        bool canGrowInSeason = cropToGrow.SeasonsToGrow.Contains((TimeManager.SeasonName)TimeManager.Instance.CurrentDate.Value.Season);
+        bool canGrowInSeason = cropToGrow.SeasonsToGrow.Contains((TimeManager.SeasonName)GameManager.Instance.TimeManager.CurrentDate.Value.Season);
 
         Collider2D[] colliders = Physics2D.OverlapPointAll(new Vector2(pos.x, pos.y));
         bool inGreenhouse = false;
@@ -507,7 +496,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         int idx = FindCropTileIndexAtPosition(position);
         if (idx < 0) return;
 
-        var fertSO = ItemManager.Instance.ItemDatabase[itemId] as FertilizerSO;
+        var fertSO = GameManager.Instance.ItemManager.ItemDatabase[itemId] as FertilizerSO;
         if (fertSO == null) {
             Debug.LogError($"FertilizerSO not found for itemId {itemId}");
             return;
@@ -660,7 +649,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         int rarity = CalculateItemRarity(tile.QualityScaler);
         var cropSO = CropDatabase[tile.CropId];
 
-        ItemSpawnManager.Instance.SpawnItemServerRpc(
+        GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
             new ItemSlot(cropSO.ItemToGrowAndSpawn.ItemId, count, rarity),
             _targetTilemap.CellToWorld(pos),
             Vector2.zero,
@@ -683,7 +672,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         int count = CalculateItemCount(tile);
         int rarity = CalculateItemRarity(tile.QualityScaler);
 
-        ItemSpawnManager.Instance.SpawnItemServerRpc(
+        GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
             new ItemSlot(tile.CropId, count, rarity),
             _targetTilemap.CellToWorld(pos),
             Vector2.zero,
@@ -762,7 +751,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         if (index >= 0) CropTiles[index] = selectedTile;
 
         if (selectedTile.IsCropHarvestable(CropDatabase)) {
-            ItemSpawnManager.Instance.SpawnItemServerRpc(
+            GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
                 new ItemSlot(_coal.ItemId, CalculateItemCount(selectedTile), 0),
                 new Vector2(selectedTile.CropPosition.x, selectedTile.CropPosition.y) + selectedTile.SpriteRendererOffset,
                 Vector2.zero,
@@ -1019,7 +1008,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         if (!tileOpt.HasValue) return false;
 
         var tile = tileOpt.Value;
-        if (ItemManager.Instance.ItemDatabase[itemId] is not FertilizerSO fert) return false;
+        if (GameManager.Instance.ItemManager.ItemDatabase[itemId] is not FertilizerSO fert) return false;
 
         return fert.FertilizerType switch {
             FertilizerTypes.GrowthTime => tile.GrowthTimeScaler < ((fert.FertilizerBonusValue / 100f) + 1f),

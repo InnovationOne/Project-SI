@@ -7,8 +7,6 @@ using Unity.Netcode;
 /// </summary>
 [RequireComponent(typeof(NetworkObject))]
 public class FinanceManager : NetworkBehaviour, IDataPersistance {
-    public static FinanceManager Instance { get; private set; }
-
     // Events to notify subscribers about money changes
     public event Action<int> OnFarmMoneyChanged;
     public event Action<int> OnTownMoneyChanged;
@@ -21,14 +19,6 @@ public class FinanceManager : NetworkBehaviour, IDataPersistance {
 
     public int GetMoneyFarm => _networkedFarmMoney.Value;
     public int GetMoneyTown => _networkedTownMoney.Value;
-
-    void Awake() {
-        if (Instance != null) {
-            Debug.LogError("Multiple FinanceManager instances found!");
-            return;
-        }
-        Instance = this;
-    }
 
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();

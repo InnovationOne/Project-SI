@@ -13,7 +13,7 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     
     public NetworkList<PlaceableObjectData> PlaceableObjects { get; private set; }
 
-    Tilemap _targetTilemap;
+    [SerializeField] Tilemap _targetTilemap;
     ItemDatabaseSO _itemDatabase;
     CropsManager _cropsManager;
 
@@ -31,15 +31,14 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         }
         Instance = this;
 
-        _targetTilemap = GetComponent<Tilemap>();
         PlaceableObjects = new NetworkList<PlaceableObjectData>();
         PlaceableObjects.OnListChanged += OnPlaceableObjectsChanged;
         _positionToIndexMap = new Dictionary<Vector3Int, int>();
     }
 
     void Start() {
-        _itemDatabase = ItemManager.Instance.ItemDatabase;
-        _cropsManager = CropsManager.Instance;
+        _itemDatabase = GameManager.Instance.ItemManager.ItemDatabase;
+        _cropsManager = GameManager.Instance.CropsManager;
     }
 
     void OnPlaceableObjectsChanged(NetworkListEvent<PlaceableObjectData> changeEvent) {
@@ -170,7 +169,7 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         HandleClientCallback(serverRpcParams, true);
 
         var obj = PlaceableObjects[idx];
-        ItemSpawnManager.Instance.SpawnItemServerRpc(
+        GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
             new ItemSlot(obj.ObjectId, 1, 0),
             _targetTilemap.CellToWorld(obj.Position),
             PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,

@@ -8,11 +8,7 @@ using UnityEngine.InputSystem;
 /// Handles custom input actions and manages input-related events.
 /// Utilizes modern C# features and optimizes for performance and memory usage.
 /// </summary>
-[RequireComponent(typeof(NetworkObject))]
-public class InputManager : NetworkBehaviour {
-    // Singleton Instance
-    public static InputManager Instance { get; private set; }
-
+public class InputManager : MonoBehaviour {
     // Input Action Maps
     private PlayerInputActions _playerInputActions;
 
@@ -70,12 +66,6 @@ public class InputManager : NetworkBehaviour {
     /// Initializes the singleton instance and input actions.
     /// </summary>
     private void Awake() {
-        if (Instance != null) {
-            throw new Exception("Found more than one Input Manager in the scene.");
-        } else {
-            Instance = this;
-        }
-
         _playerInputActions = new PlayerInputActions();
     }
 
@@ -334,7 +324,7 @@ public class InputManager : NetworkBehaviour {
     /// <summary>
     /// Cleans up event subscriptions to prevent memory leaks.
     /// </summary>
-    private new void OnDestroy() {
+    private void OnDestroy() {
         // Unsubscribe from player input actions
         _playerInputActions.Player.Run.performed -= Run_performed;
         _playerInputActions.Player.Dash.performed -= Dash_performed;
@@ -383,7 +373,5 @@ public class InputManager : NetworkBehaviour {
 
         // Dispose input actions
         _playerInputActions.Dispose();
-
-        base.OnDestroy();
     }
 }

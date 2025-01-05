@@ -15,12 +15,12 @@ public class AnimalStore : Store {
         base.OnNetworkSpawn();
 
         _pIC = PlayerController.LocalInstance.PlayerInventoryController;
-        _fM = FinanceManager.Instance;
-        _pOM = PlaceableObjectsManager.Instance;
-        _iM = ItemManager.Instance;
+        _fM = GameManager.Instance.FinanceManager;
+        _pOM = GameManager.Instance.PlaceableObjectsManager;
+        _iM = GameManager.Instance.ItemManager;
         _nSM = NetworkManager.Singleton.SpawnManager;
 
-        TimeManager.Instance.OnNextDayStarted += OnNextDay;
+        GameManager.Instance.TimeManager.OnNextDayStarted += OnNextDay;
     }
 
     public override void OnLeftClick(ItemSO itemSO) {

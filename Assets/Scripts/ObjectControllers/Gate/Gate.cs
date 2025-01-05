@@ -8,7 +8,7 @@ public class Gate : AdjustingObject {
     /// <summary>
     /// Gets the GateSO (Gate ScriptableObject) associated with this gate.
     /// </summary>
-    private GateSO GateSO => ItemManager.Instance.ItemDatabase[_itemId] as GateSO;
+    private GateSO GateSO => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as GateSO;
 
     /// <summary>
     /// Interacts with the gate, toggling its state and updating the visuals based on neighbors.

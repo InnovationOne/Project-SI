@@ -5,9 +5,9 @@ using UnityEngine;
 public class DestroyCropTileSO : ToolActionSO {
     public override void OnApplyToTileMap(Vector3Int position, ItemSlot itemSlot) {
         int rarityIndex = itemSlot.RarityId - 1;
-        if (ItemManager.Instance.ItemDatabase[itemSlot.ItemId] is ToolSO tool) {
+        if (GameManager.Instance.ItemManager.ItemDatabase[itemSlot.ItemId] is ToolSO tool) {
             int energyCost = tool.EnergyOnAction[rarityIndex];
-            CropsManager.Instance.DestroyCropTileServerRpc(
+            GameManager.Instance.CropsManager.DestroyCropTileServerRpc(
                 new Vector3IntSerializable(position),
                 energyCost,
                 ToolSO.ToolTypes.Pickaxe

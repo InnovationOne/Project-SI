@@ -45,8 +45,8 @@ public class QuestCalenderMapVisual : MonoBehaviour {
 
     private void Start() {
         //QuestManager.Instance.OnNewQuestAdded += QuestManager_OnNewQuestAdded;
-        PauseGameManager.Instance.OnShowUIForPause += PauseGameManager_OnShowUIForPause;
-        PauseGameManager.Instance.OnHideUIForPause += PauseGameManager_OnHideUIForPause;
+        GameManager.Instance.PauseGameManager.OnShowUIForPause += PauseGameManager_OnShowUIForPause;
+        GameManager.Instance.PauseGameManager.OnHideUIForPause += PauseGameManager_OnHideUIForPause;
     }
 
     private void Update() {
@@ -113,7 +113,7 @@ public class QuestCalenderMapVisual : MonoBehaviour {
 
     private void OnDestroy() {
         //QuestManager.Instance.OnNewQuestAdded -= QuestManager_OnNewQuestAdded;
-        PauseGameManager.Instance.OnShowUIForPause -= PauseGameManager_OnShowUIForPause;
-        PauseGameManager.Instance.OnHideUIForPause -= PauseGameManager_OnHideUIForPause;
+        GameManager.Instance.PauseGameManager.OnShowUIForPause -= PauseGameManager_OnShowUIForPause;
+        GameManager.Instance.PauseGameManager.OnHideUIForPause -= PauseGameManager_OnHideUIForPause;
     }
 }

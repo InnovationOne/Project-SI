@@ -16,7 +16,7 @@ public class PlayerInteractController : NetworkBehaviour {
     }
 
     void Start() {
-        _inputManager = InputManager.Instance;
+        _inputManager = GameManager.Instance.InputManager;
         _inputManager.OnInteractAction += HandleInteractAction;
     }
 

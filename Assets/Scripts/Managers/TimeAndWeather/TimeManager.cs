@@ -9,8 +9,6 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
     public enum TimeOfDay { Morning, Noon, Afternoon, Evening, Night }
     public enum SeasonName { Spring, Summer, Autumn, Winter }
 
-    public static TimeManager Instance { get; private set; }
-
     public event Action OnNextDayStarted;
     public event Action<int> OnNextSeasonStarted;
     public event Action<int, int> OnUpdateUITime;
@@ -42,8 +40,8 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    NetworkVariable<float> _currentTime = new NetworkVariable<float>(TIME_TO_WAKE_UP);
-    public NetworkVariable<CustomDate> CurrentDate = new NetworkVariable<CustomDate>(new CustomDate { Day = 0, Season = 0, Year = 0 });
+    NetworkVariable<float> _currentTime = new(TIME_TO_WAKE_UP);
+    public NetworkVariable<CustomDate> CurrentDate = new(new CustomDate { Day = 0, Season = 0, Year = 0 });
 
     bool _nextDayAvailable = false;
     private HashSet<TimeAgent> _timeAgents = new();
@@ -64,14 +62,6 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
     const int TIMEAGENT_INVOKES_IN_A_DAY = 144;
     public int TotalTimeAgentInvokesThisDay { get; private set; } = 0;
 
-
-    void Awake() {
-        if (Instance != null && Instance != this) {
-            Debug.LogWarning("Multiple instances of TimeManager detected.");
-            return;
-        }
-        Instance = this;
-    }
 
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();

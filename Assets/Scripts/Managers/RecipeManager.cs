@@ -7,11 +7,6 @@ using Newtonsoft.Json;
 /// </summary>
 [RequireComponent(typeof(NetworkObject))]
 public class RecipeManager : NetworkBehaviour, IDataPersistance {
-    /// <summary>
-    /// Singleton instance of the RecipeManager.
-    /// </summary>
-    public static RecipeManager Instance { get; private set; }
-
     private RecipeContainer _recipeContainer;
     public RecipeContainer RecipeContainer => _recipeContainer;
     [SerializeField] private RecipeDatabaseSO _recipeDatabase;
@@ -27,12 +22,6 @@ public class RecipeManager : NetworkBehaviour, IDataPersistance {
     /// Otherwise, it sets the instance to this script and initializes the components.
     /// </summary>
     private void Awake() {
-        if (Instance != null) {
-            Debug.LogError("There is more than one instance of RecipeManager in the scene!");
-            return;
-        }
-
-        Instance = this;
         _recipeContainer = new RecipeContainer();
         _recipeDatabase.InitializeRecipes();
     }

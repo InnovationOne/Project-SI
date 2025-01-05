@@ -23,8 +23,8 @@ public class TestCropsManager : NetworkBehaviour {
     }
 
     private void Start() {
-        cropsManager = CropsManager.Instance;
-        timeManager = TimeManager.Instance;
+        cropsManager = GameManager.Instance.CropsManager;
+        timeManager = GameManager.Instance.TimeManager;
         _test = Test;
     }
 

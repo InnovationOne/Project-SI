@@ -2,16 +2,12 @@ using Ink.Runtime;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 
-[RequireComponent(typeof(NetworkObject))]
-public class DialogueManager : NetworkBehaviour, IDataPersistance {
-    public static DialogueManager Instance { get; private set; }
-
+public class DialogueManager : MonoBehaviour, IDataPersistance {
     [Header("Parameters")]
     [SerializeField] float _typingSpeed = 0.04f; // Speed the letters of a text are displayed on screen - lower = faster
     [SerializeField] TextAsset _loadGlobalsJSON;
@@ -61,12 +57,6 @@ public class DialogueManager : NetworkBehaviour, IDataPersistance {
 
 
     void Awake() {
-        if (Instance != null) {
-            Debug.LogError("More than one DialogueManager in the scene");
-            return;
-        }
-        Instance = this;
-
         _audioSource = gameObject.AddComponent<AudioSource>();
         _currentNPCAudioInfo = _defaultAudioInfo;
     }
@@ -84,7 +74,7 @@ public class DialogueManager : NetworkBehaviour, IDataPersistance {
             _choicesText[i] = _choiceButtons[i].GetComponentInChildren<TextMeshProUGUI>();
         }
 
-        _inputManager = InputManager.Instance;
+        _inputManager = GameManager.Instance.InputManager;
         // Input events from new input system
         _inputManager.Dialogue_OnContinueAction += OnContinuePressed;
         _inputManager.Dialogue_OnContinueStarted += OnContinueStarted;

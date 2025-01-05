@@ -113,8 +113,8 @@ public class ItemConverter : PlaceableObject {
     /// <returns>The ID of the selected recipe, or -1 if no recipe is found.</returns>
     private int SelectRecipeAutomatically() {
         ItemSlot toolbeltItemSlot = PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot();
-        foreach (var recipe in RecipeManager.Instance.RecipeContainer.Recipes) {
-            RecipeSO recipeSO = RecipeManager.Instance.RecipeDatabase[recipe];
+        foreach (var recipe in GameManager.Instance.RecipeManager.RecipeContainer.Recipes) {
+            RecipeSO recipeSO = GameManager.Instance.RecipeManager.RecipeDatabase[recipe];
 
             for (int i = 0; i < recipeSO.ItemsToConvert.Count; i++) {
                 if (recipeSO.ItemsToConvert[i].ItemId == toolbeltItemSlot.ItemId &&
@@ -136,14 +136,14 @@ public class ItemConverter : PlaceableObject {
     private bool HasAllNeededItems() {
         List<ItemSlot> inventory = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.CombineItemsByTypeAndRarity();
 
-        var matchingNum = RecipeManager.Instance.RecipeDatabase[_recipeId].ItemsNeededToConvert
-            .Concat(RecipeManager.Instance.RecipeDatabase[_recipeId].ItemsToConvert)
+        var matchingNum = GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsNeededToConvert
+            .Concat(GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsToConvert)
             .Count(recipe => inventory.Any(inventoryItemSlot =>
-                ItemManager.Instance.ItemDatabase[inventoryItemSlot.ItemId] != null &&
+                GameManager.Instance.ItemManager.ItemDatabase[inventoryItemSlot.ItemId] != null &&
                 inventoryItemSlot.ItemId == recipe.ItemId &&
                 inventoryItemSlot.Amount >= recipe.Amount));
 
-        return matchingNum == RecipeManager.Instance.RecipeDatabase[_recipeId].ItemsNeededToConvert.Count + RecipeManager.Instance.RecipeDatabase[_recipeId].ItemsToConvert.Count;
+        return matchingNum == GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsNeededToConvert.Count + GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsToConvert.Count;
     }
 
     /// <summary>
@@ -169,13 +169,13 @@ public class ItemConverter : PlaceableObject {
     /// Retrieves the recipe items needed to produce the desired item.
     /// </summary>
     /// <returns>An enumerable collection of ItemSlot representing the recipe items.</returns>
-    private IEnumerable<ItemSlot> GetRecipeItemsToProduce() => RecipeManager.Instance.RecipeDatabase[_recipeId].ItemsToProduce;
+    private IEnumerable<ItemSlot> GetRecipeItemsToProduce() => GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsToProduce;
 
     /// <summary>
     /// Retrieves the combined item slots required for conversion.
     /// </summary>
     /// <returns>An enumerable collection of ItemSlot objects representing the combined item slots.</returns>
-    private IEnumerable<ItemSlot> GetCombinedItemSlots() => RecipeManager.Instance.RecipeDatabase[_recipeId].ItemsNeededToConvert.Concat(RecipeManager.Instance.RecipeDatabase[_recipeId].ItemsToConvert);
+    private IEnumerable<ItemSlot> GetCombinedItemSlots() => GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsNeededToConvert.Concat(GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsToConvert);
 
     /// <summary>
     /// Picks up items in the placed object and spawns them.
@@ -194,7 +194,7 @@ public class ItemConverter : PlaceableObject {
         foreach (ItemSlot itemSlot in _storedItemSlots) {
             int remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(itemSlot, false);
             if (remainingAmount > 0) {
-                ItemSpawnManager.Instance.SpawnItemServerRpc(
+                GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
                     itemSlot: itemSlot,
                     initialPosition: transform.position,
                     motionDirection: PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
@@ -206,13 +206,13 @@ public class ItemConverter : PlaceableObject {
     /// <summary>
     /// Resets the production timer based on the recipe's production time.
     /// </summary>
-    private void ResetTimer() => _timer = RecipeManager.Instance.RecipeDatabase[_recipeId].TimeToProduce * ConverterSO.ProduceTimeInPercent / 100;
+    private void ResetTimer() => _timer = GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].TimeToProduce * ConverterSO.ProduceTimeInPercent / 100;
 
     /// <summary>
     /// Fetches the ObjectSO associated with the current item ID.
     /// </summary>
     /// <returns>The ObjectSO associated with the current item.</returns>
-    private ConverterSO ConverterSO => ItemManager.Instance.ItemDatabase[_itemId] as ConverterSO;
+    private ConverterSO ConverterSO => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as ConverterSO;
 
     private void ClearStoredItems() {
         _storedItemSlots.Clear();
