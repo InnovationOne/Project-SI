@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da1b35da3e2b3604098d1e1f1adf8bdf, type: 3}
   m_Name: Sword
   m_EditorClassIdentifier: 
-  ItemId: 0
+  ItemId: 253
   ItemType: 0
   ItemName: Sword
-  ItemIcon: {fileID: 1260782343283211980, guid: 215687feeab0b7445b4a1cd86c82c2e1, type: 3}
+  ItemIcon: {fileID: 21300000, guid: aadecd4a136e4ef489d5887ef0c4b4d5, type: 3}
   IsStackable: 0
   MaxStackableAmount: 1
   CanBeBought: 0
@@ -26,10 +26,35 @@ MonoBehaviour:
   LeftClickAction: []
   AttackType: 0
   WeaponType: 0
+  WeaponActionSO: {fileID: 11400000, guid: 0314d95d49e99a643a90dfc27368ab26, type: 2}
   DamageType: 0
-  Damage: 5
-  Range: 2
-  EnergyOnAction: 0
-  AttackSpeed: 0.5
-  CritChance: 25
-  CritDamage: 10
+  AdditionalEffects: []
+  Range: 0
+  LightAttackDamage: 2
+  LightAttackEnergyCost: 1
+  LightAttackSpeed: 1
+  HeavyAttackDamage: 4
+  HeavyAttackEnergyCost: 2
+  HeavyAttackChargeTime: 2
+  HeavyAttackSpeed: 0.5
+  BlockEnergyCost: 1
+  SpecialComboCost: 0
+  ComboMaxDelay: 1
+  ComboMaxCount: 1
+  CritChance: 20
+  CritDamage: 3
+  ComboPointsLightAttack:
+  - Points:
+    - {x: -0.62504995, y: -0.25002}
+    - {x: 0.70839, y: -0.25002}
+    - {x: 0.70839, y: -0.62504995}
+    - {x: 0.66672, y: -0.70839}
+    - {x: 0.50004, y: -0.87507}
+    - {x: 0.33336, y: -0.95840997}
+    - {x: 0.20834999, y: -1.00008}
+    - {x: -0.12501, y: -1.00008}
+    - {x: -0.25002, y: -0.95840997}
+    - {x: -0.41669998, y: -0.87507}
+    - {x: -0.58338, y: -0.70839}
+    - {x: -0.62504995, y: -0.62505}
+  ComboPointsHeavyAttack: []

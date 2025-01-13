@@ -10,6 +10,7 @@ using UnityEngine;
 public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance {
     // Notifies changes in toolbelt setup and toggle actions
     public event Action OnToolbeltChanged;
+    public event Action OnToolbeltSlotChanged;
     public event Action OnToggleToolbelt;
 
     // Predefined toolbelt sizes (read-only)
@@ -132,6 +133,7 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
             : (_selectedToolSlot - 1 + _toolbeltSize) % _toolbeltSize;
 
         _toolbeltUI.SetToolbeltSlotHighlight(_selectedToolSlot);
+        OnToolbeltSlotChanged?.Invoke();
     }
 
     // Rotates through available toolbelts and shifts inventory slots
@@ -147,6 +149,7 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
         _inventoryController.InventoryContainer.ShiftSlots(shiftAmount);
 
         _toolbeltUI.ShowUIButtonContains();
+        OnToolbeltSlotChanged?.Invoke();
     }
 
     // Handles slot selection from UI clicks
@@ -155,6 +158,7 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
             _selectedToolSlot = selectedToolbeltSlot;
             OnToolbeltChanged?.Invoke();
             _toolbeltUI.SetToolbeltSlotHighlight(_selectedToolSlot);
+            OnToolbeltSlotChanged?.Invoke();
         }
     }
 
@@ -181,6 +185,7 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
             _selectedToolSlot = slotIndex;
             OnToolbeltChanged?.Invoke();
             _toolbeltUI.SetToolbeltSlotHighlight(_selectedToolSlot);
+            OnToolbeltSlotChanged?.Invoke();
         }
     }
     #endregion -------------------- Input Handling --------------------

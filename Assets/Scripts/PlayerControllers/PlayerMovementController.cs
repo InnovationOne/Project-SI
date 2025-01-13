@@ -3,10 +3,52 @@ using UnityEngine;
 using FMOD.Studio;
 using System.Collections;
 using static WeatherManager;
+using System.Collections.Generic;
 
 // This Script handles player movement, animations, and data persistance for a 2D character
 [RequireComponent(typeof(NetworkObject))]
 public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance {
+    public enum PlayerState {
+        Idle,
+        Walking,
+        Running,
+        Attacking,
+        Dashing,
+        Swimming,
+        Sleeping,
+        Hit,
+        Death,
+
+        Blocking,
+        Stunned
+    }
+
+    // Default
+    const string IDLE = "Idle";
+    const string WALK = "Walk";
+    const string RUN = "Run";
+    const string HIT = "Hit";
+    const string DEATH = "Death";
+
+    // Sword
+    const string SWORD_IDLE = "Sword_Idle";
+    const string SWORD_ATTACK = "Sword_Attack";
+    const string SWORD_WALK = "Sword_Walk";
+    const string SWORD_WALK_ATTACK = "Sword_Walk_Attack";
+    const string SWORD_RUN = "Sword_Run";
+    const string SWORD_RUN_ATTACK = "Sword_Run_Attack";
+    const string SWORD_HIT = "Sword_Hit";
+    const string SWORD_DEATH = "Sword_Death";
+
+    // Movement
+    const string X_AXIS = "xAxis";
+    const string Y_AXIS = "yAxis";
+    const string LAST_X_AXIS = "lastXAxis";
+    const string LAST_Y_AXIS = "lastYAxis";
+
+    public PlayerState ActivePlayerState = PlayerState.Idle;
+    public bool IsPlayerIdle => ActivePlayerState == PlayerState.Idle;
+
     // Movement Directions
     public Vector2 LastMotionDirection { get; private set; } = Vector2.right;
 
@@ -28,32 +70,28 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     const float EFFECT_DESPAWN_TIMER = 5f;
     float _effectSpawnTimer = 0f;
 
-    static readonly int MovingHash = Animator.StringToHash("Moving");
-    static readonly int RunningHash = Animator.StringToHash("Running");
-    static readonly int HorizontalHash = Animator.StringToHash("Horizontal");
-    static readonly int VerticalHash = Animator.StringToHash("Vertical");
-    static readonly int LastHorizontalHash = Animator.StringToHash("LastHorizontal");
-    static readonly int LastVerticalHash = Animator.StringToHash("LastVertical");
-    static readonly int DashingHash = Animator.StringToHash("Dashing");
-
     // Movement State
     bool _canMoveAndTurn = true;
     bool _isRunning;
     Vector2 _inputDirection;
+    public Vector3 Position;
     float _timeSinceLastMovement;
 
     // Dash State
-    bool _isDashing = false;
+    const float _dashEnergyCost = 2f;
     float _dashTimeRemaining;
     float _dashCooldownRemaining;
     Vector2 _dashDirection = Vector2.zero;
 
     // Components
-    Rigidbody2D _rb2D;
-    Animator _animator;
+    Rigidbody2D _rb;
+    Animator _anim;
     InputManager _inputManager;
     BoxCollider2D _boxCollider;
     AudioManager _audioManager;
+    PlayerHealthAndEnergyController _playerHealthAndEnergyController;
+    PlayerToolsAndWeaponController _playerToolsAndWeaponController;
+    PlayerToolbeltController _playerToolbeltController;
 
     // Audio
     EventInstance _playerWalkGrassEvent;
@@ -61,8 +99,8 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
 
 
     void Awake() {
-        _rb2D = GetComponent<Rigidbody2D>();
-        _animator = GetComponentInChildren<Animator>();
+        _rb = GetComponent<Rigidbody2D>();
+        _anim = GetComponentInChildren<Animator>();
         _boxCollider = GetComponent<BoxCollider2D>();
 
         // Initialize audio event
@@ -72,7 +110,13 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
         _inputManager = GameManager.Instance.InputManager;
         _audioManager = GameManager.Instance.AudioManager;
         _playerWalkGrassEvent = _audioManager.CreateEventInstance(GameManager.Instance.FMODEvents.PlayerWalkGrassSFX);
+        _playerHealthAndEnergyController = GetComponent<PlayerHealthAndEnergyController>();
+        _playerToolsAndWeaponController = GetComponent<PlayerToolsAndWeaponController>();
+        _playerToolbeltController = GetComponent<PlayerToolbeltController>();
+        _playerToolbeltController.OnToolbeltSlotChanged += ToolbeltSlotChanged;
+
         //TODO _playerDashEvent = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.PlayerDashSFX);
+
         _inputManager.OnRunAction += ToggleRunState;
         _inputManager.OnDashAction += TryStartDash;
     }
@@ -86,13 +130,25 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
         base.OnDestroy();
     }
 
-    void ToggleRunState() => _isRunning = !_isRunning;
+    void ToggleRunState() {
+        _isRunning = !_isRunning;
+
+        bool isMoving = _inputDirection != Vector2.zero;
+        if (isMoving) {
+            ChangeState(_isRunning ? PlayerState.Running : PlayerState.Walking);
+        } else {
+            ChangeState(PlayerState.Idle);
+        }
+    }
 
     void Update() {
         if (!IsOwner) return;
+
+        Position = _boxCollider.bounds.center;
         HandleInput();
-        HandleDashTimers();
-        UpdateAnimationState();
+
+        if (_dashCooldownRemaining > 0f) _dashCooldownRemaining -= Time.deltaTime;
+
         UpdateSound();
         HandleRunningEffects();
     }
@@ -106,24 +162,28 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
         Vector2 newInputDirection = _inputManager.GetMovementVectorNormalized();
         bool directionChanged = newInputDirection != _inputDirection;
 
+        bool isMoving = newInputDirection != Vector2.zero;
+        if (isMoving) {
+            ChangeState(_isRunning ? PlayerState.Running : PlayerState.Walking);
+        } else {
+            ChangeState(PlayerState.Idle);
+        }
+
         if (directionChanged) {
             _inputDirection = newInputDirection;
-            _animator.SetFloat(HorizontalHash, _inputDirection.x);
-            _animator.SetFloat(VerticalHash, _inputDirection.y);
-
-            bool isMoving = _inputDirection != Vector2.zero;
-            _animator.SetBool(MovingHash, isMoving);
+            _anim.SetFloat(X_AXIS, _inputDirection.x);
+            _anim.SetFloat(Y_AXIS, _inputDirection.y);
 
             if (isMoving) {
                 LastMotionDirection = _inputDirection;
-                _animator.SetFloat(LastHorizontalHash, _inputDirection.x);
-                _animator.SetFloat(LastVerticalHash, _inputDirection.y);
+                _anim.SetFloat(LAST_X_AXIS, _inputDirection.x);
+                _anim.SetFloat(LAST_Y_AXIS, _inputDirection.y);
                 _timeSinceLastMovement = 0f;
             } else {
                 _timeSinceLastMovement += Time.deltaTime;
                 if (_timeSinceLastMovement >= MAX_DELAY_FOR_PLAYER_ROTATION && LastMotionDirection != Vector2.zero) {
-                    _animator.SetFloat(LastHorizontalHash, LastMotionDirection.x);
-                    _animator.SetFloat(LastVerticalHash, LastMotionDirection.y);
+                    _anim.SetFloat(LAST_X_AXIS, LastMotionDirection.x);
+                    _anim.SetFloat(LAST_Y_AXIS, LastMotionDirection.y);
                 }
             }
         }
@@ -131,79 +191,69 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
 
     #region -------------------- Dashing --------------------
     void TryStartDash() {
-        if (_dashCooldownRemaining > 0f || _isDashing) return;
+        if (_dashCooldownRemaining > 0f &&
+           (ActivePlayerState != PlayerState.Idle ||
+            ActivePlayerState != PlayerState.Walking ||
+            ActivePlayerState != PlayerState.Running)) return;
 
         Vector2 dashDir = _inputDirection == Vector2.zero ? LastMotionDirection : _inputDirection;
         if (dashDir == Vector2.zero) return;
 
-        StartDash(dashDir);
+        StartCoroutine(StartDash(dashDir));
     }
 
-    void StartDash(Vector2 direction) {
-        _isDashing = true;
+    IEnumerator StartDash(Vector2 direction) {
         _dashTimeRemaining = _dashDuration;
         _dashCooldownRemaining = _dashCooldown;
         _dashDirection = direction.normalized;
 
-        _animator.SetBool(DashingHash, true);
+        var lastState = ActivePlayerState;
+        ChangeState(PlayerState.Dashing);
         _playerDashEvent.start();
+        _playerHealthAndEnergyController.AdjustEnergy(-_dashEnergyCost);
 
         // (Optional) Trigger visual effects like motion blur or trails here.
 
-        PerformDashServerRpc();
-    }
-
-    void EndDash() {
-        _isDashing = false;
-        _animator.SetBool(DashingHash, false);
-    }
-
-    private void HandleDashTimers() {
-        if (_dashCooldownRemaining > 0f) _dashCooldownRemaining -= Time.deltaTime;
-
-        if (_isDashing) {
-            _dashTimeRemaining -= Time.deltaTime;
-            if (_dashTimeRemaining <= 0f) {
-                EndDash();
-            }
-        }
+        yield return new WaitForSeconds(_dashDuration);
+        ChangeState(lastState);
     }
     #endregion -------------------- Dashing --------------------
 
     #region -------------------- Movement --------------------
     void MoveCharacter() {
-        if (_isDashing) {
-            float dashSpeed = _runSpeed * _dashSpeedMultiplier;
-            _rb2D.linearVelocity = _dashDirection * dashSpeed;
-        } else {
-            float speed = GetCurrentSpeed();
-            _rb2D.linearVelocity = _inputDirection * speed;
-        }
-    }
+        if (ActivePlayerState == PlayerState.Idle ||
+            ActivePlayerState == PlayerState.Walking ||
+            ActivePlayerState == PlayerState.Running ||
+            ActivePlayerState == PlayerState.Dashing) {
 
-    void UpdateAnimationState() {
-        bool isMoving = _inputDirection != Vector2.zero && !_isDashing;
-        _animator.SetBool(MovingHash, isMoving);
-        _animator.SetBool(RunningHash, _isRunning && !_isDashing);
+            if (ActivePlayerState == PlayerState.Dashing) {
+                float dashSpeed = _runSpeed * _dashSpeedMultiplier;
+                _rb.linearVelocity = _dashDirection * dashSpeed;
+            } else {
+                float speed = GetCurrentSpeed();
+                _rb.linearVelocity = _inputDirection * speed;
+            }
+        }
     }
 
     float GetCurrentSpeed() {
-        if (_isDashing) {
-            return _runSpeed * _dashSpeedMultiplier;
-        }
-        return _animator.GetBool(MovingHash) ? (_isRunning ? _runSpeed : _walkSpeed) : 0f;
+        return ActivePlayerState switch {
+            PlayerState.Walking => _walkSpeed,
+            PlayerState.Running => _runSpeed,
+            PlayerState.Dashing => _runSpeed * _dashSpeedMultiplier,
+            _ => 0f,
+        };
     }
 
     public void SetCanMoveAndTurn(bool canMove) {
         _canMoveAndTurn = canMove;
-        if (!_canMoveAndTurn && _rb2D.linearVelocity != Vector2.zero) {
-            _rb2D.linearVelocity = Vector2.zero;
-            _animator.SetBool(MovingHash, false);
+        if (!_canMoveAndTurn && _rb.linearVelocity != Vector2.zero) {
+            _rb.linearVelocity = Vector2.zero;
         }
     }
 
     void UpdateSound() {
-        bool isMoving = _rb2D.linearVelocity != Vector2.zero;
+        bool isMoving = _rb.linearVelocity != Vector2.zero;
         _playerWalkGrassEvent.getPlaybackState(out PLAYBACK_STATE playbackState);
 
         if (isMoving && playbackState == PLAYBACK_STATE.STOPPED) {
@@ -217,7 +267,7 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     #region -------------------- Running Effects --------------------
     void HandleRunningEffects() {
         if (!IsOwner) return;
-        if (_animator.GetBool(MovingHash) && !_isDashing) {
+        if (_rb.linearVelocity != Vector2.zero && ActivePlayerState != PlayerState.Dashing) {
             _effectSpawnTimer -= Time.deltaTime;
             if (_effectSpawnTimer <= 0f) {
                 SpawnFootprints();
@@ -269,37 +319,77 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     }
     #endregion -------------------- Running Effects --------------------
 
-    #region -------------------- Networking (Dash Synchronization) --------------------
-    [ServerRpc]
-    void PerformDashServerRpc() => PerformDashClientRpc();
-
-    [ClientRpc]
-    void PerformDashClientRpc() {
-        if (IsOwner) return;
-
-        _animator.SetBool(DashingHash, true);
-        _playerDashEvent.start();
-        StartCoroutine(RemoteDashEndRoutine(_dashDuration));
+    void ToolbeltSlotChanged() {
+        ChangeState(ActivePlayerState, true);
     }
 
-    IEnumerator RemoteDashEndRoutine(float duration) {
-        yield return new WaitForSeconds(duration);
-        _animator.SetBool(DashingHash, false);
+    public void ChangeState(PlayerState newState, bool forceUpdate = false) {
+        if (ActivePlayerState == newState && !forceUpdate) return;
+
+        PlayerState oldState = ActivePlayerState;
+        bool hasWeapon = _playerToolsAndWeaponController.IsPlayerHoldingWeapon();
+
+        string animName = string.Empty;
+        switch (newState) {
+            case PlayerState.Idle:
+                animName = hasWeapon ? SWORD_IDLE : IDLE;
+                break;
+
+            case PlayerState.Walking:
+                animName = hasWeapon ? SWORD_WALK : WALK;
+                break;
+
+            case PlayerState.Running:
+                animName = hasWeapon ? SWORD_RUN : RUN;
+                break;
+
+            case PlayerState.Attacking:
+                if (hasWeapon) {
+                    animName = oldState switch {
+                        PlayerState.Idle => SWORD_ATTACK,
+                        PlayerState.Walking => SWORD_WALK_ATTACK,
+                        PlayerState.Running => SWORD_RUN_ATTACK,
+                        _ => SWORD_ATTACK,
+                    };
+                } else {
+                    animName = "Attack";
+                }
+                break;
+
+            case PlayerState.Hit:
+                animName = hasWeapon ? SWORD_HIT : HIT;
+                break;
+
+            case PlayerState.Death:
+                animName = hasWeapon ? SWORD_DEATH : DEATH;
+                break;
+
+            case PlayerState.Dashing:
+            case PlayerState.Blocking:
+            case PlayerState.Stunned:
+            default:
+                animName = hasWeapon ? SWORD_IDLE : IDLE;
+                break;
+        }
+
+        if (string.IsNullOrEmpty(animName)) return;
+
+        _anim.Play(animName);
+        ActivePlayerState = newState;
     }
 
-    #endregion -------------------- Networking (Dash Synchronization) --------------------
 
     #region -------------------- Save & Load --------------------
     public void SavePlayer(PlayerData playerData) {
         playerData.Position = transform.position;
-        playerData.LastDirection = new Vector2(_animator.GetFloat(LastHorizontalHash), _animator.GetFloat(LastVerticalHash));
+        playerData.LastDirection = new Vector2(_anim.GetFloat(LAST_X_AXIS), _anim.GetFloat(LAST_Y_AXIS));
     }
 
     public void LoadPlayer(PlayerData playerData) {
         transform.position = playerData.Position;
         LastMotionDirection = playerData.LastDirection;
-        _animator.SetFloat(LastHorizontalHash, LastMotionDirection.x);
-        _animator.SetFloat(LastVerticalHash, LastMotionDirection.y);
+        _anim.SetFloat(LAST_X_AXIS, LastMotionDirection.x);
+        _anim.SetFloat(LAST_Y_AXIS, LastMotionDirection.y);
     }
     #endregion -------------------- Save & Load --------------------
 }

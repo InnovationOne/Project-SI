@@ -6,7 +6,6 @@ using UnityEngine.InputSystem;
 
 /// <summary>
 /// Handles custom input actions and manages input-related events.
-/// Utilizes modern C# features and optimizes for performance and memory usage.
 /// </summary>
 public class InputManager : MonoBehaviour {
     // Input Action Maps
@@ -25,14 +24,12 @@ public class InputManager : MonoBehaviour {
     public event Action OnVMirrorAction;
     public event Action OnHMirrorAction;
 
-    // Toolbelt Slot Actions
-    private readonly Dictionary<int, Action> _toolbeltSlotActions = new Dictionary<int, Action>();
-
     // Mouse Click Events
     public event Action OnLeftClickAction;
     public event Action OnLeftClickStarted;
     public event Action OnLeftClickCanceled;
     public event Action OnRightClickAction;
+    public event Action OnSpecialComboAction;
 
     // Modifier Keys
     public event Action OnLeftControlAction;
@@ -59,8 +56,14 @@ public class InputManager : MonoBehaviour {
     private readonly InputAction[] _toolbeltSlotInputActions = new InputAction[10];
 
     // Dictionary zur Speicherung der Delegates für die ToolbeltSlot Performeds
-    private readonly Dictionary<int, Action<InputAction.CallbackContext>> _toolbeltSlotPerformedCallbacks = new Dictionary<int, Action<InputAction.CallbackContext>>();
+    private readonly Dictionary<int, Action<InputAction.CallbackContext>> _toolbeltSlotPerformedCallbacks = new();
 
+    // Toolbelt Slot Actions
+    private readonly Dictionary<int, Action> _toolbeltSlotActions = new();
+
+    private float _timeLastLeftClick;
+    private float _timeLastRightClick;
+    private const float COMBO_THRESHOLD = 0.2f;
 
     /// <summary>
     /// Initializes the singleton instance and input actions.
@@ -192,13 +195,27 @@ public class InputManager : MonoBehaviour {
 
     private void HMirrorObj_Performed(InputAction.CallbackContext obj) => OnHMirrorAction?.Invoke();
 
-    private void LeftClick_performed(InputAction.CallbackContext obj) => OnLeftClickAction?.Invoke();
+    private void LeftClick_performed(InputAction.CallbackContext obj) {
+        OnLeftClickAction?.Invoke();
+        _timeLastLeftClick = Time.time;
+
+        if (Time.time - _timeLastRightClick <= COMBO_THRESHOLD) {
+            OnSpecialComboAction?.Invoke();
+        }
+    }
 
     private void LeftClick_started(InputAction.CallbackContext obj) => OnLeftClickStarted?.Invoke();
 
     private void LeftClick_canceled(InputAction.CallbackContext obj) => OnLeftClickCanceled?.Invoke();
 
-    private void RightClick_performed(InputAction.CallbackContext obj) => OnRightClickAction?.Invoke();
+    private void RightClick_performed(InputAction.CallbackContext obj) { 
+        OnRightClickAction?.Invoke();
+        _timeLastRightClick = Time.time;
+
+        if (Time.time - _timeLastLeftClick <= COMBO_THRESHOLD) {
+            OnSpecialComboAction?.Invoke();
+        }
+    }
 
     private void LeftControl_performed(InputAction.CallbackContext obj) => OnLeftControlAction?.Invoke();
 

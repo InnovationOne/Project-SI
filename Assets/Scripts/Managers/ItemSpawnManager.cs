@@ -36,15 +36,11 @@ public class ItemSpawnManager : NetworkBehaviour {
         for (int i = 0; i < itemSlot.Amount; i++) {
             Vector3 finalPos = CalculateFinalPosition(spawnPosition, initialPosition, motionDirection, spreadType, i, itemSlot.Amount, useInventoryPosition);
 
-            if (NetworkManager.Singleton.SpawnManager != null) {
-                PickUpItem pickUp = Instantiate(_pickUpItemPrefab, spawnPosition, Quaternion.identity, transform);
-                pickUp.InitializeItem(new ItemSlot(itemSlot.ItemId, 1, itemSlot.RarityId));
-                NetworkObject no = pickUp.GetComponent<NetworkObject>();
-                no.Spawn(true);
-                SpawnItemClientRpc(finalPos, no.NetworkObjectId, spawnPosition, useInventoryPosition);
-            } else {
-                Debug.LogError("NetworkManager SpawnManager is null. Cannot spawn items.");
-            }
+            PickUpItem pickUp = Instantiate(_pickUpItemPrefab, spawnPosition, Quaternion.identity, transform);
+            pickUp.InitializeItem(new ItemSlot(itemSlot.ItemId, 1, itemSlot.RarityId));
+            NetworkObject no = pickUp.GetComponent<NetworkObject>();
+            no.Spawn(true);
+            SpawnItemClientRpc(finalPos, no.NetworkObjectId, spawnPosition, useInventoryPosition);
         }
     }
 

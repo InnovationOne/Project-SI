@@ -42,22 +42,6 @@ public class PickUpItem : NetworkBehaviour {
     GameManager _gameManager;
 
 
-    void Awake() {
-        _parabolaAnimationTime = _maxParabolaAnimationTime;
-        _itemSlot ??= new ItemSlot();
-    }
-
-    void Start() {
-        _gameManager = GameManager.Instance;
-        _timeManager = _gameManager.TimeManager;
-        _itemManager = _gameManager.ItemManager;
-        _dragItemUI = DragItemUI.Instance;
-        _eventsManager = _gameManager.EventsManager;
-        _timeManager.OnNextDayStarted += OnNextDay;
-
-        _canPickUpTimer = ItemSpawnManager.LEAN_MOVE_TIME;
-    }
-
     new void OnDestroy() {
         _timeManager.OnNextDayStarted -= OnNextDay;
         base.OnDestroy();
@@ -175,6 +159,18 @@ public class PickUpItem : NetworkBehaviour {
     #region -------------------- Initialization --------------------
     // Sets up the item's data, including its icon, based on the provided slot info.
     public void InitializeItem(ItemSlot itemSlot) {
+        _parabolaAnimationTime = _maxParabolaAnimationTime;
+        _itemSlot ??= new ItemSlot();
+
+        _gameManager = GameManager.Instance;
+        _timeManager = _gameManager.TimeManager;
+        _itemManager = _gameManager.ItemManager;
+        _eventsManager = _gameManager.EventsManager;
+        _timeManager.OnNextDayStarted += OnNextDay;
+        _dragItemUI = DragItemUI.Instance;
+
+        _canPickUpTimer = ItemSpawnManager.LEAN_MOVE_TIME;
+
         _itemSlot.Set(itemSlot);
         _itemRenderer.sprite = _itemManager.ItemDatabase[_itemSlot.ItemId].ItemIcon;
     }

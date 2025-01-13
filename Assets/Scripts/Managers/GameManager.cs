@@ -6,6 +6,22 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(NetworkObject))]
+[RequireComponent(typeof(CropsManager))]
+[RequireComponent(typeof(DialogueManager))]
+[RequireComponent(typeof(FinanceManager))]
+[RequireComponent(typeof(InputManager))]
+[RequireComponent(typeof(ItemManager))]
+[RequireComponent(typeof(ItemSpawnManager))]
+[RequireComponent(typeof(SI_LoadSceneManager))]
+[RequireComponent(typeof(QuestManager))]
+[RequireComponent(typeof(TimeManager))]
+[RequireComponent(typeof(RecipeManager))]
+[RequireComponent(typeof(PauseGameManager))]
+[RequireComponent(typeof(PlaceableObjectsManager))]
+[RequireComponent(typeof(EventsManager))]
+[RequireComponent(typeof(AudioManager))]
+[RequireComponent(typeof(FMODEvents))]
+[RequireComponent(typeof(WeatherManager))]
 public class GameManager : NetworkBehaviour, IDataPersistance {
     public static GameManager Instance { get; private set; }
 
@@ -225,7 +241,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     [ClientRpc]
     private void SetAllPlayersAwakeClientRpc() {
         if (PlayerController.LocalInstance != null) {
-            PlayerController.LocalInstance.SetPlayerInBed(false);
+            PlayerController.LocalInstance.TogglePlayerInBed();
         } else {
             Debug.LogWarning("LocalInstance of Player is not set.");
         }

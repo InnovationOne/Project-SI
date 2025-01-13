@@ -18,26 +18,25 @@ using UnityEngine;
 public class PlayerController : NetworkBehaviour {
     public static PlayerController LocalInstance { get; private set; }
 
-    public PlayerCraftController PlayerCraftController { get; private set; } 
-    public PlayerHealthAndEnergyController PlayerHealthAndEnergyController { get; private set; }
-    public PlayerInteractController PlayerInteractionController { get; private set; }
-    public PlayerInventoryController PlayerInventoryController { get; private set; }
-    public PlayerItemDragAndDropController PlayerItemDragAndDropController { get; private set; }
-    public PlayerMarkerController PlayerMarkerController { get; private set; }
-    public PlayerMovementController PlayerMovementController { get; private set; }
-    public PlayerToolbeltController PlayerToolbeltController { get; private set; }
-    public PlayerToolsAndWeaponController PlayerToolsAndWeaponController { get; private set; }
-    public PlayerCameraController PlayerCameraController { get; private set; }
-    public PlayerFishingController PlayerFishingController { get; private set; }
-    public RaindropController RaindropController { get; private set; }
-
-    public bool InBed { get; private set; }
+    public PlayerCraftController PlayerCraftController;
+    public PlayerHealthAndEnergyController PlayerHealthAndEnergyController;
+    public PlayerInteractController PlayerInteractionController;
+    public PlayerInventoryController PlayerInventoryController;
+    public PlayerItemDragAndDropController PlayerItemDragAndDropController;
+    public PlayerMarkerController PlayerMarkerController;
+    public PlayerMovementController PlayerMovementController;
+    public PlayerToolbeltController PlayerToolbeltController;
+    public PlayerToolsAndWeaponController PlayerToolsAndWeaponController;
+    public PlayerCameraController PlayerCameraController;
+    public PlayerFishingController PlayerFishingController;
+    public RaindropController RaindropController;
 
     GameManager _gameManager;
 
     public override void OnNetworkSpawn() {
         _gameManager = GameManager.Instance;
         _gameManager.AddPlayerToSleepingDict(OwnerClientId);
+        _gameManager.AddPlayer(this);
 
         if (IsOwner) {
             if (LocalInstance != null) {
@@ -64,12 +63,17 @@ public class PlayerController : NetworkBehaviour {
 
     public override void OnNetworkDespawn() {
         _gameManager.RemovePlayerFromSleepingDict(OwnerClientId);
+        _gameManager.RemovePlayer(this);
     }
 
-    public void SetPlayerInBed(bool inBed) {
-        if (InBed == inBed) return;
-        InBed = inBed;
+    public void TogglePlayerInBed() {
+        if (PlayerMovementController.ActivePlayerState == PlayerMovementController.PlayerState.Sleeping) {
+            _gameManager.SetPlayerSleepingStateServerRpc(false);
+            PlayerMovementController.ChangeState(PlayerMovementController.PlayerState.Idle, true);
+            return;
+        }
 
-        _gameManager.SetPlayerSleepingStateServerRpc(InBed);
+        PlayerMovementController.ChangeState(PlayerMovementController.PlayerState.Sleeping, true);
+        _gameManager.SetPlayerSleepingStateServerRpc(true);
     }
 }

@@ -101,6 +101,7 @@ public class PauseGameManager : NetworkBehaviour {
     }
 
     private void TestGamePausedState() {
+        return;
         foreach (ulong clientId in NetworkManager.Singleton.ConnectedClientsIds) {
             if (playerPausedDict.ContainsKey(clientId) && playerPausedDict[clientId]) {
                 // This player is paused
