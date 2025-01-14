@@ -4,7 +4,7 @@ public class BreakableObject : MonoBehaviour, IDamageable {
     [SerializeField] private int _hp = 10;
     [SerializeField] private ItemSlot _itemSlot;
 
-    public void TakeDamage(Vector2 attackerPosition, int amount, WeaponSO.DamageTypes type) {
+    public void TakeDamage(Vector2 attackerPosition, int amount, WeaponSO.DamageTypes type, float knockbackForce) {
         _hp -= amount;
 
         if (_hp <= 0) {

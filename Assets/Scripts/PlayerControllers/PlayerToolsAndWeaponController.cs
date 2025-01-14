@@ -103,7 +103,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     void MeleeAction(WeaponSO weaponSO) {
         CheckComboWindow(weaponSO.ComboMaxDelay, weaponSO.ComboMaxCount);
 
-        PlayerState animationType;
+        PlayerState animationType = PlayerState.Slash;
         // Sword 
         if (weaponSO.HasSlashAnimation && _comboIndex == 0) {
             // 1. Slash Animation
@@ -111,19 +111,11 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         } else if (weaponSO.HasSlashReverseAnimation && _comboIndex == 1) {
             // 2. Slash Reverse Animation
             animationType = PlayerState.SlashReverse;
-        } else if (weaponSO.HasThrustAnimation && _comboIndex == 2) {
+        } else if (weaponSO.HasThrustAnimation) {
             // 3. Thrust Animation
             animationType = PlayerState.RaiseStaff;
-        }
-
-        // Speer
-        else if (weaponSO.HasThrustAnimation) {
-            animationType = PlayerState.RaiseStaff;
-        }
-
-        // Fallback
-        else {
-            animationType = PlayerState.Slash;
+        } else {
+            // Fallback
             Debug.LogError($"No animation found for comboIndex {_comboIndex}");
         }
 
@@ -201,7 +193,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
                 // Prüfen, ob der Collider ein BoxCollider2D ist
                 if (col is BoxCollider2D && col.TryGetComponent<IDamageable>(out var target)) {
-                    target.TakeDamage(transform.position, weapon.AttackDamage, dmgType);
+                    target.TakeDamage(transform.position, weapon.AttackDamage, dmgType, weapon.KnockbackForce);
                     Debug.Log($"Hit {col.name} for {weapon.AttackDamage} damage");
                 }
 

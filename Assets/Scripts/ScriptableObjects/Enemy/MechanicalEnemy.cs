@@ -7,7 +7,7 @@ public class MechanicalEnemy : Enemy {
             GameObject proj = Instantiate(_enemySO.ProjectilePrefab, transform.position, Quaternion.identity);
 
             if (proj != null) {
-                proj.GetComponent<LightningProjectile>().Init(directionToPlayer, this);
+                proj.GetComponent<LightningProjectile>().Init(directionToPlayer, 0, this);
             }
         }
     }

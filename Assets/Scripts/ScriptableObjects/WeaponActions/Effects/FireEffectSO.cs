@@ -22,7 +22,7 @@ public class FireEffectSO : ScriptableObject, IStatusEffect {
 
         while (elapsed < duration) {
             int dmg = Mathf.RoundToInt(damageOverTime);
-            target.TakeDamage(Vector2.zero, dmg, WeaponSO.DamageTypes.Fire);
+            target.TakeDamage(Vector2.zero, dmg, WeaponSO.DamageTypes.Fire, 0);
 
             yield return new WaitForSeconds(tickInterval);
             elapsed += tickInterval;

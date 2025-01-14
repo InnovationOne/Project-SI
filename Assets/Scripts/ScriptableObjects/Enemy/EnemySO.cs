@@ -27,7 +27,7 @@ public class EnemySO : ScriptableObject {
 
     [Header("Enemy Movement")]
     public float Speed;
-    public float KnockbackForce;
+    //public float KnockbackForce;
     public float MinIdleTime;
     public float MaxIdleTime;
 

@@ -23,7 +23,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable {
 
     public abstract void Attack(Vector2 enemyPos);
 
-    public void TakeDamage(Vector2 attackerPos, int amount, WeaponSO.DamageTypes type) {
+    public void TakeDamage(Vector2 attackerPos, int amount, WeaponSO.DamageTypes type, float knockbackForce) {
         if (_enemyAI.GetState() == EnemyAI.EnemyState.Stunned) {
             // TODO: e.g. Extralogic: If stunned, do you get bonus damage?
         }
@@ -34,7 +34,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable {
 
         // Knockback effect
         StartCoroutine(HitStopCoroutine(0.5f, 0.0f));
-        ApplyKnockback(attackerPos);
+        ApplyKnockback(attackerPos, knockbackForce);
 
         if (_currentHealth <= 0) {
             Die();
@@ -53,19 +53,19 @@ public abstract class Enemy : MonoBehaviour, IDamageable {
         //Time.timeScale = originalTimeScale;
     }
 
-    private void ApplyKnockback(Vector2 attackerPosition) {
+    private void ApplyKnockback(Vector2 attackerPosition, float knockbackForce) {
         Vector2 knockbackDirection = ((Vector2)transform.position - attackerPosition).normalized;
-        _rb.linearVelocity = knockbackDirection * _enemySO.KnockbackForce;
-        StopCoroutine(ReduceKnockback());
-        StartCoroutine(ReduceKnockback());
+        _rb.linearVelocity = knockbackDirection * knockbackForce;
+        StopCoroutine(ReduceKnockback(knockbackForce));
+        StartCoroutine(ReduceKnockback(knockbackForce));
     }
 
-    private IEnumerator ReduceKnockback() {
+    private IEnumerator ReduceKnockback(float knockbackForce) {
         float knockbackDuration = 0.5f; // Total duration of knockback effect
         float elapsedTime = 0f;
 
         while (elapsedTime < knockbackDuration) {
-            float damping = Mathf.Lerp(_enemySO.KnockbackForce, 0f, elapsedTime / knockbackDuration);
+            float damping = Mathf.Lerp(knockbackForce, 0f, elapsedTime / knockbackDuration);
             _rb.linearVelocity = _rb.linearVelocity.normalized * damping;
             elapsedTime += Time.deltaTime;
             yield return null;

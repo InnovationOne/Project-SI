@@ -13,7 +13,7 @@ public class GreenSlimeEnemy : Enemy {
 
         foreach (var hit in hits) {
             if (hit.CompareTag(_playerTag) && hit.TryGetComponent(out IDamageable target)) {
-                target.TakeDamage(transform.position, EnemySO.AttackDamage, WeaponSO.DamageTypes.Physical);
+                target.TakeDamage(transform.position, EnemySO.AttackDamage, WeaponSO.DamageTypes.Physical, 0);
                 Debug.Log($"[GreenSlimeEnemy] Hit {hit.name} for {EnemySO.AttackDamage} damage.");
             }
         }

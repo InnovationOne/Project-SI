@@ -129,7 +129,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IDamageable, IP
         _isInvincible = false;
     }
 
-    public void TakeDamage(Vector2 attackerPosition, int amount, WeaponSO.DamageTypes type) {
+    public void TakeDamage(Vector2 attackerPosition, int amount, WeaponSO.DamageTypes type, float knockbackForce) {
         StartCoroutine(HitStopCoroutine(0.5f, 0.0f));
 
         int finalDamage = amount;

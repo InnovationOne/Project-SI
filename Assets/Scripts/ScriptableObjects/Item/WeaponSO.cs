@@ -20,18 +20,16 @@ public class WeaponSO : ItemSO {
 
     [Header("Weapon Info")]
     public WeaponTypes WeaponType;
-    public WeaponActionSO WeaponActionSO;
     public DamageTypes DamageType;
 
     [Header("Additional Status Effects")]
     public List<ScriptableObject> AdditionalEffects;
 
-    public int Range;
-
     [Header("Attack")]
     public int AttackDamage;
     public int AttackEnergyCost;
     public float AttackSpeed;
+    public float KnockbackForce;
 
     [Header("Combo Settings")]
     public float ComboMaxDelay;
