@@ -29,7 +29,8 @@ public class InputManager : MonoBehaviour {
     public event Action OnLeftClickStarted;
     public event Action OnLeftClickCanceled;
     public event Action OnRightClickAction;
-    public event Action OnSpecialComboAction;
+    public event Action OnRightClickStarted;
+    public event Action OnRightClickCanceled;
 
     // Modifier Keys
     public event Action OnLeftControlAction;
@@ -61,9 +62,6 @@ public class InputManager : MonoBehaviour {
     // Toolbelt Slot Actions
     private readonly Dictionary<int, Action> _toolbeltSlotActions = new();
 
-    private float _timeLastLeftClick;
-    private float _timeLastRightClick;
-    private const float COMBO_THRESHOLD = 0.2f;
 
     /// <summary>
     /// Initializes the singleton instance and input actions.
@@ -132,6 +130,8 @@ public class InputManager : MonoBehaviour {
         _playerInputActions.Player.LeftClick.started += LeftClick_started;
         _playerInputActions.Player.LeftClick.canceled += LeftClick_canceled;
         _playerInputActions.Player.RightClick.performed += RightClick_performed;
+        _playerInputActions.Player.RightClick.started += RightClick_started;
+        _playerInputActions.Player.RightClick.canceled += RightClick_canceled;
 
         // Modifier Keys
         _playerInputActions.Player.LeftControl.performed += LeftControl_performed;
@@ -195,27 +195,16 @@ public class InputManager : MonoBehaviour {
 
     private void HMirrorObj_Performed(InputAction.CallbackContext obj) => OnHMirrorAction?.Invoke();
 
-    private void LeftClick_performed(InputAction.CallbackContext obj) {
-        OnLeftClickAction?.Invoke();
-        _timeLastLeftClick = Time.time;
-
-        if (Time.time - _timeLastRightClick <= COMBO_THRESHOLD) {
-            OnSpecialComboAction?.Invoke();
-        }
-    }
-
+    private void LeftClick_performed(InputAction.CallbackContext obj) => OnLeftClickAction?.Invoke();
     private void LeftClick_started(InputAction.CallbackContext obj) => OnLeftClickStarted?.Invoke();
 
     private void LeftClick_canceled(InputAction.CallbackContext obj) => OnLeftClickCanceled?.Invoke();
 
-    private void RightClick_performed(InputAction.CallbackContext obj) { 
-        OnRightClickAction?.Invoke();
-        _timeLastRightClick = Time.time;
+    private void RightClick_performed(InputAction.CallbackContext obj) => OnRightClickAction?.Invoke();
 
-        if (Time.time - _timeLastLeftClick <= COMBO_THRESHOLD) {
-            OnSpecialComboAction?.Invoke();
-        }
-    }
+    private void RightClick_started(InputAction.CallbackContext obj) => OnRightClickStarted?.Invoke();
+
+    private void RightClick_canceled(InputAction.CallbackContext obj) => OnRightClickCanceled?.Invoke();
 
     private void LeftControl_performed(InputAction.CallbackContext obj) => OnLeftControlAction?.Invoke();
 
@@ -359,6 +348,8 @@ public class InputManager : MonoBehaviour {
         _playerInputActions.Player.LeftClick.started -= LeftClick_started;
         _playerInputActions.Player.LeftClick.canceled -= LeftClick_canceled;
         _playerInputActions.Player.RightClick.performed -= RightClick_performed;
+        _playerInputActions.Player.RightClick.started -= RightClick_started;
+        _playerInputActions.Player.RightClick.canceled -= RightClick_canceled;
 
         _playerInputActions.Player.LeftControl.performed -= LeftControl_performed;
         _playerInputActions.Player.LeftControl.canceled -= LeftControl_canceled;

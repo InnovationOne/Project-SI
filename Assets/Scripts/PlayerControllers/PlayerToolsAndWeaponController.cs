@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
+using static PlayerAnimationController;
 
 // This class represents the character using an item
 [RequireComponent(typeof(NetworkObject))]
@@ -9,8 +10,9 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     PlayerMarkerController _playerMarkerController;
     PlayerToolbeltController _playerToolbeltController;
     PlayerController _pC;
-    PlayerHealthAndEnergyController _pHaEC;
+    PlayerHealthAndEnergyController _pHEC;
     PlayerMovementController _pMC;
+    PlayerAnimationController _pAC;
     InputManager _inputManager;
     InventoryMasterUI _inventoryMasterUI;
     ItemManager _itemManager;
@@ -24,11 +26,11 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     float _elapsedTime;
 
     float _attackTimer;
-    float _specialAttackTimer;
-    float _heavyAttackChargeTime;
 
     float _comboTimer;
     int _comboIndex;
+
+    float _bowChargedTimer;
 
     private ContactFilter2D _contactFilter;
     private Collider2D[] _overlapResults = new Collider2D[10];
@@ -38,17 +40,16 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         _pC = GetComponent<PlayerController>();
         _playerMarkerController = GetComponent<PlayerMarkerController>();
         _playerToolbeltController = GetComponent<PlayerToolbeltController>();
-        _pHaEC = GetComponent<PlayerHealthAndEnergyController>();
+        _pHEC = GetComponent<PlayerHealthAndEnergyController>();
         _pMC = GetComponent<PlayerMovementController>();
         _itemManager = GameManager.Instance.ItemManager;
         _inventoryMasterUI = InventoryMasterUI.Instance;
+        _pAC = GetComponent<PlayerAnimationController>();
 
         _inputManager = GameManager.Instance.InputManager;
         _inputManager.OnLeftClickAction += HandleLeftClick;
-        _inputManager.OnRightClickAction += HandleRightClick;
-        _inputManager.OnLeftClickStarted += HandleLeftClickStarted;
-        _inputManager.OnLeftClickCanceled += HandleLeftClickCanceled;
-        _inputManager.OnSpecialComboAction += HandleSpecialComboAction;
+        _inputManager.OnRightClickStarted += HandleRightClickStarted;
+        _inputManager.OnRightClickCanceled += HandleRightClickCanceled;
 
         _contactFilter.useTriggers = true;
         _contactFilter.SetLayerMask(_enemyLayerMask);
@@ -62,18 +63,10 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
     private void Update() {
         if (_attackTimer > 0) _attackTimer -= Time.deltaTime;
-        if (_specialAttackTimer > 0) _specialAttackTimer -= Time.deltaTime;
-        if (_heavyAttackChargeTime > 0) _heavyAttackChargeTime -= Time.deltaTime;
     }
 
     bool CanAttack() {
-        return _attackTimer <= 0f && AttackableState();
-    }
-
-    bool AttackableState() {
-        return _pMC.ActivePlayerState == PlayerMovementController.PlayerState.Idle ||
-               _pMC.ActivePlayerState == PlayerMovementController.PlayerState.Walking ||
-               _pMC.ActivePlayerState == PlayerMovementController.PlayerState.Running;
+        return _attackTimer <= 0f;
     }
 
     void HandleLeftClick() {
@@ -91,95 +84,81 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     void WeaponAction(WeaponSO weaponSO) {
         if (!CanAttack()) return;
 
-        // Combo-Window check
-        if (Time.time - _comboTimer > weaponSO.ComboMaxDelay) {
-            _comboIndex = 0;
+        switch (weaponSO.WeaponType) {
+            case WeaponSO.WeaponTypes.Melee:
+                MeleeAction(weaponSO);
+                break;
+            case WeaponSO.WeaponTypes.Ranged:
+                RangedAction(weaponSO);
+                break;
+            case WeaponSO.WeaponTypes.Magic:
+                //MagicAction(weaponSO);
+                break;
         }
-        _comboIndex++;
-        if (_comboIndex > weaponSO.ComboMaxCount) {
-            _comboIndex = 0;
+
+        
+    }
+
+    #region -------------------- Meele Action --------------------
+    void MeleeAction(WeaponSO weaponSO) {
+        CheckComboWindow(weaponSO.ComboMaxDelay, weaponSO.ComboMaxCount);
+
+        PlayerState animationType;
+        // Sword 
+        if (weaponSO.HasSlashAnimation && _comboIndex == 0) {
+            // 1. Slash Animation
+            animationType = PlayerState.Slash;
+        } else if (weaponSO.HasSlashReverseAnimation && _comboIndex == 1) {
+            // 2. Slash Reverse Animation
+            animationType = PlayerState.SlashReverse;
+        } else if (weaponSO.HasThrustAnimation && _comboIndex == 2) {
+            // 3. Thrust Animation
+            animationType = PlayerState.RaiseStaff;
         }
-        _comboTimer = Time.time;
+
+        // Speer
+        else if (weaponSO.HasThrustAnimation) {
+            animationType = PlayerState.RaiseStaff;
+        }
+
+        // Fallback
+        else {
+            animationType = PlayerState.Slash;
+            Debug.LogError($"No animation found for comboIndex {_comboIndex}");
+        }
 
         // Start attack
         Debug.Log($"[Player Attack] ComboIndex = {_comboIndex}/{weaponSO.ComboMaxCount}");
-
-        _pHaEC.AdjustEnergy(-weaponSO.LightAttackEnergyCost);
-
-        _attackTimer = 1f / weaponSO.LightAttackSpeed;
-        StartCoroutine(PerformMeleeHit(weaponSO, WeaponSO.AttackMode.Light, _comboIndex));
+        _pHEC.AdjustEnergy(-weaponSO.AttackEnergyCost);
+        _attackTimer = 1f / weaponSO.AttackSpeed;
+        StartCoroutine(PerformMeleeHit(weaponSO, _comboIndex, animationType));
     }
 
-    void HandleLeftClickStarted() {
-        var weaponSO = GetItemSO() as WeaponSO;
-        if (!CanAttack() || weaponSO == null) return;
-
-        Debug.Log("Holding LMB: Charging heavy attack!");
-
-        _heavyAttackChargeTime = weaponSO.HeavyAttackChargeTime;
+    void CheckComboWindow(float comboMaxDelay, int comboMaxCount) {
+        if (Time.time - _comboTimer > comboMaxDelay) { 
+            _comboIndex = 0; 
+        } else { 
+            _comboIndex++;
+            if (_comboIndex >= comboMaxCount){ 
+                _comboIndex = 0; 
+            }
+        }        
+        _comboTimer = Time.time;
     }
 
-    void HandleLeftClickCanceled() {
-        var weaponSO = GetItemSO() as WeaponSO;
-        if (!CanAttack() || weaponSO == null || _heavyAttackChargeTime > 0) return;
-
-        Debug.Log("Releasing LMB: Heavy attack triggered!");
-
-        _pHaEC.AdjustEnergy(-weaponSO.HeavyAttackEnergyCost);
-        _attackTimer = 1f / weaponSO.HeavyAttackSpeed;
-        StartCoroutine(PerformMeleeHit(weaponSO, WeaponSO.AttackMode.Heavy, 0));
-    }
-
-    void HandleRightClick() {
-        var weaponSO = GetItemSO() as WeaponSO;
-        if (!CanAttack() || weaponSO == null) return;
+    IEnumerator PerformMeleeHit(WeaponSO weapon, int comboIndex, PlayerState animationType) {
         StopMovement();
-
-        // Start blocking
-        Debug.Log("Player is blocking!");
-        var previousPlayerState = _pMC.ActivePlayerState;
-        _pMC.ChangeState(PlayerMovementController.PlayerState.Blocking);
-        _pHaEC.AdjustEnergy(-weaponSO.BlockEnergyCost);
-
-        _pMC.ChangeState(previousPlayerState, true);
-        StartMovement();
-    }
-
-    void HandleSpecialComboAction() {
-        return;
-
-        if (!AttackableState()) return;
-        StopMovement();
-
-        Debug.Log("LMB + RMB gleichzeitig gedrückt: SPECIAL ATTACK!");
-        //_pC.ChangeState(PlayerController.PlayerState.Attacking);
-
-        // Here you could, for example, call up a vortex attack, area attack, etc.
-        // -> TODO: WeaponAction( specialComboWeaponSO ) or something similar.
-
-        //_pC.ChangeState(PlayerController.PlayerState.Idle);
-        StartMovement();
-    }
-
-    IEnumerator PerformMeleeHit(WeaponSO weapon, WeaponSO.AttackMode mode, int comboIndex) {
-        StopMovement();
-        var previousPlayerState = _pMC.ActivePlayerState;
-        _pMC.ChangeState(PlayerMovementController.PlayerState.Attacking);
+        var previousPlayerState = _pAC.ActivePlayerState;
+        _pAC.ChangeState(animationType);
         yield return new WaitForSeconds(_anim.GetCurrentAnimatorStateInfo(0).length / 2);
 
         // 1) Hole dir die korrekten Polygondaten
         int arrayIndex = Mathf.Clamp(comboIndex, 0, 999);
 
-        var listOfPoints = (mode == WeaponSO.AttackMode.Light)
-            ? weapon.ComboPointsLightAttack
-            : weapon.ComboPointsHeavyAttack;
+        var listOfPoints = weapon.ComboPointsAttack;
 
-        if (listOfPoints == null || listOfPoints.Count == 0) {
-            Debug.LogError($"No {mode} polygon data set in weaponSO!");
-            yield break;
-        }
         if (arrayIndex >= listOfPoints.Count) {
-            arrayIndex = listOfPoints.Count - 1; // Fallback
+            Debug.LogError($"ComboIndex {comboIndex} is out of bounds for weapon {weapon.name}");
         }
 
         var polygonLocalPoints = listOfPoints[arrayIndex];
@@ -215,7 +194,6 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         int hitCount = Physics2D.OverlapCollider(polyCollider, _contactFilter, _overlapResults);
         if (hitCount > 0) {
             // Schaden definieren
-            int dmg = (mode == WeaponSO.AttackMode.Light) ? weapon.LightAttackDamage : weapon.HeavyAttackDamage;
             WeaponSO.DamageTypes dmgType = weapon.DamageType;
 
             for (int i = 0; i < hitCount; i++) {
@@ -223,8 +201,8 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
                 // Prüfen, ob der Collider ein BoxCollider2D ist
                 if (col is BoxCollider2D && col.TryGetComponent<IDamageable>(out var target)) {
-                    target.TakeDamage(transform.position, dmg, dmgType, mode);
-                    Debug.Log($"Hit {col.name} for {dmg} damage");
+                    target.TakeDamage(transform.position, weapon.AttackDamage, dmgType);
+                    Debug.Log($"Hit {col.name} for {weapon.AttackDamage} damage");
                 }
 
                 // Den Eintrag zurücksetzen, um die Liste aufzuräumen
@@ -237,10 +215,62 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
         yield return new WaitForSeconds(_anim.GetCurrentAnimatorStateInfo(0).length / 2);
 
-        _pMC.ChangeState(previousPlayerState, true);
+        _pAC.ChangeState(previousPlayerState, true);
 
         StartMovement();
     }
+
+    #endregion -------------------- Meele Action --------------------
+
+    #region -------------------- Ranged Action --------------------
+    void HandleRightClickStarted() {
+        var weaponSO = GetItemSO() as WeaponSO;
+        if (weaponSO == null || !weaponSO.HasBowAnimation) return;
+        StopMovement();
+
+        // Bogen spannen
+        _pAC.ChangeState(PlayerState.RaiseBowAndAim, true);
+        _bowChargedTimer = Time.time + _pAC.AnimationTime;
+    }
+
+    void HandleRightClickCanceled() {
+        // Bogen loslassen
+        _pAC.ChangeState(PlayerState.Idle, true);
+        StartMovement();
+    }
+
+    void RangedAction(WeaponSO weaponSO) {
+        // Bow
+        if (weaponSO.HasBowAnimation && CanShoot()) {
+            Shoot(true);
+        }
+
+        // Crossbow
+        if (weaponSO.HasThrustAnimation) {
+            Shoot(false);
+        }
+    }
+
+    bool CanShoot() => (_pAC.ActivePlayerState == PlayerState.RaiseBowAndAim || _pAC.ActivePlayerState == PlayerState.AimNewArrow) && Time.time > _bowChargedTimer;
+
+    void Shoot(bool hasReload) {
+        // Shoot arrow
+        // TODO: Implement arrow shooting
+
+        if (hasReload) {
+            StartCoroutine(ReloadBow());
+        }
+    }
+
+    IEnumerator ReloadBow() {
+        _pAC.ChangeState(PlayerState.LooseArrow, true);
+        yield return new WaitForSeconds(_anim.GetCurrentAnimatorStateInfo(0).length);
+        _pAC.ChangeState(PlayerState.GrabNewArrow, true);
+        yield return new WaitForSeconds(_anim.GetCurrentAnimatorStateInfo(0).length);
+        _pAC.ChangeState(PlayerState.AimNewArrow, true);
+        _bowChargedTimer = Time.time + _pAC.AnimationTime;
+    }
+    #endregion -------------------- Ranged Action --------------------
     #endregion -------------------- Weapon Action --------------------
 
     #region -------------------- Tool Action --------------------

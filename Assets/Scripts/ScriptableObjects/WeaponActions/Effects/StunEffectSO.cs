@@ -21,10 +21,10 @@ public class StunEffectSO : ScriptableObject, IStatusEffect {
             yield return new WaitForSeconds(StunDuration);
             enemyAI.ChangeState(lastState);
         } else if (target is PlayerHealthAndEnergyController playerTarget) {
-            var pMC = playerTarget.GetComponent<PlayerMovementController>();
-            pMC.ChangeState(PlayerMovementController.PlayerState.Stunned);
+            var pMC = playerTarget.GetComponent<PlayerAnimationController>();
+            pMC.ChangeState(PlayerAnimationController.PlayerState.Stunned);
             yield return new WaitForSeconds(StunDuration);
-            pMC.ChangeState(PlayerMovementController.PlayerState.Idle);
+            pMC.ChangeState(PlayerAnimationController.PlayerState.Idle);
         }
     }
 }

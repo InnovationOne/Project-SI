@@ -5,15 +5,14 @@ using static WeaponSO;
 public class SwordActionSO : WeaponActionSO {
     public float hitRadius = 1f;
 
-    public override void OnUseWeapon(Vector2 moveDir, Vector2 origin, AttackMode attackMode, ItemSlot itemSlot) {
+    public override void OnUseWeapon(Vector2 moveDir, Vector2 origin, ItemSlot itemSlot) {
         WeaponSO weapon = GameManager.Instance.ItemManager.ItemDatabase[itemSlot.ItemId] as WeaponSO;
         if (weapon == null) return;
 
         Collider2D[] hits = Physics2D.OverlapCircleAll(origin + moveDir.normalized, hitRadius);
         foreach (Collider2D c in hits) {
             if (c.TryGetComponent<IDamageable>(out var dmg)) {
-                int damage = (attackMode == AttackMode.Light) ? weapon.LightAttackDamage : weapon.HeavyAttackDamage;
-                dmg.TakeDamage(origin, damage, weapon.DamageType, attackMode);
+                dmg.TakeDamage(origin, weapon.AttackDamage, weapon.DamageType);
 
                 foreach (var effectSo in weapon.AdditionalEffects) {
                     if (effectSo is IStatusEffect effect) {

@@ -23,7 +23,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable {
 
     public abstract void Attack(Vector2 enemyPos);
 
-    public void TakeDamage(Vector2 attackerPos, int amount, WeaponSO.DamageTypes type, WeaponSO.AttackMode attackMode) {
+    public void TakeDamage(Vector2 attackerPos, int amount, WeaponSO.DamageTypes type) {
         if (_enemyAI.GetState() == EnemyAI.EnemyState.Stunned) {
             // TODO: e.g. Extralogic: If stunned, do you get bonus damage?
         }

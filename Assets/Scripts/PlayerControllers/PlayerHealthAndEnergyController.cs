@@ -31,6 +31,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IDamageable, IP
     // TODO Move _hospitalRespawnPosition to the hospital itself
     Vector2 _hospitalRespawnPosition;
     PlayerMovementController _pMC;
+    PlayerAnimationController _pAC;
     PlayerInventoryController _inventoryController;
     TimeManager _timeManager;
 
@@ -48,6 +49,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IDamageable, IP
 
     void Awake() {
         _pMC = GetComponent<PlayerMovementController>();
+        _pAC = GetComponent<PlayerAnimationController>();
         _inventoryController = GetComponent<PlayerInventoryController>();
     }
 
@@ -67,7 +69,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IDamageable, IP
     }
 
     void FixedUpdate() {
-        if (IsOwner && _pMC.ActivePlayerState == PlayerMovementController.PlayerState.Sleeping) {
+        if (IsOwner && _pAC.ActivePlayerState == PlayerAnimationController.PlayerState.Sleeping) {
             RegenerateHealthAndEnergy();
         }
     }
@@ -127,12 +129,8 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IDamageable, IP
         _isInvincible = false;
     }
 
-    public void TakeDamage(Vector2 attackerPosition, int amount, WeaponSO.DamageTypes type, WeaponSO.AttackMode attackMode) {
-        if (attackMode == WeaponSO.AttackMode.Light) {
-            StartCoroutine(HitStopCoroutine(0.2f, 0.0f));
-        } else {
-            StartCoroutine(HitStopCoroutine(0.5f, 0.0f));
-        }
+    public void TakeDamage(Vector2 attackerPosition, int amount, WeaponSO.DamageTypes type) {
+        StartCoroutine(HitStopCoroutine(0.5f, 0.0f));
 
         int finalDamage = amount;
         finalDamage -= type switch {

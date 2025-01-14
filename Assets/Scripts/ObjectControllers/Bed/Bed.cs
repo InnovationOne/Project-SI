@@ -22,8 +22,8 @@ public class Bed : MonoBehaviour, IInteractable {
     /// </summary>
     /// <param name="player">The player object.</param>
     public void Interact(PlayerController player) {
-        var pMC = player.PlayerMovementController;
-        bool inBed = pMC.ActivePlayerState == PlayerMovementController.PlayerState.Sleeping;
+        var pAC = player.PlayerAnimationController;
+        bool inBed = pAC.ActivePlayerState == PlayerAnimationController.PlayerState.Sleeping;
         player.TogglePlayerInBed();
         PlayerController.LocalInstance.PlayerMovementController.SetCanMoveAndTurn(inBed);
     }

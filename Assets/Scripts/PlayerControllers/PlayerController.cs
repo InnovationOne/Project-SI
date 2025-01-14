@@ -30,6 +30,7 @@ public class PlayerController : NetworkBehaviour {
     public PlayerCameraController PlayerCameraController;
     public PlayerFishingController PlayerFishingController;
     public RaindropController RaindropController;
+    public PlayerAnimationController PlayerAnimationController;
 
     GameManager _gameManager;
 
@@ -57,6 +58,7 @@ public class PlayerController : NetworkBehaviour {
         PlayerToolsAndWeaponController = GetComponent<PlayerToolsAndWeaponController>();
         PlayerCameraController = GetComponent<PlayerCameraController>();
         PlayerFishingController = GetComponent<PlayerFishingController>();
+        PlayerAnimationController = GetComponent<PlayerAnimationController>();
 
         RaindropController = GetComponentInChildren<RaindropController>();
     }
@@ -67,13 +69,13 @@ public class PlayerController : NetworkBehaviour {
     }
 
     public void TogglePlayerInBed() {
-        if (PlayerMovementController.ActivePlayerState == PlayerMovementController.PlayerState.Sleeping) {
+        if (PlayerAnimationController.ActivePlayerState == PlayerAnimationController.PlayerState.Sleeping) {
             _gameManager.SetPlayerSleepingStateServerRpc(false);
-            PlayerMovementController.ChangeState(PlayerMovementController.PlayerState.Idle, true);
+            PlayerAnimationController.ChangeState(PlayerAnimationController.PlayerState.Idle, true);
             return;
         }
 
-        PlayerMovementController.ChangeState(PlayerMovementController.PlayerState.Sleeping, true);
+        PlayerAnimationController.ChangeState(PlayerAnimationController.PlayerState.Sleeping, true);
         _gameManager.SetPlayerSleepingStateServerRpc(true);
     }
 }
