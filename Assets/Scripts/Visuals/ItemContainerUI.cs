@@ -75,7 +75,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
     public void Init() {
         //Set the button index on the button
         for (int i = 0; i < ItemContainer.ItemSlots.Count && i < ItemButtons.Length; i++) {
-            ItemButtons[i].GetComponent<BackpackButton>().SetButtonIndex(i);
+            ItemButtons[i].GetComponent<InventorySlot>().SetButtonIndex(i);
         }
 
         ShowUIButtonContains();
@@ -86,9 +86,9 @@ public abstract class ItemContainerUI : MonoBehaviour {
         for (int i = 0; i < ItemContainer.ItemSlots.Count && i < ItemButtons.Length; i++) {
             //If the slot has no item, clear the button
             if (ItemContainer.ItemSlots[i].ItemId == -1) {
-                ItemButtons[i].GetComponent<BackpackButton>().ClearItemSlot();
+                ItemButtons[i].GetComponent<InventorySlot>().ClearItemSlot();
             } else {
-                ItemButtons[i].GetComponent<BackpackButton>().SetItemSlot(ItemContainer.ItemSlots[i], RaritySprites);
+                ItemButtons[i].GetComponent<InventorySlot>().SetItemSlot(ItemContainer.ItemSlots[i], RaritySprites);
             }
         }
     }
@@ -148,7 +148,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
                 splitValue,
                 originalSlot.RarityId
                 );
-                PlayerItemDragAndDropController.LocalInstance.OnLeftClick(newItemSlot);
+                PlayerController.LocalInstance.PlayerItemDragAndDropController.OnLeftClick(newItemSlot);
 
                 // When all items are "Splitted" clear the item slot
                 if ((int)_splitAmountSlider.maxValue == splitValue) {
@@ -198,7 +198,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
         }
 
         if (_currentTime >= TIME_TO_SHOW_ITEM_INFO && !_itemInfo.gameObject.activeSelf) {
-            _itemNameText.text = ItemManager.Instance.ItemDatabase[_itemSlotForShowInfo.ItemId].ItemName;
+            _itemNameText.text = GameManager.Instance.ItemManager.ItemDatabase[_itemSlotForShowInfo.ItemId].ItemName;
 
             StringBuilder itemSlotInfoStringBuilder = new();
             //int rarityOffset = 0;

@@ -8,11 +8,11 @@ public class CollectWoodQuestStep : QuestStep {
     
 
     private void OnEnable() {
-        EventsManager.Instance.ItemPickedUpEvents.OnPickedUpItemId += ItemCollected;
+        GameManager.Instance.EventsManager.ItemPickedUpEvents.OnPickedUpItemId += ItemCollected;
     }
 
     private void OnDisable() {
-        EventsManager.Instance.ItemPickedUpEvents.OnPickedUpItemId -= ItemCollected;
+        GameManager.Instance.EventsManager.ItemPickedUpEvents.OnPickedUpItemId -= ItemCollected;
     }
 
     private void ItemCollected(int id) {

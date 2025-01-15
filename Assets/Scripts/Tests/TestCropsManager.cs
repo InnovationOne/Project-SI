@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using Unity.Netcode;
 
+[RequireComponent(typeof(NetworkObject))]
 public class TestCropsManager : NetworkBehaviour {
     public static TestCropsManager Instance;
 
@@ -22,8 +23,8 @@ public class TestCropsManager : NetworkBehaviour {
     }
 
     private void Start() {
-        cropsManager = CropsManager.Instance;
-        timeManager = TimeManager.Instance;
+        cropsManager = GameManager.Instance.CropsManager;
+        timeManager = GameManager.Instance.TimeManager;
         _test = Test;
     }
 
@@ -148,7 +149,7 @@ public class TestCropsManager : NetworkBehaviour {
     /// </summary>
     private void HarvestAllHarvestableCrops() {
         foreach (var cropTile in cropsManager.CropTiles) {
-            if (cropTile.CropId != -1 && cropTile.IsCropHarvestable()) {
+            if (cropTile.CropId != -1 && cropTile.IsCropHarvestable(cropsManager.CropDatabase)) {
                 if (cropsManager.CropDatabase[cropTile.CropId].IsTree) {
                     cropsManager.HarvestTreeServerRpc(new Vector3IntSerializable(cropTile.CropPosition), default);
                 } else {

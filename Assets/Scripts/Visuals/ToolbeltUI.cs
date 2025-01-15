@@ -26,13 +26,7 @@ public class ToolbeltUI : ItemContainerUI {
         }
         Instance = this;
 
-        _inventoryButton.onClick.AddListener(() => {
-            if (InventoryMasterVisual.Instance.LastOpenPanel == InventorySubPanels.none) {
-                InventoryMasterVisual.Instance.SetSubPanel(InventorySubPanels.Crafting);
-            } else {
-                InventoryMasterVisual.Instance.SetSubPanel(InventoryMasterVisual.Instance.LastOpenPanel);
-            }
-        });
+        _inventoryButton.onClick.AddListener(() => InventoryMasterUI.Instance.HandleInventoryToggle());
     }
 
     private void Start() {
@@ -42,6 +36,9 @@ public class ToolbeltUI : ItemContainerUI {
     }
 
     public void SetToolbeltSize(int toolbeltSize) {
+
+        // TODO: Get the right image for unlocked and locked and set it based on the size of the toolbelt
+        /*
         for (int i = 0; i < ItemButtons.Length; i++) {
             if (i < toolbeltSize) {
                 ItemButtons[i].GetComponent<Button>().interactable = true;
@@ -51,14 +48,15 @@ public class ToolbeltUI : ItemContainerUI {
                 ItemButtons[i].GetComponent<Image>().raycastTarget = false;
             }
         }
+        */
     }
 
     public void SetToolbeltSlotHighlight(int currentlySelectedTool) {
-        ItemButtons[_lastSelectedTool].GetComponent<BackpackButton>().SetButtonHighlight(false);
+        ItemButtons[_lastSelectedTool].GetComponent<InventorySlot>().SetButtonHighlight(false);
 
         _lastSelectedTool = currentlySelectedTool;
 
-        ItemButtons[currentlySelectedTool].GetComponent<BackpackButton>().SetButtonHighlight(true);
+        ItemButtons[currentlySelectedTool].GetComponent<InventorySlot>().SetButtonHighlight(true);
     }
 
     public void ToolbeltChanged(int selectedToolbelt, float rotation) {

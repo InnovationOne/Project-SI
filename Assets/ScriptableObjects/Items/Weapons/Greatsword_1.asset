@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da1b35da3e2b3604098d1e1f1adf8bdf, type: 3}
+  m_Name: Greatsword_1
+  m_EditorClassIdentifier: 
+  ItemId: 253
+  ItemType: 0
+  ItemName: Sword
+  ItemIcon: {fileID: 21300000, guid: aadecd4a136e4ef489d5887ef0c4b4d5, type: 3}
+  IsStackable: 0
+  MaxStackableAmount: 1
+  CanBeBought: 0
+  BuyPrice: 0
+  CanBeSold: 1
+  LowestRaritySellPrice: 100
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  AttackType: 0
+  WeaponType: 0
+  WeaponActionSO: {fileID: 11400000, guid: 0314d95d49e99a643a90dfc27368ab26, type: 2}
+  DamageType: 0
+  AdditionalEffects: []
+  Range: 0
+  LightAttackDamage: 2
+  LightAttackEnergyCost: 1
+  LightAttackSpeed: 1
+  HeavyAttackDamage: 4
+  HeavyAttackEnergyCost: 2
+  HeavyAttackChargeTime: 2
+  HeavyAttackSpeed: 0.5
+  BlockEnergyCost: 1
+  SpecialComboCost: 0
+  ComboMaxDelay: 1
+  ComboMaxCount: 1
+  CritChance: 20
+  CritDamage: 3
+  ComboPointsLightAttack:
+  - Points:
+    - {x: -0.62504995, y: -0.25002}
+    - {x: 0.70839, y: -0.25002}
+    - {x: 0.70839, y: -0.62504995}
+    - {x: 0.66672, y: -0.70839}
+    - {x: 0.50004, y: -0.87507}
+    - {x: 0.33336, y: -0.95840997}
+    - {x: 0.20834999, y: -1.00008}
+    - {x: -0.12501, y: -1.00008}
+    - {x: -0.25002, y: -0.95840997}
+    - {x: -0.41669998, y: -0.87507}
+    - {x: -0.58338, y: -0.70839}
+    - {x: -0.62504995, y: -0.62505}
+  ComboPointsHeavyAttack: []

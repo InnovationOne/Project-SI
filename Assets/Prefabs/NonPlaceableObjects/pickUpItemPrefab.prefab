@@ -135,7 +135,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 394840070
+  GlobalObjectIdHash: 3973843843
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -161,9 +161,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  _itemMoveSpeed: 0.2
-  _itemSpeedAcceleration: 0.01
-  _pickUpDistanceThreshold: 1.25
+  _itemMoveSpeed: 5
+  _itemSpeedAcceleration: 0.1
+  _pickUpDistanceThreshold: 2
   _upAndDownSpeed: 1
   _timeForLoop: 1
   _upAndDownHeight: 0.01

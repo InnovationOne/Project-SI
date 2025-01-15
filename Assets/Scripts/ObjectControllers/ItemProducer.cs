@@ -21,7 +21,10 @@ public class ItemProducer : PlaceableObject {
     /// </summary>
     private void Start() => GetComponent<TimeAgent>().OnMinuteTimeTick += ItemProducerProcess;
 
-    private void OnDestroy() => GetComponent<TimeAgent>().OnMinuteTimeTick -= ItemProducerProcess;
+    private new void OnDestroy() { 
+        GetComponent<TimeAgent>().OnMinuteTimeTick -= ItemProducerProcess; 
+        base.OnDestroy();
+    }
 
     /// <summary>
     /// Initializes the item producer with a specific item identifier.
@@ -55,7 +58,7 @@ public class ItemProducer : PlaceableObject {
     /// Handles interactions with the player, typically used to trigger item production.
     /// </summary>
     /// <param name="player">The player interacting with the item producer.</param>
-    public override void Interact(Player player) {
+    public override void Interact(PlayerController player) {
         if (_timer <= 0f) {
             ProduceItems();
             ResetTimer();
@@ -68,13 +71,13 @@ public class ItemProducer : PlaceableObject {
     /// </summary>
     /// <param name="player">The player for whom items are being produced.</param>
     private void ProduceItems() {
-        foreach (ItemSlot itemSlot in RecipeManager.Instance.RecipeDatabase[_recipeId].ItemsToProduce) {
-            int remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(itemSlot, false);
+        foreach (ItemSlot itemSlot in GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsToProduce) {
+            int remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(itemSlot, false);
             if (remainingAmount > 0) {
-                ItemSpawnManager.Instance.SpawnItemServerRpc(
+                GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
                     itemSlot: itemSlot,
                     initialPosition: transform.position,
-                    motionDirection: PlayerMovementController.LocalInstance.LastMotionDirection,
+                    motionDirection: PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
                     spreadType: ItemSpawnManager.SpreadType.Circle);
             }
         }
@@ -83,19 +86,19 @@ public class ItemProducer : PlaceableObject {
     /// <summary>
     /// Resets the production timer based on the recipe's production time.
     /// </summary>
-    private void ResetTimer() => _timer = RecipeManager.Instance.RecipeDatabase[_recipeId].TimeToProduce * ProducerSO.ProduceTimeInPercent / 100;
+    private void ResetTimer() => _timer = GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].TimeToProduce * ProducerSO.ProduceTimeInPercent / 100;
 
     /// <summary>
     /// Fetches the ObjectSO associated with the current item ID.
     /// </summary>
     /// <returns>The ObjectSO associated with the current item.</returns>
-    private ProducerSO ProducerSO => ItemManager.Instance.ItemDatabase[_itemId] as ProducerSO;
+    private ProducerSO ProducerSO => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as ProducerSO;
 
     /// <summary>
     /// Handles the collection of produced items when the object is dismanteled with.
     /// </summary>
     /// <param name="player">The player interacting with the placed object.</param>
-    public override void PickUpItemsInPlacedObject(Player player) {
+    public override void PickUpItemsInPlacedObject(PlayerController player) {
         if (_timer <= 0) {
             ProduceItems();
         }

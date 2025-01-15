@@ -1,9 +1,7 @@
 using UnityEngine;
 using FMODUnity;
 
-public class FMODEvents : MonoBehaviour
-{
-    public static FMODEvents Instance { get; private set; }
+public class FMODEvents : MonoBehaviour {
 
     [field: Header("Music")]
     [field: SerializeField] public EventReference SeasonTheme { get; private set; }
@@ -22,13 +20,4 @@ public class FMODEvents : MonoBehaviour
 
     [field: Header("Player Walk Grass SFX")]
     [field: SerializeField] public EventReference PlayerWalkGrassSFX { get; private set; }
-
-
-    private void Awake() {
-        if (Instance != null) {
-            Debug.Log("There is more than one instance of FMODEvents in the scene!");
-            Destroy(Instance);
-        }
-        Instance = this;
-    }
 }

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: -3642706895242882101}
   - component: {fileID: 4948398707952232944}
   - component: {fileID: 194746138}
+  - component: {fileID: 9083005821384474768}
   m_Layer: 6
   m_Name: Tree
   m_TagString: Untagged
@@ -128,7 +129,7 @@ MonoBehaviour:
   _rarityID: 0
   _spreadType: 1
   _beeNest: {fileID: 0}
-  _seedToDrop: {fileID: 0}
+  _seedToDrop: {fileID: 11400000, guid: 816905964733dbc408fc95181668a045, type: 2}
   _coal: {fileID: 11400000, guid: c48707f47f83cce4486831e1f1d009a5, type: 2}
 --- !u!114 &194746138
 MonoBehaviour:
@@ -142,9 +143,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   _isObjectStationary: 1
   _objectCollider2D: {fileID: 0}
+--- !u!114 &9083005821384474768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4948398707952232940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b96fe5e33d622904aacd24a8c719bb09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  _fertilizerSpriteRenderersList: []
 --- !u!1 &7160746654117115934
 GameObject:
   m_ObjectHideFlags: 0

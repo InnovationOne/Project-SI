@@ -1,93 +1,80 @@
 using Unity.Netcode;
 using UnityEngine;
 
-[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerInteractController : NetworkBehaviour {
-    public static PlayerInteractController LocalInstance { get; private set; }
+    const float MAX_INTERACT_DISTANCE = 0.4f;
 
-    // Maximum distance within which interactions can occur
-    private const float MAX_INTERACT_DISTANCE = 0.4f;
+    IInteractable _currentInteractable;
+    BoxCollider2D _playerCollider;
+    PlayerController _player;
+    InputManager _inputManager;
 
-    // Cached references
-    private IInteractable _currentIInteractable;
-    private BoxCollider2D _playerCollider;
-    private Player _player;
+    void Awake() {
+        _playerCollider = GetComponent<BoxCollider2D>();
+        _player = GetComponent<PlayerController>();
+    }
 
-    private new void OnDestroy() {
-        InputManager.Instance.OnInteractAction -= HandleInteractAction;
+    void Start() {
+        _inputManager = GameManager.Instance.InputManager;
+        _inputManager.OnInteractAction += HandleInteractAction;
+    }
 
+    new void OnDestroy() {
+        _inputManager.OnInteractAction -= HandleInteractAction;
         base.OnDestroy();
     }
 
-    public override void OnNetworkSpawn() {
-        if (IsOwner) {
-            if (LocalInstance != null) {
-                Debug.LogError("There is more than one local instance of PlayerInteractController in the scene!");
-                return;
-            }
-            LocalInstance = this;
-
-            InputManager.Instance.OnInteractAction += HandleInteractAction;
-
-            _playerCollider = GetComponent<BoxCollider2D>();
-            _player = GetComponent<Player>();
-        }
-    }
-
-    private void Update() {
+    void Update() {
         if (IsOwner) {
             CheckInteractionDistance();
         }
     }
 
-    /// <summary>
-    /// Handles the interaction action triggered by the input manager.
-    /// </summary>
-    private void HandleInteractAction() {
+    // Called when the player presses the interact button.
+    void HandleInteractAction() {
+        RequestInteractServerRpc();
+    }
+
+    // Server finds the closest interactable and triggers interaction.
+    [ServerRpc]
+    void RequestInteractServerRpc(ServerRpcParams serverRpcParams = default) {
         FindClosestInteractable();
-        _currentIInteractable?.Interact(_player);
+        _currentInteractable?.Interact(_player);
     }
 
-    /// <summary>
-    /// Checks if the current interactable is still within the allowed interaction distance.
-    /// If not, it triggers the interaction and clears the reference.
-    /// </summary>
-    private void CheckInteractionDistance() {
-        if (_currentIInteractable == null || _currentIInteractable.MaxDistanceToPlayer <= 0f) {
-            return;
-        }
+    // Checks if the current interactable is too far; if yes, interact and clear it.
+    void CheckInteractionDistance() {
+        if (_currentInteractable == null || _currentInteractable.MaxDistanceToPlayer <= 0f) return;
 
         Vector2 playerPosition = transform.position;
-        Vector2 interactablePosition = ((Component)_currentIInteractable).transform.position;
+        Vector2 interactablePosition = ((Component)_currentInteractable).transform.position;
+
         float sqrDistance = (playerPosition - interactablePosition).sqrMagnitude;
-        float sqrMaxDistance = _currentIInteractable.MaxDistanceToPlayer * _currentIInteractable.MaxDistanceToPlayer;
+        float allowedSqrDist = _currentInteractable.MaxDistanceToPlayer * _currentInteractable.MaxDistanceToPlayer;
 
-        if (sqrDistance > sqrMaxDistance) {
-            _currentIInteractable.Interact(_player);
-            _currentIInteractable = null;
+        if (sqrDistance > allowedSqrDist) {
+            _currentInteractable.Interact(_player);
+            _currentInteractable = null;
         }
     }
 
-    /// <summary>
-    /// Finds the closest interactable object within the maximum interaction distance.
-    /// Utilizes non-allocating physics queries to enhance performance.
-    /// </summary>
-    private void FindClosestInteractable() {
+    // Finds the closest interactable object within the maximum interaction distance.
+    void FindClosestInteractable() {
         Vector2 center = _playerCollider.bounds.center;
-        float radius = MAX_INTERACT_DISTANCE;
+        var colliders = Physics2D.OverlapCircleAll(center, MAX_INTERACT_DISTANCE);
 
-        Collider2D[] colliders = Physics2D.OverlapCircleAll(center, radius);
-        IInteractable closestInteractable = null;
+        IInteractable closest = null;
         float closestSqrDistance = float.MaxValue;
-        Vector2 playerPosition = transform.position;
+        Vector2 playerPos = transform.position;
 
-        foreach (Collider2D collider in colliders) {
+        foreach (var collider in colliders) {
             if (collider == null) {
                 continue;
             }
 
-            // Attempt to get Interactable component from the collider or its parent
-            if (!collider.TryGetComponent(out IInteractable interactable)) {
+            // Attempt to retrieve the IInteractable component from the collider or its parent.
+            if (!collider.TryGetComponent<IInteractable>(out var interactable)) {
                 interactable = collider.GetComponentInParent<IInteractable>();
             }
 
@@ -95,17 +82,16 @@ public class PlayerInteractController : NetworkBehaviour {
                 continue;
             }
 
-            // Calculate squared distance to avoid unnecessary square root computation
-            Vector2 interactablePosition = ((Component)interactable).transform.position;
-            float sqrDistance = (playerPosition - interactablePosition).sqrMagnitude;
+            Vector2 interactablePos = ((Component)interactable).transform.position;
+            float sqrDist = (playerPos - interactablePos).sqrMagnitude;
 
-            if (sqrDistance < closestSqrDistance) {
-                closestSqrDistance = sqrDistance;
-                closestInteractable = interactable;
+            if (sqrDist < closestSqrDistance) {
+                closestSqrDistance = sqrDist;
+                closest = interactable;
             }
         }
 
-        _currentIInteractable = closestInteractable;
+        _currentInteractable = closest;
     }
 }
 

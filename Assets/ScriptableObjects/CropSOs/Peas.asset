@@ -13,17 +13,19 @@ MonoBehaviour:
   m_Name: Peas
   m_EditorClassIdentifier: 
   CropID: 0
-  CropRarity: 1
+  IsTree: 0
   DaysToGrow: 9
+  ItemForSeeding: {fileID: 0}
   ItemToGrowAndSpawn: {fileID: 11400000, guid: d830a84bf5741834d9c6232d25ceee22, type: 2}
-  LeavesHole: 0
   IsHarvestedByScythe: 0
   CanRegrow: 1
   DaysToRegrow: 3
+  UsesCollider: 1
+  ColliderSize: {x: -0.21, y: -0.4795}
+  Position: {x: 1.33, y: 0.378}
   SeasonsToGrow: 00000000
   MinItemAmountToSpawn: 2
   MaxItemAmountToSpawn: 4
-  TimeGrowthStages: 0300000006000000
   DeadSpritesGrowthStages:
   - {fileID: -1823244498, guid: fe9eb4ac9357e404fb665db2e4b6a36d, type: 3}
   - {fileID: -1371215653, guid: fe9eb4ac9357e404fb665db2e4b6a36d, type: 3}

@@ -133,13 +133,11 @@ public abstract class AdjustingObject : PlaceableObject {
     /// <summary>
     /// Picks up the object and updates neighbor connections.
     /// </summary>
-    public virtual void PickUpItemsInPlacedObject(Player player) {
+    public virtual void PickUpItemsInPlacedObject(PlayerController player) {
         UpdateNeighborConnections(false);
         // Additional pick up logic can be implemented here
     }
-    public virtual void Interact(Player player) {
-        
-    }
+    public virtual void Interact(PlayerController player) { }
 
     /// <summary>
     /// Compares two boolean arrays for equality.

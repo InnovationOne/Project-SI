@@ -16,7 +16,7 @@ public class CraftVisual : MonoBehaviour {
     public void SpawnCraftItemSlot(int recipeId) {
         CraftButton craftButton = Instantiate(_buttonPrefab, _content);
 
-        craftButton.SetItemImage(ItemManager.Instance.ItemDatabase[RecipeManager.Instance.RecipeDatabase[recipeId].ItemsToProduce[0].ItemId].ItemIcon);
+        craftButton.SetItemImage(GameManager.Instance.ItemManager.ItemDatabase[GameManager.Instance.RecipeManager.RecipeDatabase[recipeId].ItemsToProduce[0].ItemId].ItemIcon);
         craftButton.SetIndex(_lastIndex);
 
         _lastIndex++;
@@ -32,6 +32,6 @@ public class CraftVisual : MonoBehaviour {
     }
 
     public void OnLeftClick(int buttonIndex) {
-        PlayerCraftController.LocalInstance.OnLeftClick(buttonIndex);
+        PlayerController.LocalInstance.PlayerCraftController.OnLeftClick(buttonIndex);
     }
 }

@@ -24,7 +24,7 @@ public class QuestPanel : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
         _closeButton.onClick.AddListener(() => {
             QuestCalenderMapVisual.Instance.SetSubPanel(QCMSubPanels.Quest);
-            PlayerToolbeltController.LocalInstance.LockToolbelt(false);
+            PlayerController.LocalInstance.PlayerToolbeltController.LockToolbelt(false);
             });
 
         gameObject.SetActive(false);
@@ -71,12 +71,12 @@ public class QuestPanel : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public void OnPointerEnter(PointerEventData eventData) {
         // Block only from local player
-        PlayerToolbeltController.LocalInstance.LockToolbelt(true);
+        PlayerController.LocalInstance.PlayerToolbeltController.LockToolbelt(true);
     }
 
     public void OnPointerExit(PointerEventData eventData) {
         // Block only from local player
-        PlayerToolbeltController.LocalInstance.LockToolbelt(false);
+        PlayerController.LocalInstance.PlayerToolbeltController.LockToolbelt(false);
     }
 
     /*

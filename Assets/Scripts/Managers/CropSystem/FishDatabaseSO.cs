@@ -223,7 +223,7 @@ public class FishDatabaseSO : ScriptableObject {
     /// Retrieves a fish based on the fishing conditions
     /// </summary>
     public FishSO GetFish(FishingRodToolSO fishingRod, int tileId, CatchingMethod catchingMethod) {
-        var timeManager = TimeManager.Instance;
+        var timeManager = GameManager.Instance.TimeManager;
         var currentSeason = timeManager.CurrentDate.Value.Season;
         var currentTimeOfDay = timeManager.CurrentTimeOfDay;
 
@@ -234,7 +234,7 @@ public class FishDatabaseSO : ScriptableObject {
         }
 
         // Calculate catch chance
-        int rarityId = PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().RarityId;
+        int rarityId = PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().RarityId;
         float catchChance = fishingRod.CatchChance[rarityId - 1] / 100f;
 
         // Filter available fish without using LINQ to reduce allocations

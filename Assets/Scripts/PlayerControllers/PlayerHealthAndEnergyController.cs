@@ -1,56 +1,61 @@
 using System;
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
-// This script handels hp and energy of the player
-public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPersistance {
-    public static PlayerHealthAndEnergyController LocalInstance { get; private set; }
-
+// Manages player's health and energy, supporting network synchronization and persistence
+[RequireComponent(typeof(NetworkObject))]
+public class PlayerHealthAndEnergyController : NetworkBehaviour, IDamageable, IPlayerDataPersistance {
+    // Events to notify listeners about health and energy updates
     public event Action<float> OnUpdateHealth;
     public event Action<float> OnUpdateMaxHealth;
     public event Action<float> OnUpdateEnergy;
     public event Action<float> OnUpdateMaxEnergy;
 
     [Header("Health Parameters")]
-    [SerializeField] private float _maxHealth = 100;
-    public float MaxHealth => _maxHealth;
-
-    [SerializeField] private float _currentHealth = 100;
-    public float CurrentHealth => _currentHealth;
-
-    [SerializeField] private float _hpAtRespawn = 10;
-    [SerializeField] private float _regenHpAmountInBed = 0.5f;
+    [SerializeField] float _maxHealth = 100;
+    [SerializeField] float _currentHealth = 100;
+    [SerializeField] float _hpAtRespawn = 10;
+    [SerializeField] float _regenHpAmountInBed = 0.5f;
 
     [Header("Energy Parameters")]
-    [SerializeField] private float _maxEnergy = 100;
-    public float MaxEnergy => _maxEnergy;
-
-    [SerializeField] private float _currentEnergy = 100;
-    public float CurrentEnergy => _currentEnergy;
-
-    [SerializeField] private float _energyAtRespawn = 10;
-
-    [SerializeField, Tooltip("Energy is set to max when resting energy is above this multiplier of max.")]
-    private float _minimumEnergyMultiplierForFullReset = 0.25f; // Energy is set to max, when rest energy is above 25%
-
-    [SerializeField, Tooltip("Energy is set to 50% of max when resting energy is below this multiplier of max.")]
-    private float _energyMultiplierForNonFullReset = 0.5f; // Energy is set to 50% of max, when rest energy is below 25%
-
-    [SerializeField] private float _regenEnergyAmountInBed = 0.5f;
+    [SerializeField] float _maxEnergy = 100;
+    [SerializeField] float _currentEnergy = 100;
+    [SerializeField] float _energyAtRespawn = 10;
+    [SerializeField, Tooltip("If current energy on day end is above this fraction, next day energy is full.")]
+    float _minimumEnergyMultiplierForFullReset = 0.25f;
+    [SerializeField, Tooltip("If energy is lower than the minimum fraction, next day energy is set to 50% of max.")]
+    float _energyMultiplierForNonFullReset = 0.5f;
+    [SerializeField] float _regenEnergyAmountInBed = 0.5f;
 
     // TODO Move _hospitalRespawnPosition to the hospital itself
-    private Vector2 _hospitalRespawnPosition;
-    private Player _localPlayer;
-    private PlayerInventoryController _inventoryController;
+    Vector2 _hospitalRespawnPosition;
+    PlayerMovementController _pMC;
+    PlayerAnimationController _pAC;
+    PlayerInventoryController _inventoryController;
+    TimeManager _timeManager;
 
-    private void Awake() {
-        _localPlayer = GetComponent<Player>();
+    bool _isInvincible = false;
+    const float _invincibleDuration = 1f;
+    const float _blinkInterval = 0.1f;
+    [SerializeField] SpriteRenderer _spriteRenderer;
+
+    [SerializeField] int Armor;
+    [SerializeField] int Shield;
+    [SerializeField] int FireResistance;
+    [SerializeField] int IceResistance;
+    [SerializeField] int PoisonResistance;
+    [SerializeField] int LightningResistance;
+
+    void Awake() {
+        _pMC = GetComponent<PlayerMovementController>();
+        _pAC = GetComponent<PlayerAnimationController>();
         _inventoryController = GetComponent<PlayerInventoryController>();
     }
 
-
-    private void Start() {
-        TimeManager.Instance.OnNextDayStarted += HandleNextDayStarted;
+    void Start() {
+        _timeManager = GameManager.Instance.TimeManager;
+        _timeManager.OnNextDayStarted += HandleNextDayStarted;
 
         OnUpdateHealth?.Invoke(_currentHealth);
         OnUpdateMaxHealth?.Invoke(_maxHealth);
@@ -58,51 +63,25 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
         OnUpdateMaxEnergy?.Invoke(_maxEnergy);
     }
 
-    private new void OnDestroy() {
+    new void OnDestroy() {
+        _timeManager.OnNextDayStarted -= HandleNextDayStarted;
         base.OnDestroy();
+    }
 
-        if (TimeManager.Instance != null) {
-            TimeManager.Instance.OnNextDayStarted -= HandleNextDayStarted;
-        }
-
-        if (LocalInstance == this) {
-            LocalInstance = null;
+    void FixedUpdate() {
+        if (IsOwner && _pAC.ActivePlayerState == PlayerAnimationController.PlayerState.Sleeping) {
+            RegenerateHealthAndEnergy();
         }
     }
 
-    public override void OnNetworkSpawn() {
-        if (IsOwner) {
-            if (LocalInstance != null) {
-                Debug.LogError("There is more than one local instance of PlayerHealthAndEnergyController in the scene!");
-                return;
-            }
-            LocalInstance = this;
-        }
+    void RegenerateHealthAndEnergy() {
+        float dt = Time.deltaTime;
+        AdjustHealth(_regenHpAmountInBed * dt);
+        AdjustEnergy(_regenEnergyAmountInBed * dt);
     }
 
-    private void FixedUpdate() {
-        if (IsOwner) {
-            // Regenerate health and energy if the player is in bed
-            if (_localPlayer.InBed) {
-                RegenerateHealthAndEnergy();
-            }
-        }
-    }
-
-    /// <summary>
-    /// Regenerates health and energy while the player is in bed.
-    /// </summary>
-    private void RegenerateHealthAndEnergy() {
-        // Using deltaTime ensures frame rate independence
-        float regenHealth = _regenHpAmountInBed * Time.deltaTime;
-        float regenEnergy = _regenEnergyAmountInBed * Time.deltaTime;
-
-        AdjustHealth(regenHealth);
-        AdjustEnergy(regenEnergy);
-    }
-
-    private void HandleNextDayStarted() {
-        AdjustHealth(_maxHealth - _currentHealth); // Fully restore health
+    void HandleNextDayStarted() {
+        AdjustHealth(_maxHealth - _currentHealth);
 
         float targetEnergy = _currentEnergy >= _maxEnergy * _minimumEnergyMultiplierForFullReset
             ? _maxEnergy
@@ -115,13 +94,9 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
         OnUpdateEnergy?.Invoke(_currentEnergy);
     }
 
-
-    #region Health
-    /// <summary>
-    /// Adjusts the player's health by the specified amount.
-    /// </summary>
-    /// <param name="amount">The amount to adjust the health by.</param>
+    #region -------------------- Health --------------------
     public void AdjustHealth(float amount) {
+        if (_isInvincible) return;
         float previousHealth = _currentHealth;
         _currentHealth = Mathf.Clamp(_currentHealth + amount, 0f, _maxHealth);
 
@@ -130,15 +105,56 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
             OnUpdateHealth?.Invoke(_currentHealth);
         }
 
+        StartCoroutine(BlinkEffect());
+
         if (_currentHealth <= 0f) {
             HandlePlayerDeath();
         }
     }
 
-    /// <summary>
-    /// Adjusts the maximum health of the player.
-    /// </summary>
-    /// <param name="newMaxHealth">The new maximum health value.</param>
+    IEnumerator BlinkEffect() {
+        _isInvincible = true;
+        float elapsed = 0f;
+        bool spriteVisible = true;
+
+        while (elapsed < _invincibleDuration) {
+            spriteVisible = !spriteVisible;
+            _spriteRenderer.enabled = spriteVisible;
+            yield return new WaitForSeconds(_blinkInterval);
+            elapsed += _blinkInterval;
+        }
+
+        // Am Ende sichtbar und nicht mehr invincible
+        _spriteRenderer.enabled = true;
+        _isInvincible = false;
+    }
+
+    public void TakeDamage(Vector2 attackerPosition, int amount, WeaponSO.DamageTypes type, float knockbackForce) {
+        StartCoroutine(HitStopCoroutine(0.5f, 0.0f));
+
+        int finalDamage = amount;
+        finalDamage -= type switch {
+            WeaponSO.DamageTypes.Physical => Armor,
+            WeaponSO.DamageTypes.Magical => Shield,
+            WeaponSO.DamageTypes.Fire => FireResistance,
+            WeaponSO.DamageTypes.Ice => IceResistance,
+            WeaponSO.DamageTypes.Poison => PoisonResistance,
+            WeaponSO.DamageTypes.Lightning => LightningResistance,
+            _ => 0
+        };
+
+        AdjustHealth(Mathf.Max(finalDamage, 0));
+    }
+
+    IEnumerator HitStopCoroutine(float duration, float timeScale) {
+        float originalTimeScale = Time.timeScale;
+        //Time.timeScale = timeScale;
+
+        yield return new WaitForSecondsRealtime(duration);
+
+        //Time.timeScale = originalTimeScale;
+    }
+
     public void AdjustMaxHealth(float newMaxHealth) {
         if (newMaxHealth <= 0f) {
             Debug.LogWarning("Max health must be greater than zero.");
@@ -151,10 +167,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
         OnUpdateHealth?.Invoke(_currentHealth);
     }
 
-    /// <summary>
-    /// Handles the player's death.
-    /// </summary>
-    private void HandlePlayerDeath() {
+    void HandlePlayerDeath() {
         // TODO: Play death animation
 
         RespawnPlayer();
@@ -167,10 +180,9 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
         // TODO: Play wake-up animation and in-hospital event
     }
 
-    #endregion
+    #endregion -------------------- Health --------------------
 
-
-    #region Energy
+    #region -------------------- Energy --------------------
 
     /// <summary>
     /// Adjusts the energy of the player by the specified amount.
@@ -218,12 +230,12 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
 
         // Additional exhaustion logic
     }
-    #endregion
+    #endregion -------------------- Energy --------------------
 
     /// <summary>
     /// Respawns the player at the hospital respawn position and restores their health to the value at respawn.
     /// </summary>
-    private void RespawnPlayer() {
+    void RespawnPlayer() {
         if (_hospitalRespawnPosition == Vector2.zero) {
             Debug.LogWarning("Hospital respawn position is not set.");
             return;
@@ -239,13 +251,12 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
     }
 
 
-    #region Save & Load
+    #region -------------------- Save & Load --------------------
     public void SavePlayer(PlayerData playerData) {
         playerData.MaxHp = _maxHealth;
         playerData.CurrentHp = _currentHealth;
         playerData.MaxEnergy = _maxEnergy;
         playerData.CurrentEnergy = _currentEnergy;
-        playerData.HospitalRespawnPosition = _hospitalRespawnPosition;
     }
 
     public void LoadPlayer(PlayerData playerData) {
@@ -255,13 +266,19 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IPlayerDataPers
         _maxEnergy = playerData.MaxEnergy;
         _currentEnergy = Mathf.Clamp(playerData.CurrentEnergy, 0f, _maxEnergy);
 
-        _hospitalRespawnPosition = playerData.HospitalRespawnPosition;
-
         // Invoke events to update UI or other listeners
         OnUpdateMaxHealth?.Invoke(_maxHealth);
         OnUpdateHealth?.Invoke(_currentHealth);
         OnUpdateMaxEnergy?.Invoke(_maxEnergy);
         OnUpdateEnergy?.Invoke(_currentEnergy);
     }
-    #endregion
+    #endregion -------------------- Save & Load --------------------
+
+    public void GetDebugUIStuff(out float currentHealth, out float maxHealth, out float currentEnergy, out float maxEnergy) {
+        currentHealth = _currentHealth;
+        maxHealth = _maxHealth;
+        currentEnergy = _currentEnergy;
+        maxEnergy = _maxEnergy;
+    }
+
 }

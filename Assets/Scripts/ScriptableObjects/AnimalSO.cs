@@ -1,51 +1,50 @@
 using UnityEngine;
 
-public enum AnimalType {
-    none,
-    // Small
-    WhiteChicken,
-    BrownChicken,
-    CemaniChicken,
-    BeryllChicken,
-    Goose,
-    BlueGoose,
-    Bunny,
-    Turkey,
-
-    // Big
-    Cow,
-    SpottedCow,
-    EringerCow,
-    BeryllCow,
-    Buffalo,
-    Sheep,
-    Goat,
-    ValaisGoat,
-    Lama,
+public enum AnimalSize {
+    None, Small, Large
 }
 
-// This class contains information used in an animal
-[CreateAssetMenu(menuName = "Scriptable Objects/Animal")]
-public class AnimalSO : ScriptableObject {
-    [HideInInspector] public int AnimalID;
+public enum AnimalBase {
+    None, Chicken, Goose, Duck, Cow, Sheep, Goat, Pig, Alpaca
+}
 
-    [Header("Animal Settings")]
+public enum AnimalType {
+    None,
+    WhiteChicken, BrownChicken, BlueChicken, GreenChicken, GoldenChicken,
+    WhiteGoose, BlackGoose, ColorfulGoose,
+    Duck, MandarinDuck, BlackHeadDuck,
+    BlackWhiteCow, BlackCow, ReddishCow, RainbowCow,
+    WhiteSheep, BlackSheep, ColorfulSheep,
+    BrownGoat, GoldenGoat,
+    PinkPig, BlackPig, GalacticPig,
+    Alpaca, SilverAlpaca, GoldenAlpaca
+}
+
+[CreateAssetMenu(menuName = "Scriptable Objects/ItemSO/Animal")]
+public class AnimalSO : ItemSO {
+    public AnimalSize AnimalSize;
+    public AnimalBase AnimalBase;
     public AnimalType AnimalType;
 
-    [Header("Produktion Settings")]
-    public ItemSlot ItemToFeed; // e.g. hay
-    public ItemSlot ItemToPet; // e.g. brush
-    public ItemSlot ItemToGetProducedItem; // e.g. milk bucket
-    public ItemSlot ProducedItem;
+    [Header("Food / Items")]
+    public ItemSO FeedItem;
+    public ItemSO PetItem;
+    public bool HasQualityLevels = true;
+    public ItemSO ProductItem;
 
-    [Header("Visual Settings")]
+    [Header("Visuals & Animation Sprites")]
     public Sprite[] WalkUp;
     public Sprite[] WalkRight;
-    public Sprite[] WalkDown;    
+    public Sprite[] WalkDown;
     public Sprite[] WalkLeft;
+    // Additional arrays for standing, sleeping and eating could be added here.
 
-    //Standing.
-    //Sleeping.
-    //Eating.
-    //Drinking.
+    [Header("Friendship & growth")]
+    public int InitialFriendship = 0;
+    public int MaxFriendship = 1000;
+    public int GrowthDays = 4;
+
+    [Header("Mating / Breeding")]
+    public bool CanLayEggs = false;
+    public bool CanBeIncubated = false;
 }

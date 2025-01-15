@@ -113,15 +113,31 @@ public class ItemDatabaseSO : ScriptableObject {
     private void SaveItemsToTextFile(string filePath) {
         int nameColumnWidth = 30; // Definiere eine feste Breite für die Item-Namen-Spalte
 
-        using (StreamWriter writer = new StreamWriter(filePath)) {
+        if (_items == null) {
+            Debug.LogError("_items ist null. Keine Daten zum Speichern vorhanden.");
+            return;
+        }
+
+        using (var writer = new StreamWriter(filePath)) {
             foreach (var item in _items) {
-                // Schreibe jedes Item im Format "ItemName (ausgerichtet)\tItemId"
-                string formattedName = item.ItemName.PadRight(nameColumnWidth); // Füllt den ItemName mit Leerzeichen auf
+                if (item == null) {
+                    Debug.LogWarning("Ein Element in _items ist null und wird übersprungen.");
+                    continue;
+                }
+
+                string itemName = item.ItemName;
+                if (string.IsNullOrEmpty(itemName)) {
+                    Debug.LogWarning($"Das Item mit ID {item.ItemId} hat keinen Namen. Setze einen Standardnamen.");
+                    itemName = "Unbenannt";
+                }
+
+                string formattedName = itemName.PadRight(nameColumnWidth);
                 writer.WriteLine($"{formattedName}\t{item.ItemId}");
             }
         }
         Debug.Log("Item-Liste wurde auf " + filePath + " gespeichert.");
     }
+
 
     /// <summary>
     /// Adds missing ItemSO assets to the database.

@@ -12,13 +12,13 @@ public interface IInteractable {
     /// Executes the interaction logic when a player interacts with the object.
     /// </summary>
     /// <param name="player">The player that is interacting with the object.</param>
-    void Interact(Player player);
+    void Interact(PlayerController player);
 
     /// <summary>
     /// Handles the logic for picking up items from the object when interacted with.
     /// </summary>
     /// <param name="player">The player attempting to pick up items.</param>
-    void PickUpItemsInPlacedObject(Player player);
+    void PickUpItemsInPlacedObject(PlayerController player);
 
     /// <summary>
     /// Initializes the interactable object before the game loads.

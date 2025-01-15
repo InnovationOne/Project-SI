@@ -1,63 +1,39 @@
 using System;
 using Unity.Netcode;
+using UnityEngine;
 
 /// <summary>
-/// This script is attached to every object that needs to be managed by time.
-/// It subscribes to the TimeManager to receive minute tick events.
+/// Attaches to objects that need to react to in-game minute ticks.
+/// Only the server should manage TimeAgents.
 /// </summary>
+[RequireComponent(typeof(NetworkObject))]
 public class TimeAgent : NetworkBehaviour {
-    // Event invoked every minute tick.
     public event Action OnMinuteTimeTick;
+    TimeManager _timeManager;
 
-    // Cached reference to TimeManager to reduce repeated access
-    private TimeManager _timeManager;
-
-    /// <summary>
-    /// Initializes the TimeAgent and subscribes to the TimeManager.
-    /// Only the server should manage TimeAgents.
-    /// </summary>
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
-
         if (IsServer) {
-            _timeManager = TimeManager.Instance;
+            _timeManager = GameManager.Instance.TimeManager;
             if (_timeManager != null) {
-                SubscribeTimeAgent();
+                SubscribeToTimeManager();
             }
         }
     }
 
-    /// <summary>
-    /// Subscribes this TimeAgent to the TimeManager.
-    /// </summary>
-    private void SubscribeTimeAgent() {
-        if (_timeManager != null) {
-            _timeManager.SubscribeTimeAgent(this);
-        }
-    }
+    // Subscribes this agent to TimeManager's tick events.
+    void SubscribeToTimeManager() => _timeManager.SubscribeTimeAgent(this);
 
-    /// <summary>
-    /// Unsubscribes this TimeAgent from the TimeManager.
-    /// </summary>
-    private void UnsubscribeTimeAgent() {
-        if (_timeManager != null) {
-            _timeManager.UnsubscribeTimeAgent(this);
-        }        
-    }
+    // Unsubscribes this agent from TimeManager's tick events.
+    void UnsubscribeFromTimeManager() => _timeManager.UnsubscribeTimeAgent(this);
 
-    /// <summary>
-    /// Invokes the OnMinuteTimeTick event.
-    /// </summary>
+    // Invoked by TimeManager every minute.
     public void InvokeMinute() => OnMinuteTimeTick?.Invoke();
 
-    /// <summary>
-    /// Handles the destruction of the TimeAgent by unsubscribing from the TimeManager.
-    /// </summary>
-    private void OnDestroy() {
-        base.OnDestroy();
-
+    new void OnDestroy() {
         if (IsServer && _timeManager != null) {
-            UnsubscribeTimeAgent();
+            UnsubscribeFromTimeManager();
         }
+        base.OnDestroy();
     }
 }

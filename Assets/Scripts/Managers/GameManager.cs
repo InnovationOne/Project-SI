@@ -1,14 +1,28 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Manages game-wide functionalities, including player states and scene management.
-/// Implements a singleton pattern to ensure only one instance exists.
-/// </summary>
-public class GameManager : NetworkBehaviour {
+[RequireComponent(typeof(NetworkObject))]
+[RequireComponent(typeof(CropsManager))]
+[RequireComponent(typeof(DialogueManager))]
+[RequireComponent(typeof(FinanceManager))]
+[RequireComponent(typeof(InputManager))]
+[RequireComponent(typeof(ItemManager))]
+[RequireComponent(typeof(ItemSpawnManager))]
+[RequireComponent(typeof(SI_LoadSceneManager))]
+[RequireComponent(typeof(QuestManager))]
+[RequireComponent(typeof(TimeManager))]
+[RequireComponent(typeof(RecipeManager))]
+[RequireComponent(typeof(PauseGameManager))]
+[RequireComponent(typeof(PlaceableObjectsManager))]
+[RequireComponent(typeof(EventsManager))]
+[RequireComponent(typeof(AudioManager))]
+[RequireComponent(typeof(FMODEvents))]
+[RequireComponent(typeof(WeatherManager))]
+public class GameManager : NetworkBehaviour, IDataPersistance {
     public static GameManager Instance { get; private set; }
 
     [Header("Game Settings")]
@@ -19,8 +33,27 @@ public class GameManager : NetworkBehaviour {
 
     // Dictionary to track player sleeping states; only accessed on the server
     private Dictionary<ulong, bool> _playerSleepingDict;
+    public List<PlayerController> PlayerControllers { get; private set; } = new();
 
-    // Cached references for performance optimization
+    // Cached references
+    public CropsManager CropsManager;
+    public DialogueManager DialogueManager;
+    public FinanceManager FinanceManager;
+    public InputManager InputManager;
+    public ItemManager ItemManager;
+    public ItemSpawnManager ItemSpawnManager;
+    public SI_LoadSceneManager LoadSceneManager;
+    public QuestManager QuestManager;
+    public TimeManager TimeManager;
+    public RecipeManager RecipeManager;
+    public PauseGameManager PauseGameManager;
+    public PlaceableObjectsManager PlaceableObjectsManager;
+    public EventsManager EventsManager;
+    public AudioManager AudioManager;
+    public FMODEvents FMODEvents;
+    public WeatherManager WeatherManager;
+
+
     private NetworkManager _networkManager;
     private TestNetcodeUI _testNetcodeUI;
 
@@ -36,6 +69,23 @@ public class GameManager : NetworkBehaviour {
 
         // Initialize the network-synchronized dictionary
         _playerSleepingDict = new Dictionary<ulong, bool>();
+
+        CropsManager = GetComponent<CropsManager>();
+        DialogueManager = GetComponent<DialogueManager>();
+        FinanceManager = GetComponent<FinanceManager>();
+        InputManager = GetComponent<InputManager>();
+        ItemManager = GetComponent<ItemManager>();
+        ItemSpawnManager = GetComponent<ItemSpawnManager>();
+        LoadSceneManager = GetComponent<SI_LoadSceneManager>();
+        QuestManager = GetComponent<QuestManager>();
+        TimeManager = GetComponent<TimeManager>();
+        RecipeManager = GetComponent<RecipeManager>();
+        PauseGameManager = GetComponent<PauseGameManager>();
+        PlaceableObjectsManager = GetComponent<PlaceableObjectsManager>();
+        EventsManager = GetComponent<EventsManager>();
+        AudioManager = GetComponent<AudioManager>();
+        FMODEvents = GetComponent<FMODEvents>();
+        WeatherManager = GetComponent<WeatherManager>();
     }
 
     private void Start() {
@@ -117,7 +167,7 @@ public class GameManager : NetworkBehaviour {
     public void AddPlayerToSleepingDict(ulong clientId) {
         if (!_playerSleepingDict.ContainsKey(clientId)) {
             _playerSleepingDict[clientId] = false;
-            Debug.Log($"Added player {clientId} to sleeping dictionary.");
+            //Debug.Log($"Added player {clientId} to sleeping dictionary.");
         }
     }
 
@@ -128,7 +178,7 @@ public class GameManager : NetworkBehaviour {
     public void RemovePlayerFromSleepingDict(ulong clientId) {
         if (_playerSleepingDict.ContainsKey(clientId)) {
             _playerSleepingDict.Remove(clientId);
-            Debug.Log($"Removed player {clientId} from sleeping dictionary.");
+            //Debug.Log($"Removed player {clientId} from sleeping dictionary.");
         }
     }
 
@@ -172,7 +222,7 @@ public class GameManager : NetworkBehaviour {
         Debug.Log("All players are sleeping. Transitioning to the next day.");
 
         // Reset all players' sleeping states
-        List<ulong> clientIds = new List<ulong>(_playerSleepingDict.Keys);
+        List<ulong> clientIds = new(_playerSleepingDict.Keys);
         foreach (ulong clientId in clientIds) {
             _playerSleepingDict[clientId] = false;
         }
@@ -180,7 +230,7 @@ public class GameManager : NetworkBehaviour {
         // Notify all clients to wake up
         SetAllPlayersAwakeClientRpc();
 
-        TimeManager.Instance.StartNextDay();
+        TimeManager.StartNextDay();
         Debug.Log("Next day started.");
     }
 
@@ -190,13 +240,58 @@ public class GameManager : NetworkBehaviour {
     /// </summary>
     [ClientRpc]
     private void SetAllPlayersAwakeClientRpc() {
-        if (Player.LocalInstance != null) {
-            Player.LocalInstance.SetPlayerInBed(false);
+        if (PlayerController.LocalInstance != null) {
+            PlayerController.LocalInstance.TogglePlayerInBed();
         } else {
             Debug.LogWarning("LocalInstance of Player is not set.");
         }
     }
 
+    public void AddPlayer(PlayerController playerController) {
+        PlayerControllers.Add(playerController);
+    }
+
+    public void RemovePlayer(PlayerController playerController) {
+        PlayerControllers.Remove(playerController);
+    }
+    #endregion
+
+    #region Save & Load
+    [Serializable]
+    public class PlayerDataList {
+        public List<PlayerData> _players = new();
+    }
+
+    public void SaveData(GameData data) {
+        var allPlayerData = new List<PlayerData>();
+        foreach (var pc in PlayerControllers) {
+            var dataPersistanceObjects = FindAllDataPersistanceObjects(pc);
+            var playerData = new PlayerData();
+
+            foreach (var persistence in dataPersistanceObjects) {
+                persistence.SavePlayer(playerData);
+            }
+
+            playerData.OwnerClientId = pc.OwnerClientId;
+            allPlayerData.Add(playerData);
+        }
+
+        var playerDataList = new PlayerDataList {
+            _players = allPlayerData
+        };
+
+        string json = JsonUtility.ToJson(playerDataList, true);
+        data.PlayerData = json;
+    }
+
+    public void LoadData(GameData data) {
+        // TODO: Implement loading player data maybe with UI to select player
+    }
+
+    private List<IPlayerDataPersistance> FindAllDataPersistanceObjects(PlayerController pc) {
+        // Annahme: PlayerController ist ein MonoBehaviour und hat ein GameObject
+        IEnumerable<IPlayerDataPersistance> dataPersistanceObjects = pc.GetComponents<MonoBehaviour>().OfType<IPlayerDataPersistance>();
+        return new List<IPlayerDataPersistance>(dataPersistanceObjects);
+    }
     #endregion
 }
-

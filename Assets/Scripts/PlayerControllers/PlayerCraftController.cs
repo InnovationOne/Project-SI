@@ -2,11 +2,8 @@ using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerCraftController : NetworkBehaviour {
-
-    // Singleton instance for the local player
-    public static PlayerCraftController LocalInstance { get; private set; }
-
     [Header("Recipe Container")]
     [SerializeField] private RecipeContainer _recipeContainer;
 
@@ -21,20 +18,12 @@ public class PlayerCraftController : NetworkBehaviour {
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
 
-        if (IsOwner) {
-            if (LocalInstance != null) {
-                Debug.LogError("There is more than one local instance of PlayerCraftController in the scene!");
-                return;
-            }
-            LocalInstance = this;
-        }
-
         // Cache component references
         _inventoryController = GetComponent<PlayerInventoryController>();
         _movementController = GetComponent<PlayerMovementController>();
-        _recipeManager = RecipeManager.Instance;
+        _recipeManager = GameManager.Instance.RecipeManager;
         _craftVisual = CraftVisual.Instance;
-        _itemSpawnManager = ItemSpawnManager.Instance;
+        _itemSpawnManager = GameManager.Instance.ItemSpawnManager;
     }
 
 

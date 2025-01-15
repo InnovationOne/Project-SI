@@ -11,10 +11,10 @@ public class SellChest : MonoBehaviour, IInteractable {
         _sellBoxHighlight.gameObject.SetActive(false);
     }
 
-    public void Interact(Player character) {
+    public void Interact(PlayerController character) {
 
-        if (ItemManager.Instance.ItemDatabase[PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId] != null 
-            && ItemManager.Instance.ItemDatabase[PlayerToolbeltController.LocalInstance.GetCurrentlySelectedToolbeltItemSlot().ItemId].CanBeSold) {
+        if (GameManager.Instance.ItemManager.ItemDatabase[PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId] != null 
+            && GameManager.Instance.ItemManager.ItemDatabase[PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId].CanBeSold) {
 
             var itemSlot = character.GetComponent<PlayerToolbeltController>().GetCurrentlySelectedToolbeltItemSlot();
             _sellBoxContainer.AddItem(itemSlot, false);
@@ -23,7 +23,7 @@ public class SellChest : MonoBehaviour, IInteractable {
         }
     }
 
-    public void PickUpItemsInPlacedObject(Player player) { }
+    public void PickUpItemsInPlacedObject(PlayerController player) { }
 
     public void InitializePreLoad(int itemId) { }
 }

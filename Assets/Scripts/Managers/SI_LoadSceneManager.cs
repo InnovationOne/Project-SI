@@ -1,7 +1,6 @@
 using UnityEngine.SceneManagement;
 using UnityEngine;
 public class SI_LoadSceneManager : MonoBehaviour {
-
     public Scene TargetScene { get; private set; }
 
     public enum Scene {
@@ -9,6 +8,10 @@ public class SI_LoadSceneManager : MonoBehaviour {
         LoadingScene,
         GameScene,
         // Add other scenes as needed
+    }
+
+    public void LS() {
+        LoadScene(Scene.LoadingScene);
     }
 
     /// <summary>

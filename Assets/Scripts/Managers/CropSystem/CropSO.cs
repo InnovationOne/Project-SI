@@ -16,6 +16,11 @@ public class CropSO : ScriptableObject {
     public bool CanRegrow;
     [ConditionalHide("CanRegrow", true)]
     public int DaysToRegrow;
+    public bool HasCollider;
+    [ConditionalHide("UsesCollider", true)]
+    public Vector2 ColliderSize;
+    [ConditionalHide("UsesCollider", true)]
+    public Vector2 Position;
 
     public List<TimeManager.SeasonName> SeasonsToGrow;
 

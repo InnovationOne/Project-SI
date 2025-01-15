@@ -4,8 +4,6 @@ using FMOD.Studio;
 using System.Collections.Generic;
 
 public class AudioManager : MonoBehaviour {
-    public static AudioManager Instance { get; private set; }
-
     [Header("Volume")]
     [Range(0f, 1f)]
     public float MasterVolume = 1f;
@@ -28,12 +26,7 @@ public class AudioManager : MonoBehaviour {
     private EventInstance _music;
 
     private void Awake() {
-        if (Instance != null) {
-            Debug.Log("There is more than one instance of AudioManager in the scene!");
-            Destroy(Instance);
-        }
-        Instance = this;
-        DontDestroyOnLoad(this.gameObject);
+        DontDestroyOnLoad(gameObject);
 
         _eventInstances = new List<EventInstance>();
 

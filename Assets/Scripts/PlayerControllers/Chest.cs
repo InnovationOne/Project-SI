@@ -43,7 +43,7 @@ public class Chest : PlaceableObject {
     /// Interacts with the chest.
     /// </summary>
     /// <param name="player">The player interacting with the chest.</param>
-    public void Interact(Player player) {
+    public void Interact(PlayerController player) {
         ToggleChest();
         UpdateVisual();
         UpdateUI();
@@ -77,14 +77,14 @@ public class Chest : PlaceableObject {
     /// Picks up items in the placed object and adds them to the player's inventory.
     /// </summary>
     /// <param name="player">The player who is picking up the items.</param>
-    public override void PickUpItemsInPlacedObject(Player player) {
+    public override void PickUpItemsInPlacedObject(PlayerController player) {
         foreach (ItemSlot itemSlot in _itemContainer.ItemSlots) {
-            int remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(itemSlot, false);
+            int remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(itemSlot, false);
             if (remainingAmount > 0) {
-                ItemSpawnManager.Instance.SpawnItemServerRpc(
+                GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
                     itemSlot: itemSlot,
                     initialPosition: transform.position,
-                    motionDirection: PlayerMovementController.LocalInstance.LastMotionDirection,
+                    motionDirection: PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
                     spreadType: ItemSpawnManager.SpreadType.Circle);
             }
         }
@@ -93,7 +93,7 @@ public class Chest : PlaceableObject {
     /// <summary>
     /// Represents a chest scriptable object.
     /// </summary>
-    private ChestSO ChestSO => ItemManager.Instance.ItemDatabase[_itemId] as ChestSO;
+    private ChestSO ChestSO => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as ChestSO;
 
 
     #region Save & Load

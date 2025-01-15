@@ -1,12 +1,22 @@
 using UnityEngine;
 
-// This script is for waterning a crop tile
+// Watering can action: Waters an area of tiles to promote growth.
 [CreateAssetMenu(menuName = "Tool Action/Watering Can")]
 public class WateringCanSO : ToolActionSO {
     public override void OnApplyToTileMap(Vector3Int position, ItemSlot itemSlot) {
-        PlayerMarkerController.LocalInstance.TriggerAreaMarker(itemSlot.RarityId - 1, 
-            (ItemManager.Instance.ItemDatabase[itemSlot.ItemId] as AreaToolSO).Area, 
-            (ItemManager.Instance.ItemDatabase[itemSlot.ItemId] as AreaToolSO).EnergyOnAction[itemSlot.RarityId - 1],
-            ToolSO.ToolTypes.WateringCan);
+        int rarityIndex = itemSlot.RarityId - 1;
+        if (GameManager.Instance.ItemManager.ItemDatabase[itemSlot.ItemId] is AreaToolSO areaTool) {
+            int energyCost = areaTool.EnergyOnAction[rarityIndex];
+            Area[] area = areaTool.Area;
+
+            PlayerController.LocalInstance.PlayerMarkerController.TriggerAreaMarker(
+                rarityIndex,
+                area,
+                energyCost,
+                ToolSO.ToolTypes.WateringCan
+            );
+        } else {
+            Debug.LogWarning("Attempted to water with a non-area tool.");
+        }
     }
 }

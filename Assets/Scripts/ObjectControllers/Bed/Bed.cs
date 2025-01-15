@@ -21,15 +21,17 @@ public class Bed : MonoBehaviour, IInteractable {
     /// Interacts with the bed object.
     /// </summary>
     /// <param name="player">The player object.</param>
-    public void Interact(Player player) {
-        player.SetPlayerInBed(!player.InBed);
-        PlayerMovementController.LocalInstance.SetCanMoveAndTurn(player.InBed);
+    public void Interact(PlayerController player) {
+        var pAC = player.PlayerAnimationController;
+        bool inBed = pAC.ActivePlayerState == PlayerAnimationController.PlayerState.Sleeping;
+        player.TogglePlayerInBed();
+        PlayerController.LocalInstance.PlayerMovementController.SetCanMoveAndTurn(inBed);
     }
 
-    public void PickUpItemsInPlacedObject(Player player) { }
+    public void PickUpItemsInPlacedObject(PlayerController player) { }
 
     /// <summary>
     /// Represents a ScriptableObject for objects in the game.
     /// </summary>
-    private ObjectSO GetObjectSO() => ItemManager.Instance.ItemDatabase[_itemId] as ObjectSO;
+    private ObjectSO GetObjectSO() => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as ObjectSO;
 }

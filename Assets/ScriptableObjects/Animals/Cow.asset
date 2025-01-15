@@ -12,21 +12,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 371289e2b940a3f488363e19d1d5875a, type: 3}
   m_Name: Cow
   m_EditorClassIdentifier: 
-  AnimalID: 0
-  AnimalType: 9
-  ItemToFeed:
-    item: {fileID: 11400000, guid: 505d4164109bd8140b53702e21871dc3, type: 2}
-    amount: 1
-    rarityID: 0
-  ItemToPet:
-    item: {fileID: 11400000, guid: ef3534fbcc08d1145b1c2579f8c0e37f, type: 2}
-    amount: 1
-    rarityID: 0
-  ProducedItem:
-    item: {fileID: 11400000, guid: 56450c2a4a7639b44ba09d7ef14a5029, type: 2}
-    amount: 1
-    rarityID: 3
+  ItemId: 367
+  ItemType: 0
+  ItemName: Black and White Cow
+  ItemIcon: {fileID: 0}
+  IsStackable: 0
+  MaxStackableAmount: 1
+  CanBeBought: 0
+  BuyPrice: 0
+  CanBeSold: 0
+  LowestRaritySellPrice: 0
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  AnimalSize: 2
+  AnimalBase: 4
+  AnimalType: 12
+  FeedItem: {fileID: 11400000, guid: 440b4a68560226e4d8412f6b8001d31d, type: 2}
+  PetItem: {fileID: 0}
+  HasQualityLevels: 1
+  ProductItem: {fileID: 11400000, guid: 2e0c2bd242fc9044e8fc15856526bfcf, type: 2}
   WalkUp: []
   WalkRight: []
   WalkDown: []
   WalkLeft: []
+  InitialFriendship: 0
+  MaxFriendship: 1000
+  GrowthDays: 7
+  CanLayEggs: 0
+  CanBeIncubated: 0

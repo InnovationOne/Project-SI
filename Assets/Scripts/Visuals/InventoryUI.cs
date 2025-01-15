@@ -25,8 +25,8 @@ public class InventoryUI : ItemContainerUI {
         }
         Instance = this;
 
-        _sortButton.onClick.AddListener(() => PlayerInventoryController.LocalInstance.InventoryContainer.SortItems());
-        _trashButton.onClick.AddListener(() => PlayerItemDragAndDropController.LocalInstance.ClearDragItem());
+        _sortButton.onClick.AddListener(() => PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.SortItems());
+        _trashButton.onClick.AddListener(() => PlayerController.LocalInstance.PlayerItemDragAndDropController.ClearDragItem());
     }
 
     private void Start() {
@@ -38,6 +38,8 @@ public class InventoryUI : ItemContainerUI {
     }
 
     public void InventoryOrToolbeltSizeChanged() {
+        // TODO: Get the right image for unlocked and locked and set it based on the size of the inventory
+        /*
         for (int i = 0; i < ItemButtons.Length; i++) {
             // Set the toolbelt slots
             if (i < PlayerToolbeltController.LocalInstance.ToolbeltSizes[2]) {
@@ -77,15 +79,16 @@ public class InventoryUI : ItemContainerUI {
             1 => _rarityIconSprites[1],
             _ => _rarityIconSprites[2],
         };
+        */
     }
 
     public override void OnPlayerLeftClick(int buttonIndex) {
         if (Input.GetKey(KeyCode.LeftShift)) {
             int remainingAmount;
-            if (buttonIndex < PlayerToolbeltController.LocalInstance.ToolbeltSizes[2]) {
-                remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], true);
+            if (buttonIndex < PlayerController.LocalInstance.PlayerToolbeltController.ToolbeltSizes[2]) {
+                remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], true);
             } else {
-                remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], false);
+                remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], false);
             }
 
             if (remainingAmount > 0) {
@@ -97,7 +100,7 @@ public class InventoryUI : ItemContainerUI {
         } else {
             LastSlotId = buttonIndex;
 
-            PlayerItemDragAndDropController.LocalInstance.OnLeftClick(ItemContainer.ItemSlots[buttonIndex]);
+            PlayerController.LocalInstance.PlayerItemDragAndDropController.OnLeftClick(ItemContainer.ItemSlots[buttonIndex]);
         }
 
         ShowUIButtonContains();
@@ -108,7 +111,7 @@ public class InventoryUI : ItemContainerUI {
 
         // If the drag item is active, call for the OnRightClick of the ItemDragAndDropManager 
         if (DragItemUI.Instance.gameObject.activeSelf) {
-            PlayerItemDragAndDropController.LocalInstance.OnRightClick(ItemContainer.ItemSlots[buttonIndex]);
+            PlayerController.LocalInstance.PlayerItemDragAndDropController.OnRightClick(ItemContainer.ItemSlots[buttonIndex]);
         }
     }
 }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
+[RequireComponent(typeof(NetworkObject))]
 public class QuestManager : NetworkBehaviour, IDataPersistance {
     [Header("Config")]
     //[SerializeField] private bool _loadQuestState = true;
@@ -22,24 +23,24 @@ public class QuestManager : NetworkBehaviour, IDataPersistance {
                 quest.InstantiateCurrentQuestStep(transform);
             }
 
-            EventsManager.Instance.QuestEvents.QuestStateChange(quest);
+            GameManager.Instance.EventsManager.QuestEvents.QuestStateChange(quest);
         }
     }
 
     private void Start() {
-        EventsManager.Instance.QuestEvents.OnStartQuest += StartQuest;
-        EventsManager.Instance.QuestEvents.OnAdvanceQuest += AdvanceQuest;
-        EventsManager.Instance.QuestEvents.OnFinishQuest += FinishQuest;
+        GameManager.Instance.EventsManager.QuestEvents.OnStartQuest += StartQuest;
+        GameManager.Instance.EventsManager.QuestEvents.OnAdvanceQuest += AdvanceQuest;
+        GameManager.Instance.EventsManager.QuestEvents.OnFinishQuest += FinishQuest;
 
-        EventsManager.Instance.QuestEvents.OnQuestStepStateChange += QuestStepStateChange;
+        GameManager.Instance.EventsManager.QuestEvents.OnQuestStepStateChange += QuestStepStateChange;
     }
 
     private new void OnDestroy() {
-        EventsManager.Instance.QuestEvents.OnStartQuest -= StartQuest;
-        EventsManager.Instance.QuestEvents.OnAdvanceQuest -= AdvanceQuest;
-        EventsManager.Instance.QuestEvents.OnFinishQuest -= FinishQuest;
+        GameManager.Instance.EventsManager.QuestEvents.OnStartQuest -= StartQuest;
+        GameManager.Instance.EventsManager.QuestEvents.OnAdvanceQuest -= AdvanceQuest;
+        GameManager.Instance.EventsManager.QuestEvents.OnFinishQuest -= FinishQuest;
 
-        EventsManager.Instance.QuestEvents.OnQuestStepStateChange -= QuestStepStateChange;
+        GameManager.Instance.EventsManager.QuestEvents.OnQuestStepStateChange -= QuestStepStateChange;
     }
 
     private void Update() {
@@ -53,7 +54,7 @@ public class QuestManager : NetworkBehaviour, IDataPersistance {
     private void ChangeQuestState(string id, QuestState state) {
         Quest quest = GetQuestById(id);
         quest.QuestState = state;
-        EventsManager.Instance.QuestEvents.QuestStateChange(quest);
+        GameManager.Instance.EventsManager.QuestEvents.QuestStateChange(quest);
     }
 
     private bool CheckRequirementsMet(Quest quest) {

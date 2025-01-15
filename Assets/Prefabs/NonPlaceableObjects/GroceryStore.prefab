@@ -269,7 +269,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d4da3c61cc8c8e42bea59456f56805b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _storeContainer: {fileID: 11400000, guid: 6ac12736961f02a448c352615a8fd57d, type: 2}
+  ShowTopMostFoldoutHeaderGroup: 1
+  _storeContainer: {fileID: 0}
   _storeVisual: {fileID: 0}
   _groceryStoreVisual: {fileID: 8447655519678598203}
   _groceryStoreHighlight: {fileID: 8447655521182775667}
@@ -286,7 +287,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
   _isObjectStationary: 1
   _objectCollider2D: {fileID: 0}
 --- !u!114 &7362073770877681772

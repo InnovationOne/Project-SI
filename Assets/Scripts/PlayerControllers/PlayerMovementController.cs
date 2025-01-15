@@ -1,159 +1,220 @@
 using Unity.Netcode;
 using UnityEngine;
 using FMOD.Studio;
+using System.Collections;
+using static WeatherManager;
+using static PlayerAnimationController;
 
 // This Script handles player movement, animations, and data persistance for a 2D character
-[RequireComponent(typeof(Rigidbody2D))]
-[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance {
-    public static PlayerMovementController LocalInstance { get; private set; }
-
     // Movement Directions
     public Vector2 LastMotionDirection { get; private set; } = Vector2.right;
 
     [Header("Movement Settings")]
-    [SerializeField] private float _walkSpeed = 2f;
-    [SerializeField] private float _runSpeed = 4f;
-    private const float MAX_DELAY_FOR_PLAYER_ROTATION = 0.2f;
+    [SerializeField] float _walkSpeed = 2f;
+    [SerializeField] float _runSpeed = 4f;
+    const float MAX_DELAY_FOR_PLAYER_ROTATION = 0.2f;
 
-    private static readonly int MovingHash = Animator.StringToHash("Moving");
-    private static readonly int RunningHash = Animator.StringToHash("Running");
-    private static readonly int HorizontalHash = Animator.StringToHash("Horizontal");
-    private static readonly int VerticalHash = Animator.StringToHash("Vertical");
-    private static readonly int LastHorizontalHash = Animator.StringToHash("LastHorizontal");
-    private static readonly int LastVerticalHash = Animator.StringToHash("LastVertical");
+    [Header("Dash Settings")]
+    [SerializeField] float _dashSpeedMultiplier = 3f; // How much faster than run speed
+    [SerializeField] float _dashDuration = 0.2f;
+    [SerializeField] float _dashCooldown = 1f;
+
+    [Header("Visual Effects")]
+    [SerializeField] GameObject _footprintPrefab;
+    [SerializeField] float _effectSpawnInterval = 0.2f;
+    [SerializeField] float _footprintSpread = 0.1f;
+    const float EFFECT_FADE_OUT_TIMER = 1f;
+    const float EFFECT_DESPAWN_TIMER = 5f;
+    float _effectSpawnTimer = 0f;
 
     // Movement State
-    private bool _canMoveAndTurn = true;
-    private bool _isRunning;
-    private Vector2 _inputDirection;
-    private float _timeSinceLastMovement;
+    bool _canMoveAndTurn = true;
+    bool _isRunning;
+    Vector2 _inputDirection;
+    public Vector3 Position;
+    float _timeSinceLastMovement;
+
+    // Dash State
+    const float _dashEnergyCost = 2f;
+    float _dashTimeRemaining;
+    float _dashCooldownRemaining;
+    Vector2 _dashDirection = Vector2.zero;
 
     // Components
-    private Rigidbody2D _rb2D;
-    private Animator _animator;
-    private InputManager _inputManager;
+    Rigidbody2D _rb;
+    Animator _anim;
+    InputManager _inputManager;
+    BoxCollider2D _boxCollider;
+    AudioManager _audioManager;
+    PlayerHealthAndEnergyController _playerHealthAndEnergyController;
+    PlayerToolsAndWeaponController _playerToolsAndWeaponController;
+    PlayerToolbeltController _playerToolbeltController;
+    PlayerAnimationController _pAC;
 
     // Audio
-    private EventInstance _playerWalkGrassEvent;
+    EventInstance _playerWalkGrassEvent;
+    EventInstance _playerDashEvent;
 
+    // Movement
+    public const string X_AXIS = "xAxis";
+    public const string Y_AXIS = "yAxis";
+    public const string LAST_X_AXIS = "lastXAxis";
+    public const string LAST_Y_AXIS = "lastYAxis";
 
-    private void Awake() {
-        _rb2D = GetComponent<Rigidbody2D>();
-        _animator = GetComponentInChildren<Animator>();
+    void Awake() {
+        _rb = GetComponent<Rigidbody2D>();
+        _anim = GetComponentInChildren<Animator>();
+        _boxCollider = GetComponent<BoxCollider2D>();
 
         // Initialize audio event
-        _playerWalkGrassEvent = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.PlayerWalkGrassSFX);
     }
 
-    private void Start() {
-        _inputManager = InputManager.Instance;
-        if (_inputManager == null) {
-            Debug.LogError("InputManager instance not found!");
-            enabled = false;
-            return;
-        }
+    void Start() {
+        _inputManager = GameManager.Instance.InputManager;
+        _audioManager = GameManager.Instance.AudioManager;
+        _playerWalkGrassEvent = _audioManager.CreateEventInstance(GameManager.Instance.FMODEvents.PlayerWalkGrassSFX);
+        _playerHealthAndEnergyController = GetComponent<PlayerHealthAndEnergyController>();
+        _playerToolsAndWeaponController = GetComponent<PlayerToolsAndWeaponController>();
+        _playerToolbeltController = GetComponent<PlayerToolbeltController>();
+        _pAC = GetComponent<PlayerAnimationController>();
+
+        //TODO _playerDashEvent = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.PlayerDashSFX);
 
         _inputManager.OnRunAction += ToggleRunState;
+        _inputManager.OnDashAction += TryStartDash;
     }
 
-    private new void OnDestroy() {
-        _inputManager.OnRunAction -= ToggleRunState;
+    new void OnDestroy() {
         _playerWalkGrassEvent.release();
+        //TODO _playerDashEvent.release();
+        _inputManager.OnRunAction -= ToggleRunState;
+        _inputManager.OnDashAction -= TryStartDash;
+
+        base.OnDestroy();
     }
 
-    public override void OnNetworkSpawn() {
-        base.OnNetworkSpawn();
-
-        if (IsOwner) {
-            if (LocalInstance != null) {
-                Debug.LogError("There is more than one local instance of PlayerMovementController in the scene!");
-                return;
-            }
-            LocalInstance = this;
-        }
-    }
-
-    private void ToggleRunState() {
+    void ToggleRunState() {
         _isRunning = !_isRunning;
+
+        bool isMoving = _inputDirection != Vector2.zero;
+        if (isMoving) {
+            _pAC.ChangeState(PlayerState.Walkcycle);
+        } else {
+            _pAC.ChangeState(PlayerState.Idle);
+        }
     }
 
-    private void Update() {
-        if (!IsOwner) {
-            return;
-        }
+    void Update() {
+        if (!IsOwner) return;
 
+        Position = _boxCollider.bounds.center;
         HandleInput();
-        UpdateAnimationState();
+
+        if (_dashCooldownRemaining > 0f) _dashCooldownRemaining -= Time.deltaTime;
+
         UpdateSound();
+        HandleRunningEffects();
     }
 
-    private void FixedUpdate() {
-        if (!IsOwner || !_canMoveAndTurn) { 
-            return; 
-        }
-
+    void FixedUpdate() {
+        if (!IsOwner || !_canMoveAndTurn) return;
         MoveCharacter();
     }
 
-    private void HandleInput() {
+    void HandleInput() {
         Vector2 newInputDirection = _inputManager.GetMovementVectorNormalized();
+        bool directionChanged = newInputDirection != _inputDirection;
 
-        if (newInputDirection != _inputDirection) {
+        bool isMoving = newInputDirection != Vector2.zero;
+        if (isMoving) {
+            _pAC.ChangeState(PlayerState.Walkcycle);
+        } else {
+            _pAC.ChangeState(PlayerState.Idle);
+        }
+
+        if (directionChanged) {
             _inputDirection = newInputDirection;
-            _animator.SetFloat(HorizontalHash, _inputDirection.x);
-            _animator.SetFloat(VerticalHash, _inputDirection.y);
-
-            bool isMoving = _inputDirection != Vector2.zero;
-            _animator.SetBool(MovingHash, isMoving);
+            _anim.SetFloat(X_AXIS, _inputDirection.x);
+            _anim.SetFloat(Y_AXIS, _inputDirection.y);
 
             if (isMoving) {
                 LastMotionDirection = _inputDirection;
-                _animator.SetFloat(LastHorizontalHash, _inputDirection.x);
-                _animator.SetFloat(LastVerticalHash, _inputDirection.y);
+                _anim.SetFloat(LAST_X_AXIS, _inputDirection.x);
+                _anim.SetFloat(LAST_Y_AXIS, _inputDirection.y);
                 _timeSinceLastMovement = 0f;
             } else {
                 _timeSinceLastMovement += Time.deltaTime;
                 if (_timeSinceLastMovement >= MAX_DELAY_FOR_PLAYER_ROTATION && LastMotionDirection != Vector2.zero) {
-                    _animator.SetFloat(LastHorizontalHash, LastMotionDirection.x);
-                    _animator.SetFloat(LastVerticalHash, LastMotionDirection.y);
+                    _anim.SetFloat(LAST_X_AXIS, LastMotionDirection.x);
+                    _anim.SetFloat(LAST_Y_AXIS, LastMotionDirection.y);
                 }
             }
         }
     }
 
-    private void MoveCharacter() {
-        float speed = GetCurrentSpeed();
-        _rb2D.linearVelocity = _inputDirection * speed;
+    #region -------------------- Dashing --------------------
+    void TryStartDash() {
+        if (_dashCooldownRemaining > 0f && !CanDash()) return;
+
+        Vector2 dashDir = _inputDirection == Vector2.zero ? LastMotionDirection : _inputDirection;
+        if (dashDir == Vector2.zero) return;
+
+        StartCoroutine(StartDash(dashDir));
     }
 
-    private void UpdateAnimationState() {
-        bool isMoving = _inputDirection != Vector2.zero;
-        _animator.SetBool(MovingHash, isMoving);
-        _animator.SetBool(RunningHash, _isRunning);
+    IEnumerator StartDash(Vector2 direction) {
+        _dashTimeRemaining = _dashDuration;
+        _dashCooldownRemaining = _dashCooldown;
+        _dashDirection = direction.normalized;
+
+        var lastState = _pAC.ActivePlayerState;
+        _pAC.ChangeState(PlayerState.Dashing);
+        _playerDashEvent.start();
+        _playerHealthAndEnergyController.AdjustEnergy(-_dashEnergyCost);
+
+        // (Optional) Trigger visual effects like motion blur or trails here.
+
+        yield return new WaitForSeconds(_dashDuration);
+        _pAC.ChangeState(lastState);
     }
 
-    private float GetCurrentSpeed() { 
-        return _animator.GetBool(MovingHash) ? (_isRunning? _runSpeed : _walkSpeed) : 0f;
+    bool CanDash() => _pAC.ActivePlayerState == PlayerState.Idle || _pAC.ActivePlayerState == PlayerState.Walkcycle;
+    #endregion -------------------- Dashing --------------------
+
+    #region -------------------- Movement --------------------
+    void MoveCharacter() {
+        if (CanDash() || _pAC.ActivePlayerState == PlayerState.Dashing) {
+
+            if (_pAC.ActivePlayerState == PlayerState.Dashing) {
+                float dashSpeed = _runSpeed * _dashSpeedMultiplier;
+                _rb.linearVelocity = _dashDirection * dashSpeed;
+            } else {
+                float speed = GetCurrentSpeed();
+                _rb.linearVelocity = _inputDirection * speed;
+            }
+        }
+    }
+
+    float GetCurrentSpeed() {
+        return _pAC.ActivePlayerState switch {
+            PlayerState.Idle => 0f,
+            PlayerState.Walkcycle => _walkSpeed,
+            PlayerState.Dashing => _walkSpeed * _dashSpeedMultiplier,
+            _ => 0f,
+        };
     }
 
     public void SetCanMoveAndTurn(bool canMove) {
         _canMoveAndTurn = canMove;
-        if (!_canMoveAndTurn) {
-            StopMoving();
+        if (!_canMoveAndTurn && _rb.linearVelocity != Vector2.zero) {
+            _rb.linearVelocity = Vector2.zero;
         }
     }
 
-    private void StopMoving() {
-        if (_rb2D.linearVelocity != Vector2.zero) {
-            _rb2D.linearVelocity = Vector2.zero;
-            _animator.SetBool(MovingHash, false);
-        }
-    }
-
-    private void UpdateSound() {
-        bool isMoving = _rb2D.linearVelocity != Vector2.zero;
-
+    void UpdateSound() {
+        bool isMoving = _rb.linearVelocity != Vector2.zero;
         _playerWalkGrassEvent.getPlaybackState(out PLAYBACK_STATE playbackState);
 
         if (isMoving && playbackState == PLAYBACK_STATE.STOPPED) {
@@ -162,18 +223,75 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
             _playerWalkGrassEvent.stop(STOP_MODE.ALLOWFADEOUT);
         }
     }
+    #endregion -------------------- Movement --------------------
 
-    #region Save & Load
+    #region -------------------- Running Effects --------------------
+    void HandleRunningEffects() {
+        if (!IsOwner) return;
+        if (_rb.linearVelocity != Vector2.zero && _pAC.ActivePlayerState != PlayerState.Dashing) {
+            _effectSpawnTimer -= Time.deltaTime;
+            if (_effectSpawnTimer <= 0f) {
+                SpawnFootprints();
+                _effectSpawnTimer = _effectSpawnInterval;
+            }
+        } else {
+            _effectSpawnTimer = 0f;
+        }
+    }
+
+    void SpawnFootprints() {
+        bool spawnAllowed = GameManager.Instance.WeatherManager.CurrentWeather switch {
+            WeatherName.Rain => true,
+            WeatherName.Thunder => true,
+            WeatherName.Snow => true,
+            _ => false
+        };
+        if (!spawnAllowed) return;
+
+        float offsetX = Random.Range(-_footprintSpread, _footprintSpread);
+        float offsetY = Random.Range(-_footprintSpread, _footprintSpread);
+        var spawnPosition = _boxCollider.bounds.center + new Vector3(offsetX, offsetY, 0f);
+
+        // TODO: Object pooling could be used here to avoid repeated instantiation
+        var spawnedEffect = Instantiate(_footprintPrefab, spawnPosition, Quaternion.identity);
+        StartCoroutine(FadeOutAndDestroy(spawnedEffect, EFFECT_DESPAWN_TIMER, EFFECT_FADE_OUT_TIMER));
+    }
+
+    IEnumerator FadeOutAndDestroy(GameObject obj, float delay, float fadeDuration) {
+        yield return new WaitForSeconds(delay);
+        if (!obj.TryGetComponent<SpriteRenderer>(out var sr)) {
+            Destroy(obj);
+            yield break;
+        }
+
+        var c = sr.color;
+        float startAlpha = c.a;
+        float time = 0f;
+
+        while (time < fadeDuration) {
+            time += Time.deltaTime;
+            float t = time / fadeDuration;
+            float newAlpha = Mathf.Lerp(startAlpha, 0f, t);
+            sr.color = new Color(c.r, c.g, c.b, newAlpha);
+            yield return null;
+        }
+
+        Destroy(obj);
+    }
+    #endregion -------------------- Running Effects --------------------
+
+
+    #region -------------------- Save & Load --------------------
     public void SavePlayer(PlayerData playerData) {
         playerData.Position = transform.position;
-        playerData.LastDirection = new Vector2(_animator.GetFloat(LastHorizontalHash), _animator.GetFloat(LastVerticalHash));
+        playerData.LastDirection = new Vector2(_anim.GetFloat(LAST_X_AXIS), _anim.GetFloat(LAST_Y_AXIS));
     }
 
     public void LoadPlayer(PlayerData playerData) {
         transform.position = playerData.Position;
         LastMotionDirection = playerData.LastDirection;
-        _animator.SetFloat(LastHorizontalHash, LastMotionDirection.x);
-        _animator.SetFloat(LastVerticalHash, LastMotionDirection.y);
+        _anim.SetFloat(LAST_X_AXIS, LastMotionDirection.x);
+        _anim.SetFloat(LAST_Y_AXIS, LastMotionDirection.y);
     }
-    #endregion
+    #endregion -------------------- Save & Load --------------------
 }

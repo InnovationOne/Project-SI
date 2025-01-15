@@ -42,7 +42,7 @@ public class ChestUI : ItemContainerUI {
 
     public override void OnPlayerLeftClick(int buttonIndex) {
         if (Input.GetKey(KeyCode.LeftShift)) {
-            int remainingAmount = PlayerInventoryController.LocalInstance.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], true);
+            int remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], true);
 
             if (remainingAmount > 0) {
                 var slot = ItemContainer.ItemSlots[buttonIndex];
@@ -51,7 +51,7 @@ public class ChestUI : ItemContainerUI {
                 ItemContainer.ItemSlots[buttonIndex].Clear();
             }
         } else {
-            PlayerItemDragAndDropController.LocalInstance.OnLeftClick(ItemContainer.ItemSlots[buttonIndex]);
+            PlayerController.LocalInstance.PlayerItemDragAndDropController.OnLeftClick(ItemContainer.ItemSlots[buttonIndex]);
         }
 
         ShowUIButtonContains();

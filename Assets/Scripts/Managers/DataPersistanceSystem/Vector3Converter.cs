@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using UnityEngine;
 
-// For converting Vector3 to JSON and back
+// Converts Vector3 objects to JSON and back for modding and serialization.
 public class Vector3Converter : JsonConverter<Vector3> {
     public override void WriteJson(JsonWriter writer, Vector3 value, JsonSerializer serializer) {
         writer.WriteStartObject();

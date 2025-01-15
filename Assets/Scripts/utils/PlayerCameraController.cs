@@ -2,14 +2,14 @@ using Unity.Cinemachine;
 using Unity.Netcode;
 using UnityEngine;
 
+[RequireComponent(typeof(NetworkObject))]
 public class PlayerCameraController : NetworkBehaviour {
     public override void OnNetworkSpawn() {
-        if (IsOwner) {
-            Camera camera = Camera.main;
-            CinemachineCamera cinemachineVirtualCamera = camera.GetComponent<CinemachineCamera>();
+        if (!IsOwner) return;
 
-            cinemachineVirtualCamera.Follow = transform;
-            cinemachineVirtualCamera.LookAt = transform;
-        }
+        var mainCamera = Camera.main;
+        var cinemachineVirtualCamera = mainCamera.GetComponent<CinemachineCamera>();
+        cinemachineVirtualCamera.Follow = transform;
+        cinemachineVirtualCamera.LookAt = transform;
     }
 }
