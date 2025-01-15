@@ -44,7 +44,6 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
 
     // Components
     Rigidbody2D _rb;
-    Animator _anim;
     InputManager _inputManager;
     BoxCollider2D _boxCollider;
     AudioManager _audioManager;
@@ -57,15 +56,8 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     EventInstance _playerWalkGrassEvent;
     EventInstance _playerDashEvent;
 
-    // Movement
-    public const string X_AXIS = "xAxis";
-    public const string Y_AXIS = "yAxis";
-    public const string LAST_X_AXIS = "lastXAxis";
-    public const string LAST_Y_AXIS = "lastYAxis";
-
     void Awake() {
         _rb = GetComponent<Rigidbody2D>();
-        _anim = GetComponentInChildren<Animator>();
         _boxCollider = GetComponent<BoxCollider2D>();
 
         // Initialize audio event
@@ -136,19 +128,16 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
 
         if (directionChanged) {
             _inputDirection = newInputDirection;
-            _anim.SetFloat(X_AXIS, _inputDirection.x);
-            _anim.SetFloat(Y_AXIS, _inputDirection.y);
+            _pAC.SetAnimatorDirection(_inputDirection);
 
             if (isMoving) {
                 LastMotionDirection = _inputDirection;
-                _anim.SetFloat(LAST_X_AXIS, _inputDirection.x);
-                _anim.SetFloat(LAST_Y_AXIS, _inputDirection.y);
+                _pAC.SetAnimatorLastDirection(_inputDirection);
                 _timeSinceLastMovement = 0f;
             } else {
                 _timeSinceLastMovement += Time.deltaTime;
                 if (_timeSinceLastMovement >= MAX_DELAY_FOR_PLAYER_ROTATION && LastMotionDirection != Vector2.zero) {
-                    _anim.SetFloat(LAST_X_AXIS, LastMotionDirection.x);
-                    _anim.SetFloat(LAST_Y_AXIS, LastMotionDirection.y);
+                    _pAC.SetAnimatorLastDirection(LastMotionDirection);
                 }
             }
         }
@@ -284,14 +273,11 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     #region -------------------- Save & Load --------------------
     public void SavePlayer(PlayerData playerData) {
         playerData.Position = transform.position;
-        playerData.LastDirection = new Vector2(_anim.GetFloat(LAST_X_AXIS), _anim.GetFloat(LAST_Y_AXIS));
     }
 
     public void LoadPlayer(PlayerData playerData) {
         transform.position = playerData.Position;
         LastMotionDirection = playerData.LastDirection;
-        _anim.SetFloat(LAST_X_AXIS, LastMotionDirection.x);
-        _anim.SetFloat(LAST_Y_AXIS, LastMotionDirection.y);
     }
     #endregion -------------------- Save & Load --------------------
 }

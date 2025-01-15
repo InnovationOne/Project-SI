@@ -101,6 +101,8 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
     #region -------------------- Meele Action --------------------
     void MeleeAction(WeaponSO weaponSO) {
+        return;
+
         CheckComboWindow(weaponSO.ComboMaxDelay, weaponSO.ComboMaxCount);
 
         PlayerState animationType = PlayerState.Slash;
@@ -120,7 +122,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         }
 
         // Start attack
-        Debug.Log($"[Player Attack] ComboIndex = {_comboIndex}/{weaponSO.ComboMaxCount}");
+        Debug.Log($"[Player Attack] ComboIndex = {_comboIndex}/{weaponSO.ComboMaxCount - 1}");
         _pHEC.AdjustEnergy(-weaponSO.AttackEnergyCost);
         _attackTimer = 1f / weaponSO.AttackSpeed;
         StartCoroutine(PerformMeleeHit(weaponSO, _comboIndex, animationType));
@@ -131,7 +133,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
             _comboIndex = 0; 
         } else { 
             _comboIndex++;
-            if (_comboIndex >= comboMaxCount){ 
+            if (_comboIndex > comboMaxCount - 1){ 
                 _comboIndex = 0; 
             }
         }        

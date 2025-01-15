@@ -1,7 +1,8 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAnimationController : MonoBehaviour {
+public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     public enum PlayerState {
         RaiseBowAndAim,
         LooseArrow,
@@ -54,7 +55,7 @@ public class PlayerAnimationController : MonoBehaviour {
     // Walkcycle
     const string WALKCYCLE = "Walkcycle";
 
-    readonly Dictionary<PlayerState, string> _playerStates = new Dictionary<PlayerState, string> {
+    readonly Dictionary<PlayerState, string> _playerStates = new() {
         { PlayerState.RaiseBowAndAim, RAISE_BOW_AND_AIM },
         { PlayerState.LooseArrow, LOOSE_ARROW },
         { PlayerState.GrabNewArrow, GRAB_NEW_ARROW },
@@ -71,7 +72,7 @@ public class PlayerAnimationController : MonoBehaviour {
         { PlayerState.Dashing, IDLE },
     };
 
-    public PlayerState ActivePlayerState = PlayerState.Idle;
+    public PlayerState ActivePlayerState { get; private set; }
     public float AnimationTime => _weaponAnim.GetCurrentAnimatorStateInfo(0).length;
 
     [SerializeField] Animator _weaponAnim;
@@ -85,7 +86,7 @@ public class PlayerAnimationController : MonoBehaviour {
     [SerializeField] Animator _bodyAnim;
     [SerializeField] Animator _behindAnim;
 
-    WeaponSO _weaponSO;
+    ItemSO _weaponItemSO;
     ItemSO _handItemSO;
     ItemSO _helmetItemSO;
     // XX _hair;
@@ -96,10 +97,17 @@ public class PlayerAnimationController : MonoBehaviour {
     // XX _head;
     // XX _body;
 
+    // Movement
+    public const string X_AXIS = "xAxis";
+    public const string Y_AXIS = "yAxis";
+    public const string LAST_X_AXIS = "lastXAxis";
+    public const string LAST_Y_AXIS = "lastYAxis";
+
     PlayerToolsAndWeaponController _pTWC;
     PlayerToolbeltController _pTC;
 
     private void Awake() {
+        ChangeState(PlayerState.Idle, true);
         _pTWC = GetComponent<PlayerToolsAndWeaponController>();
         _pTC = GetComponent<PlayerToolbeltController>();
     }
@@ -112,8 +120,12 @@ public class PlayerAnimationController : MonoBehaviour {
         _pTC.OnToolbeltSlotChanged -= ToolbeltSlotChanged;
     }
 
-    public void SetWeapon(WeaponSO weaponSO) {
-        _weaponAnim.runtimeAnimatorController = weaponSO.Animator;
+    IEnumerator SetWeapon(RuntimeAnimatorController runtimeAnimatorController) {
+        _weaponAnim.GetComponent<OwnerNetworkAnimator>().enabled = false;
+        _weaponAnim.runtimeAnimatorController = runtimeAnimatorController;
+        _weaponAnim.Rebind();
+        yield return new WaitForEndOfFrame();
+        _weaponAnim.GetComponent<OwnerNetworkAnimator>().enabled = true;
     }
 
     public void SetHand(ItemSO handItemSO) {
@@ -152,24 +164,87 @@ public class PlayerAnimationController : MonoBehaviour {
         // _body = body;
     }
 
+    IEnumerator SetBehind(RuntimeAnimatorController runtimeAnimatorController) {
+        _behindAnim.GetComponent<OwnerNetworkAnimator>().enabled = false;
+        _behindAnim.runtimeAnimatorController = runtimeAnimatorController;
+        _weaponAnim.Rebind();
+        yield return new WaitForEndOfFrame();
+        _behindAnim.GetComponent<OwnerNetworkAnimator>().enabled = true;
+    }
+
     void ToolbeltSlotChanged() {
+        int itemId = _pTC.GetCurrentlySelectedToolbeltItemSlot().ItemId;
+        ItemSO itemSO = GameManager.Instance.ItemManager.ItemDatabase[itemId];
+        if (itemSO is WeaponSO weaponSO) {
+            Debug.Log("Setting weapon");
+            if (weaponSO.AnimatorFG != null) StartCoroutine(SetWeapon(weaponSO.AnimatorFG));
+            if (weaponSO.AnimatorBG != null) StartCoroutine(SetBehind(weaponSO.AnimatorBG));
+        } else if (itemSO is ToolSO toolSO) {
+            if (toolSO.AnimatorFG != null) StartCoroutine(SetWeapon(toolSO.AnimatorFG));
+            if (toolSO.AnimatorBG != null) StartCoroutine(SetBehind(toolSO.AnimatorBG));
+        }
+
         ChangeState(ActivePlayerState, true);
     }
 
     public void ChangeState(PlayerState newState, bool forceUpdate = false) {
         if (ActivePlayerState == newState && !forceUpdate) return;
 
-        _weaponAnim.Play(_playerStates[newState]);
-        _handAnim.Play(_playerStates[newState]);
-        _helmetHairAnim.Play(_playerStates[newState]);
-        _beltAnim.Play(_playerStates[newState]);
-        _torsoAnim.Play(_playerStates[newState]);
-        _legsAnim.Play(_playerStates[newState]);
-        _feetAnim.Play(_playerStates[newState]);
-        _headAnim.Play(_playerStates[newState]);
-        _bodyAnim.Play(_playerStates[newState]);
-        _behindAnim.Play(_playerStates[newState]);
+        string stateName = _playerStates[newState];
+        PlayAnimationIfExists(_weaponAnim, stateName);
+        PlayAnimationIfExists(_handAnim, stateName);
+        PlayAnimationIfExists(_helmetHairAnim, stateName);
+        PlayAnimationIfExists(_beltAnim, stateName);
+        PlayAnimationIfExists(_torsoAnim, stateName);
+        PlayAnimationIfExists(_legsAnim, stateName);
+        PlayAnimationIfExists(_feetAnim, stateName);
+        PlayAnimationIfExists(_headAnim, stateName);
+        PlayAnimationIfExists(_bodyAnim, stateName);
+        PlayAnimationIfExists(_behindAnim, stateName);
 
         ActivePlayerState = newState;
     }
+
+    void PlayAnimationIfExists(Animator animator, string stateName) {
+        int stateHash = Animator.StringToHash(stateName);
+        if (animator != null && animator.HasState(0, stateHash)) {
+            animator.GetComponent<OwnerNetworkAnimator>().enabled = true;
+            animator.Play(stateName);
+        } else {
+            animator.GetComponent<OwnerNetworkAnimator>().enabled = false;
+        }
+    }
+
+    public void SetAnimatorDirection(Vector2 direction) {
+        SetAnimatorValues(X_AXIS, direction.x);
+        SetAnimatorValues(Y_AXIS, direction.y);
+    }
+
+    public void SetAnimatorLastDirection(Vector2 direction) {
+        SetAnimatorValues(LAST_X_AXIS, direction.x);
+        SetAnimatorValues(LAST_Y_AXIS, direction.y);
+    }
+
+    void SetAnimatorValues(string axis, float value) {
+        _weaponAnim.SetFloat(axis, value);
+        _handAnim.SetFloat(axis, value);
+        _helmetHairAnim.SetFloat(axis, value);
+        _beltAnim.SetFloat(axis, value);
+        _torsoAnim.SetFloat(axis, value);
+        _legsAnim.SetFloat(axis, value);
+        _feetAnim.SetFloat(axis, value);
+        _headAnim.SetFloat(axis, value);
+        _bodyAnim.SetFloat(axis, value);
+        _behindAnim.SetFloat(axis, value);
+    }
+
+    #region -------------------- Save & Load --------------------
+    public void SavePlayer(PlayerData playerData) {
+        playerData.LastDirection = new Vector2(_weaponAnim.GetFloat(LAST_X_AXIS), _weaponAnim.GetFloat(LAST_Y_AXIS));
+    }
+
+    public void LoadPlayer(PlayerData playerData) {
+        SetAnimatorLastDirection(playerData.LastDirection);
+    }
+    #endregion -------------------- Save & Load --------------------
 }

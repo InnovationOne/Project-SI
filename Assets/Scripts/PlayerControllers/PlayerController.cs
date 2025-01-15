@@ -12,6 +12,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerToolsAndWeaponController))]
 [RequireComponent(typeof(PlayerCameraController))]
 [RequireComponent(typeof(PlayerFishingController))]
+[RequireComponent(typeof(PlayerAnimationController))]
 [RequireComponent(typeof(NetworkObject))]
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(BoxCollider2D))]

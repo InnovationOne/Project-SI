@@ -27,4 +27,15 @@ public class ToolSO : ItemSO {
 
     [Header("Tool Settings")]
     public int[] EnergyOnAction;
+
+    [Header("Animator")]
+    public bool HasBowAnimation;
+    public bool HasHurtAnimation;
+    public bool HasSlashAnimation;
+    public bool HasSlashReverseAnimation;
+    public bool HasSpellcastAnimation;
+    public bool HasThrustAnimation;
+
+    public RuntimeAnimatorController AnimatorBG;
+    public RuntimeAnimatorController AnimatorFG;
 }

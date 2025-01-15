@@ -50,5 +50,6 @@ public class WeaponSO : ItemSO {
     public bool HasSpellcastAnimation;
     public bool HasThrustAnimation;
 
-    public RuntimeAnimatorController Animator;
+    public RuntimeAnimatorController AnimatorBG;
+    public RuntimeAnimatorController AnimatorFG;
 }

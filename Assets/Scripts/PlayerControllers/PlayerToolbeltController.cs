@@ -70,6 +70,9 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
         _pauseGameManager.OnShowLocalPauseGame += OnTogglePauseMenu;
 
         Initialize();
+
+        // Invoke for first automatic selection
+        OnToolbeltSlotChanged?.Invoke();
     }
 
     new void OnDestroy() {
