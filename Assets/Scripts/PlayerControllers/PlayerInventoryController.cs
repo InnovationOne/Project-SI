@@ -34,11 +34,8 @@ public class PlayerInventoryController : NetworkBehaviour, IPlayerDataPersistanc
             return;
         }
 
-        if (_currentInventorySize == inventorySize) return;
-
         _currentInventorySize = inventorySize;
         _inventoryUI.InventoryOrToolbeltSizeChanged();
-
     }
 
     // Saves inventory contents and size

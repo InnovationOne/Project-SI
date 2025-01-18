@@ -19,7 +19,7 @@ public class PlayerToolbeltController : NetworkBehaviour, IPlayerDataPersistance
 
     // Current toolbelt size and selections
     int _toolbeltSize = TOOLBELT_SIZES[^1];
-    public int ToolbeltSize => _toolbeltSize;
+    public int CurrentToolbeltSize => _toolbeltSize;
 
     // Max sets of toolbelts and rotation step for switching sets
     const int MAX_TOOLBELTS = 3;

@@ -6,8 +6,8 @@ using UnityEngine;
 public class ItemSO : ScriptableObject {
     public enum ItemTypes {
         Weapons,            
-        Tools,              
-        Resources,          
+        Tools,
+        Resources,
         Food,               
         PlaceableObject,
         Plants,             
@@ -18,7 +18,8 @@ public class ItemSO : ScriptableObject {
         Insects,            
         Artifacts,          
         Minerals,           
-        Animal,             
+        Animal,
+        Clothing,
         none
     }
 

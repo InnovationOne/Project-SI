@@ -59,7 +59,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
+  m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -134,7 +134,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
+  m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -260,6 +260,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 773a5597fd74b7c438a9b60dcfe9ead8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _inventorySlot_Normal: {fileID: 4386049626892606723}
+  _inventorySlot_Locked: {fileID: 5826005458330069350}
   _itemRarityImage: {fileID: 2508749066068798351}
   _itemIconImage: {fileID: 3601158953112616164}
   _selectedImage: {fileID: 8019513377258117122}
@@ -562,6 +564,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6719dd64341a0d43898c140b65b8b7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _textComponent: {fileID: 0}
 --- !u!1 &6881402709403212038
 GameObject:
   m_ObjectHideFlags: 0

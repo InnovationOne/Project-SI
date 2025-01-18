@@ -36,19 +36,15 @@ public class ToolbeltUI : ItemContainerUI {
     }
 
     public void SetToolbeltSize(int toolbeltSize) {
-
-        // TODO: Get the right image for unlocked and locked and set it based on the size of the toolbelt
-        /*
         for (int i = 0; i < ItemButtons.Length; i++) {
             if (i < toolbeltSize) {
                 ItemButtons[i].GetComponent<Button>().interactable = true;
-                ItemButtons[i].GetComponent<Image>().raycastTarget = true;
+                ItemButtons[i].GetComponent<InventorySlot>().SetActive();
             } else {
                 ItemButtons[i].GetComponent<Button>().interactable = false;
-                ItemButtons[i].GetComponent<Image>().raycastTarget = false;
+                ItemButtons[i].GetComponent<InventorySlot>().SetLocked();
             }
         }
-        */
     }
 
     public void SetToolbeltSlotHighlight(int currentlySelectedTool) {

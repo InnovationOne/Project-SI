@@ -1,16 +1,27 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static ClothingSO;
 
 // This script is used on every item slot button
 public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IBeginDragHandler, IEndDragHandler, IDropHandler, IDragHandler, IPointerEnterHandler, IPointerExitHandler {
+    public event Action<int> OnNewItem;
+
     [Header("Item button referenzes")]
+    [SerializeField] private Image _inventorySlot_Normal;
+    [SerializeField] private Image _inventorySlot_Locked;
+
     [SerializeField] private Image _itemRarityImage;
     [SerializeField] private Image _itemIconImage;
     [SerializeField] private Image _selectedImage;
     [SerializeField] private Image _itemAmountBackgroundImage;
     [SerializeField] private TextMeshProUGUI _itemAmountText;
+
+    [Header("Restrictions")]
+    public bool IsClothingSlot;
+    public ClothingType AcceptedClothingType;
 
     private int _buttonIndex;
     private ItemContainerUI _itemPanel;
@@ -59,20 +70,33 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
         }
     }
 
-    public void SetItemSlot(ItemSlot itemSlot, Sprite[] raritySprites) {
-        _itemSlot = itemSlot;
+    public void SetActive() {
+        _inventorySlot_Normal.enabled = true;
+        _inventorySlot_Locked.enabled = false;
+    }
+
+    public void SetLocked() {
+        _inventorySlot_Normal.enabled = false;
+        _inventorySlot_Locked.enabled = true;
+    }
+
+    public void SetItemSlot(ItemSlot newItemSlot, Sprite[] raritySprites) {
+        _itemSlot = newItemSlot;
 
         if (_itemSlot == null) {
+            OnNewItem?.Invoke(0);
             ClearItemSlot();
             return;
         }
 
+        OnNewItem?.Invoke(newItemSlot.ItemId);
+
         _itemIconImage.gameObject.SetActive(true);
 
-        // Retrieve the item once and reuse the reference
-        var item = _itemManager.ItemDatabase[_itemSlot.ItemId];
+        var item = GameManager.Instance.ItemManager.ItemDatabase[_itemSlot.ItemId];
         _itemIconImage.sprite = item.ItemIcon;
 
+        /*
         switch (item) {
             case ToolSO tool:
                 if (_itemSlot.RarityId > 0 && _itemSlot.RarityId - 1 < tool.ToolItemRarity.Length) {
@@ -86,6 +110,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
                 }
                 break;
         }
+        */
 
         // Handle stackable items
         if (item.IsStackable) {
@@ -95,6 +120,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
     }
 
     public void ClearItemSlot() {
+        OnNewItem?.Invoke(0);
         _itemIconImage.gameObject.SetActive(false);
         _itemAmountText.SetText(string.Empty);
         _itemAmountBackgroundImage.gameObject.SetActive(false);
@@ -104,12 +130,8 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
     }
 
     public void OnPointerClick(PointerEventData eventData) {
-        if (_itemPanel == null) {
-            return;
-        }
-
-        // Right click
-        if (eventData.button == PointerEventData.InputButton.Right) {
+        if (_itemPanel == null) return;
+        if (eventData.button == PointerEventData.InputButton.Right) { // RMB Click
             if (DragItemUI.Instance.gameObject.activeSelf) {
                 _itemPanel.OnPlayerRightClick(_buttonIndex);
             } else {
@@ -119,43 +141,31 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
     }
 
     public void OnPointerDown(PointerEventData eventData) {
-        if (_itemPanel == null) {
-            return;
-        }
-
-        // Left click
-        if (eventData.button == PointerEventData.InputButton.Left) {
-            _itemPanel.OnPlayerLeftClick(_buttonIndex);
-        }
+        if (_itemPanel == null) return;
+        if (eventData.button == PointerEventData.InputButton.Left) _itemPanel.OnPlayerLeftClick(_buttonIndex); // LMB Click
     }
 
     public void OnBeginDrag(PointerEventData eventData) {
-        if (_dragItemUICanvasGroup != null) {
-            // Dragged item cannot block the button to trigger events
-            _dragItemUICanvasGroup.blocksRaycasts = false;
-        }
+        // Dragged item cannot block the button to trigger events
+        if (_dragItemUICanvasGroup != null) _dragItemUICanvasGroup.blocksRaycasts = false;
     }
 
     public void OnDrag(PointerEventData eventData) { }
 
     public void OnEndDrag(PointerEventData eventData) {
-        if (_dragItemUICanvasGroup != null) {
-            // Dragged item can be clicked again
-            _dragItemUICanvasGroup.blocksRaycasts = true;
-        }
+        // Draged item can be clicked again
+        if (_dragItemUICanvasGroup != null) _dragItemUICanvasGroup.blocksRaycasts = true;
     }
 
     public void OnDrop(PointerEventData eventData) {
-        if (_itemPanel == null) {
-            return;
-        }
-
-        if (eventData.pointerDrag != null) {
-            _itemPanel.OnPlayerLeftClick(_buttonIndex);
-        }
+        if (_itemPanel == null) return;
+        if (eventData.pointerDrag != null) _itemPanel.OnPlayerLeftClick(_buttonIndex);
     }
 
-    public void SetButtonHighlight(bool highlight) {
-        _selectedImage.gameObject.SetActive(highlight);
+    public void SetButtonHighlight(bool highlight) => _selectedImage.gameObject.SetActive(highlight);
+
+    public Sprite GetPlayerClothingUiSprite() {
+        if (_itemSlot == null || _itemSlot.IsEmpty) return null;
+        return (GameManager.Instance.ItemManager.ItemDatabase[_itemSlot.ItemId] as ClothingSO).PlayerClothingUiSprite;
     }
 }

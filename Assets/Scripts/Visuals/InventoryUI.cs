@@ -12,11 +12,6 @@ public class InventoryUI : ItemContainerUI {
     [SerializeField] private Button _sortButton;
     [SerializeField] private Button _trashButton;
 
-    [Header("Backpack & Inventory")]
-    [SerializeField] private Image _backpackRarityIcon;
-    [SerializeField] private Image _toolbeltRarityIcon;
-    [SerializeField] private Sprite[] _rarityIconSprites;
-
 
     private void Awake() {
         if (Instance != null) {
@@ -38,54 +33,45 @@ public class InventoryUI : ItemContainerUI {
     }
 
     public void InventoryOrToolbeltSizeChanged() {
-        // TODO: Get the right image for unlocked and locked and set it based on the size of the inventory
-        /*
+        int toolbeltSize = PlayerController.LocalInstance.PlayerToolbeltController.CurrentToolbeltSize;
+        int maxToolbeltSize = PlayerController.LocalInstance.PlayerToolbeltController.ToolbeltSizes[^1];
+        int inventorySize = PlayerController.LocalInstance.PlayerInventoryController.CurrentInventorySize;
+
+
+
         for (int i = 0; i < ItemButtons.Length; i++) {
             // Set the toolbelt slots
-            if (i < PlayerToolbeltController.LocalInstance.ToolbeltSizes[2]) {
-                if (i < PlayerToolbeltController.LocalInstance.ToolbeltSize) {
-                    ItemButtons[i].GetComponent<Button>().interactable = true;
-                    ItemButtons[i].GetComponent<Image>().raycastTarget = true;
+            if (i < maxToolbeltSize) {
+                if (i < toolbeltSize) {
+                    ItemButtons[i].interactable = true;
+                    ItemButtons[i].GetComponent<InventorySlot>().SetActive();
                     continue;
                 } else {
-                    ItemButtons[i].GetComponent<Button>().interactable = false;
-                    ItemButtons[i].GetComponent<Image>().raycastTarget = false;
+                    ItemButtons[i].interactable = false;
+                    ItemButtons[i].GetComponent<InventorySlot>().SetLocked();
                     continue;
                 }
             }
 
             // Set the inventory slots
-            if (i < (PlayerInventoryController.LocalInstance.CurrentInventorySize + PlayerToolbeltController.LocalInstance.ToolbeltSizes[^1])) {
+            if (i < (maxToolbeltSize + inventorySize)) {
                 ItemButtons[i].GetComponent<Button>().interactable = true;
-                ItemButtons[i].GetComponent<Image>().raycastTarget = true;
+                ItemButtons[i].GetComponent<InventorySlot>().SetActive();
                 continue;
             } else {
                 ItemButtons[i].GetComponent<Button>().interactable = false;
-                ItemButtons[i].GetComponent<Image>().raycastTarget = false;
+                ItemButtons[i].GetComponent<InventorySlot>().SetLocked();
                 continue;
             }
         }
-
-        // Show the correct inventory rarity icon
-        _backpackRarityIcon.sprite = PlayerInventoryController.LocalInstance.InventorySizes.IndexOf(PlayerInventoryController.LocalInstance.CurrentInventorySize) switch {
-            0 => _rarityIconSprites[0],
-            1 => _rarityIconSprites[1],
-            _ => _rarityIconSprites[2],
-        };
-
-        // Show the correct toolbelt rarity icon
-        _toolbeltRarityIcon.sprite = PlayerToolbeltController.LocalInstance.ToolbeltSizes.IndexOf(PlayerToolbeltController.LocalInstance.ToolbeltSize) switch {
-            0 => _rarityIconSprites[0],
-            1 => _rarityIconSprites[1],
-            _ => _rarityIconSprites[2],
-        };
-        */
     }
 
     public override void OnPlayerLeftClick(int buttonIndex) {
+        Debug.Log("Left click on button " + buttonIndex);
+
         if (Input.GetKey(KeyCode.LeftShift)) {
             int remainingAmount;
-            if (buttonIndex < PlayerController.LocalInstance.PlayerToolbeltController.ToolbeltSizes[2]) {
+            if (buttonIndex < PlayerController.LocalInstance.PlayerToolbeltController.ToolbeltSizes[^1]) {
                 remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], true);
             } else {
                 remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], false);

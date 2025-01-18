@@ -143,7 +143,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
             int splitValue = (int)_splitAmountSlider.value;
             if (splitValue > 0) {
                 ItemSlot originalSlot = ItemContainer.ItemSlots[_buttonIndex];
-                ItemSlot newItemSlot = new ItemSlot(
+                ItemSlot newItemSlot = new(
                 originalSlot.ItemId,
                 splitValue,
                 originalSlot.RarityId

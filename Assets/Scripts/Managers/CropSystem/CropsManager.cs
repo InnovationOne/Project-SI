@@ -587,7 +587,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         foreach (var pos in _targetTilemap.cellBounds.allPositionsWithin) {
             if (_targetTilemap.HasTile(pos) && _targetTilemap.GetTile(pos) == _dirtWet) {
-                Debug.Log($"Drying tile at {pos}");
                 _targetTilemap.SetTile(pos, _dirtDry);
             }
         }

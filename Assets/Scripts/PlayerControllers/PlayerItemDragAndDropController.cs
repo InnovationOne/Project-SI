@@ -47,18 +47,25 @@ public class PlayerItemDragAndDropController : NetworkBehaviour {
 
     #region -------------------- Left Click --------------------
     // Handles a left-click input on a specified item slot (inventory or outside)
-    public void OnLeftClick(ItemSlot itemSlot) {
+    public void OnLeftClick(ItemSlot itemSlot, InventorySlot inventorySlot = null) {
         if (!EventSystem.current.IsPointerOverGameObject()) {
             PlaceItemOnMap(_dragItemSlot.Amount);
         } else {
-            HandleLeftClickOnInventory(itemSlot);
+            HandleLeftClickOnInventory(itemSlot, inventorySlot);
         }
 
         FinalizeDragAction();
     }
 
     // Manages inventory logic when left-clicking inside the inventory area
-    void HandleLeftClickOnInventory(ItemSlot clickedSlot) {
+    void HandleLeftClickOnInventory(ItemSlot clickedSlot, InventorySlot clickedInventorySlot) {
+        // Check if the dragged item can be placed in the clicked slot
+        if (clickedInventorySlot != null && clickedInventorySlot.IsClothingSlot) {
+            if (!_dragItemSlot.IsEmpty && (GameManager.Instance.ItemManager.ItemDatabase[_dragItemSlot.ItemId] as ClothingSO).Type != clickedInventorySlot.AcceptedClothingType) {
+                return;
+            }
+        }
+
         if (_dragItemSlot.IsEmpty && clickedSlot.ItemId != EmptyItemId) {
             PickUpItemSlot(clickedSlot);
         } else if (clickedSlot.IsEmpty) {

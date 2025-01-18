@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43f365e02cb856a4e88e66667e579e92, type: 3}
+  m_Name: TORSO_LeatherArmorShirtWhite
+  m_EditorClassIdentifier: 
+  ItemId: 0
+  ItemType: 14
+  ItemName: Leather Armor Shirt White
+  ItemIcon: {fileID: -1543892541, guid: dd0be5a1cc4cdf147a9583b24549acc8, type: 3}
+  IsStackable: 0
+  MaxStackableAmount: 1
+  CanBeBought: 0
+  BuyPrice: 1000
+  CanBeSold: 0
+  LowestRaritySellPrice: 1000
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  Set: 0
+  Type: 5
+  PlayerClothingUiSprite: {fileID: -1543892541, guid: dd0be5a1cc4cdf147a9583b24549acc8, type: 3}
+  HealthBoost: 0
+  EnergyBoost: 0
+  Armor: 0
+  Shield: 0
+  FireResistance: 0
+  IceResistance: 0
+  PoisonResistance: 0
+  LightningResistance: 0
+  SpeedBoost: 0
+  Animator: {fileID: 22100000, guid: ec07c6ab6851a2d4c812d3179dc1fab1, type: 2}

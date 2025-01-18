@@ -1,6 +1,7 @@
 using System;
 using Unity.Netcode;
 using UnityEngine;
+using static ClothingSO;
 
 [Serializable]
 public class ItemSlot : INetworkSerializable {
