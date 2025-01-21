@@ -189,7 +189,7 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     float GetCurrentSpeed() {
         return _pAC.ActivePlayerState switch {
             PlayerState.Idle => 0f,
-            PlayerState.Walkcycle => _walkSpeed,
+            PlayerState.Walkcycle => _isRunning ? _runSpeed : _walkSpeed,
             PlayerState.Dashing => _walkSpeed * _dashSpeedMultiplier,
             _ => 0f,
         };

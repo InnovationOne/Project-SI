@@ -79,4 +79,12 @@ public class PlayerController : NetworkBehaviour {
         PlayerAnimationController.ChangeState(PlayerAnimationController.PlayerState.Sleeping, true);
         _gameManager.SetPlayerSleepingStateServerRpc(true);
     }
+
+    public void SavePlayer(PlayerData playerData) {
+        
+    }
+
+    public void LoadPlayer(PlayerData playerData) {
+        
+    }
 }

@@ -28,23 +28,21 @@ public class PlayerData {
     public float MaxEnergy;
     public float CurrentEnergy;
 
-    /*
     [Header("Clothing")]
-    public Sprite hat;
-    public Sprite hair;
-    public Color32 hairColor;
-    public Color32 eyeColor;
-    public Sprite earrings;
-    public Color32 skinColor;
-    public Sprite shirt;
-    public Sprite gloves;
-    public Sprite pants;
-    public Sprite shoes;
+    public Sprite Hands;
+    public Sprite Helmet;
+    public Sprite Hair;
+    public Color32 EyeColor;
+    public Sprite Belt;
+    public Sprite Torso;
+    public Sprite Legs;
+    public Sprite Feet;
+    public Sprite Skin;
+    public Sprite Head;
 
     [Header("Achivements")]
     public int distanceMoved;
 
     [Header("Hidden-Settings")]
     public bool skipTutorial;
-    */
 }

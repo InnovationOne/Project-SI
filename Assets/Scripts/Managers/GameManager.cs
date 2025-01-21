@@ -89,7 +89,6 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     }
 
     private void Start() {
-        // Cache commonly accessed singletons
         _networkManager = NetworkManager.Singleton;
         _testNetcodeUI = TestNetcodeUI.Instance;
 
@@ -103,31 +102,18 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    /// <summary>
-    /// Subscribes to network events upon network spawn.
-    /// </summary>
     public override void OnNetworkSpawn() {
         if (IsServer) {
             _networkManager.SceneManager.OnLoadEventCompleted += OnSceneLoadCompleted;
         }
     }
 
-    /// <summary>
-    /// Unsubscribes from network events upon network despawn.
-    /// </summary>
     public override void OnNetworkDespawn() {
         if (IsServer) {
             _networkManager.SceneManager.OnLoadEventCompleted -= OnSceneLoadCompleted;
         }
     }
 
-    /// <summary>
-    /// Handles player spawning once the scene has fully loaded.
-    /// </summary>
-    /// <param name="sceneName">Name of the loaded scene.</param>
-    /// <param name="loadSceneMode">Mode in which the scene was loaded.</param>
-    /// <param name="clientsCompleted">List of clients that have completed loading.</param>
-    /// <param name="clientsTimedOut">List of clients that timed out during loading.</param>
     private void OnSceneLoadCompleted(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut) {
         foreach (ulong clientId in _networkManager.ConnectedClientsIds) {
             if (!_playerSleepingDict.ContainsKey(clientId)) {
@@ -136,10 +122,6 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    /// <summary>
-    /// Spawns a player object for the specified client.
-    /// </summary>
-    /// <param name="clientId">The client ID for which to spawn the player.</param>
     private void SpawnPlayerForClient(ulong clientId) {
         if (_playerPrefab == null) {
             Debug.LogError("Player prefab is not assigned in the GameManager.");
@@ -171,10 +153,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    /// <summary>
-    /// Removes a player from the sleeping dictionary.
-    /// </summary>
-    /// <param name="clientId">The client ID of the player.</param>
+    
     public void RemovePlayerFromSleepingDict(ulong clientId) {
         if (_playerSleepingDict.ContainsKey(clientId)) {
             _playerSleepingDict.Remove(clientId);
@@ -182,11 +161,6 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    /// <summary>
-    /// Sets the sleeping state of a player. Invokes RPCs to update the state across the network.
-    /// </summary>
-    /// <param name="isSleeping">True if the player is going to sleep; false otherwise.</param>
-    /// <param name="serverRpcParams">Parameters for the Server RPC.</param>
     [ServerRpc(RequireOwnership = false)]
     public void SetPlayerSleepingStateServerRpc(bool isSleeping, ServerRpcParams serverRpcParams = default) {
         ulong clientId = serverRpcParams.Receive.SenderClientId;
@@ -208,9 +182,6 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    /// <summary>
-    /// Checks if all players are currently sleeping. If so, initiates the transition to the next day.
-    /// </summary>
     private void CheckIfAllPlayersAreSleeping() {
         foreach (var playerState in _playerSleepingDict.Values) {
             if (!playerState) {
@@ -234,10 +205,6 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         Debug.Log("Next day started.");
     }
 
-
-    /// <summary>
-    /// RPC to set all players to awake on their respective clients.
-    /// </summary>
     [ClientRpc]
     private void SetAllPlayersAwakeClientRpc() {
         if (PlayerController.LocalInstance != null) {
@@ -256,6 +223,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     }
     #endregion
 
+
     #region Save & Load
     [Serializable]
     public class PlayerDataList {
@@ -265,11 +233,10 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     public void SaveData(GameData data) {
         var allPlayerData = new List<PlayerData>();
         foreach (var pc in PlayerControllers) {
-            var dataPersistanceObjects = FindAllDataPersistanceObjects(pc);
             var playerData = new PlayerData();
-
-            foreach (var persistence in dataPersistanceObjects) {
-                persistence.SavePlayer(playerData);
+            var persisters = pc.GetComponents<IPlayerDataPersistance>();
+            foreach (var persister in persisters) {
+                persister.SavePlayer(playerData);
             }
 
             playerData.OwnerClientId = pc.OwnerClientId;
@@ -285,13 +252,21 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     }
 
     public void LoadData(GameData data) {
-        // TODO: Implement loading player data maybe with UI to select player
-    }
+        if (string.IsNullOrEmpty(data.PlayerData)) return;
+        var playerDataList = JsonUtility.FromJson<PlayerDataList>(data.PlayerData);
 
-    private List<IPlayerDataPersistance> FindAllDataPersistanceObjects(PlayerController pc) {
-        // Annahme: PlayerController ist ein MonoBehaviour und hat ein GameObject
-        IEnumerable<IPlayerDataPersistance> dataPersistanceObjects = pc.GetComponents<MonoBehaviour>().OfType<IPlayerDataPersistance>();
-        return new List<IPlayerDataPersistance>(dataPersistanceObjects);
+        foreach (var pd in playerDataList._players) {
+            var pc = PlayerControllers.FirstOrDefault(p => p.OwnerClientId == pd.OwnerClientId);
+            if (pc == null) {
+                Debug.LogWarning($"No matching PlayerController found for OwnerClientId {pd.OwnerClientId}.");
+                continue;
+            }
+
+            var persisters = pc.GetComponents<IPlayerDataPersistance>();
+            foreach (var persister in persisters) {
+                persister.LoadPlayer(pd);
+            }
+        }
     }
     #endregion
 }

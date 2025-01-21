@@ -263,10 +263,12 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
 
     #region -------------------- Save & Load --------------------
     public void SavePlayer(PlayerData playerData) {
+        Debug.Log("Saving player animation data.");
         playerData.LastDirection = new Vector2(_weaponAnim.GetFloat(LAST_X_AXIS), _weaponAnim.GetFloat(LAST_Y_AXIS));
     }
 
     public void LoadPlayer(PlayerData playerData) {
+        Debug.Log("Loading player animation data.");
         SetAnimatorLastDirection(playerData.LastDirection);
     }
     #endregion -------------------- Save & Load --------------------

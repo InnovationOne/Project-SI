@@ -21,7 +21,7 @@ public class PathfindingGrid : MonoBehaviour {
     [SerializeField] private Tilemap _tilemap;
     [SerializeField] private TerrainType[] _walkableRegions;
     [SerializeField] private int _obstacleProximityPenalty = 10;
-    private Dictionary<TileBase, int> _walkableRegionsDictionary = new Dictionary<TileBase, int>();
+    private Dictionary<TileBase, int> _walkableRegionsDictionary;
     private int _penaltyMin = int.MaxValue;
     private int _penaltyMax = int.MinValue;
 
@@ -36,6 +36,7 @@ public class PathfindingGrid : MonoBehaviour {
         _gridSizeX = Mathf.RoundToInt(_gridWorldSize.x / _nodeDiameter);
         _gridSizeY = Mathf.RoundToInt(_gridWorldSize.y / _nodeDiameter);
 
+        _walkableRegionsDictionary = new Dictionary<TileBase, int>();
         foreach (TerrainType region in _walkableRegions) {
             foreach (TileBase tile in region.Tiles) {
                 _walkableRegionsDictionary.Add(tile, region.TerrainPenalty);

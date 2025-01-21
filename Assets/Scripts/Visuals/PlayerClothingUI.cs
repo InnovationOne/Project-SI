@@ -22,7 +22,6 @@ public class PlayerClothingUI : ItemContainerUI {
     }
 
     private void UpdatePlayerVisual() {
-        Debug.Log("UpdatePlayerVisual");
         for (int i = 0; i < _playerClothingUiImages.Length; i++) {
             _playerClothingUiImages[i].sprite = ItemButtons[i].GetComponent<InventorySlot>().GetPlayerClothingUiSprite();
             if (_playerClothingUiImages[i].sprite != null) {

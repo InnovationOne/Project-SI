@@ -10,7 +10,7 @@ public class RuleTileGenerator : EditorWindow {
     public string tileName = "NewRuleTile";
 
     //default neighbor positions, copied from the rule tile script so we don't need a reference to it
-    public List<Vector3Int> NeighborPositions = new List<Vector3Int>()
+    public List<Vector3Int> NeighborPositions = new()
     {
         new Vector3Int(-1, 1, 0),
         new Vector3Int(0, 1, 0),

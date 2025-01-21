@@ -79,12 +79,18 @@ public class FileDataHandler {
         try {
             Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
 
-            // Compute checksum
-            string jsonData = JsonUtility.ToJson(data, true);
-            string checksum = ComputeChecksum(jsonData);
-            data.Checksum = checksum;
+            // Temporarily keep any old checksum, then clear it
+            string oldChecksum = data.Checksum;
+            data.Checksum = "";
 
-            // Re-serialize with checksum
+            // Compute hash on the "no-checksum" version
+            string jsonWithoutChecksum = JsonUtility.ToJson(data, true);
+            string newChecksum = ComputeChecksum(jsonWithoutChecksum);
+
+            // Now store the new checksum
+            data.Checksum = newChecksum;
+
+            // Finally serialize again with the *new* checksum
             string dataToStore = JsonUtility.ToJson(data, true);
 
             if (_useEncryption) {
