@@ -1,26 +1,27 @@
-using Ink.Parsed;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 public class SellChest : MonoBehaviour, IInteractable {
-    [SerializeField] private ItemContainerSO _sellBoxContainer;
-    [SerializeField] private SpriteRenderer _sellBoxHighlight;
+    [SerializeField] ItemContainerSO _sellBoxContainer;
 
-    public float MaxDistanceToPlayer => 0f;
+    public float MaxDistanceToPlayer => 0.5f;
 
-    private void Awake() {
-        _sellBoxHighlight.gameObject.SetActive(false);
-    }
+    public void Interact(PlayerController playerController) {
+        if (playerController == null) return;
 
-    public void Interact(PlayerController character) {
+        if (!playerController.TryGetComponent<PlayerToolbeltController>(out var toolbelt)) return;
 
-        if (GameManager.Instance.ItemManager.ItemDatabase[PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId] != null 
-            && GameManager.Instance.ItemManager.ItemDatabase[PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId].CanBeSold) {
+        var slot = toolbelt.GetCurrentlySelectedToolbeltItemSlot();
+        if (slot == null || slot.ItemId <= 0) return;
 
-            var itemSlot = character.GetComponent<PlayerToolbeltController>().GetCurrentlySelectedToolbeltItemSlot();
-            _sellBoxContainer.AddItem(itemSlot, false);
+        var database = GameManager.Instance.ItemManager.ItemDatabase;
+        if (!database[slot.ItemId]) return;
 
-            character.GetComponent<PlayerToolbeltController>().ClearCurrentItemSlot();
-        }
+        var item = database[slot.ItemId];
+        if (item == null || !item.CanBeSold) return;
+
+        _sellBoxContainer.AddItem(slot, false);
+        toolbelt.ClearCurrentItemSlot();
     }
 
     public void PickUpItemsInPlacedObject(PlayerController player) { }

@@ -70,14 +70,10 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
         }
     }
 
-    public void SetActive() {
-        _inventorySlot_Normal.enabled = true;
-        _inventorySlot_Locked.enabled = false;
-    }
-
-    public void SetLocked() {
-        _inventorySlot_Normal.enabled = false;
-        _inventorySlot_Locked.enabled = true;
+    public void SetInteractable(bool interactable) {
+        _inventorySlot_Normal.enabled = interactable;
+        _inventorySlot_Locked.enabled = !interactable;
+        GetComponent<Button>().interactable = interactable;
     }
 
     public void SetItemSlot(ItemSlot newItemSlot, Sprite[] raritySprites) {
@@ -96,7 +92,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
         var item = GameManager.Instance.ItemManager.ItemDatabase[_itemSlot.ItemId];
         _itemIconImage.sprite = item.ItemIcon;
 
-        /*
+        /* TODO
         switch (item) {
             case ToolSO tool:
                 if (_itemSlot.RarityId > 0 && _itemSlot.RarityId - 1 < tool.ToolItemRarity.Length) {

@@ -9,84 +9,71 @@ public class InventoryUI : ItemContainerUI {
     public int LastSlotId { get; private set; }
 
     [Header("Buttons")]
-    [SerializeField] private Button _sortButton;
-    [SerializeField] private Button _trashButton;
+    [SerializeField] Button _sortButton;
+    [SerializeField] Button _trashButton;
 
+    PlayerInventoryController _playerInventoryController;
+    PlayerToolbeltController _playerToolbeltController;
+    PlayerItemDragAndDropController _playerItemDragAndDropController;
 
-    private void Awake() {
+    void Awake() {
         if (Instance != null) {
             Debug.LogError("There is more than one instance of InventoryPanel in the scene!");
             return;
         }
         Instance = this;
 
-        _sortButton.onClick.AddListener(() => PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.SortItems());
-        _trashButton.onClick.AddListener(() => PlayerController.LocalInstance.PlayerItemDragAndDropController.ClearDragItem());
     }
 
-    private void Start() {
-        base.ItemContainerPanelAwake();
-
+    void Start() {
+        ItemContainerUIAwake();
         ItemContainer.OnItemsUpdated += ShowUIButtonContains;
-
         Init();
+
+        _playerInventoryController = PlayerController.LocalInstance.PlayerInventoryController;
+        _playerToolbeltController = PlayerController.LocalInstance.PlayerToolbeltController;
+        _playerItemDragAndDropController = PlayerController.LocalInstance.PlayerItemDragAndDropController;
+
+        _sortButton.onClick.AddListener(() => _playerInventoryController.InventoryContainer.SortItems());
+        _trashButton.onClick.AddListener(() => _playerItemDragAndDropController.ClearDragItem());
     }
 
+    // Updates inventory and toolbelt sizes based on the player's current configuration.
     public void InventoryOrToolbeltSizeChanged() {
-        int toolbeltSize = PlayerController.LocalInstance.PlayerToolbeltController.CurrentToolbeltSize;
-        int maxToolbeltSize = PlayerController.LocalInstance.PlayerToolbeltController.ToolbeltSizes[^1];
-        int inventorySize = PlayerController.LocalInstance.PlayerInventoryController.CurrentInventorySize;
-
-
+        int toolbeltSize = _playerToolbeltController.CurrentToolbeltSize;
+        int maxToolbeltSize = _playerToolbeltController.ToolbeltSizes[^1];
+        int inventorySize = _playerInventoryController.CurrentInventorySize;
 
         for (int i = 0; i < ItemButtons.Length; i++) {
-            // Set the toolbelt slots
+            // Toolbelt slots
             if (i < maxToolbeltSize) {
-                if (i < toolbeltSize) {
-                    ItemButtons[i].interactable = true;
-                    ItemButtons[i].GetComponent<InventorySlot>().SetActive();
-                    continue;
-                } else {
-                    ItemButtons[i].interactable = false;
-                    ItemButtons[i].GetComponent<InventorySlot>().SetLocked();
-                    continue;
-                }
+                ItemButtons[i].SetInteractable(i < toolbeltSize);
+                continue;
             }
 
-            // Set the inventory slots
-            if (i < (maxToolbeltSize + inventorySize)) {
-                ItemButtons[i].GetComponent<Button>().interactable = true;
-                ItemButtons[i].GetComponent<InventorySlot>().SetActive();
-                continue;
-            } else {
-                ItemButtons[i].GetComponent<Button>().interactable = false;
-                ItemButtons[i].GetComponent<InventorySlot>().SetLocked();
-                continue;
-            }
+            // Inventory slots
+            ItemButtons[i].SetInteractable(i < (maxToolbeltSize + inventorySize));
         }
     }
 
+
     public override void OnPlayerLeftClick(int buttonIndex) {
-        Debug.Log("Left click on button " + buttonIndex);
-
-        if (Input.GetKey(KeyCode.LeftShift)) {
+        if (GameManager.Instance.InputManager.IsShiftPressed()) {
             int remainingAmount;
-            if (buttonIndex < PlayerController.LocalInstance.PlayerToolbeltController.ToolbeltSizes[^1]) {
-                remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], true);
-            } else {
-                remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], false);
-            }
 
+            // Decides if we should add items directly to the inventory or toolbelt region.
+            bool isToolbeltSlot = buttonIndex < _playerToolbeltController.ToolbeltSizes[^1];
+            remainingAmount = _playerInventoryController.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], isToolbeltSlot);
+
+            var slot = ItemContainer.ItemSlots[buttonIndex];
             if (remainingAmount > 0) {
-                var slot = ItemContainer.ItemSlots[buttonIndex];
                 slot.Set(new ItemSlot(slot.ItemId, remainingAmount, slot.RarityId));
             } else {
-                ItemContainer.ItemSlots[buttonIndex].Clear();
+                slot.Clear();
             }
         } else {
             LastSlotId = buttonIndex;
-
-            PlayerController.LocalInstance.PlayerItemDragAndDropController.OnLeftClick(ItemContainer.ItemSlots[buttonIndex]);
+            _playerItemDragAndDropController.OnLeftClick(ItemContainer.ItemSlots[buttonIndex]);
         }
 
         ShowUIButtonContains();
@@ -95,9 +82,9 @@ public class InventoryUI : ItemContainerUI {
     public override void OnPlayerRightClick(int buttonIndex) {
         LastSlotId = buttonIndex;
 
-        // If the drag item is active, call for the OnRightClick of the ItemDragAndDropManager 
+        // If an item is on the cursor, do a drag-and-drop right-click action
         if (DragItemUI.Instance.gameObject.activeSelf) {
-            PlayerController.LocalInstance.PlayerItemDragAndDropController.OnRightClick(ItemContainer.ItemSlots[buttonIndex]);
+            _playerItemDragAndDropController.OnRightClick(ItemContainer.ItemSlots[buttonIndex]);
         }
     }
 }

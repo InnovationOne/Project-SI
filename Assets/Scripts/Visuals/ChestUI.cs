@@ -5,10 +5,13 @@ public class ChestUI : ItemContainerUI {
     public static ChestUI Instance { get; private set; }
 
     [Header("Settings")]
-    [SerializeField] private Button _buttonPrefab;
+    [SerializeField] InventorySlot _buttonPrefab;
 
     [Header("Contentbox")]
-    [SerializeField] private Transform _content;
+    [SerializeField] Transform _content;
+
+    PlayerInventoryController _playerInventoryController;
+    PlayerItemDragAndDropController _playerItemDragAndDropController;
 
     private void Awake() {
         if (Instance != null) {
@@ -18,31 +21,37 @@ public class ChestUI : ItemContainerUI {
         Instance = this;
     }
 
-    public void ShowChest(ItemContainerSO itemContainer) {
-        gameObject.SetActive(true);
+    private void Start() {
+        _playerInventoryController = PlayerController.LocalInstance.PlayerInventoryController;
+        _playerItemDragAndDropController = PlayerController.LocalInstance.PlayerItemDragAndDropController;
+    }
 
+    // Dynamically shows a chest's item container by creating slot UI.
+    public void ShowChestUI(ItemContainerSO itemContainer) {
+        gameObject.SetActive(true);
         ItemContainer = itemContainer;
 
         foreach (Transform child in _content) {
             Destroy(child.gameObject);
         }
 
-        ItemButtons = new Button[ItemContainer.ItemSlots.Count];
+        ItemButtons = new InventorySlot[ItemContainer.ItemSlots.Count];
         for (int i = 0; i < ItemContainer.ItemSlots.Count; i++) {
-            Button button = Instantiate(_buttonPrefab, _content);
+            var button = Instantiate(_buttonPrefab, _content);
             ItemButtons[i] = button;
         }
 
         Init();
     }
 
-    public void HideChest() {
+    // Hides the entire chest UI.
+    public void HideChestUI() {
         gameObject.SetActive(false);
     }
 
     public override void OnPlayerLeftClick(int buttonIndex) {
-        if (Input.GetKey(KeyCode.LeftShift)) {
-            int remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], true);
+        if (GameManager.Instance.InputManager.IsShiftPressed()) {
+            int remainingAmount = _playerInventoryController.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], true);
 
             if (remainingAmount > 0) {
                 var slot = ItemContainer.ItemSlots[buttonIndex];
@@ -51,7 +60,7 @@ public class ChestUI : ItemContainerUI {
                 ItemContainer.ItemSlots[buttonIndex].Clear();
             }
         } else {
-            PlayerController.LocalInstance.PlayerItemDragAndDropController.OnLeftClick(ItemContainer.ItemSlots[buttonIndex]);
+            _playerItemDragAndDropController.OnLeftClick(ItemContainer.ItemSlots[buttonIndex]);
         }
 
         ShowUIButtonContains();

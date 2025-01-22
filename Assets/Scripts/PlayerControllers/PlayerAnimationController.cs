@@ -80,7 +80,7 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     public const string LAST_Y_AXIS = "lastYAxis";
 
     private PlayerToolbeltController _playerToolbeltController;
-    private PlayerClothingUI _playerClothingUI;
+    private ClothingUI _playerClothingUI;
 
     private void Awake() {
         ChangeState(PlayerState.Idle, true);
@@ -88,15 +88,14 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     }
 
     private void Start() {
-        _playerClothingUI = PlayerClothingUI.Instance;
+        _playerClothingUI = ClothingUI.Instance;
 
-        _playerClothingUI.ItemButtons[0].GetComponent<InventorySlot>().OnNewItem += SetFeet;
-
-        _playerClothingUI.ItemButtons[1].GetComponent<InventorySlot>().OnNewItem += SetBelt;
-        _playerClothingUI.ItemButtons[2].GetComponent<InventorySlot>().OnNewItem += SetHelmet;
-        _playerClothingUI.ItemButtons[3].GetComponent<InventorySlot>().OnNewItem += SetLegs;
-        _playerClothingUI.ItemButtons[4].GetComponent<InventorySlot>().OnNewItem += SetHands;
-        _playerClothingUI.ItemButtons[5].GetComponent<InventorySlot>().OnNewItem += SetTorso;
+        _playerClothingUI.PlayerClothingUIItemButtons[0].OnNewItem += SetFeet;
+        _playerClothingUI.PlayerClothingUIItemButtons[1].OnNewItem += SetBelt;
+        _playerClothingUI.PlayerClothingUIItemButtons[2].OnNewItem += SetHelmet;
+        _playerClothingUI.PlayerClothingUIItemButtons[3].OnNewItem += SetLegs;
+        _playerClothingUI.PlayerClothingUIItemButtons[4].OnNewItem += SetHands;
+        _playerClothingUI.PlayerClothingUIItemButtons[5].OnNewItem += SetTorso;
 
         _playerToolbeltController.OnToolbeltSlotChanged += OnToolbeltSlotChanged;
 
@@ -106,12 +105,12 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     }
 
     private void OnDestroy() {
-        _playerClothingUI.ItemButtons[0].GetComponent<InventorySlot>().OnNewItem -= SetFeet;
-        _playerClothingUI.ItemButtons[1].GetComponent<InventorySlot>().OnNewItem -= SetBelt;
-        _playerClothingUI.ItemButtons[2].GetComponent<InventorySlot>().OnNewItem -= SetHelmet;
-        _playerClothingUI.ItemButtons[3].GetComponent<InventorySlot>().OnNewItem -= SetLegs;
-        _playerClothingUI.ItemButtons[4].GetComponent<InventorySlot>().OnNewItem -= SetHands;
-        _playerClothingUI.ItemButtons[5].GetComponent<InventorySlot>().OnNewItem -= SetTorso;
+        _playerClothingUI.PlayerClothingUIItemButtons[0].OnNewItem -= SetFeet;
+        _playerClothingUI.PlayerClothingUIItemButtons[1].OnNewItem -= SetBelt;
+        _playerClothingUI.PlayerClothingUIItemButtons[2].OnNewItem -= SetHelmet;
+        _playerClothingUI.PlayerClothingUIItemButtons[3].OnNewItem -= SetLegs;
+        _playerClothingUI.PlayerClothingUIItemButtons[4].OnNewItem -= SetHands;
+        _playerClothingUI.PlayerClothingUIItemButtons[5].OnNewItem -= SetTorso;
 
 
         _playerToolbeltController.OnToolbeltSlotChanged -= OnToolbeltSlotChanged;

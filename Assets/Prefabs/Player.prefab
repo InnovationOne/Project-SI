@@ -6093,12 +6093,10 @@ GameObject:
   - component: {fileID: 7280026062797871308}
   - component: {fileID: -8145328593073467161}
   - component: {fileID: 7538093593932798205}
-  - component: {fileID: 6823292315665194501}
   - component: {fileID: 8828609184466402328}
   - component: {fileID: 2532303169848316385}
   - component: {fileID: 1644743227822221196}
   - component: {fileID: 5425509020679667450}
-  - component: {fileID: 1156460460221968290}
   m_Layer: 11
   m_Name: Player
   m_TagString: Player
@@ -6444,20 +6442,6 @@ MonoBehaviour:
   _fishCatchText: {fileID: 0}
   _alertPopup: {fileID: 7798567739198905670}
   _bobberAlphaAdjustment: 0.5
---- !u!114 &6823292315665194501
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6615988121713394588}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _isObjectStationary: 0
-  _objectCollider2D: {fileID: 5824850440494676101}
 --- !u!114 &8828609184466402328
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6548,18 +6532,6 @@ SortingGroup:
   m_SortingLayer: 2
   m_SortingOrder: 0
   m_SortAtRoot: 0
---- !u!114 &1156460460221968290
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6615988121713394588}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c01c7b39930a48544a997e749003d3f4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &6714516358234223677
 GameObject:
   m_ObjectHideFlags: 0

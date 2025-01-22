@@ -1,102 +1,87 @@
-using System;
 using Unity.Collections;
 using UnityEngine;
 
 public class Chest : PlaceableObject {
     [Header("References")]
-    private SpriteRenderer _visual;
-    private static readonly ChestUI _chestUI = ChestUI.Instance;
+    SpriteRenderer _visual;
 
-    [NonSerialized] private const float MAX_DISTANCE_TO_PLAYER = 1.5f;
-    public float MaxDistanceToPlayer { get => MAX_DISTANCE_TO_PLAYER; }
+    public float MaxDistanceToPlayer => 1.5f;
 
-    private ItemContainerSO _itemContainer;
-    private bool _opened;
-    private int _itemId;
+    ItemContainerSO _itemContainer;
+    ChestUI _chestUI;
+    bool _opened;
+    int _itemId;
+
 
     private void Awake() {
+        // Ensure the chest has a valid item container on creation.
         InitializeItemContainer();
     }
 
-    /// <summary>
-    /// Initializes the item container for the chest.
-    /// </summary>
+    private void Start() {
+        _chestUI = ChestUI.Instance;
+    }
+
+    // Creates or reinitializes the item container if it does not already exist.
     private void InitializeItemContainer() {
         if (_itemContainer == null) {
-            _itemContainer = (ItemContainerSO)ScriptableObject.CreateInstance(typeof(ItemContainerSO));
+            _itemContainer = ScriptableObject.CreateInstance<ItemContainerSO>();
             _itemContainer.Initialize(ChestSO.ItemSlots);
         }
     }
 
-    /// <summary>
-    /// Initializes the chest with the specified item ID.
-    /// </summary>
-    /// <param name="itemId">The ID of the item to initialize the chest with.</param>
+    // Sets up chest data and visual state before the chest is fully loaded into the scene.
     public override void InitializePreLoad(int itemId) {
         _itemId = itemId;
         InitializeItemContainer();
         _visual = GetComponent<SpriteRenderer>();
-        _visual.sprite =ChestSO.ClosedSprite;
+        _visual.sprite = ChestSO.ClosedSprite;
     }
 
-    /// <summary>
-    /// Interacts with the chest.
-    /// </summary>
-    /// <param name="player">The player interacting with the chest.</param>
+    // Allows the player to interact with the chest, toggling its open/closed state.
     public void Interact(PlayerController player) {
         ToggleChest();
         UpdateVisual();
         UpdateUI();
     }
 
-    /// <summary>
-    /// Toggles the state of the chest (opened or closed).
-    /// </summary>
+    // Changes the chest between opened and closed.
     private void ToggleChest() => _opened = !_opened;
 
-    /// <summary>
-    /// Updates the visual appearance of the chest based on its current state.
-    /// </summary>
+    // Updates the chest's sprite based on whether it is opened or closed.
     private void UpdateVisual() => _visual.sprite = _opened ? ChestSO.OpenSprite : ChestSO.ClosedSprite;
-    
 
-    /// <summary>
-    /// Updates the UI based on the state of the chest.
-    /// If the chest is opened, it shows the item container in the chest UI.
-    /// If the chest is closed, it hides the chest UI.
-    /// </summary>
+
+    // Shows or hides the chest UI depending on the chest's current state.
     private void UpdateUI() {
         if (_opened) {
-            _chestUI.ShowChest(_itemContainer);
+            _chestUI.ShowChestUI(_itemContainer);
         } else {
-            _chestUI.HideChest();
+            _chestUI.HideChestUI();
         }
     }
 
-    /// <summary>
-    /// Picks up items in the placed object and adds them to the player's inventory.
-    /// </summary>
-    /// <param name="player">The player who is picking up the items.</param>
+    // Lets the player pick up any remaining items from inside the chest.
     public override void PickUpItemsInPlacedObject(PlayerController player) {
-        foreach (ItemSlot itemSlot in _itemContainer.ItemSlots) {
-            int remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(itemSlot, false);
+        foreach (var slot in _itemContainer.ItemSlots) {
+            // Tries to add items to the player's inventory.
+            int remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(slot, false);
+
+            // If items remain, spawn them in the world around the chest.
             if (remainingAmount > 0) {
                 GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
-                    itemSlot: itemSlot,
-                    initialPosition: transform.position,
-                    motionDirection: PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
+                    slot,
+                    transform.position,
+                    PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
                     spreadType: ItemSpawnManager.SpreadType.Circle);
             }
         }
     }
 
-    /// <summary>
-    /// Represents a chest scriptable object.
-    /// </summary>
+    // Retrieves the ChestSO data from the global item database using this chest's item ID.
     private ChestSO ChestSO => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as ChestSO;
 
-
-    #region Save & Load
+    #region -------------------- Save & Load --------------------
     public override string SaveObject() {
         return _itemContainer.SaveItemContainer();
     }
@@ -109,5 +94,5 @@ public class Chest : PlaceableObject {
             _itemContainer.LoadItemContainer(jsonData);
         }
     }
-    #endregion
+    #endregion -------------------- Save & Load --------------------
 }

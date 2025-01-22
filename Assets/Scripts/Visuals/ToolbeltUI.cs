@@ -5,21 +5,19 @@ using UnityEngine.UI;
 
 public class ToolbeltUI : ItemContainerUI {
     public static ToolbeltUI Instance { get; private set; }
-
     public Action<int> OnToolbeltSlotLeftClick;
 
     [Header("Selection wheel")]
-    [SerializeField] private Image _toolbeltSelectionWheelSelectedImage;
-    [SerializeField] private TextMeshProUGUI _toolbeltSelectionWheelSelectedText;
+    [SerializeField] Image _toolbeltSelectionWheelSelectedImage;
+    [SerializeField] TextMeshProUGUI _toolbeltSelectionWheelSelectedText;
 
     [Header("Inventory Button")]
-    [SerializeField] private Button _inventoryButton;
-    [SerializeField] private Sprite[] _rarityIconSprites;
+    [SerializeField] Button _inventoryButton;
+    [SerializeField] Sprite[] _rarityIconSprites;
 
-    private int _lastSelectedTool;
+    int _lastSelectedSlot;
 
-
-    private void Awake() {
+    void Awake() {
         if (Instance != null) {
             Debug.LogError("There is more than one instance of ToolbeltPanel in the scene!");
             return;
@@ -31,36 +29,30 @@ public class ToolbeltUI : ItemContainerUI {
 
     private void Start() {
         ItemContainer.OnItemsUpdated += ShowUIButtonContains;
-
         Init();
     }
 
+    // Adjusts toolbelt size.
     public void SetToolbeltSize(int toolbeltSize) {
         for (int i = 0; i < ItemButtons.Length; i++) {
-            if (i < toolbeltSize) {
-                ItemButtons[i].GetComponent<Button>().interactable = true;
-                ItemButtons[i].GetComponent<InventorySlot>().SetActive();
-            } else {
-                ItemButtons[i].GetComponent<Button>().interactable = false;
-                ItemButtons[i].GetComponent<InventorySlot>().SetLocked();
-            }
+            ItemButtons[i].SetInteractable(i < toolbeltSize);
         }
     }
 
-    public void SetToolbeltSlotHighlight(int currentlySelectedTool) {
-        ItemButtons[_lastSelectedTool].GetComponent<InventorySlot>().SetButtonHighlight(false);
-
-        _lastSelectedTool = currentlySelectedTool;
-
-        ItemButtons[currentlySelectedTool].GetComponent<InventorySlot>().SetButtonHighlight(true);
+    // Visually highlights the currently selected toolbelt slot.
+    public void SetToolbeltSlotHighlight(int currentlySelectedSlot) {
+        ItemButtons[_lastSelectedSlot].SetButtonHighlight(false);
+        _lastSelectedSlot = currentlySelectedSlot;
+        ItemButtons[currentlySelectedSlot].SetButtonHighlight(true);
     }
 
+    // Rotates the selection wheel UI and updates the displayed slot number.
     public void ToolbeltChanged(int selectedToolbelt, float rotation) {
         _toolbeltSelectionWheelSelectedImage.transform.Rotate(0f, 0f, -rotation);
-
         _toolbeltSelectionWheelSelectedText.text = (selectedToolbelt + 1).ToString();
     }
 
+    // Toggles the entire toolbelt UI on or off.
     public void ToggleToolbelt() {
         gameObject.SetActive(!gameObject.activeSelf);
 
@@ -71,7 +63,6 @@ public class ToolbeltUI : ItemContainerUI {
 
     public override void OnPlayerLeftClick(int selectedToolbeltSlot) {
         OnToolbeltSlotLeftClick?.Invoke(selectedToolbeltSlot);
-
         SetToolbeltSlotHighlight(selectedToolbeltSlot);
     }
 }
