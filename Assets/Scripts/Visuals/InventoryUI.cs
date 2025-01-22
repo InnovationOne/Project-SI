@@ -30,16 +30,21 @@ public class InventoryUI : ItemContainerUI {
         ItemContainer.OnItemsUpdated += ShowUIButtonContains;
         Init();
 
-        _playerInventoryController = PlayerController.LocalInstance.PlayerInventoryController;
-        _playerToolbeltController = PlayerController.LocalInstance.PlayerToolbeltController;
-        _playerItemDragAndDropController = PlayerController.LocalInstance.PlayerItemDragAndDropController;
-
         _sortButton.onClick.AddListener(() => _playerInventoryController.InventoryContainer.SortItems());
         _trashButton.onClick.AddListener(() => _playerItemDragAndDropController.ClearDragItem());
     }
 
+    // Catches the reference. Has to be done twice, because this Start() method is called before the PlayerInventoryController is initialized.
+    void CatchReference() {
+        _playerInventoryController = PlayerController.LocalInstance.PlayerInventoryController;
+        _playerToolbeltController = PlayerController.LocalInstance.PlayerToolbeltController;
+        _playerItemDragAndDropController = PlayerController.LocalInstance.PlayerItemDragAndDropController;
+    }
+
     // Updates inventory and toolbelt sizes based on the player's current configuration.
     public void InventoryOrToolbeltSizeChanged() {
+        if (_playerInventoryController == null || _playerToolbeltController == null || _playerItemDragAndDropController == null) CatchReference();
+
         int toolbeltSize = _playerToolbeltController.CurrentToolbeltSize;
         int maxToolbeltSize = _playerToolbeltController.ToolbeltSizes[^1];
         int inventorySize = _playerInventoryController.CurrentInventorySize;

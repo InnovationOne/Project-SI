@@ -93,7 +93,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
     #region -------------------- Right Click Menu --------------------
     // Displays the right-click menu for item splitting, wiki info, etc.
     public void ShowRightClickMenu(int buttonIndex, Vector3 position) {
-        if (ItemContainer.ItemSlots[buttonIndex].IsEmpty) return;
+        if (_rightClickMenu == null || ItemContainer.ItemSlots[buttonIndex].IsEmpty) return;
 
         // Toggles the menu if already open on the same button.
         if (_rightClickMenu.gameObject.activeSelf && buttonIndex == _buttonIndex) {
@@ -118,6 +118,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
 
     // Hides the right-click context menu.
     public void HideRightClickMenu() {
+        if (_rightClickMenu == null) return;
         _rightClickMenu.gameObject.SetActive(false);
         _buttonIndex = -1;
     }
@@ -168,7 +169,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
     #region -------------------- Item Info --------------------
     // Triggers delayed display of item information.
     public void TriggerItemInfo(ItemSlot itemSlot) {
-        if (itemSlot == null) return;
+        if (itemSlot == null || _itemInfo == null) return;
 
         _showInfo = true;
         _itemSlotForShowInfo = itemSlot;
@@ -176,7 +177,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
 
     // Hides the item info panel immediately.
     public void HideItemInfo() {
-        if (_itemSlotForShowInfo == null) return;
+        if (_itemSlotForShowInfo == null || _itemInfo == null) return;
 
         _itemInfo.gameObject.SetActive(false);
         _currentTime = 0f;
@@ -186,7 +187,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
 
     // TODO: Displays item info after a short delay.
     void ShowItemInfo() {
-        if (_itemSlotForShowInfo == null) return;
+        if (_itemSlotForShowInfo == null || _itemInfo == null) return;
 
         // Show panel once the time threshold is reached
         if (_currentTime >= TIME_TO_SHOW_ITEM_INFO && !_itemInfo.gameObject.activeSelf) {

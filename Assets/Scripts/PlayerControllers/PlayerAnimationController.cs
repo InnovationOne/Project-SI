@@ -67,8 +67,10 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     [SerializeField] Animator _headAnim;
     [SerializeField] Animator _bodyAnim;
     [SerializeField] Animator _behindAnim;
+    [SerializeField] Animator _shadowAnim;
 
     [Header("DEBUG: Animator Controllers")]
+    [SerializeField] RuntimeAnimatorController _shadowAnimator;
     [SerializeField] RuntimeAnimatorController _bodyAnimator;
     [SerializeField] RuntimeAnimatorController _headAnimator;
     [SerializeField] RuntimeAnimatorController _defaultAnimator;
@@ -102,6 +104,7 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         // DEBUG: Ensure the correct override controllers are applied.
         StartCoroutine(SetAnimationOverride(_bodyAnim, _bodyAnimator));
         StartCoroutine(SetAnimationOverride(_headAnim, _headAnimator));
+        StartCoroutine(SetAnimationOverride(_shadowAnim, _shadowAnimator));
     }
 
     private void OnDestroy() {

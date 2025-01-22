@@ -31,7 +31,7 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
 
     // Movement State
     bool _canMoveAndTurn = true;
-    bool _isRunning;
+    bool _isRunning = true;
     Vector2 _inputDirection;
     public Vector3 Position;
     float _timeSinceLastMovement;
