@@ -39,7 +39,8 @@ public class WeaponSO : ItemSO {
     public int CritChance;
     public int CritDamage;
 
-    [Header("Melee Hitboxe")]
+    [Header("Melee Hitbox")]
+
     [ConditionalHide("HasSlashAnimation", true)]
     public int SlashHitFrameIndex;
     [ConditionalHide("HasThrustAnimation", true)]
@@ -52,6 +53,7 @@ public class WeaponSO : ItemSO {
     public bool HasSpellcastAnimation;
     public bool HasThrustAnimation;
 
+    [Header("Animator Controllers")]
     public RuntimeAnimatorController AnimatorBG;
     public RuntimeAnimatorController AnimatorFG;
 }

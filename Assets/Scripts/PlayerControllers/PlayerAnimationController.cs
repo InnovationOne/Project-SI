@@ -234,9 +234,7 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         }
 
         // This warning addresses the case where the state doesn't exist in the Controller
-        Debug.LogWarning(
-            $"Animator '{animator.name}' does not have a state named '{stateName}' in its Controller."
-        );
+        Debug.LogWarning($"Animator '{animator.name}' does not have a state named '{stateName}' in its Controller.");
         return false;
     }
 

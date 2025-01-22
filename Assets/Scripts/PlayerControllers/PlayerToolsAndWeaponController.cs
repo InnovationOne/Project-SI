@@ -103,8 +103,6 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
     #region -------------------- Meele Action --------------------
     void MeleeAction(WeaponSO weaponSO) {
-        return;
-
         CheckComboWindow(weaponSO.ComboMaxDelay, weaponSO.ComboMaxCount);
 
         PlayerState animationType = PlayerState.Slash;
