@@ -145,7 +145,7 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
 
     #region -------------------- Dashing --------------------
     void TryStartDash() {
-        if (_dashCooldownRemaining > 0f && !CanDash()) return;
+        if (_dashCooldownRemaining > 0f || !CanDash()) return;
 
         Vector2 dashDir = _inputDirection == Vector2.zero ? LastMotionDirection : _inputDirection;
         if (dashDir == Vector2.zero) return;
@@ -211,6 +211,12 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
         } else if (!isMoving && playbackState == PLAYBACK_STATE.PLAYING) {
             _playerWalkGrassEvent.stop(STOP_MODE.ALLOWFADEOUT);
         }
+    }
+
+    public IEnumerator SlidePlayerOnThrust() {
+        _rb.linearVelocity = _dashDirection * 2;
+        yield return new WaitForSeconds(0.2f);
+        _rb.linearVelocity = Vector2.zero;
     }
     #endregion -------------------- Movement --------------------
 

@@ -39,12 +39,14 @@ public class WeaponSO : ItemSO {
     public int CritChance;
     public int CritDamage;
 
-    [Header("Melee Hitboxes")]
-    public List<V2Array> ComboPointsAttack;
+    [Header("Melee Hitboxe")]
+    [ConditionalHide("HasSlashAnimation", true)]
+    public int SlashHitFrameIndex;
+    [ConditionalHide("HasThrustAnimation", true)]
+    public int ThrustHitFrameIndex;
 
     [Header("Animator")]
     public bool HasBowAnimation;
-    public bool HasHurtAnimation;
     public bool HasSlashAnimation;
     public bool HasSlashReverseAnimation;
     public bool HasSpellcastAnimation;

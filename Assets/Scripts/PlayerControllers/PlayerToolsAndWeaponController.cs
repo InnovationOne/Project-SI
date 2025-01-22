@@ -7,42 +7,44 @@ using static PlayerAnimationController;
 // This class represents the character using an item
 [RequireComponent(typeof(NetworkObject))]
 public class PlayerToolsAndWeaponController : NetworkBehaviour {
+    [Header("Animator")]
+    [SerializeField] Animator _weaponAnim;
+    [SerializeField] Animator _behindAnim;
+
+    [Header("Enemy")]
+    [SerializeField] private LayerMask _enemyLayerMask;
+
     PlayerMarkerController _playerMarkerController;
     PlayerToolbeltController _playerToolbeltController;
-    PlayerController _pC;
     PlayerHealthAndEnergyController _pHEC;
     PlayerMovementController _pMC;
     PlayerAnimationController _pAC;
     InputManager _inputManager;
     InventoryMasterUI _inventoryMasterUI;
-    ItemManager _itemManager;
-    [SerializeField] Animator _anim;
 
+    // Network
     const float MAX_TIMEOUT = 2f;
-
     bool _success;
     bool _callbackSuccessful;
     float _timeout;
     float _elapsedTime;
 
+    // Combat
     float _attackTimer;
+    float _bowChargedTimer;
 
+    // Combo
     float _comboTimer;
     int _comboIndex;
 
-    float _bowChargedTimer;
-
-    private ContactFilter2D _contactFilter;
-    private Collider2D[] _overlapResults = new Collider2D[10];
-    [SerializeField] private LayerMask _enemyLayerMask;
+    ContactFilter2D _contactFilter;
+    Collider2D[] _overlapResults = new Collider2D[10];
 
     void Start() {
-        _pC = GetComponent<PlayerController>();
         _playerMarkerController = GetComponent<PlayerMarkerController>();
         _playerToolbeltController = GetComponent<PlayerToolbeltController>();
         _pHEC = GetComponent<PlayerHealthAndEnergyController>();
         _pMC = GetComponent<PlayerMovementController>();
-        _itemManager = GameManager.Instance.ItemManager;
         _inventoryMasterUI = InventoryMasterUI.Instance;
         _pAC = GetComponent<PlayerAnimationController>();
 
@@ -96,7 +98,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
                 break;
         }
 
-        
+
     }
 
     #region -------------------- Meele Action --------------------
@@ -125,94 +127,113 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         Debug.Log($"[Player Attack] ComboIndex = {_comboIndex}/{weaponSO.ComboMaxCount - 1}");
         _pHEC.AdjustEnergy(-weaponSO.AttackEnergyCost);
         _attackTimer = 1f / weaponSO.AttackSpeed;
-        StartCoroutine(PerformMeleeHit(weaponSO, _comboIndex, animationType));
+        StartCoroutine(PerformMeleeHit(weaponSO, animationType));
     }
 
     void CheckComboWindow(float comboMaxDelay, int comboMaxCount) {
-        if (Time.time - _comboTimer > comboMaxDelay) { 
-            _comboIndex = 0; 
-        } else { 
+        if (Time.time - _comboTimer > comboMaxDelay) {
+            _comboIndex = 0;
+        } else {
             _comboIndex++;
-            if (_comboIndex > comboMaxCount - 1){ 
-                _comboIndex = 0; 
+            if (_comboIndex > comboMaxCount - 1) {
+                _comboIndex = 0;
             }
-        }        
+        }
         _comboTimer = Time.time;
     }
 
-    IEnumerator PerformMeleeHit(WeaponSO weapon, int comboIndex, PlayerState animationType) {
+    IEnumerator PerformMeleeHit(WeaponSO weapon, PlayerState animationType) {
+        // 1) If the animation is RaiseStaff, play it fully before doing the Thrust
+        if (animationType == PlayerState.RaiseStaff) {
+            _pAC.ChangeState(PlayerState.RaiseStaff, true);
+            yield return new WaitForSeconds(_weaponAnim.GetCurrentAnimatorStateInfo(0).length);
+            animationType = PlayerState.ThrustLoop;
+        }
+
+        // 2) Switch to the chosen attack state
         StopMovement();
-        var previousPlayerState = _pAC.ActivePlayerState;
-        _pAC.ChangeState(animationType);
-        yield return new WaitForSeconds(_anim.GetCurrentAnimatorStateInfo(0).length / 2);
+        var previousState = _pAC.ActivePlayerState;
+        _pAC.ChangeState(animationType, true);
+        yield return null;
 
-        // 1) Hole dir die korrekten Polygondaten
-        int arrayIndex = Mathf.Clamp(comboIndex, 0, 999);
-
-        var listOfPoints = weapon.ComboPointsAttack;
-
-        if (arrayIndex >= listOfPoints.Count) {
-            Debug.LogError($"ComboIndex {comboIndex} is out of bounds for weapon {weapon.name}");
+        // 3) Determine which keyFrame to use (slash or thrust)
+        float fractionOfClip = 0f;
+        if (animationType == PlayerState.Slash || animationType == PlayerState.SlashReverse) {
+            float slashAnimationFrames = 6f;
+            fractionOfClip = (float)weapon.SlashHitFrameIndex / slashAnimationFrames;
+        } else if (animationType == PlayerState.ThrustLoop) {
+            float thrustAnimationFrames = 4f;
+            fractionOfClip = (float)weapon.ThrustHitFrameIndex / thrustAnimationFrames;
         }
 
-        var polygonLocalPoints = listOfPoints[arrayIndex];
-        if (polygonLocalPoints.Points == null || polygonLocalPoints.Points.Length < 3) {
-            Debug.LogError($"Polygon data for comboIndex {comboIndex} is invalid!");
-            yield break;
+        // 4) Get the AnimatorStateInfo for the weapon anim 
+        var info = _weaponAnim.GetCurrentAnimatorStateInfo(0);
+        float actualClipDuration = info.length / info.speed;
+
+        // Time until the keyframe
+        float waitUntilHit = fractionOfClip * actualClipDuration;
+        yield return new WaitForSeconds(waitUntilHit);
+
+        // 5) Perform the actual hit logic
+        // a) Check collider from the front/weapon sprite
+        var frontSr = _weaponAnim.GetComponent<SpriteRenderer>();
+        SpawnAndCheckColliderFromSprite(frontSr, weapon.AttackDamage, weapon.DamageType, weapon.KnockbackForce);
+
+        // b) Check collider from the behind sprite
+        var behindSr = _behindAnim.GetComponent<SpriteRenderer>();
+        SpawnAndCheckColliderFromSprite(behindSr, weapon.AttackDamage, weapon.DamageType, weapon.KnockbackForce);
+
+        // 6) Slide forward if it's a Thrust
+        if (animationType == PlayerState.ThrustLoop) {
+            StartCoroutine(_pMC.SlidePlayerOnThrust());
         }
 
-        // 2) Erstelle ein temporäres Objekt mit PolygonCollider2D
+        // 7) Wait the remainder of the clip 
+        float remainingTime = actualClipDuration - waitUntilHit;
+        if (remainingTime > 0f) {
+            yield return new WaitForSeconds(remainingTime);
+        }
+
+        // 8) Restore previous state
+        _pAC.ChangeState(previousState, true);
+        StartMovement();
+    }
+
+    private void SpawnAndCheckColliderFromSprite(SpriteRenderer sr, int damage, WeaponSO.DamageTypes dmgType, float knockback) {
+        if (!sr || !sr.sprite) return;
+
+        var currentSprite = sr.sprite;
+        int shapeCount = currentSprite.GetPhysicsShapeCount();
+        if (shapeCount == 0) return;
+
+        var shapePoints = new List<Vector2>();
+        currentSprite.GetPhysicsShape(0, shapePoints);
+        if (shapePoints.Count < 3) return;
+
+        // Create a temporary object with a PolygonCollider2D
         var tempHitbox = new GameObject("TempMeleeHitbox");
         tempHitbox.transform.position = transform.position;
 
-        // Offset für die Richtung des Spielers (Testing)
-        if (_pMC.LastMotionDirection == new Vector2(0, 1)) {
-            tempHitbox.transform.position += new Vector3(0, -0.20835f, 0);
-        } else if (_pMC.LastMotionDirection == new Vector2(1, 0) || _pMC.LastMotionDirection == new Vector2(-1, 0)) {
-            tempHitbox.transform.position += new Vector3(0.04167f, 0.04167f, 0);
-        }
-
-        // Bestimme Rotation basierend auf LastMotionDirection:
-        Vector2 lookDir = _pMC.LastMotionDirection;
-        float angle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg;
-        tempHitbox.transform.rotation = Quaternion.Euler(0, 0, angle + 90);
-
         var polyCollider = tempHitbox.AddComponent<PolygonCollider2D>();
         polyCollider.isTrigger = true;
-        // Pfad setzen. Hier interpretieren wir polygonLocalPoints als “lokale” Koordinaten (um (0,0)).
-        // => es rotiert das gesamte tempHitbox-Objekt, wodurch sich die localPoints mitdrehen.
-        polyCollider.SetPath(0, polygonLocalPoints.Points);
+        polyCollider.SetPath(0, shapePoints.ToArray());
 
-        // 3) OverlapCollider
-
+        // Overlap collider
         int hitCount = Physics2D.OverlapCollider(polyCollider, _contactFilter, _overlapResults);
         if (hitCount > 0) {
-            // Schaden definieren
-            WeaponSO.DamageTypes dmgType = weapon.DamageType;
-
             for (int i = 0; i < hitCount; i++) {
                 Collider2D col = _overlapResults[i];
-
-                // Prüfen, ob der Collider ein BoxCollider2D ist
-                if (col is BoxCollider2D && col.TryGetComponent<IDamageable>(out var target)) {
-                    target.TakeDamage(transform.position, weapon.AttackDamage, dmgType, weapon.KnockbackForce);
-                    Debug.Log($"Hit {col.name} for {weapon.AttackDamage} damage");
+                if (col && col.TryGetComponent<IDamageable>(out var target)) {
+                    target.TakeDamage(transform.position, damage, dmgType, knockback);
+                    Debug.Log($"Hit {col.name} for {damage} damage");
                 }
-
-                // Den Eintrag zurücksetzen, um die Liste aufzuräumen
                 _overlapResults[i] = null;
             }
         }
 
-        // 4) Zerstöre das temporäre Objekt
         Destroy(tempHitbox);
-
-        yield return new WaitForSeconds(_anim.GetCurrentAnimatorStateInfo(0).length / 2);
-
-        _pAC.ChangeState(previousPlayerState, true);
-
-        StartMovement();
     }
+
 
     #endregion -------------------- Meele Action --------------------
 
@@ -258,9 +279,9 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
     IEnumerator ReloadBow() {
         _pAC.ChangeState(PlayerState.LooseArrow, true);
-        yield return new WaitForSeconds(_anim.GetCurrentAnimatorStateInfo(0).length);
+        yield return new WaitForSeconds(_weaponAnim.GetCurrentAnimatorStateInfo(0).length);
         _pAC.ChangeState(PlayerState.GrabNewArrow, true);
-        yield return new WaitForSeconds(_anim.GetCurrentAnimatorStateInfo(0).length);
+        yield return new WaitForSeconds(_weaponAnim.GetCurrentAnimatorStateInfo(0).length);
         _pAC.ChangeState(PlayerState.AimNewArrow, true);
         _bowChargedTimer = Time.time + _pAC.AnimationTime;
     }
