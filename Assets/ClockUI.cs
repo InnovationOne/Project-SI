@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -5,7 +6,6 @@ using UnityEngine.UI;
 
 public class ClockUI : MonoBehaviour {
     [Header("Date and Time")]
-    [SerializeField] TextMeshProUGUI _dayText;
     [SerializeField] TextMeshProUGUI _dateText;
     [SerializeField] TextMeshProUGUI _timeText;
 
@@ -42,18 +42,22 @@ public class ClockUI : MonoBehaviour {
     // Displays the current hour and minute in two UI text fields.
     private void HandleTimeUpdate(int currentHour, int currentMinute) {
         string timeString = $"{currentHour:00}:{currentMinute:00}";
-        _dateText.text = timeString;
         _timeText.text = timeString;
     }
 
     // Displays the current day, season, and year in the date UI text field.
     void HandleDateUpdate(int currentDay, int currentSeason, int currentYear) {
-        // Convert numerical values to enum names
-        var dayName = (TimeManager.ShortDayName)(currentDay % TimeManager.DAYS_PER_WEEK);
-        var seasonName = (TimeManager.SeasonName)currentSeason;
+        int idx = currentDay % TimeManager.DAYS_PER_WEEK;
+        var dayName = (TimeManager.ShortDayName)idx;
+        TimeManager.DateSuffix dateSuffix;
+        if (idx >= Enum.GetNames(typeof(TimeManager.DateSuffix)).Length) {
+            dateSuffix = TimeManager.DateSuffix.th;
+        } else {
+            dateSuffix = (TimeManager.DateSuffix)idx;
+        }
 
         // Format date
-        _dayText.text = dayName.ToString();
+        _dateText.text = $"{dayName},\n{currentDay}{dateSuffix}";
     }
 
     // Toggles this UI object's visibility, primarily for the pause menu.

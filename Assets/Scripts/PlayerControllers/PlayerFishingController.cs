@@ -300,7 +300,7 @@ public class PlayerFishingController : MonoBehaviour {
         }
         _bobberTileId = (int)tileType;
 
-        _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.WaterDropSFX, transform.position);
+        _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.Fishing_Water_Drop, transform.position);
         _waitForFishCoroutine ??= StartCoroutine(WaitForFish());
         _castLineCoroutine = null;
     }
@@ -322,6 +322,7 @@ public class PlayerFishingController : MonoBehaviour {
         }
 
         float timeToBite = UnityEngine.Random.Range(MIN_TIME_TO_BITE, MAX_TIME_TO_BITE) * biteRateAdjustment;
+        // TODO: _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.Fishing_Reel_Backwards, transform.position);
         yield return new WaitForSeconds(timeToBite);
 
         _currentFish = _fishDatabaseSO.GetFish(_fishingRod, _bobberTileId, CatchingMethod.FishingRod);
@@ -332,7 +333,7 @@ public class PlayerFishingController : MonoBehaviour {
         }
 
         _fishIsBiting = true;
-        _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.FishBitSFX, transform.position);
+        //TODO: _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.FishBitSFX, transform.position);
         _alertPopup.enabled = true;
         _waitForFishCoroutine = null;
     }

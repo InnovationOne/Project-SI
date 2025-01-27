@@ -54,7 +54,7 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     };
 
     [HideInInspector] public PlayerState ActivePlayerState { get; private set; }
-    public float AnimationTime => _weaponAnim != null ? _weaponAnim.GetCurrentAnimatorStateInfo(0).length : 0f;
+    public float AnimationTime => _weaponAnim != null ? _weaponAnim.GetCurrentAnimatorStateInfo(0).length / _weaponAnim.GetCurrentAnimatorStateInfo(0).speed : 0f;
 
     [Header("Animator References")]
     [SerializeField] Animator _weaponAnim;
@@ -81,16 +81,22 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     public const string LAST_X_AXIS = "lastXAxis";
     public const string LAST_Y_AXIS = "lastYAxis";
 
-    private PlayerToolbeltController _playerToolbeltController;
+    private PlayerToolbeltController _pTC;
+    private PlayerMovementController _pMC;
     private ClothingUI _playerClothingUI;
+    private AudioManager _audioManager;
+    private FMODEvents _fmodEvents;
 
     private void Awake() {
         ChangeState(PlayerState.Idle, true);
-        _playerToolbeltController = GetComponent<PlayerToolbeltController>();
+        _pTC = GetComponent<PlayerToolbeltController>();
+        _pMC = GetComponent<PlayerMovementController>();
     }
 
     private void Start() {
         _playerClothingUI = ClothingUI.Instance;
+        _audioManager = GameManager.Instance.AudioManager;
+        _fmodEvents = GameManager.Instance.FMODEvents;
 
         _playerClothingUI.PlayerClothingUIItemButtons[0].OnNewItem += SetFeet;
         _playerClothingUI.PlayerClothingUIItemButtons[1].OnNewItem += SetBelt;
@@ -98,8 +104,8 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         _playerClothingUI.PlayerClothingUIItemButtons[3].OnNewItem += SetLegs;
         _playerClothingUI.PlayerClothingUIItemButtons[4].OnNewItem += SetHands;
         _playerClothingUI.PlayerClothingUIItemButtons[5].OnNewItem += SetTorso;
-
-        _playerToolbeltController.OnToolbeltSlotChanged += OnToolbeltSlotChanged;
+        
+        _pTC.OnToolbeltSlotChanged += OnToolbeltSlotChanged;
 
         // DEBUG: Ensure the correct override controllers are applied.
         StartCoroutine(SetAnimationOverride(_bodyAnim, _bodyAnimator));
@@ -114,9 +120,8 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         _playerClothingUI.PlayerClothingUIItemButtons[3].OnNewItem -= SetLegs;
         _playerClothingUI.PlayerClothingUIItemButtons[4].OnNewItem -= SetHands;
         _playerClothingUI.PlayerClothingUIItemButtons[5].OnNewItem -= SetTorso;
-
-
-        _playerToolbeltController.OnToolbeltSlotChanged -= OnToolbeltSlotChanged;
+        
+        _pTC.OnToolbeltSlotChanged -= OnToolbeltSlotChanged;
     }
 
     IEnumerator SetAnimationOverride(Animator anim, RuntimeAnimatorController runtimeAnimatorController) {
@@ -130,6 +135,7 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         yield return new WaitForEndOfFrame();
 
         ownerNetworkAnimator.enabled = true;
+        SetAnimatorLastDirection(_pMC.LastMotionDirection);
     }
 
     public void SetHands(int itemId) {
@@ -181,10 +187,14 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     }
 
     void OnToolbeltSlotChanged() {
-        int itemId = _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId;
+        int itemId = _pTC.GetCurrentlySelectedToolbeltItemSlot().ItemId;
         ItemSO itemSO = GameManager.Instance.ItemManager.ItemDatabase[itemId];
 
         if (itemSO is WeaponSO weaponSO) {
+            if (weaponSO.WeaponType == WeaponSO.WeaponTypes.Melee) {
+                _audioManager.PlayOneShot(_fmodEvents.Pull_Weapon, transform.position);
+            }
+
             if (weaponSO.AnimatorFG != null) {
                 StartCoroutine(SetAnimationOverride(_weaponAnim, weaponSO.AnimatorFG));
             }
@@ -198,6 +208,9 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
             if (toolSO.AnimatorBG != null) {
                 StartCoroutine(SetAnimationOverride(_behindAnim, toolSO.AnimatorBG));
             }
+        } else {
+            StartCoroutine(SetAnimationOverride(_weaponAnim, _defaultAnimator));
+            StartCoroutine(SetAnimationOverride(_behindAnim, _defaultAnimator));
         }
 
         // Force-update the current state so the new items play the correct animation

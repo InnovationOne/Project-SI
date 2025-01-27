@@ -137,9 +137,10 @@ public abstract class ResourceNodeBase : NetworkBehaviour {
 
     protected virtual void OnCurrentHpChanged(int oldValue, int newValue) {
         _networkCurrentHp.Value = newValue;
-        PlaySound();
 
-        if (_networkCurrentHp.Value > 0) {
+        bool isDestroyed = _networkCurrentHp.Value <= 0;
+        PlaySound(isDestroyed);
+        if (!isDestroyed) {
             StartShakeEffect();
         } else {
             HandleNodeDestruction();
@@ -203,7 +204,7 @@ public abstract class ResourceNodeBase : NetworkBehaviour {
     }
 
     protected abstract void PerformTypeSpecificNextDayActions();
-    protected abstract void PlaySound();
+    protected abstract void PlaySound(bool isDestroyed);
     protected abstract void HandleNodeDestruction();
 
     public abstract bool CanHitResourceNodeType(HashSet<ResourceNodeType> canBeHit);

@@ -14,16 +14,19 @@ public class OreResourceNode : ResourceNodeBase {
 
     protected override void PerformTypeSpecificNextDayActions() { }
 
-    protected override void PlaySound() {
-        // TODO: Play ore hit SFX here
+    protected override void PlaySound(bool isDestroyed) {
+        if (isDestroyed) {
+            _audioManager.PlayOneShot(_fmodEvents.Pickaxe_Breake_Rock, transform.position);
+        } else {
+            _audioManager.PlayOneShot(_fmodEvents.Pickaxe_Hit_Rock, transform.position);
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
     public override void HitResourceNodeServerRpc(int damage, ServerRpcParams rpcParams = default) {
         var selectedTool = _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot();
         if (selectedTool.RarityId < _minimumToolRarity) {
-            Debug.Log("Tool rarity too low.");
-            // TODO: Implement bounce back animation & sound
+            _audioManager.PlayOneShot(_fmodEvents.Hit_Unhittable_Object, transform.position);
             HandleClientCallback(rpcParams, false);
             return;
         }

@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da1b35da3e2b3604098d1e1f1adf8bdf, type: 3}
+  m_Name: Flail
+  m_EditorClassIdentifier: 
+  ItemId: 253
+  ItemType: 0
+  ItemName: Flail
+  ItemIcon: {fileID: 21300000, guid: aadecd4a136e4ef489d5887ef0c4b4d5, type: 3}
+  IsStackable: 0
+  MaxStackableAmount: 1
+  CanBeBought: 0
+  BuyPrice: 0
+  CanBeSold: 1
+  LowestRaritySellPrice: 100
+  ItemInfoHoverText: 
+  LeftClickAction: []
+  WeaponType: 0
+  DamageType: 0
+  AdditionalEffects: []
+  AttackDamage: 1
+  AttackEnergyCost: 1
+  AttackSpeed: 2
+  KnockbackForce: 10
+  ComboMaxDelay: 5
+  ComboMaxCount: 1
+  CritChance: 20
+  CritDamage: 3
+  HasBowAnimation: 0
+  HasSlashAnimation: 1
+  HasSlashReverseAnimation: 0
+  HasSpellcastAnimation: 0
+  HasThrustAnimation: 0
+  SlashHitFrameIndex: 5
+  SlashReverseHitFrameIndex: 3
+  ThrustHitFrameIndex: 6
+  AnimatorBG: {fileID: 22100000, guid: ab4a0c0f4bd52884ba41ae46030d402e, type: 2}
+  AnimatorFG: {fileID: 22100000, guid: 7261010e33df17347af63cb82209a7ef, type: 2}

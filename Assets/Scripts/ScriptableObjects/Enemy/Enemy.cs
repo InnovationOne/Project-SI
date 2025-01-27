@@ -33,7 +33,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable {
         Debug.Log($"[GreenSlimeEnemy] took {damage} damage. Current HP = {_currentHealth}");
 
         // Knockback effect
-        StartCoroutine(HitStopCoroutine(0.5f, 0.0f));
+        StartCoroutine(HitStopCoroutine(0.5f, 0.8f));
         ApplyKnockback(attackerPos, knockbackForce);
 
         if (_currentHealth <= 0) {
@@ -55,7 +55,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable {
 
     private void ApplyKnockback(Vector2 attackerPosition, float knockbackForce) {
         Vector2 knockbackDirection = ((Vector2)transform.position - attackerPosition).normalized;
-        _rb.linearVelocity = knockbackDirection * knockbackForce;
+        _rb.linearVelocity += knockbackDirection * knockbackForce;
         StopCoroutine(ReduceKnockback(knockbackForce));
         StartCoroutine(ReduceKnockback(knockbackForce));
     }

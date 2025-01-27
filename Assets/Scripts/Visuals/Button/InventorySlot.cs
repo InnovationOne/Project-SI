@@ -6,6 +6,9 @@ using UnityEngine.UI;
 using static ClothingSO;
 
 // This script is used on every item slot button
+[RequireComponent(typeof(Button))]
+[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IBeginDragHandler, IEndDragHandler, IDropHandler, IDragHandler, IPointerEnterHandler, IPointerExitHandler {
     public event Action<int> OnNewItem;
 
@@ -21,6 +24,7 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
 
     [Header("Restrictions")]
     public bool IsClothingSlot;
+    [ConditionalHide("IsClothingSlot", true)]
     public ClothingType AcceptedClothingType;
 
     private int _buttonIndex;
@@ -126,7 +130,6 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
     }
 
     public void OnPointerClick(PointerEventData eventData) {
-        if (_itemPanel == null) return;
         if (eventData.button == PointerEventData.InputButton.Right) { // RMB Click
             if (DragItemUI.Instance.gameObject.activeSelf) {
                 _itemPanel.OnPlayerRightClick(_buttonIndex);
@@ -137,7 +140,6 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
     }
 
     public void OnPointerDown(PointerEventData eventData) {
-        if (_itemPanel == null) return;
         if (eventData.button == PointerEventData.InputButton.Left) _itemPanel.OnPlayerLeftClick(_buttonIndex); // LMB Click
     }
 
@@ -154,7 +156,6 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
     }
 
     public void OnDrop(PointerEventData eventData) {
-        if (_itemPanel == null) return;
         if (eventData.pointerDrag != null) _itemPanel.OnPlayerLeftClick(_buttonIndex);
     }
 

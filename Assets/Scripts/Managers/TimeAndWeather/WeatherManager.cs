@@ -3,6 +3,7 @@ using Unity.Netcode;
 using System;
 using UnityEngine.Rendering.Universal;
 using System.Collections.Generic;
+using static TimeManager;
 
 [RequireComponent(typeof(NetworkObject))]
 public class WeatherManager : NetworkBehaviour, IDataPersistance {
@@ -37,6 +38,7 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     NetworkList<int> _weatherForecast;
     public WeatherName CurrentWeather => ((WeatherName)_weatherForecast[0]);
 
+    public bool IsWeatherPlaying;
     const float MIN_TIME_BETWEEN_THUNDER = 10f;
     const float MAX_TIME_BETWEEN_THUNDER = 30f;
     float _timeSinceLastThunder = 0f;
@@ -45,6 +47,8 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     const int LIGHT_RAIN_INTENSITY = 60;
     const int HEAVY_RAIN_INTENSITY = 100;
 
+    TimeOfDay _lastAmbienceUpdate;
+
     AudioManager _audioManager;
     FMODEvents _fmodEvents;
     TimeManager _timeManager;
@@ -52,9 +56,9 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
 
     void Awake() {
         _weatherForecast = new NetworkList<int>(new List<int> {
-            (int)WeatherName.Rain,
+            (int)WeatherName.Sun,
             (int)WeatherName.Thunder,
-            (int)WeatherName.Sun
+            (int)WeatherName.Rain
         });
 
         InitializeThunderTimer();
@@ -81,7 +85,9 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
         if (IsServer) {
             UpdateThunder();
         }
+
         UpdateLightColor();
+        CheckForTimeOfDayUpdate();
     }
 
     void InitializeThunderTimer() => _nextThunderTime = UnityEngine.Random.Range(MIN_TIME_BETWEEN_THUNDER, MAX_TIME_BETWEEN_THUNDER);
@@ -90,27 +96,36 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
         _audioManager = GameManager.Instance.AudioManager;
         _fmodEvents = GameManager.Instance.FMODEvents;
 
-        _audioManager.InitializeAmbience(_fmodEvents.WeatherAmbience);
-        _audioManager.InitializeMusic(_fmodEvents.SeasonTheme);
+        _audioManager.InitializeAmbience(_fmodEvents.Weather);
+        _audioManager.InitializeMusic(_fmodEvents.Seasons);
 
-        var currentSeason = (TimeManager.SeasonName)_timeManager.CurrentDate.Value.Season;
-        _audioManager.SetMusicSeason(currentSeason);
+        _audioManager.SetMusicSeason((SeasonName)_timeManager.CurrentDate.Value.Season);
+        _audioManager.SetAmbienceTimeOfDay(_timeManager.CurrentTimeOfDay);
         _audioManager.SetAmbienceWeather((WeatherName)_weatherForecast[0]);
     }
 
+    void CheckForTimeOfDayUpdate() {
+        if (_timeManager == null || _audioManager == null) return;
+
+        if (_timeManager.CurrentTimeOfDay != _lastAmbienceUpdate) {
+            _lastAmbienceUpdate = _timeManager.CurrentTimeOfDay;
+            _audioManager.SetAmbienceTimeOfDay(_lastAmbienceUpdate);
+        }
+    }
+
     void InitializeWeatherProbabilities() {
-        var currentSeason = (TimeManager.SeasonName)_timeManager.CurrentDate.Value.Season;
+        var currentSeason = (SeasonName)_timeManager.CurrentDate.Value.Season;
         Array.Copy(_baseWeatherProbability, _currentWeatherProbability, _baseWeatherProbability.Length);
 
         // Seasonal adjustments
         switch (currentSeason) {
-            case TimeManager.SeasonName.Summer:
+            case SeasonName.Summer:
                 AdjustProbabilities(SUMMER_SUN_BOOST);
                 break;
-            case TimeManager.SeasonName.Autumn:
+            case SeasonName.Autumn:
                 AdjustProbabilitiesForAutumn(FALL_WIND_BOOST);
                 break;
-            case TimeManager.SeasonName.Winter:
+            case SeasonName.Winter:
                 AdjustProbabilitiesForWinter(WINTER_SNOW_BOOST);
                 break;
             default:
@@ -146,7 +161,7 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     }
 
     void HandleNextSeasonStarted(int newSeason) {
-        var season = (TimeManager.SeasonName)newSeason;
+        var season = (SeasonName)newSeason;
         _audioManager.SetMusicSeason(season);
         InitializeWeatherProbabilities();
         ApplyWeather();
@@ -157,7 +172,7 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
         _timeSinceLastThunder += Time.deltaTime;
         var currentWeather = (WeatherName)_weatherForecast[0];
 
-        if (_timeSinceLastThunder >= _nextThunderTime && currentWeather == WeatherName.Thunder) {
+        if (_timeSinceLastThunder >= _nextThunderTime && currentWeather == WeatherName.Thunder && IsWeatherPlaying) {
             _timeSinceLastThunder = 0f;
             _nextThunderTime = UnityEngine.Random.Range(MIN_TIME_BETWEEN_THUNDER, MAX_TIME_BETWEEN_THUNDER);
             OnThunderStrike?.Invoke();
@@ -196,8 +211,8 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     }
 
     WeatherName DetermineRainOrSnow() {
-        var currentSeason = (TimeManager.SeasonName)_timeManager.CurrentDate.Value.Season;
-        return currentSeason == TimeManager.SeasonName.Winter ? WeatherName.Snow : WeatherName.Rain;
+        var currentSeason = (SeasonName)_timeManager.CurrentDate.Value.Season;
+        return currentSeason == SeasonName.Winter ? WeatherName.Snow : WeatherName.Rain;
     }
 
     void ApplyWeather() {

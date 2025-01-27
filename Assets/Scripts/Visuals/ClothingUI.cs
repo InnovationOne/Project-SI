@@ -21,6 +21,9 @@ public class ClothingUI : ItemContainerUI {
 
     private void Start() {
         _playerItemDragAndDropController = PlayerController.LocalInstance.PlayerItemDragAndDropController;
+        ItemContainer.OnItemsUpdated += ShowUIButtonContains;
+        Init();
+        UpdatePlayerVisual();
     }
 
     public override void OnPlayerLeftClick(int buttonIndex) {

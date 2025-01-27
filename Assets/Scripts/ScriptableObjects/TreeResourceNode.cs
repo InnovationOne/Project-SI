@@ -36,14 +36,19 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
 
     protected override void PerformTypeSpecificNextDayActions() => AttemptSeedSpawn();
 
-    protected override void PlaySound() => _audioManager.PlayOneShot(_fmodEvents.HitTreeSFX, transform.position);
+    protected override void PlaySound(bool isDestroyed) {
+        if (isDestroyed) {
+            _audioManager.PlayOneShot(_fmodEvents.Axe_Breake_Wood, transform.position);
+        } else {
+            _audioManager.PlayOneShot(_fmodEvents.Axe_Hit_Wood, transform.position);
+        }
+    }
 
     [ServerRpc(RequireOwnership = false)]
     public override void HitResourceNodeServerRpc(int damage, ServerRpcParams rpcParams = default) {
         var selectedTool = _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot();
         if (selectedTool.RarityId < _minimumToolRarity) {
-            Debug.Log("Tool rarity too low.");
-            // TODO: Implement bounce back animation & sound
+            _audioManager.PlayOneShot(_fmodEvents.Hit_Unhittable_Object, transform.position);
             HandleClientCallback(rpcParams, false);
             return;
         }

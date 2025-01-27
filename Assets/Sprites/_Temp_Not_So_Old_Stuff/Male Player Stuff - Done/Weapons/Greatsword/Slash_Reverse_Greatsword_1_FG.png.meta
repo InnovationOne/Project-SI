@@ -105,7 +105,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -127,7 +127,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -149,7 +149,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -171,7 +171,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -193,7 +193,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -215,7 +215,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -237,7 +237,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -259,7 +259,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -281,11 +281,28 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
-      physicsShape: []
+      physicsShape:
+      - - {x: -76, y: -16}
+        - {x: -75, y: -18}
+        - {x: -73, y: -20}
+        - {x: -67, y: -23}
+        - {x: -61, y: -25}
+        - {x: -57, y: -26}
+        - {x: -9, y: -26}
+        - {x: -9, y: -1}
+        - {x: -36, y: -1}
+        - {x: -46, y: -2}
+        - {x: -53, y: -3}
+        - {x: -58, y: -4}
+        - {x: -62, y: -5}
+        - {x: -68, y: -7}
+        - {x: -72, y: -9}
+        - {x: -74, y: -11}
+        - {x: -76, y: -12}
       tessellationDetail: 0
       bones: []
       spriteID: 296f6107f678f83429484ec165c2ca0b
@@ -303,7 +320,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -325,7 +342,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -347,7 +364,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -369,7 +386,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -391,7 +408,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -413,11 +430,28 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
-      physicsShape: []
+      physicsShape:
+      - - {x: -1, y: -30}
+        - {x: 47, y: -30}
+        - {x: 51, y: -29}
+        - {x: 57, y: -27}
+        - {x: 63, y: -24}
+        - {x: 65, y: -22}
+        - {x: 66, y: -20}
+        - {x: 66, y: -16}
+        - {x: 64, y: -15}
+        - {x: 62, y: -13}
+        - {x: 58, y: -11}
+        - {x: 52, y: -9}
+        - {x: 48, y: -8}
+        - {x: 43, y: -7}
+        - {x: 36, y: -6}
+        - {x: 26, y: -5}
+        - {x: -1, y: -5}
       tessellationDetail: 0
       bones: []
       spriteID: 7e43fa73e0a60da4ca4b8f1e233905b0
@@ -435,7 +469,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -457,7 +491,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -479,7 +513,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -501,7 +535,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -515,19 +549,37 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Slash_Reverse_Greatsword_1_FG_19
+      name: Slash_Reverse_Greatsword_1_FG_20
       rect:
         serializedVersion: 2
-        x: 192
+        x: 384
         y: 0
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
-      physicsShape: []
+      physicsShape:
+      - - {x: 14, y: -14}
+        - {x: 41, y: -14}
+        - {x: 51, y: -13}
+        - {x: 58, y: -12}
+        - {x: 63, y: -11}
+        - {x: 67, y: -10}
+        - {x: 73, y: -8}
+        - {x: 77, y: -6}
+        - {x: 79, y: -4}
+        - {x: 81, y: -3}
+        - {x: 81, y: 1}
+        - {x: 80, y: 3}
+        - {x: 78, y: 5}
+        - {x: 72, y: 8}
+        - {x: 69, y: 9}
+        - {x: 66, y: 10}
+        - {x: 62, y: 11}
+        - {x: 14, y: 11}
       tessellationDetail: 0
       bones: []
       spriteID: 8d245628500b7654e91f993d055265b0
@@ -537,15 +589,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Slash_Reverse_Greatsword_1_FG_20
+      name: Slash_Reverse_Greatsword_1_FG_19
       rect:
         serializedVersion: 2
-        x: 384
+        x: 192
         y: 0
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -567,7 +619,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -589,7 +641,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -611,7 +663,7 @@ TextureImporter:
         width: 192
         height: 192
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -649,9 +701,9 @@ TextureImporter:
       Slash_Reverse_Greatsword_1_FG_16: -1917116923
       Slash_Reverse_Greatsword_1_FG_17: 169562322
       Slash_Reverse_Greatsword_1_FG_18: -839844256
-      Slash_Reverse_Greatsword_1_FG_19: 680203467
+      Slash_Reverse_Greatsword_1_FG_19: 236056742
       Slash_Reverse_Greatsword_1_FG_2: 530752367
-      Slash_Reverse_Greatsword_1_FG_20: 236056742
+      Slash_Reverse_Greatsword_1_FG_20: 680203467
       Slash_Reverse_Greatsword_1_FG_21: -61963519
       Slash_Reverse_Greatsword_1_FG_22: 703226292
       Slash_Reverse_Greatsword_1_FG_23: -1996010417

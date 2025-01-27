@@ -2,10 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using System;
+using FMODUnity;
+using System.Collections;
+using FMOD.Studio;
 
 [RequireComponent(typeof(NetworkObject))]
 public class TimeManager : NetworkBehaviour, IDataPersistance {
     public enum ShortDayName { Mon, Tue, Wed, Thu, Fri, Sat, Sun }
+    public enum DateSuffix { st, nd, rd, th }
     public enum TimeOfDay { Morning, Noon, Afternoon, Evening, Night }
     public enum SeasonName { Spring, Summer, Autumn, Winter }
 
@@ -15,7 +19,12 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
     public event Action<int, int, int> OnUpdateUIDate;
 
     [Header("Time constants")]
-    [SerializeField] private float _timeScale = 60f;
+    [SerializeField] float _timeScale = 60f;
+
+    [Header("Church Audio")]
+    [SerializeField] StudioEventEmitter _churchAudio;
+    readonly int[] CHURCH_AUDIO_START_HOURS = { 6, 12, 18 };
+    bool _isCheckingChurchAudio;
 
     const int TOTAL_SECONDS_IN_A_DAY = 86400;
     const int TIME_TO_WAKE_UP = 21600; // 6 AM
@@ -77,6 +86,31 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
         }
         ClientUpdateUI();
         ClientInvokeTimeAgents();
+
+        if (!_isCheckingChurchAudio) {
+            StartCoroutine(CheckForChurchAudio());
+        }
+    }
+
+    IEnumerator CheckForChurchAudio() {
+        _isCheckingChurchAudio = true;
+        float hour = GetHours();
+        if ((hour == CHURCH_AUDIO_START_HOURS[0] || 
+             hour == CHURCH_AUDIO_START_HOURS[1] || 
+             hour == CHURCH_AUDIO_START_HOURS[2]) && 
+             GetMinutes() == 0 && 
+             !_churchAudio.IsPlaying()) {
+
+            yield return new WaitForSeconds(UnityEngine.Random.Range(0, 5));
+            _churchAudio.Play();
+            _churchAudio.EventInstance.getDescription(out EventDescription description);
+            description.getLength(out int lengthMs);
+            float duration = lengthMs / 1000f;
+            yield return new WaitForSeconds(duration);
+            _churchAudio.Stop();
+        }
+
+        _isCheckingChurchAudio = false;
     }
 
     void ServerUpdateTime() {
@@ -257,7 +291,7 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
 
     public float GetHours() => Mathf.Floor(_currentTime.Value / 3600f);
 
-    public float GetMinutes() => Mathf.Floor((_currentTime.Value % 3600f) / 60f);
+    public float GetMinutes() => Mathf.Floor(_currentTime.Value % 3600f / 60f);
 
     public override void OnNetworkDespawn() {
         if (IsServer) {

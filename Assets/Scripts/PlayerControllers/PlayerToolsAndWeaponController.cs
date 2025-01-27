@@ -21,6 +21,8 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     PlayerAnimationController _pAC;
     InputManager _inputManager;
     InventoryMasterUI _inventoryMasterUI;
+    AudioManager _audioManager;
+    FMODEvents _fmodEvents;
 
     // Network
     const float MAX_TIMEOUT = 2f;
@@ -48,6 +50,9 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         _inventoryMasterUI = InventoryMasterUI.Instance;
         _pAC = GetComponent<PlayerAnimationController>();
 
+        _audioManager = GameManager.Instance.AudioManager;
+        _fmodEvents = GameManager.Instance.FMODEvents;
+
         _inputManager = GameManager.Instance.InputManager;
         _inputManager.OnLeftClickAction += HandleLeftClick;
         _inputManager.OnRightClickStarted += HandleRightClickStarted;
@@ -68,7 +73,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     }
 
     bool CanAttack() {
-        return _attackTimer <= 0f;
+        return _attackTimer <= 0f && _pAC.ActivePlayerState == PlayerState.Idle || _pAC.ActivePlayerState == PlayerState.Walkcycle;
     }
 
     void HandleLeftClick() {
@@ -77,6 +82,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
         if (itemSO.ItemType == ItemSO.ItemTypes.Weapons) {
             WeaponAction(itemSO as WeaponSO);
+            return;
         }
 
         ToolAction(itemSO);
@@ -85,6 +91,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     #region -------------------- Weapon Action --------------------
     void WeaponAction(WeaponSO weaponSO) {
         if (!CanAttack()) return;
+        _attackTimer = 1f / weaponSO.AttackSpeed;
 
         switch (weaponSO.WeaponType) {
             case WeaponSO.WeaponTypes.Melee:
@@ -97,23 +104,20 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
                 //MagicAction(weaponSO);
                 break;
         }
-
-
     }
 
     #region -------------------- Meele Action --------------------
     void MeleeAction(WeaponSO weaponSO) {
-        CheckComboWindow(weaponSO.ComboMaxDelay, weaponSO.ComboMaxCount);
+        if (Time.time - _comboTimer > weaponSO.ComboMaxDelay) _comboIndex = 0;
 
         PlayerState animationType = PlayerState.Slash;
-        // Sword 
         if (weaponSO.HasSlashAnimation && _comboIndex == 0) {
             // 1. Slash Animation
             animationType = PlayerState.Slash;
         } else if (weaponSO.HasSlashReverseAnimation && _comboIndex == 1) {
             // 2. Slash Reverse Animation
             animationType = PlayerState.SlashReverse;
-        } else if (weaponSO.HasThrustAnimation) {
+        } else if (weaponSO.HasThrustAnimation && _comboIndex == 1 || _comboIndex == 2) {
             // 3. Thrust Animation
             animationType = PlayerState.RaiseStaff;
         } else {
@@ -121,47 +125,46 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
             Debug.LogError($"No animation found for comboIndex {_comboIndex}");
         }
 
-        // Start attack
-        Debug.Log($"[Player Attack] ComboIndex = {_comboIndex}/{weaponSO.ComboMaxCount - 1}");
-        _pHEC.AdjustEnergy(-weaponSO.AttackEnergyCost);
-        _attackTimer = 1f / weaponSO.AttackSpeed;
-        StartCoroutine(PerformMeleeHit(weaponSO, animationType));
-    }
-
-    void CheckComboWindow(float comboMaxDelay, int comboMaxCount) {
-        if (Time.time - _comboTimer > comboMaxDelay) {
+        // Combo Index
+        _comboIndex++;
+        if (_comboIndex > weaponSO.ComboMaxCount - 1) {
             _comboIndex = 0;
-        } else {
-            _comboIndex++;
-            if (_comboIndex > comboMaxCount - 1) {
-                _comboIndex = 0;
-            }
         }
-        _comboTimer = Time.time;
+
+        // Start attack
+        _pHEC.AdjustEnergy(-weaponSO.AttackEnergyCost);
+        StartCoroutine(PerformMeleeHit(weaponSO, animationType));
     }
 
     IEnumerator PerformMeleeHit(WeaponSO weapon, PlayerState animationType) {
         // 1) If the animation is RaiseStaff, play it fully before doing the Thrust
+        StopMovement();
+        var previousState = _pAC.ActivePlayerState;
+        _audioManager.PlayOneShot(_fmodEvents.Whip_Weapon, transform.position);
+
         if (animationType == PlayerState.RaiseStaff) {
             _pAC.ChangeState(PlayerState.RaiseStaff, true);
-            yield return new WaitForSeconds(_weaponAnim.GetCurrentAnimatorStateInfo(0).length);
+            yield return null;
+            var animInfo = _weaponAnim.GetCurrentAnimatorStateInfo(0);
+            yield return new WaitForSeconds(animInfo.length / animInfo.speed);
             animationType = PlayerState.ThrustLoop;
         }
 
         // 2) Switch to the chosen attack state
-        StopMovement();
-        var previousState = _pAC.ActivePlayerState;
         _pAC.ChangeState(animationType, true);
         yield return null;
 
-        // 3) Determine which keyFrame to use (slash or thrust)
+        // 3) Determine which keyFrame to use (slash, slash reverse or thrust)
         float fractionOfClip = 0f;
-        if (animationType == PlayerState.Slash || animationType == PlayerState.SlashReverse) {
+        if (animationType == PlayerState.Slash) {
             float slashAnimationFrames = 6f;
-            fractionOfClip = (float)weapon.SlashHitFrameIndex / slashAnimationFrames;
+            fractionOfClip = weapon.SlashHitFrameIndex / slashAnimationFrames;
+        } else if (animationType == PlayerState.SlashReverse) {
+            float slashAnimationFrames = 6f;
+            fractionOfClip = weapon.SlashReverseHitFrameIndex / slashAnimationFrames;
         } else if (animationType == PlayerState.ThrustLoop) {
             float thrustAnimationFrames = 4f;
-            fractionOfClip = (float)weapon.ThrustHitFrameIndex / thrustAnimationFrames;
+            fractionOfClip = weapon.ThrustHitFrameIndex / thrustAnimationFrames;
         }
 
         // 4) Get the AnimatorStateInfo for the weapon anim 
@@ -181,11 +184,6 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         var behindSr = _behindAnim.GetComponent<SpriteRenderer>();
         SpawnAndCheckColliderFromSprite(behindSr, weapon.AttackDamage, weapon.DamageType, weapon.KnockbackForce);
 
-        // 6) Slide forward if it's a Thrust
-        if (animationType == PlayerState.ThrustLoop) {
-            StartCoroutine(_pMC.SlidePlayerOnThrust());
-        }
-
         // 7) Wait the remainder of the clip 
         float remainingTime = actualClipDuration - waitUntilHit;
         if (remainingTime > 0f) {
@@ -195,6 +193,9 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         // 8) Restore previous state
         _pAC.ChangeState(previousState, true);
         StartMovement();
+
+        // 9) Combo Timer
+        _comboTimer = Time.time;
     }
 
     private void SpawnAndCheckColliderFromSprite(SpriteRenderer sr, int damage, WeaponSO.DamageTypes dmgType, float knockback) {
@@ -232,7 +233,6 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         Destroy(tempHitbox);
     }
 
-
     #endregion -------------------- Meele Action --------------------
 
     #region -------------------- Ranged Action --------------------
@@ -248,6 +248,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
     void HandleRightClickCanceled() {
         // Bogen loslassen
+        _audioManager.PlayOneShot(_fmodEvents.Shoot_Arrow, transform.position);
         _pAC.ChangeState(PlayerState.Idle, true);
         StartMovement();
     }
@@ -283,6 +284,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         _pAC.ChangeState(PlayerState.AimNewArrow, true);
         _bowChargedTimer = Time.time + _pAC.AnimationTime;
     }
+
     #endregion -------------------- Ranged Action --------------------
     #endregion -------------------- Weapon Action --------------------
 

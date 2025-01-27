@@ -16,6 +16,7 @@ public class Teleporter : MonoBehaviour
     }
 
     IEnumerator TeleportPlayerWithFade(Collider2D player) {
+        GameManager.Instance.AudioManager.PlayOneShot(GameManager.Instance.FMODEvents.Teleport, player.transform.position);
         player.GetComponent<PlayerMovementController>().SetCanMoveAndTurn(false);
         yield return StartCoroutine(FadeToBlack());
         player.transform.position = _teleportTarget.position;

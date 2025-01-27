@@ -2,6 +2,9 @@ using UnityEngine;
 using FMODUnity;
 using FMOD.Studio;
 using System.Collections.Generic;
+using static WeatherManager;
+using static TimeManager;
+using static SwitchMusicTrigger;
 
 public class AudioManager : MonoBehaviour {
     [Header("Volume")]
@@ -18,8 +21,16 @@ public class AudioManager : MonoBehaviour {
     public float SFXVolume = 1f;
     private Bus _sfxBus;
 
-    private const string MUSIC_PARAMETER_NAME = "Seasons";
-    private const string AMBIENCE_PARAMETER_NAME = "Weather";
+    // Music
+    private const string SEASONS_PARAMETER_NAME = "Seasons";
+    private const string BOSS_FIGHT_PARAMETER_NAME = "BossFight";
+    // Ambience
+    private const string WEATHER_PARAMETER_NAME = "Weather";
+    private const string TIME_OF_DAY_PARAMETER_NAME = "TimeOfDay";
+    private const string AMBIENCE_WIND_INTENSITY_PARAMETER_NAME = "Wind_Intensity";
+
+    // SFX
+    private const string GROUND_PARAMETER_NAME = "Ground";
 
     private List<EventInstance> _eventInstances;
     private EventInstance _ambience;
@@ -44,34 +55,77 @@ public class AudioManager : MonoBehaviour {
     }
 
     public void InitializeAmbience(EventReference eventReference) {
-        if (_ambience.isValid()) {
-            _ambience.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
-            _ambience.release();
-        }
-
+        StopEvent(_ambience);
         _ambience = CreateEventInstance(eventReference);
         _ambience.start();
     }
 
     public void InitializeMusic(EventReference eventReference) {
-        if (_music.isValid()) {
-            _music.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
-            _music.release();
-        }
-
+        StopEvent(_music);
         _music = CreateEventInstance(eventReference);
         _music.start();
     }
 
-    public void SetMusicSeason(TimeManager.SeasonName seasonName) {
+    public void PlayMusic(EventReference newMusicEvent) {
+        StopEvent(_music, crossfade: true);
+        _music = CreateEventInstance(newMusicEvent);
+        _music.start();
+    }
+
+    public void SetMusicSeason(SeasonName seasonName) {
         if (_music.isValid()) {
-            _music.setParameterByName(MUSIC_PARAMETER_NAME, (float)seasonName);
+            _music.setParameterByName(SEASONS_PARAMETER_NAME, (float)seasonName);
         }
     }
 
-    public void SetAmbienceWeather(WeatherManager.WeatherName weatherName) {
+    public void SetBossFight(BossFight bossFight) {
+        if (_music.isValid()) {
+            _music.setParameterByName(BOSS_FIGHT_PARAMETER_NAME, (float)bossFight);
+        }
+    }
+
+    public void SetBossFightPhase(BossFightPhase bossFightPhase) {
+        if (_music.isValid()) {
+            _music.setParameterByName("", (float)bossFightPhase);
+        }
+    }
+
+    public void PlayAmbience(EventReference newAmbienceEvent) {
+        GameManager.Instance.WeatherManager.IsWeatherPlaying = newAmbienceEvent.Equals(GameManager.Instance.FMODEvents.Weather);
+        StopEvent(_ambience);
+        InitializeAmbience(newAmbienceEvent);
+    }
+
+    public void SetAmbienceTimeOfDay(TimeOfDay timeOfDay) {
         if (_ambience.isValid()) {
-            _ambience.setParameterByName(AMBIENCE_PARAMETER_NAME, (float)weatherName);
+            if (timeOfDay == TimeOfDay.Evening) {
+                _ambience.setParameterByName(TIME_OF_DAY_PARAMETER_NAME, 1);
+                return;
+            } else if (timeOfDay == TimeOfDay.Night) {
+                _ambience.setParameterByName(TIME_OF_DAY_PARAMETER_NAME, 2);
+                return;
+            } else {
+                _ambience.setParameterByName(TIME_OF_DAY_PARAMETER_NAME, 0);
+                return;
+            }
+        }
+    }
+
+    public void SetAmbienceWeather(WeatherName weatherName) {
+        if (_ambience.isValid()) {
+            if (weatherName == WeatherName.Rain) {
+                _ambience.setParameterByName(WEATHER_PARAMETER_NAME, 1);
+                return;
+            } else if (weatherName == WeatherName.Thunder) {
+                _ambience.setParameterByName(WEATHER_PARAMETER_NAME, 2);
+                return;
+            } else if (weatherName == WeatherName.Wind) {
+                _ambience.setParameterByName(WEATHER_PARAMETER_NAME, 3);
+                return;
+            } else {
+                _ambience.setParameterByName(WEATHER_PARAMETER_NAME, 0);
+                return;
+            }
         }
     }
 
@@ -86,26 +140,24 @@ public class AudioManager : MonoBehaviour {
         return eventInstance;
     }
 
-    public void StopMusic() {
-        if (_music.isValid()) {
-            _music.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
-            _music.release();
-            _music = default;
-        }
-    }
+    public void StopMusic() => StopEvent(_music);
 
-    private void CleanUp() {
-        foreach (var eventInstance in _eventInstances) {
-            if (eventInstance.isValid()) {
-                eventInstance.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
-                eventInstance.release();
-            }
+    private bool StopEvent(EventInstance eventInstance, bool crossfade = false) {
+        bool isValid = eventInstance.isValid();
+        if (isValid) {
+            // If crossfade is true, use ALLOWFADEOUT, otherwise IMMEDIATE
+            eventInstance.stop(crossfade ? FMOD.Studio.STOP_MODE.ALLOWFADEOUT
+                                         : FMOD.Studio.STOP_MODE.IMMEDIATE);
+            eventInstance.release();
         }
-
-        _eventInstances.Clear();
+        return isValid;
     }
 
     private void OnDestroy() {
-        CleanUp();
+        foreach (var eventInstance in _eventInstances) {
+            StopEvent(eventInstance);
+        }
+
+        _eventInstances.Clear();
     }
 }

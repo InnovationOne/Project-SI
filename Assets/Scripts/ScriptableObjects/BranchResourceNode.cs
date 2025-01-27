@@ -14,15 +14,19 @@ public class BranchResourceNode : ResourceNodeBase {
 
     protected override void PerformTypeSpecificNextDayActions() { }
 
-    protected override void PlaySound() {
-        // TODO: Play branch hit SFX here
+    protected override void PlaySound(bool isDestroyed) {
+        if (isDestroyed) {
+            _audioManager.PlayOneShot(_fmodEvents.Axe_Breake_Wood, transform.position);
+        } else {
+            _audioManager.PlayOneShot(_fmodEvents.Axe_Hit_Wood, transform.position);
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
     public override void HitResourceNodeServerRpc(int damage, ServerRpcParams rpcParams = default) {
         var selectedTool = _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot();
         if (selectedTool.RarityId < _minimumToolRarity) {
-            Debug.Log("Tool rarity too low.");
+            _audioManager.PlayOneShot(_fmodEvents.Hit_Unhittable_Object, transform.position);
             HandleClientCallback(rpcParams, false);
             return;
         }

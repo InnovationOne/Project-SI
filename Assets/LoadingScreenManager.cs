@@ -27,7 +27,7 @@ public class LoadingScreenManager : MonoBehaviour {
     private LoadingTask _loadingTask = new();
 
     private void Start() {
-        GameManager.Instance.AudioManager.InitializeMusic(GameManager.Instance.FMODEvents.LoadingTheme);
+        GameManager.Instance.AudioManager.InitializeMusic(GameManager.Instance.FMODEvents.Loading);
         InitializeUI();
         StartCoroutine(StartLoading());
         StartCoroutine(CycleLoadingImages());

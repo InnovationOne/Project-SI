@@ -48,39 +48,30 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     BoxCollider2D _boxCollider;
     AudioManager _audioManager;
     PlayerHealthAndEnergyController _playerHealthAndEnergyController;
-    PlayerToolsAndWeaponController _playerToolsAndWeaponController;
-    PlayerToolbeltController _playerToolbeltController;
     PlayerAnimationController _pAC;
 
     // Audio
-    EventInstance _playerWalkGrassEvent;
-    EventInstance _playerDashEvent;
+    EventInstance _playerFootsteps;
+    EventInstance _playerDash;
 
     void Awake() {
         _rb = GetComponent<Rigidbody2D>();
         _boxCollider = GetComponent<BoxCollider2D>();
-
-        // Initialize audio event
     }
 
     void Start() {
         _inputManager = GameManager.Instance.InputManager;
         _audioManager = GameManager.Instance.AudioManager;
-        _playerWalkGrassEvent = _audioManager.CreateEventInstance(GameManager.Instance.FMODEvents.PlayerWalkGrassSFX);
+        _playerFootsteps = _audioManager.CreateEventInstance(GameManager.Instance.FMODEvents.Footsteps);
         _playerHealthAndEnergyController = GetComponent<PlayerHealthAndEnergyController>();
-        _playerToolsAndWeaponController = GetComponent<PlayerToolsAndWeaponController>();
-        _playerToolbeltController = GetComponent<PlayerToolbeltController>();
         _pAC = GetComponent<PlayerAnimationController>();
-
-        //TODO _playerDashEvent = AudioManager.Instance.CreateEventInstance(FMODEvents.Instance.PlayerDashSFX);
 
         _inputManager.OnRunAction += ToggleRunState;
         _inputManager.OnDashAction += TryStartDash;
     }
 
     new void OnDestroy() {
-        _playerWalkGrassEvent.release();
-        //TODO _playerDashEvent.release();
+        _playerFootsteps.release();
         _inputManager.OnRunAction -= ToggleRunState;
         _inputManager.OnDashAction -= TryStartDash;
 
@@ -116,6 +107,8 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     }
 
     void HandleInput() {
+        if (!CanDash()) return;
+
         Vector2 newInputDirection = _inputManager.GetMovementVectorNormalized();
         bool directionChanged = newInputDirection != _inputDirection;
 
@@ -147,42 +140,36 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     void TryStartDash() {
         if (_dashCooldownRemaining > 0f || !CanDash()) return;
 
-        Vector2 dashDir = _inputDirection == Vector2.zero ? LastMotionDirection : _inputDirection;
-        if (dashDir == Vector2.zero) return;
+        _dashDirection = _inputDirection == Vector2.zero ? LastMotionDirection : _inputDirection;
+        if (_dashDirection == Vector2.zero) return;
 
-        StartCoroutine(StartDash(dashDir));
+        _dashCooldownRemaining = _dashCooldown;
+        _playerHealthAndEnergyController.AdjustEnergy(-_dashEnergyCost);
+        StartCoroutine(StartDash());
     }
 
-    IEnumerator StartDash(Vector2 direction) {
-        _dashTimeRemaining = _dashDuration;
-        _dashCooldownRemaining = _dashCooldown;
-        _dashDirection = direction.normalized;
-
+    IEnumerator StartDash() {
         var lastState = _pAC.ActivePlayerState;
         _pAC.ChangeState(PlayerState.Dashing);
-        _playerDashEvent.start();
-        _playerHealthAndEnergyController.AdjustEnergy(-_dashEnergyCost);
+        // TODO: Play dash sound
 
-        // (Optional) Trigger visual effects like motion blur or trails here.
+        // (Optional) TODO: Trigger visual effects like motion blur or trails here.
 
         yield return new WaitForSeconds(_dashDuration);
         _pAC.ChangeState(lastState);
     }
 
-    bool CanDash() => _pAC.ActivePlayerState == PlayerState.Idle || _pAC.ActivePlayerState == PlayerState.Walkcycle;
+    bool CanDash() => _canMoveAndTurn && (_pAC.ActivePlayerState == PlayerState.Idle || _pAC.ActivePlayerState == PlayerState.Walkcycle);
     #endregion -------------------- Dashing --------------------
 
     #region -------------------- Movement --------------------
     void MoveCharacter() {
-        if (CanDash() || _pAC.ActivePlayerState == PlayerState.Dashing) {
-
-            if (_pAC.ActivePlayerState == PlayerState.Dashing) {
-                float dashSpeed = _runSpeed * _dashSpeedMultiplier;
-                _rb.linearVelocity = _dashDirection * dashSpeed;
-            } else {
-                float speed = GetCurrentSpeed();
-                _rb.linearVelocity = _inputDirection * speed;
-            }
+        if (_pAC.ActivePlayerState == PlayerState.Dashing) {
+            float dashSpeed = _runSpeed * _dashSpeedMultiplier;
+            _rb.linearVelocity = _dashDirection * dashSpeed;
+        } else if (CanDash()) {
+            float speed = GetCurrentSpeed();
+            _rb.linearVelocity = _inputDirection * speed;
         }
     }
 
@@ -197,6 +184,11 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
 
     public void SetCanMoveAndTurn(bool canMove) {
         _canMoveAndTurn = canMove;
+
+        if (!_canMoveAndTurn) {
+            _pAC.ChangeState(PlayerState.Idle);
+        }
+
         if (!_canMoveAndTurn && _rb.linearVelocity != Vector2.zero) {
             _rb.linearVelocity = Vector2.zero;
         }
@@ -204,20 +196,15 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
 
     void UpdateSound() {
         bool isMoving = _rb.linearVelocity != Vector2.zero;
-        _playerWalkGrassEvent.getPlaybackState(out PLAYBACK_STATE playbackState);
+        _playerFootsteps.getPlaybackState(out PLAYBACK_STATE playbackState);
 
         if (isMoving && playbackState == PLAYBACK_STATE.STOPPED) {
-            _playerWalkGrassEvent.start();
+            _playerFootsteps.start();
         } else if (!isMoving && playbackState == PLAYBACK_STATE.PLAYING) {
-            _playerWalkGrassEvent.stop(STOP_MODE.ALLOWFADEOUT);
+            _playerFootsteps.stop(STOP_MODE.ALLOWFADEOUT);
         }
     }
 
-    public IEnumerator SlidePlayerOnThrust() {
-        _rb.linearVelocity = _dashDirection * 2;
-        yield return new WaitForSeconds(0.2f);
-        _rb.linearVelocity = Vector2.zero;
-    }
     #endregion -------------------- Movement --------------------
 
     #region -------------------- Running Effects --------------------
@@ -235,6 +222,7 @@ public class PlayerMovementController : NetworkBehaviour, IPlayerDataPersistance
     }
 
     void SpawnFootprints() {
+        return;
         bool spawnAllowed = GameManager.Instance.WeatherManager.CurrentWeather switch {
             WeatherName.Rain => true,
             WeatherName.Thunder => true,
