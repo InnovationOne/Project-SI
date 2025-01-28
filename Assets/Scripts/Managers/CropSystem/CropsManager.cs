@@ -26,8 +26,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     [SerializeField] int[] _probabilityToSpawnRarity = { 70, 20, 8, 2 }; //70% Copper, 20% Iron, 8% Gold, 2% Diamond
 
     [Header("Reference: TileBases")]
-    [SerializeField] RuleTile _dirtDry;
-    [SerializeField] RuleTile _dirtWet;
     [SerializeField] RuleTile _dirtPlowedDry;
     [SerializeField] RuleTile _dirtPlowedWet;
     [SerializeField] TileBase[] _tilesThatCanBePlowed;
@@ -55,7 +53,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     const float PROBABILITY_OF_THUNDER_STRIKE = 0.01f;
 
     // References
-    [SerializeField] Tilemap _targetTilemap;
+    [SerializeField] Tilemap _baseTilemap;
+    [SerializeField] Tilemap _plowedTilemap;
+    [SerializeField] Tilemap _cropTilemap;
     PlaceableObjectsManager _placeableObjectsManager;
 
     public NetworkList<CropTile> CropTiles { get; private set; }
@@ -137,7 +137,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
     // Removes a CropTile and updates tilemap accordingly.
     void HandleCropTileRemoveAt(CropTile cropTile) {
-        _targetTilemap.SetTile(cropTile.CropPosition, cropTile.IsWatered ? _dirtWet : _dirtDry);
+        _cropTilemap.SetTile(cropTile.CropPosition, cropTile.IsWatered ? null : null);
     }
 
     // Updates a changed CropTile (e.g. growth stage).
@@ -157,7 +157,6 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(cropTile.PrefabNetworkObjectId, out var networkObject)) {
                 networkObject.Despawn();
             }
-            _targetTilemap.SetTile(cropTile.CropPosition, cropTile.IsWatered ? _dirtWet : _dirtDry);
         }
     }
 
@@ -202,14 +201,14 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     // Updates ground tiles (dry/wet/plowed).
     void VisualizeTileChanges(CropTile tile) {
         var pos = tile.CropPosition;
-        if (!_targetTilemap.HasTile(pos)) return;
+        if (!_baseTilemap.HasTile(pos)) return;
 
-        bool isWet = tile.IsWatered || _targetTilemap.GetTile<RuleTile>(pos) == _dirtWet;
+        bool isWet = tile.IsWatered; // || _baseTilemap.GetTile<RuleTile>(pos) == _dirtWet;
         bool hasValue = GetCropTileAtPosition(pos).HasValue;
         bool isTree = tile.CropId >= 0 && CropDatabase[tile.CropId].IsTree;
 
         if (!isTree) {
-            _targetTilemap.SetTile(pos, hasValue ? (isWet ? _dirtPlowedWet : _dirtPlowedDry) : (isWet ? _dirtWet : _dirtDry));
+            _plowedTilemap.SetTile(pos, hasValue ? (isWet ? _dirtPlowedWet : _dirtPlowedDry) : null);
         }
     }
 
@@ -223,10 +222,11 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
 
         if (!networkObject.TryGetComponent<SpriteRenderer>(out var sr)) return;
-        if (!networkObject.TryGetComponent<HarvestCrop>(out var harvestCrop)) return;
+        if (!networkObject.TryGetComponent<PickUpInteract>(out var pickUpInteract)) return;
+        if (!networkObject.TryGetComponent<FertilizeCrop>(out var fertilizeCrop)) return;
 
         UpdateCropSprite(tile, crop, sr);
-        UpdateFertilizerSprites(tile, harvestCrop);
+        UpdateFertilizerSprites(tile, pickUpInteract, fertilizeCrop);
     }
 
     // Chooses correct sprite for crop stage or dead state.
@@ -243,7 +243,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     }
 
     // Shows fertilizer visuals based on tile scalers and fertilizer sets.
-    void UpdateFertilizerSprites(CropTile tile, HarvestCrop harvestCrop) {
+    void UpdateFertilizerSprites(CropTile tile, PickUpInteract pickUpInteract, FertilizeCrop fertilizeCrop) {
         var fertilizerMappings = new Dictionary<FertilizerTypes, List<FertilizerSO>> {
             { FertilizerTypes.GrowthTime, _growthFertilizer },
             { FertilizerTypes.RegrowthTime, _regrowthFertilizer },
@@ -273,7 +273,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
             var fert = list.Find(f => f.FertilizerBonusValue == bonusValue);
             if (fert != null) {
-                harvestCrop.SetFertilizerSprite(fert.FertilizerType, fert.FertilizerCropTileColor);
+                fertilizeCrop.SetFertilizerSprite(fert.FertilizerType, fert.FertilizerCropTileColor);
             }
         }
     }
@@ -282,14 +282,14 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     void CreateCropPrefab(ref CropTile tile, bool isTree, int itemId) {
         if (!IsServer) return;
         var prefabInstance = Instantiate(isTree ? _cropsTreeSpritePrefab : _cropsSpritePrefab, transform);
-        var harvestCrop = prefabInstance.GetComponent<HarvestCrop>();
+        var pickUpInteract = prefabInstance.GetComponent<PickUpInteract>();
 
         if (isTree && GameManager.Instance.ItemManager.ItemDatabase[itemId] is SeedSO seedSOForTree) {
             var resourceNode = prefabInstance.GetComponent<ResourceNodeBase>();
             resourceNode.SetSeed(seedSOForTree);
         }
 
-        Vector3 worldPos = _targetTilemap.GetCellCenterWorld(tile.CropPosition);
+        Vector3 worldPos = _baseTilemap.GetCellCenterWorld(tile.CropPosition);
         prefabInstance.transform.position = worldPos + new Vector3(tile.SpriteRendererOffset.x, tile.SpriteRendererOffset.y + 0.5f, -0.1f);
         prefabInstance.transform.localScale = new Vector3(tile.SpriteRendererXScale, 1, 1);
 
@@ -297,7 +297,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             prefabInstance.GetComponentInChildren<BoxCollider2D>().enabled = true;
         }
 
-        harvestCrop.SetCropPosition(tile.CropPosition);
+        pickUpInteract.SetPosition(tile.CropPosition);
 
         if (!prefabInstance.TryGetComponent<NetworkObject>(out var netObj)) {
             netObj = prefabInstance.AddComponent<NetworkObject>();
@@ -333,7 +333,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             CropTile tile = new() {
                 CropId = -1,
                 CropPosition = position,
-                IsWatered = _targetTilemap.GetTile<RuleTile>(position) == _dirtWet,
+                IsWatered = false, // _baseTilemap.GetTile<RuleTile>(position) == _dirtWet,
                 CurrentGrowthTimer = 0,
                 IsRegrowing = false,
                 Damage = 0,
@@ -356,7 +356,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         // Checks if tile is valid for plowing.
         var pObjData = _placeableObjectsManager.GetCropTileAtPosition(position);
         return !IsPositionPlowed(position) &&
-               Array.Exists(_tilesThatCanBePlowed, t => t == _targetTilemap.GetTile(position)) &&
+               Array.Exists(_tilesThatCanBePlowed, t => t == _baseTilemap.GetTile(position)) &&
                !pObjData.HasValue;
     }
 
@@ -417,7 +417,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             CropTile treeTile = new() {
                 CropId = cropToGrow.CropID,
                 CropPosition = pos,
-                IsWatered = _targetTilemap.GetTile<RuleTile>(pos) == _dirtWet,
+                IsWatered = false,//_baseTilemap.GetTile<RuleTile>(pos) == _dirtWet,
                 CurrentGrowthTimer = initialGrowthTimer,
                 IsRegrowing = false,
                 Damage = 0,
@@ -551,9 +551,9 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
                     tile.IsWatered = true;
                     CropTiles[idx] = tile;
                 }
-            } else if (_targetTilemap.GetTile(pos) == _dirtDry) {
-                _targetTilemap.SetTile(pos, _dirtWet);
-            }
+            } /* else if (_baseTilemap.GetTile(pos) == _dirtDry) {
+                _baseTilemap.SetTile(pos, _dirtWet);
+            }*/
         }
     }
 
@@ -569,13 +569,13 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             tile.IsWatered = true;
             CropTiles[i] = tile;
         }
-
+        /*
         // Refresh tilemap visually.
-        foreach (var pos in _targetTilemap.cellBounds.allPositionsWithin) {
-            if (_targetTilemap.HasTile(pos) && _targetTilemap.GetTile(pos) == _dirtDry) {
-                _targetTilemap.SetTile(pos, _dirtWet);
+        foreach (var pos in _baseTilemap.cellBounds.allPositionsWithin) {
+            if (_baseTilemap.HasTile(pos) && _baseTilemap.GetTile(pos) == _dirtDry) {
+                _baseTilemap.SetTile(pos, _dirtWet);
             }
-        }
+        }*/
     }
 
     void DryAllCropTiles() {
@@ -584,12 +584,12 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             tile.IsWatered = false;
             CropTiles[i] = tile;
         }
-
-        foreach (var pos in _targetTilemap.cellBounds.allPositionsWithin) {
-            if (_targetTilemap.HasTile(pos) && _targetTilemap.GetTile(pos) == _dirtWet) {
-                _targetTilemap.SetTile(pos, _dirtDry);
+        /*
+        foreach (var pos in _baseTilemap.cellBounds.allPositionsWithin) {
+            if (_baseTilemap.HasTile(pos) && _baseTilemap.GetTile(pos) == _dirtWet) {
+                _baseTilemap.SetTile(pos, _dirtDry);
             }
-        }
+        }*/
     }
 
     void CheckIfWateredAndApplyDamage() {
@@ -615,8 +615,8 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
             // Update visuals if needed.
             if (tile.PrefabNetworkObjectId != 0 && NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(tile.PrefabNetworkObjectId, out var netObj)) {
-                if (netObj.TryGetComponent<HarvestCrop>(out var hc)) {
-                    hc.SetFertilizerSprite(FertilizerTypes.Water);
+                if (netObj.TryGetComponent<FertilizeCrop>(out var fc)) {
+                    fc.SetFertilizerSprite(FertilizerTypes.Water);
                 }
             }
 
@@ -650,7 +650,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
             new ItemSlot(cropSO.ItemToGrowAndSpawn.ItemId, count, rarity),
-            _targetTilemap.CellToWorld(pos),
+            _baseTilemap.CellToWorld(pos),
             Vector2.zero,
             spreadType: ItemSpawnManager.SpreadType.Circle
         );
@@ -673,7 +673,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
             new ItemSlot(tile.CropId, count, rarity),
-            _targetTilemap.CellToWorld(pos),
+            _baseTilemap.CellToWorld(pos),
             Vector2.zero,
             spreadType: ItemSpawnManager.SpreadType.Circle
         );
@@ -899,7 +899,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     bool HasScarecrowInRange(Vector3Int position, float radius, ScarecrowType type) {
         float adjustedRadius = radius - 0.5f;
         float radiusSq = adjustedRadius * adjustedRadius;
-        var centerWorldPos = _targetTilemap.CellToWorld(position) + _targetTilemap.tileAnchor;
+        var centerWorldPos = _baseTilemap.CellToWorld(position) + _baseTilemap.tileAnchor;
 
         int minX = Mathf.FloorToInt(centerWorldPos.x - adjustedRadius);
         int maxX = Mathf.CeilToInt(centerWorldPos.x + adjustedRadius);
@@ -909,7 +909,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         for (int x = minX; x <= maxX; x++) {
             for (int y = minY; y <= maxY; y++) {
                 var checkPos = new Vector3Int(x, y, position.z);
-                Vector3 tileWorldPos = _targetTilemap.CellToWorld(checkPos) + _targetTilemap.tileAnchor;
+                Vector3 tileWorldPos = _baseTilemap.CellToWorld(checkPos) + _baseTilemap.tileAnchor;
                 float dx = tileWorldPos.x - centerWorldPos.x;
                 float dy = tileWorldPos.y - centerWorldPos.y;
                 float distSq = dx * dx + dy * dy;
@@ -990,8 +990,8 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     }
 
     public bool IsPositionPlowed(Vector3Int pos) {
-        if (!_targetTilemap.HasTile(pos)) return false;
-        var tile = _targetTilemap.GetTile(pos);
+        if (!_plowedTilemap.HasTile(pos)) return false;
+        var tile = _plowedTilemap.GetTile(pos);
         return tile == _dirtPlowedDry || tile == _dirtPlowedWet;
     }
 

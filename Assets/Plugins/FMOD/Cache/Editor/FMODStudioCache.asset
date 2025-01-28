@@ -51,8 +51,8 @@ MonoBehaviour:
   Is3D: 1
   IsOneShot: 0
   Parameters: []
-  MinDistance: 2
-  MaxDistance: 10
+  MinDistance: 5
+  MaxDistance: 20
   Length: 90107
 --- !u!114 &-6131673787572323325
 MonoBehaviour:
@@ -325,8 +325,8 @@ MonoBehaviour:
   Is3D: 1
   IsOneShot: 0
   Parameters: []
-  MinDistance: 5
-  MaxDistance: 10
+  MinDistance: 3
+  MaxDistance: 12
   Length: 90112
 --- !u!114 &-1268212146789014018
 MonoBehaviour:
@@ -429,7 +429,7 @@ MonoBehaviour:
   - {fileID: 5172267100415077143}
   StringsBanks:
   - {fileID: 7766028966685734902}
-  cacheTime: 638734997089837168
+  cacheTime: 638735424274169707
   cacheVersion: 131622
 --- !u!114 &438699061293708635
 MonoBehaviour:
@@ -654,10 +654,10 @@ MonoBehaviour:
   Path: ../../audio_system_fmod_project/Build/Desktop/Ambience.bank
   Name: Ambience
   StudioPath: bank:/Ambience
-  lastModified: 638734997089837168
+  lastModified: 638735424274169707
   FileSizes:
   - Name: Desktop
-    Value: 14243968
+    Value: 14243776
   Exists: 1
 --- !u!114 &2653430666748407760
 MonoBehaviour:

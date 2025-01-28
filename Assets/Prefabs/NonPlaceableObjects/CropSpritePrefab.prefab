@@ -11,8 +11,9 @@ GameObject:
   - component: {fileID: 5582163090626286172}
   - component: {fileID: -5225251467676991074}
   - component: {fileID: 1966016930495981158}
-  - component: {fileID: 9079669687861950075}
   - component: {fileID: -1392972338729523816}
+  - component: {fileID: 9079669687861950075}
+  - component: {fileID: 9193109341226895493}
   - component: {fileID: -2619782599425693426}
   m_Layer: 0
   m_Name: CropSpritePrefab
@@ -143,30 +144,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &9079669687861950075
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2950949280833642199}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b96fe5e33d622904aacd24a8c719bb09, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  _fertilizerSpriteRenderersList:
-  - FertilizerType: 0
-    SpriteRenderer: {fileID: 6587097774582694221}
-  - FertilizerType: 0
-    SpriteRenderer: {fileID: 8145432336802764029}
-  - FertilizerType: 0
-    SpriteRenderer: {fileID: 789594385021677538}
-  - FertilizerType: 0
-    SpriteRenderer: {fileID: 2532843437335144485}
-  - FertilizerType: 0
-    SpriteRenderer: {fileID: 1198485050650314769}
 --- !u!114 &-1392972338729523816
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -192,6 +169,32 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
+--- !u!114 &9079669687861950075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2950949280833642199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfc50f0ca936b494a9181f5b2956bde6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  _fertilizerSpriteRenderersList: []
+--- !u!114 &9193109341226895493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2950949280833642199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 304546aa340155b40a7d14f9c1757e95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &-2619782599425693426
 MonoBehaviour:
   m_ObjectHideFlags: 0
