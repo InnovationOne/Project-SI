@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using Unity.Netcode;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.Timeline;
 
 /// <summary>
 /// Manages player markers on the marker tilemap, supporting single and area markers.
@@ -263,7 +261,6 @@ public class PlayerMarkerController : NetworkBehaviour {
         if (_highlightGO == null) {
             _highlightGO = new GameObject("HighlightGO");
             _highlightSR = _highlightGO.AddComponent<SpriteRenderer>();
-            _highlightGO.AddComponent<ZDepth>()._isObjectStationary = false;
         }
 
         // Position and color the highlight object at the target cell

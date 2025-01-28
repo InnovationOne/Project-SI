@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb96cc45d5e7278408d887cc84dd134d, type: 3}
+  m_Name: Farm_Init
+  m_EditorClassIdentifier: 
+  SpawnablePrefabs:
+  - Prefab: {fileID: 4948398707952232940, guid: 6b1ab92ea49c0a444b9a3eb342d5fc80, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.2
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 4948398707952232940, guid: cd114b0a2b3e93944a4feeec5acf83db, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.1
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 4948398707952232940, guid: 96fd4e1e5481ba043adb93885add6c03, type: 3}
+    IsGrowableTree: 1
+    SpawnProbability: 0.2
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 4948398707952232940, guid: 49157b82908a87842ae4ce5d43bd9b64, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.2
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 4948398707952232940, guid: 074d93abfc8456f429e8c80f9ba3019d, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.15
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 3228041000574016177, guid: 0ec503388e32e41489479ebc5093779e, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.1
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 3228041000574016177, guid: df87af034454a934898f1afd70d78c5d, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.05
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  MinSpawnCount: 350
+  MaxSpawnCount: 400

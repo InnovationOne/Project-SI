@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cd98b811a170ce4dabec9aa6e6459d7, type: 3}
   m_Name: Pickaxe
   m_EditorClassIdentifier: 
-  ItemId: 0
+  ItemId: 246
   ItemType: 1
   ItemName: Pickaxe
   ItemIcon: {fileID: 1924818727, guid: 2351b39fdba2abe4b947de131668e213, type: 3}
@@ -35,4 +35,12 @@ MonoBehaviour:
   - {fileID: 830202794, guid: 2351b39fdba2abe4b947de131668e213, type: 3}
   - {fileID: -460985379, guid: 2351b39fdba2abe4b947de131668e213, type: 3}
   EnergyOnAction: 050000000400000004000000030000000200000001000000
+  HasBowAnimation: 0
+  HasHurtAnimation: 0
+  HasSlashAnimation: 0
+  HasSlashReverseAnimation: 0
+  HasSpellcastAnimation: 0
+  HasThrustAnimation: 0
+  AnimatorBG: {fileID: 22100000, guid: 167d9d8d1f3f37e4ead0be35782c5552, type: 2}
+  AnimatorFG: {fileID: 22100000, guid: abe23c15e26a49d4083a748a5d49968f, type: 2}
   DamageOnAction: 14000000190000001c0000002200000041000000b4000000

@@ -290,7 +290,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
 
         Vector3 worldPos = _baseTilemap.GetCellCenterWorld(tile.CropPosition);
-        prefabInstance.transform.position = worldPos + new Vector3(tile.SpriteRendererOffset.x, tile.SpriteRendererOffset.y + 0.5f, -0.1f);
+        prefabInstance.transform.position = worldPos + new Vector3(tile.SpriteRendererOffset.x, tile.SpriteRendererOffset.y);
         prefabInstance.transform.localScale = new Vector3(tile.SpriteRendererXScale, 1, 1);
 
         if (CropDatabase[tile.CropId].HasCollider) {

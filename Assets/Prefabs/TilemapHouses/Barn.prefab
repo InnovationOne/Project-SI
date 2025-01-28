@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4370834179547701663}
   - component: {fileID: 299335860158160307}
-  - component: {fileID: 216477305140626000}
   m_Layer: 0
   m_Name: Barn
   m_TagString: Untagged
@@ -89,20 +88,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &216477305140626000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 304709608075341027}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _isObjectStationary: 1
-  _objectCollider2D: {fileID: 0}
 --- !u!1 &8461343539897687749
 GameObject:
   m_ObjectHideFlags: 0

@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: -1392972338729523816}
   - component: {fileID: 9079669687861950075}
   - component: {fileID: 9193109341226895493}
-  - component: {fileID: -2619782599425693426}
   m_Layer: 0
   m_Name: CropSpritePrefab
   m_TagString: Respawn
@@ -182,7 +181,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  _fertilizerSpriteRenderersList: []
 --- !u!114 &9193109341226895493
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -195,20 +193,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 304546aa340155b40a7d14f9c1757e95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &-2619782599425693426
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2950949280833642199}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25c228169a51e734cb4f56c575382f8b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _isObjectStationary: 1
-  _objectCollider2D: {fileID: 0}
+  ShowTopMostFoldoutHeaderGroup: 1
+  _fertilizerSpriteRenderersList: []
 --- !u!1 &4264871404667490318
 GameObject:
   m_ObjectHideFlags: 0

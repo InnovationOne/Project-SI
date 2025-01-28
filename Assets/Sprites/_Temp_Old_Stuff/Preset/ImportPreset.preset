@@ -6,7 +6,7 @@ Preset:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: SingleImportPreset
+  m_Name: ImportPreset
   m_TargetType:
     m_NativeTypeID: 1006
     m_ManagedTypePPtr: {fileID: 0}
@@ -170,7 +170,7 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: m_Alignment
-    value: 0
+    value: 7
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: m_SpritePivot.x
@@ -182,7 +182,7 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: m_SpritePixelsToUnits
-    value: 24
+    value: 32
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: m_SpriteBorder.x
@@ -1330,6 +1330,10 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: m_SpriteSheet.m_SecondaryTextures.Array.size
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_SpriteSheet.m_SpriteCustomMetadata.m_Entries.Array.size
     value: 0
     objectReference: {fileID: 0}
   - target: {fileID: 0}

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bba8e0c7705831442842ff6a46903f08, type: 3}
   m_Name: Scythe
   m_EditorClassIdentifier: 
-  ItemId: 0
+  ItemId: 250
   ItemType: 1
   ItemName: Scythe
   ItemIcon: {fileID: -1233539820, guid: c2a04536e5bad0544af0f1d58bee9365, type: 3}
@@ -30,3 +30,11 @@ MonoBehaviour:
   - {fileID: -834034952, guid: c2a04536e5bad0544af0f1d58bee9365, type: 3}
   - {fileID: -1143162653, guid: c2a04536e5bad0544af0f1d58bee9365, type: 3}
   EnergyOnAction: 060000000500000004000000030000000200000001000000
+  HasBowAnimation: 0
+  HasHurtAnimation: 0
+  HasSlashAnimation: 0
+  HasSlashReverseAnimation: 0
+  HasSpellcastAnimation: 0
+  HasThrustAnimation: 0
+  AnimatorBG: {fileID: 22100000, guid: 26a60ed474d3da54fa78ef28199c85a5, type: 2}
+  AnimatorFG: {fileID: 22100000, guid: 7e1d3c045a05f824cb0636dabe4815de, type: 2}

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cd98b811a170ce4dabec9aa6e6459d7, type: 3}
   m_Name: Axe
   m_EditorClassIdentifier: 
-  ItemId: 0
+  ItemId: 245
   ItemType: 1
   ItemName: Axe
   ItemIcon: {fileID: -2145014237, guid: 0c013a9abc238484a9b8c040f4932603, type: 3}
@@ -33,4 +33,12 @@ MonoBehaviour:
   - {fileID: -2068469101, guid: 0c013a9abc238484a9b8c040f4932603, type: 3}
   - {fileID: -517679556, guid: 0c013a9abc238484a9b8c040f4932603, type: 3}
   EnergyOnAction: 050000000400000004000000030000000200000001000000
+  HasBowAnimation: 0
+  HasHurtAnimation: 0
+  HasSlashAnimation: 0
+  HasSlashReverseAnimation: 0
+  HasSpellcastAnimation: 0
+  HasThrustAnimation: 0
+  AnimatorBG: {fileID: 22100000, guid: d6784fe1b22d156429cdcc5c51bb2ee5, type: 2}
+  AnimatorFG: {fileID: 22100000, guid: 5955a9694b6a83241aa1a807cdf1ca74, type: 2}
   DamageOnAction: 0a0000000c0000000d000000110000001900000032000000
