@@ -388,7 +388,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
         bool isTree = cropToGrow.IsTree;
         bool canSeed = (isTree && CanPlowTile(pos)) || IsPositionPlowed(pos);
-        bool canGrowInSeason = cropToGrow.SeasonsToGrow.Contains((TimeManager.SeasonName)GameManager.Instance.TimeManager.CurrentDate.Value.Season);
+        bool canGrowInSeason = cropToGrow.SeasonsToGrow.Contains((TimeManager.SeasonName)GameManager.Instance.TimeManager.CurrentDate.Season);
 
         Collider2D[] colliders = Physics2D.OverlapPointAll(new Vector2(pos.x, pos.y));
         bool inGreenhouse = false;

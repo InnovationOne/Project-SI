@@ -224,7 +224,7 @@ public class FishDatabaseSO : ScriptableObject {
     /// </summary>
     public FishSO GetFish(FishingRodToolSO fishingRod, int tileId, CatchingMethod catchingMethod) {
         var timeManager = GameManager.Instance.TimeManager;
-        var currentSeason = timeManager.CurrentDate.Value.Season;
+        var currentSeason = timeManager.CurrentDate.Season;
         var currentTimeOfDay = timeManager.CurrentTimeOfDay;
 
         // Map tileId to locationId using a precomputed dictionary for faster access

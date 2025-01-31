@@ -19,19 +19,19 @@ using UnityEngine;
 public class PlayerController : NetworkBehaviour {
     public static PlayerController LocalInstance { get; private set; }
 
-    public PlayerCraftController PlayerCraftController;
-    public PlayerHealthAndEnergyController PlayerHealthAndEnergyController;
-    public PlayerInteractController PlayerInteractionController;
-    public PlayerInventoryController PlayerInventoryController;
-    public PlayerItemDragAndDropController PlayerItemDragAndDropController;
-    public PlayerMarkerController PlayerMarkerController;
-    public PlayerMovementController PlayerMovementController;
-    public PlayerToolbeltController PlayerToolbeltController;
-    public PlayerToolsAndWeaponController PlayerToolsAndWeaponController;
-    public PlayerCameraController PlayerCameraController;
-    public PlayerFishingController PlayerFishingController;
-    public RaindropController RaindropController;
-    public PlayerAnimationController PlayerAnimationController;
+    public PlayerCraftController PlayerCraftController { get; private set; }
+    public PlayerHealthAndEnergyController PlayerHealthAndEnergyController { get; private set; }
+    public PlayerInteractController PlayerInteractionController { get; private set; }
+    public PlayerInventoryController PlayerInventoryController { get; private set; }
+    public PlayerItemDragAndDropController PlayerItemDragAndDropController { get; private set; }
+    public PlayerMarkerController PlayerMarkerController { get; private set; }
+    public PlayerMovementController PlayerMovementController { get; private set; }
+    public PlayerToolbeltController PlayerToolbeltController { get; private set; }
+    public PlayerToolsAndWeaponController PlayerToolsAndWeaponController { get; private set; }
+    public PlayerCameraController PlayerCameraController { get; private set; }
+    public PlayerFishingController PlayerFishingController { get; private set; }
+    public RaindropController RaindropController { get; private set; }
+    public PlayerAnimationController PlayerAnimationController { get; private set; }
 
     GameManager _gameManager;
 

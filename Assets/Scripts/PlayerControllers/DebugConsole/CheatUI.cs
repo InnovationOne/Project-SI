@@ -36,7 +36,6 @@ public class CheatUI : MonoBehaviour {
     public static DebugCommand<int> SET_DAY;
     public static DebugCommand<int> SET_SEASON;
     public static DebugCommand<int> SET_YEAR;
-    public static DebugCommand<int, int, int> SET_DATE;
     public static DebugCommand<int> SET_WEATHER;
 
     [Header("Placeable Objects Manager")]
@@ -110,37 +109,32 @@ public class CheatUI : MonoBehaviour {
 
         // Time and Weather Manager
         START_NEXT_DAY = new DebugCommand("start_next_day", "Starts the next day.", "start_next_day", () => {
-            GameManager.Instance.TimeManager.CheatStartNextDay();
+            GameManager.Instance.TimeManager.CheatStartNextDayServerRpc();
         });
         _commandDictionary.Add(START_NEXT_DAY.CommandId, START_NEXT_DAY);
 
         SET_TIME = new DebugCommand<int, int>("set_time", "Sets the time to given hour and minute values.", "set_time <hour> <minute>", (int hour, int minute) => {
-            GameManager.Instance.TimeManager.CheatSetTime(hour, minute);
+            GameManager.Instance.TimeManager.CheatSetTimeServerRpc(hour, minute);
         });
         _commandDictionary.Add(SET_TIME.CommandId, SET_TIME);
 
         SET_DAY = new DebugCommand<int>("set_day", "Sets the day to the given value.", "set_day <day>", (int day) => {
-            GameManager.Instance.TimeManager.CheatSetDay(day);
+            GameManager.Instance.TimeManager.CheatSetDayServerRpc(day);
         });
         _commandDictionary.Add(SET_DAY.CommandId, SET_DAY);
 
         SET_SEASON = new DebugCommand<int>("set_season", "Sets the season to the given value.", "set_season <season_id>", (int seasonId) => {
-            GameManager.Instance.TimeManager.CheatSetSeason(seasonId);
+            GameManager.Instance.TimeManager.CheatSetSeasonServerRpc(seasonId);
         });
         _commandDictionary.Add(SET_SEASON.CommandId, SET_SEASON);
 
         SET_YEAR = new DebugCommand<int>("set_year", "Sets the year to the given value.", "set_year <year>", (int year) => {
-            GameManager.Instance.TimeManager.CheatSetYear(year);
+            GameManager.Instance.TimeManager.CheatSetYearServerRpc(year);
         });
         _commandDictionary.Add(SET_YEAR.CommandId, SET_YEAR);
 
-        SET_DATE = new DebugCommand<int, int, int>("set_date", "Sets the date to the given year, season and day values.", "set_date <year> <season_id> <day>", (int year, int seasonId, int day) => {
-            GameManager.Instance.TimeManager.CheatSetDate(year, seasonId, day);
-        });
-        _commandDictionary.Add(SET_DATE.CommandId, SET_DATE);
-
         SET_WEATHER = new DebugCommand<int>("set_weather", "Sets the weather to the given value.", "set_weather <weather_id>", (int weatherId) => {
-            GameManager.Instance.WeatherManager.CheatSetWeather(weatherId);
+            GameManager.Instance.WeatherManager.CheatSetWeatherServerRpc(weatherId);
         });
         _commandDictionary.Add(SET_WEATHER.CommandId, SET_WEATHER);
 
