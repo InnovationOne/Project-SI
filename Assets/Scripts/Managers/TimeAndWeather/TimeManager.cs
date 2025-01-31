@@ -6,7 +6,6 @@ using FMODUnity;
 using UnityEngine.Rendering.Universal;
 using UnityEditor.UIElements;
 
-
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine.UIElements;
@@ -383,13 +382,13 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
 
     [ServerRpc(RequireOwnership = false)]
     public void CheatSetDayServerRpc(int day) {
-        _currentDate.Day = (day + DAYS_PER_SEASON) % DAYS_PER_SEASON;
+        _currentDate.Day = Mathf.Clamp(day, 0, DAYS_PER_SEASON - 1);
         _networkDate.Value = _currentDate;
     }
 
     [ServerRpc(RequireOwnership = false)]
     public void CheatSetSeasonServerRpc(int season) {
-        _currentDate.Season = (season + SEASONS_PER_YEAR) % SEASONS_PER_YEAR;
+        _currentDate.Season = Mathf.Clamp(season, 0, SEASONS_PER_YEAR - 1);
         _networkDate.Value = _currentDate;
     }
 
@@ -404,6 +403,22 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
         StartNextDay();
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    public void CheatStartNextSeasonServerRpc() {
+        int remainingDays = DAYS_PER_SEASON - _currentDate.Day;
+        for (int i = 0; i < remainingDays; i++) {
+            StartNextDay();
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void CheatStartNextYearServerRpc() {
+        int remainingDays = (SEASONS_PER_YEAR * DAYS_PER_SEASON) - (_currentDate.Season * DAYS_PER_SEASON + _currentDate.Day);
+        for (int i = 0; i < remainingDays; i++) {
+            StartNextDay();
+        }
+    }
+
     #endregion -------------------- Debug_Cheat --------------------
 
     #region -------------------- Data_Persistance --------------------
@@ -413,7 +428,6 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
         data.CurrentDay = _currentDate.Day;
         data.CurrentSeason = _currentDate.Season;
         data.CurrentYear = _currentDate.Year;
-        // data.InGameTime = _localTime; // if needed
     }
 
     public void LoadData(GameData data) {
@@ -422,7 +436,6 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
         _currentDate.Day = Mathf.Clamp(data.CurrentDay, 0, DAYS_PER_SEASON - 1);
         _currentDate.Season = Mathf.Clamp(data.CurrentSeason, 0, SEASONS_PER_YEAR - 1);
         _currentDate.Year = Mathf.Max(data.CurrentYear, 0);
-        // _localTime = data.InGameTime;
 
         _networkTime.Value = _localTime;
         _networkDate.Value = _currentDate;
