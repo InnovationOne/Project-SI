@@ -222,11 +222,11 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         }
 
         if (!networkObject.TryGetComponent<SpriteRenderer>(out var sr)) return;
-        if (!networkObject.TryGetComponent<PickUpInteract>(out var pickUpInteract)) return;
+        if (!networkObject.TryGetComponent<HarvestCrop>(out var harvestCrop)) return;
         if (!networkObject.TryGetComponent<FertilizeCrop>(out var fertilizeCrop)) return;
 
         UpdateCropSprite(tile, crop, sr);
-        UpdateFertilizerSprites(tile, pickUpInteract, fertilizeCrop);
+        UpdateFertilizerSprites(tile, harvestCrop, fertilizeCrop);
     }
 
     // Chooses correct sprite for crop stage or dead state.
@@ -243,7 +243,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     }
 
     // Shows fertilizer visuals based on tile scalers and fertilizer sets.
-    void UpdateFertilizerSprites(CropTile tile, PickUpInteract pickUpInteract, FertilizeCrop fertilizeCrop) {
+    void UpdateFertilizerSprites(CropTile tile, HarvestCrop harvestCrop, FertilizeCrop fertilizeCrop) {
         var fertilizerMappings = new Dictionary<FertilizerTypes, List<FertilizerSO>> {
             { FertilizerTypes.GrowthTime, _growthFertilizer },
             { FertilizerTypes.RegrowthTime, _regrowthFertilizer },
@@ -282,7 +282,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     void CreateCropPrefab(ref CropTile tile, bool isTree, int itemId) {
         if (!IsServer) return;
         var prefabInstance = Instantiate(isTree ? _cropsTreeSpritePrefab : _cropsSpritePrefab, transform);
-        var pickUpInteract = prefabInstance.GetComponent<PickUpInteract>();
+        var harvestCrop = prefabInstance.GetComponent<HarvestCrop>();
 
         if (isTree && GameManager.Instance.ItemManager.ItemDatabase[itemId] is SeedSO seedSOForTree) {
             var resourceNode = prefabInstance.GetComponent<ResourceNodeBase>();
@@ -297,7 +297,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
             prefabInstance.GetComponentInChildren<BoxCollider2D>().enabled = true;
         }
 
-        pickUpInteract.SetPosition(tile.CropPosition);
+        harvestCrop.SetPosition(tile.CropPosition);
 
         if (!prefabInstance.TryGetComponent<NetworkObject>(out var netObj)) {
             netObj = prefabInstance.AddComponent<NetworkObject>();
