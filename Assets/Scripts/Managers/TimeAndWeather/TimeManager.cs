@@ -424,6 +424,7 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
     #region -------------------- Data_Persistance --------------------
 
     public void SaveData(GameData data) {
+        Debug.Log("TimeManager: Saving data...");
         if (!_saveData) return;
         data.CurrentDay = _currentDate.Day;
         data.CurrentSeason = _currentDate.Season;
@@ -431,6 +432,7 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
     }
 
     public void LoadData(GameData data) {
+        Debug.Log("TimeManager: Loading data...");
         if (!IsServer || !_loadData) return;
 
         _currentDate.Day = Mathf.Clamp(data.CurrentDay, 0, DAYS_PER_SEASON - 1);

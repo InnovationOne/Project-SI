@@ -49,7 +49,7 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     // Forecast (index 0 = today's weather)
     NetworkList<int> _weatherForecast = new(
             new List<int> {
-                (int)WeatherName.Sun,
+                (int)WeatherName.Thunder,
                 (int)WeatherName.Thunder,
                 (int)WeatherName.Rain
             },

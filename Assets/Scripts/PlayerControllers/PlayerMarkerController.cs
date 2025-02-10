@@ -19,6 +19,8 @@ public class PlayerMarkerController : NetworkBehaviour {
     [Header("Tile References")]
     [SerializeField] TileBase _markerTile;
 
+    public Vector2 test = new Vector2(1, 1);
+
     // Single-marker state
     public Vector3Int MarkedCellPosition { get; private set; }
     Vector3Int _lastCellPosition;
@@ -86,7 +88,7 @@ public class PlayerMarkerController : NetworkBehaviour {
     void Update() {
         // Determine the target cell based on player direction and position
         Vector2 motionDirection = _movementController.LastMotionDirection;
-        Vector3 positionOffset = transform.position + (Vector3)_boxCollider2D.offset + (Vector3)motionDirection;
+        Vector3 positionOffset = transform.position + (Vector3)motionDirection + new Vector3(0.43f, 0.9f);
         Vector3Int gridPosition = _targetTilemap.WorldToCell(positionOffset);
 
         // Choose between showing area marker or single marker

@@ -3,8 +3,6 @@ using System;
 using System.Text;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class ClockUI : MonoBehaviour {
@@ -97,6 +95,7 @@ public class ClockUI : MonoBehaviour {
     }
 
     void HandleWeatherUpdate(int[] weather, int weatherStation) {
+        Debug.Log($"Weather update: {weather[0]}, {weather[1]}, {weather[2]}");
         // Update forecast images safely by index
         if (weather.Length >= 3) {
             _weatherForecastImages[0].sprite = _weatherIconsColor[weather[0]];

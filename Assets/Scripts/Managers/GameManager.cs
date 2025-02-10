@@ -53,7 +53,6 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     public FMODEvents FMODEvents;
     public WeatherManager WeatherManager;
 
-
     private NetworkManager _networkManager;
     private TestNetcodeUI _testNetcodeUI;
 
