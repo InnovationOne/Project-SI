@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb96cc45d5e7278408d887cc84dd134d, type: 3}
+  m_Name: Beach_Day
+  m_EditorClassIdentifier: 
+  SpawnablePrefabs:
+  - Prefab: {fileID: 4246411984152311400, guid: 28f01a69180d7144abcb50fc25d5bcfd, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.125
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 3831353707433644151, guid: 1eb254583010c9f4da8a0b0eebb1c0ea, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.125
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 8720147392398347079, guid: e09a8c767bee390418d235159ff30611, type: 3}
+    IsGrowableTree: 1
+    SpawnProbability: 0.125
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 3567884288140218067, guid: 437686df3b53ec449bd43d85f3a0a6e3, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.125
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 545581872721637994, guid: bba55e9fa735585488603f07fa487b4d, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.125
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 4534438866258985689, guid: ba572624cb84f9e4b9b0f0c3b2b23faf, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.125
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 4622999884667932456, guid: f2e0b8d88a2f8264e9f96917c988336f, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.125
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  - Prefab: {fileID: 7117976058481419994, guid: d318034159c90b142af512080681dd29, type: 3}
+    IsGrowableTree: 0
+    SpawnProbability: 0.125
+    UseInitialGrowthRange: 0
+    InitialGrowthTimeRange: {x: 0, y: 0}
+  MinSpawnCount: 100
+  MaxSpawnCount: 200

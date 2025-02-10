@@ -445,7 +445,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
         changedTile.SeedItemId = itemId;
         changedTile.CurrentGrowthTimer = initialGrowthTimer;
 
-        CreateCropPrefab(ref changedTile, cropToGrow.IsTree, itemId);        
+        CreateCropPrefab(ref changedTile, cropToGrow.IsTree, itemId);
         int idx = FindCropTileIndexAtPosition(pos);
         if (idx >= 0) CropTiles[idx] = changedTile;
     }

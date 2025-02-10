@@ -2,8 +2,10 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 
+[RequireComponent(typeof(NetworkObject))]
+[RequireComponent(typeof(Collider2D))]
 public class CollectablePrefab : NetworkBehaviour, IInteractable {
-    [NonSerialized] float _maxDistanceToPlayer;
+    [NonSerialized] float _maxDistanceToPlayer = 1.5f;
     public float MaxDistanceToPlayer => _maxDistanceToPlayer;
     [SerializeField] private ItemSO _itemSO;
 
@@ -13,6 +15,8 @@ public class CollectablePrefab : NetworkBehaviour, IInteractable {
             transform.position, 
             Vector2.zero, 
             spreadType: ItemSpawnManager.SpreadType.Circle);
+        NetworkObject.Despawn(true);
+        Destroy(gameObject);
     }
     public void InitializePreLoad(int itemId) { }
 

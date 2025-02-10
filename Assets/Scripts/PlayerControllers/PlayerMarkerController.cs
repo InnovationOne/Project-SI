@@ -88,7 +88,7 @@ public class PlayerMarkerController : NetworkBehaviour {
     void Update() {
         // Determine the target cell based on player direction and position
         Vector2 motionDirection = _movementController.LastMotionDirection;
-        Vector3 positionOffset = transform.position + (Vector3)motionDirection + new Vector3(0.43f, 0.9f);
+        Vector3 positionOffset = transform.position + (Vector3)motionDirection + new Vector3(0f, 0.9f);
         Vector3Int gridPosition = _targetTilemap.WorldToCell(positionOffset);
 
         // Choose between showing area marker or single marker

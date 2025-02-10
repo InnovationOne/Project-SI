@@ -135,7 +135,8 @@ public class PickUpItem : NetworkBehaviour {
         }
 
         if (_itemSlot.Amount <= 0) {
-            Destroy(this.gameObject);
+            NetworkObject.Despawn(true);
+            Destroy(gameObject);
         }
     }
 

@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerInteractController : NetworkBehaviour {
     const float MAX_INTERACT_DISTANCE = 0.4f;
 
-    IInteractable _currentInteractable;
+    Component _currentInteractable;
     BoxCollider2D _playerCollider;
     PlayerController _player;
     InputManager _inputManager;
@@ -40,21 +40,23 @@ public class PlayerInteractController : NetworkBehaviour {
     [ServerRpc]
     void RequestInteractServerRpc(ServerRpcParams serverRpcParams = default) {
         FindClosestInteractable();
-        _currentInteractable?.Interact(_player);
+        if (_currentInteractable != null) {
+            _currentInteractable.GetComponent<IInteractable>()?.Interact(_player);
+        }
     }
 
     // Checks if the current interactable is too far; if yes, interact and clear it.
     void CheckInteractionDistance() {
-        if (_currentInteractable == null || _currentInteractable.MaxDistanceToPlayer <= 0f) return;
+        if (_currentInteractable == null || _currentInteractable.GetComponent<IInteractable>().MaxDistanceToPlayer <= 0f) return;
 
         Vector2 playerPosition = transform.position;
-        Vector2 interactablePosition = ((Component)_currentInteractable).transform.position;
+        Vector2 interactablePosition = (_currentInteractable).transform.position;
 
         float sqrDistance = (playerPosition - interactablePosition).sqrMagnitude;
-        float allowedSqrDist = _currentInteractable.MaxDistanceToPlayer * _currentInteractable.MaxDistanceToPlayer;
+        float allowedSqrDist = _currentInteractable.GetComponent<IInteractable>().MaxDistanceToPlayer * _currentInteractable.GetComponent<IInteractable>().MaxDistanceToPlayer;
 
         if (sqrDistance > allowedSqrDist) {
-            _currentInteractable.Interact(_player);
+            _currentInteractable.GetComponent<IInteractable>().Interact(_player);
             _currentInteractable = null;
         }
     }
@@ -69,18 +71,12 @@ public class PlayerInteractController : NetworkBehaviour {
         Vector2 playerPos = transform.position;
 
         foreach (var collider in colliders) {
-            if (collider == null) {
-                continue;
-            }
-
             // Attempt to retrieve the IInteractable component from the collider or its parent.
             if (!collider.TryGetComponent<IInteractable>(out var interactable)) {
                 interactable = collider.GetComponentInParent<IInteractable>();
             }
 
-            if (interactable == null) {
-                continue;
-            }
+            if (interactable == null) continue;
 
             Vector2 interactablePos = ((Component)interactable).transform.position;
             float sqrDist = (playerPos - interactablePos).sqrMagnitude;
@@ -91,7 +87,7 @@ public class PlayerInteractController : NetworkBehaviour {
             }
         }
 
-        _currentInteractable = closest;
+        _currentInteractable = (Component)closest;
     }
 }
 
