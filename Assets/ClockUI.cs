@@ -4,6 +4,8 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static TimeManager;
+using static WeatherManager;
 
 public class ClockUI : MonoBehaviour {
     [Header("Date and Time")]
@@ -31,6 +33,7 @@ public class ClockUI : MonoBehaviour {
     const string COLOR_START_TAG = "<color=#80775c>";
     const string COLOR_END_TAG = "</color>";
 
+    // Subscribe to game events.
     void Start() {
         GameManager.Instance.TimeManager.OnUpdateUITime += HandleTimeUpdate;
         GameManager.Instance.TimeManager.OnUpdateUIDate += HandleDateUpdate;
@@ -40,6 +43,7 @@ public class ClockUI : MonoBehaviour {
         GameManager.Instance.PauseGameManager.OnShowLocalPauseGame += TogglePauseMenu;
     }
 
+    // Unsubscribe from events.
     void OnDestroy() {
         GameManager.Instance.TimeManager.OnUpdateUITime -= HandleTimeUpdate;
         GameManager.Instance.TimeManager.OnUpdateUIDate -= HandleDateUpdate;
@@ -49,116 +53,78 @@ public class ClockUI : MonoBehaviour {
         GameManager.Instance.PauseGameManager.OnShowLocalPauseGame -= TogglePauseMenu;
     }
 
+    // Updates the displayed time and clock hands.
     void HandleTimeUpdate(int currentHour, int currentMinute) {
-        // Display time in HH:MM format
         _timeText.text = $"{currentHour:00}:{currentMinute:00}";
-
-        // Update clock hands based on hour and minute values
         _bigHand.sprite = _bigHandSprites[currentHour % 12];
         _smallHand.sprite = _smallHandSprites[(currentMinute / 5) % 12];
     }
 
     void HandleDateUpdate(int currentDay, int currentSeason, int currentYear, int oldSeason) {
-        // Get day name and suffix from TimeManager
-        int dayIndex = currentDay % TimeManager.DAYS_PER_WEEK;
-        var dayName = (TimeManager.ShortDayName)dayIndex;
-
-        // Use a safe cast for date suffix
-        TimeManager.DateSuffix dateSuffix = dayIndex >= Enum.GetNames(typeof(TimeManager.DateSuffix)).Length
-            ? TimeManager.DateSuffix.th
-            : (TimeManager.DateSuffix)dayIndex;
-
-        // Update date text
+        int dayIndex = currentDay % DAYS_PER_WEEK;
+        var dayName = (ShortDayName)dayIndex;
+        DateSuffix dateSuffix = dayIndex >= Enum.GetNames(typeof(DateSuffix)).Length
+            ? DateSuffix.th
+            : (DateSuffix)dayIndex;
         _dateText.text = $"{dayName},\n{currentDay + 1}{dateSuffix}";
 
-        // Update season image
         if (currentSeason >= 0 && currentSeason < _seasonSprites.Length) {
             _seasonImage.sprite = _seasonSprites[currentSeason];
         }
 
-        // Disable and stop the currently active season’s particle system
-        UIParticle oldParticle = _seasonParticles[oldSeason];
-        oldParticle.Stop();
-        oldParticle.enabled = false;
+        _seasonParticles[oldSeason].Stop();
+        _seasonParticles[oldSeason].enabled = false;
 
-        // Enable and play the new season’s particle system
         if (currentSeason >= 0 && currentSeason < _seasonParticles.Length) {
-            UIParticle newParticle = _seasonParticles[currentSeason];
-            newParticle.enabled = true;
-            newParticle.Play();
+            _seasonParticles[currentSeason].enabled = true;
+            _seasonParticles[currentSeason].Play();
         }
     }
 
+    // Toggles the UI (e.g., pause menu) visibility.
     void TogglePauseMenu() {
-        // Toggle active state of this UI
         gameObject.SetActive(!gameObject.activeSelf);
     }
 
-    void HandleWeatherUpdate(int[] weather, int weatherStation) {
-        Debug.Log($"Weather update: {weather[0]}, {weather[1]}, {weather[2]}");
-        // Update forecast images safely by index
-        if (weather.Length >= 3) {
-            _weatherForecastImages[0].sprite = _weatherIconsColor[weather[0]];
-            _weatherForecastImages[1].sprite = _weatherIcons[weather[1]];
-            _weatherForecastImages[2].sprite = _weatherIcons[weather[2]];
-        }
-
-        // Adjust future forecast icons based on station
-        switch (weatherStation) {
-            case 0:
-                _weatherForecastImages[1].sprite = _weatherIcons[^1];
-                _weatherForecastImages[2].sprite = _weatherIcons[^1];
-                break;
-            case 1:
-                _weatherForecastImages[2].sprite = _weatherIcons[^1];
-                break;
-            case 2:
-                // No additional changes needed
-                break;
-            default:
-                Debug.LogError($"Invalid weather station index: {weatherStation}");
-                break;
+    // Updates the weather forecast display.
+    void HandleWeatherUpdate(int[] weather) {
+        if (weather == null || weather.Length == 0) return;
+        for (int i = 0; i < _weatherForecastImages.Length && i < weather.Length; i++) {
+            if (weather[i] == (int)WeatherName.None) {
+                _weatherForecastImages[i].sprite = _weatherIcons[^1]; // Question mark icon.
+            } else {
+                _weatherForecastImages[i].sprite = (i == 0)
+                    ? _weatherIconsColor[weather[i]]
+                    : _weatherIcons[weather[i]];
+            }
         }
     }
 
+    // Updates the farm money display with leading zeros and colored placeholders.
     void UpdateFarmMoney(int farmMoney) {
-        // Constrain money to non-negative
         farmMoney = Mathf.Max(0, farmMoney);
-
-        // Convert to string once
         string moneyString = farmMoney.ToString();
-
-        // Calculate leading zero count
-        int zeroCount = NUM_DIGITS - moneyString.Length;
-        zeroCount = Mathf.Max(0, zeroCount);
-
-        // Build final text with color-coded zeros
+        int zeroCount = Mathf.Max(0, NUM_DIGITS - moneyString.Length);
         var sb = new StringBuilder(NUM_DIGITS + moneyString.Length + 20);
 
         if (farmMoney == 0) {
             if (zeroCount > 1) {
-                sb.Append(COLOR_START_TAG);
-                sb.Append(new string('0', zeroCount - 1));
-                sb.Append(COLOR_END_TAG);
+                sb.Append(COLOR_START_TAG).Append(new string('0', zeroCount - 1)).Append(COLOR_END_TAG);
             } else if (zeroCount == 1) {
                 sb.Append(COLOR_START_TAG).Append('0').Append(COLOR_END_TAG);
             }
             sb.Append('0');
         } else {
             if (zeroCount > 0) {
-                sb.Append(COLOR_START_TAG);
-                sb.Append(new string('0', zeroCount));
-                sb.Append(COLOR_END_TAG);
+                sb.Append(COLOR_START_TAG).Append(new string('0', zeroCount)).Append(COLOR_END_TAG);
             }
             sb.Append(moneyString);
         }
-
-        // Apply to UI
         _moneyText.text = sb.ToString();
     }
 
-
+    // Placeholder for future town money display updates.
     void UpdateTownMoney(int townMoney) {
-        // Future extension for town money display
+        // Future implementation.
     }
 }

@@ -19,7 +19,6 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
     [SerializeField] private Image _itemRarityImage;
     [SerializeField] private Image _itemIconImage;
     [SerializeField] private Image _selectedImage;
-    [SerializeField] private Image _itemAmountBackgroundImage;
     [SerializeField] private TextMeshProUGUI _itemAmountText;
 
     [Header("Restrictions")]
@@ -114,8 +113,9 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
 
         // Handle stackable items
         if (item.IsStackable) {
-            _itemAmountBackgroundImage.gameObject.SetActive(true);
             _itemAmountText.SetText(_itemSlot.Amount.ToString());
+        } else {
+            _itemAmountText.SetText(string.Empty);
         }
     }
 
@@ -123,7 +123,6 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
         OnNewItem?.Invoke(0);
         _itemIconImage.gameObject.SetActive(false);
         _itemAmountText.SetText(string.Empty);
-        _itemAmountBackgroundImage.gameObject.SetActive(false);
         _itemRarityImage.sprite = null;
         _itemRarityImage.gameObject.SetActive(false);
         _itemSlot = null;

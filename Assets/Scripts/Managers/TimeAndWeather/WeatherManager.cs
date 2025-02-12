@@ -5,14 +5,17 @@ using System.Collections.Generic;
 using static TimeManager;
 
 /// <summary>
-/// Handles weather forecasting, thunder logic, and audio/ambience setup.
+/// Manages weather conditions, forecasts, and associated audio/visual effects in the game.
 /// </summary>
 [RequireComponent(typeof(NetworkObject))]
 public class WeatherManager : NetworkBehaviour, IDataPersistance {
     public enum WeatherName { Sun, Cloudy, Wind, Rain, Thunder, Snow, Event, Wedding, None }
 
-    public event Action<int[], int> OnUpdateUIWeather;
+    // Event to update UI weather forecast (sends an array of weather indices).
+    public event Action<int[]> OnUpdateUIWeather;
+    // Event to update UI rain intensity.
     public event Action<int> OnChangeRainIntensity;
+    // Event to notify clients of a thunder strike.
     public event Action OnThunderStrike;
 
     #region -------------------- Inspector_Fields --------------------
@@ -24,58 +27,53 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     [Header("Weather Settings")]
     [SerializeField] int _weatherStation = 0;
 
-    [Tooltip("Minimum real-time seconds between thunder strikes.")]
-    private const float MIN_TIME_BETWEEN_THUNDER = 10f;
-
-    [Tooltip("Maximum real-time seconds between thunder strikes.")]
-    private const float MAX_TIME_BETWEEN_THUNDER = 30f;
+    // Constants for thunder timing.
+    const float MIN_TIME_BETWEEN_THUNDER = 10f;
+    const float MAX_TIME_BETWEEN_THUNDER = 30f;
 
     #endregion -------------------- Inspector_Fields --------------------
 
-    // Base probabilities (Sun, Clouds/Wind, Rain/Snow, Thunder).
-    float[] _baseWeatherProbability = { 0.4f, 0.2f, 0.25f, 0.15f };
-    float[] _currentWeatherProbability = new float[4];
+    // Base and current weather probabilities (indices: 0=Sun, 1=Clouds/Wind, 2=Rain/Snow, 3=Thunder).
+    readonly float[] _baseWeatherProbability = { 0.4f, 0.2f, 0.25f, 0.15f };
+    readonly float[] _currentWeatherProbability = new float[4];
 
-    // Seasonal adjustments
+    // Seasonal adjustments.
     const float SUMMER_SUN_BOOST = 0.2f;
     const float FALL_WIND_BOOST = 0.2f;
     const float WINTER_SNOW_BOOST = 0.3f;
 
-    // Factors that reduce brightness in TimeManager.
+    // Light reduction factors.
     const float CLOUDS_WIND_LIGHT = 0.9f;
     const float RAIN_SNOW_LIGHT = 0.8f;
     const float THUNDER_LIGHT = 0.5f;
 
-    // Forecast (index 0 = today's weather)
+    // Weather forecast (first element is the current weather).
     NetworkList<int> _weatherForecast = new(
-            new List<int> {
-                (int)WeatherName.Thunder,
-                (int)WeatherName.Thunder,
-                (int)WeatherName.Rain
-            },
-            NetworkVariableReadPermission.Everyone,
-            NetworkVariableWritePermission.Server
-        );
-    public WeatherName CurrentWeather => ((WeatherName)_weatherForecast[0]);
+        new List<int> { (int)WeatherName.Thunder, (int)WeatherName.Thunder, (int)WeatherName.Rain },
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server);
 
-    // Thunder logic
+    // Gets the current weather.
+    public WeatherName CurrentWeather => (WeatherName)_weatherForecast[0];
+
+    // Thunder timing logic.
     public bool IsWeatherPlaying;
     float _timeSinceLastThunder = 0f;
     float _nextThunderTime;
 
-    // Rain intensities
+    // Rain intensity constants.
     const int LIGHT_RAIN_INTENSITY = 60;
     const int HEAVY_RAIN_INTENSITY = 100;
 
-    // Dependencies
+    // External dependencies retrieved from GameManager.
     TimeManager _timeManager;
     AudioManager _audioManager;
     FMODEvents _fmodEvents;
 
-    // Cache last known timeOfDay to decide if we need to update ambience.
+    // Caches the last updated time-of-day for ambience adjustments.
     private TimeOfDay _lastAmbienceUpdate;
 
-    #region -------------------- Forecast --------------------
+    #region -------------------- Unity Lifecycle --------------------
 
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
@@ -86,15 +84,12 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
 
         if (IsServer) {
             InitializeThunderTimer();
-
-            // On day or season transitions, we recalc weather.
             _timeManager.OnNextDayStarted += HandleNextDayStarted;
             _timeManager.OnNextSeasonStarted += HandleNextSeasonStarted;
             InitializeWeatherProbabilities();
         }
 
         _weatherForecast.OnListChanged += OnWeatherForecastChanged;
-
         InitializeAudio();
         UpdateUIWeather();
     }
@@ -103,7 +98,6 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
         if (IsServer) {
             UpdateThunder();
         }
-
         CheckForTimeOfDayUpdate();
     }
 
@@ -112,42 +106,37 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
             _timeManager.OnNextDayStarted -= HandleNextDayStarted;
             _timeManager.OnNextSeasonStarted -= HandleNextSeasonStarted;
         }
-
-        // Unsubscribe from forecast changes.
         _weatherForecast.OnListChanged -= OnWeatherForecastChanged;
-
         base.OnNetworkDespawn();
     }
 
-    #endregion -------------------- Forecast --------------------
+    #endregion -------------------- Unity Lifecycle --------------------
 
-    #region -------------------- Weather_Events --------------------
+    #region -------------------- Weather Forecast & Application --------------------
+
+    // Called when the forecast list changes
     void OnWeatherForecastChanged(NetworkListEvent<int> changeEvent) {
         ApplyWeather();
         UpdateUIWeather();
     }
 
-
+    // Handles a new day by advancing the forecast.
     void HandleNextDayStarted() {
-        // Shift & generate new forecast.
         AdvanceWeatherForecast();
         ApplyWeather();
         UpdateUIWeather();
     }
 
+    // Handles a new season by updating audio and weather probabilities.
     void HandleNextSeasonStarted(int newSeason) {
         var season = (SeasonName)newSeason;
         _audioManager.SetMusicSeason(season);
-
         InitializeWeatherProbabilities();
         ApplyWeather();
         UpdateUIWeather();
     }
 
-    #endregion -------------------- Weather_Events --------------------
-
-    #region -------------------- Weather_Forecast --------------------
-
+    // Advances the forecast by removing the oldest weather and adding a new prediction.
     void AdvanceWeatherForecast() {
         if (_weatherForecast.Count > 0) {
             _weatherForecast.RemoveAt(0);
@@ -155,10 +144,10 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
         _weatherForecast.Add((int)DetermineNextWeather());
     }
 
+    // Chooses the next weather based on current probabilities.
     WeatherName DetermineNextWeather() {
         float prob = UnityEngine.Random.value;
         float cumul = 0f;
-
         for (int i = 0; i < _currentWeatherProbability.Length; i++) {
             cumul += _currentWeatherProbability[i];
             if (prob < cumul) {
@@ -171,22 +160,19 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
                 };
             }
         }
-        return WeatherName.Sun; // fallback
+        return WeatherName.Sun; // Fallback.
     }
 
+    // Returns Rain or Snow based on the current season.
     WeatherName DetermineRainOrSnow() {
         var season = (SeasonName)_timeManager.CurrentDate.Season;
         return (season == SeasonName.Winter) ? WeatherName.Snow : WeatherName.Rain;
     }
 
-    #endregion -------------------- Weather_Forecast --------------------
-
-    #region -------------------- Weather_Probabilities --------------------
-
+    // Initializes probabilities and applies seasonal adjustments.
     void InitializeWeatherProbabilities() {
         Array.Copy(_baseWeatherProbability, _currentWeatherProbability, _baseWeatherProbability.Length);
         var currentSeason = (SeasonName)_timeManager.CurrentDate.Season;
-
         switch (currentSeason) {
             case SeasonName.Summer:
                 AdjustProbabilities(SUMMER_SUN_BOOST);
@@ -200,56 +186,31 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
+    // Adjusts probabilities (e.g., for a sunny summer).
     void AdjustProbabilities(float boost) {
-        // More Sun in Summer.
         _currentWeatherProbability[0] += boost;      // Sun
         _currentWeatherProbability[1] -= boost / 3f; // Clouds/Wind
         _currentWeatherProbability[2] -= boost / 3f; // Rain/Snow
         _currentWeatherProbability[3] -= boost / 3f; // Thunder
     }
 
+    // Adjusts probabilities for autumn (favoring rain).
     void AdjustProbabilitiesForAutumn(float boost) {
-        // More rain in autumn.
         _currentWeatherProbability[2] += boost;
         _currentWeatherProbability[0] -= boost / 3f;
         _currentWeatherProbability[1] -= boost / 3f;
         _currentWeatherProbability[3] -= boost / 3f;
     }
 
+    // Adjusts probabilities for winter (favoring snow).
     void AdjustProbabilitiesForWinter(float boost) {
-        // More snow in Winter.
         _currentWeatherProbability[2] += boost;
         _currentWeatherProbability[0] -= boost / 3f;
         _currentWeatherProbability[1] -= boost / 3f;
         _currentWeatherProbability[3] -= boost / 3f;
     }
 
-    #endregion -------------------- Weather_Probabilities --------------------
-
-    #region -------------------- Audio --------------------
-
-    void InitializeAudio() {
-        _audioManager.InitializeAmbience(_fmodEvents.Weather);
-        _audioManager.InitializeMusic(_fmodEvents.Seasons);
-
-        // On spawn, set initial season & weather.
-        _audioManager.SetMusicSeason((SeasonName)_timeManager.CurrentDate.Season);
-        _audioManager.SetAmbienceTimeOfDay(_timeManager.CurrentTimeOfDay);
-        _audioManager.SetAmbienceWeather(CurrentWeather);
-    }
-
-    void UpdateUIWeather() {
-        int[] weatherIndices = new int[_weatherForecast.Count];
-        for (int i = 0; i < _weatherForecast.Count; i++) {
-            weatherIndices[i] = _weatherForecast[i];
-        }
-        OnUpdateUIWeather?.Invoke(weatherIndices, _weatherStation);
-    }
-
-    #endregion -------------------- Audio --------------------
-
-    #region -------------------- Apply_Weather --------------------
-
+    // Applies weather effects like rain intensity and audio ambience.
     void ApplyWeather() {
         var w = CurrentWeather;
         switch (w) {
@@ -268,34 +229,52 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    #endregion -------------------- Apply_Weather --------------------
+    // Updates the UI with the current weather forecast.
+    void UpdateUIWeather() {
+        int count = _weatherForecast.Count;
+        int[] weatherIndices = new int[count];
+        for (int i = 0; i < count; i++) {
+            weatherIndices[i] = i > _weatherStation ? (int)WeatherName.None : _weatherForecast[i];
+        }
+        OnUpdateUIWeather?.Invoke(weatherIndices);
+    }
 
-    #region -------------------- Thunder_Logic --------------------
+    #endregion -------------------- Weather Forecast & Application --------------------
+
+    #region -------------------- Audio & Thunder --------------------
+
+    // Sets up initial audio settings.
+    void InitializeAudio() {
+        _audioManager.InitializeAmbience(_fmodEvents.Weather);
+        _audioManager.InitializeMusic(_fmodEvents.Seasons);
+        _audioManager.SetMusicSeason((SeasonName)_timeManager.CurrentDate.Season);
+        _audioManager.SetAmbienceTimeOfDay(_timeManager.CurrentTimeOfDay);
+        _audioManager.SetAmbienceWeather(CurrentWeather);
+    }
+
+    // Initializes the thunder timer with a random interval.
     void InitializeThunderTimer() {
         _nextThunderTime = UnityEngine.Random.Range(MIN_TIME_BETWEEN_THUNDER, MAX_TIME_BETWEEN_THUNDER);
     }
 
+    // Updates thunder logic and triggers a thunder strike when the timer elapses.
     void UpdateThunder() {
         _timeSinceLastThunder += Time.deltaTime;
-        if (CurrentWeather == WeatherName.Thunder && IsWeatherPlaying) {
-            if (_timeSinceLastThunder >= _nextThunderTime) {
-                _timeSinceLastThunder = 0f;
-                _nextThunderTime = UnityEngine.Random.Range(MIN_TIME_BETWEEN_THUNDER, MAX_TIME_BETWEEN_THUNDER);
-                OnThunderStrike?.Invoke();
-                PlayThunderSoundClientRpc();
-            }
+        if (CurrentWeather == WeatherName.Thunder && IsWeatherPlaying && _timeSinceLastThunder >= _nextThunderTime) {
+            _timeSinceLastThunder = 0f;
+            _nextThunderTime = UnityEngine.Random.Range(MIN_TIME_BETWEEN_THUNDER, MAX_TIME_BETWEEN_THUNDER);
+            OnThunderStrike?.Invoke();
+            PlayThunderSoundClientRpc();
         }
     }
 
+    // Plays the thunder sound on all clients.
     [ClientRpc]
     void PlayThunderSoundClientRpc() {
         _audioManager.PlayOneShot(_fmodEvents.Thunder, transform.position);
     }
 
-    #endregion -------------------- Thunder_Logic --------------------
-
-    #region -------------------- Weather_Light_Factor --------------------
-
+    // Returns a light factor to reduce scene brightness based on current weather.
     public float GetWeatherLightFactor() {
         return CurrentWeather switch {
             WeatherName.Cloudy or WeatherName.Wind => CLOUDS_WIND_LIGHT,
@@ -305,14 +284,9 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
         };
     }
 
-    #endregion -------------------- Weather_Light_Factor --------------------
-
-    #region -------------------- Ambience_Support --------------------
-
+    // Checks for changes in the time of day to update ambience.
     void CheckForTimeOfDayUpdate() {
         if (_timeManager == null || _audioManager == null) return;
-
-        // If the time of day changed, update ambiance.
         var currentTimeOfDay = _timeManager.CurrentTimeOfDay;
         if (currentTimeOfDay != _lastAmbienceUpdate) {
             _lastAmbienceUpdate = currentTimeOfDay;
@@ -320,64 +294,81 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    #endregion -------------------- Ambience_Support --------------------
+    #endregion -------------------- Audio & Thunder --------------------
 
-    #region -------------------- Public_API --------------------
+    #region -------------------- Public API & Cheat Functions --------------------
 
-    public bool RainThunderSnow() {
-        return CurrentWeather == WeatherName.Rain
-            || CurrentWeather == WeatherName.Thunder
-            || CurrentWeather == WeatherName.Snow;
-    }
+    // Returns true if the current weather involves rain, thunder, or snow.
+    public bool RainThunderSnow() =>
+        CurrentWeather == WeatherName.Rain ||
+        CurrentWeather == WeatherName.Thunder ||
+        CurrentWeather == WeatherName.Snow;
 
+    // Cheat: Set the current weather (only works on the server).
     [ServerRpc(RequireOwnership = false)]
     public void CheatSetWeatherServerRpc(int weather) {
-        if (_weatherForecast.Count > 0) {
+        if (_weatherForecast.Count > 0 && Enum.IsDefined(typeof(WeatherName), weather)) {
             _weatherForecast[0] = weather;
+            ApplyWeather();
+            UpdateUIWeather();
         }
     }
 
-    #endregion -------------------- Public_API --------------------
+    // Cheat: Replace the entire weather forecast.
+    [ServerRpc(RequireOwnership = false)]
+    public void CheatSetForecastServerRpc(int[] forecast) {
+        _weatherForecast.Clear();
+        foreach (int weather in forecast) {
+            if (Enum.IsDefined(typeof(WeatherName), weather)) {
+                _weatherForecast.Add(weather);
+            } else {
+                Debug.LogWarning($"Cheat input: Invalid weather value {weather}. Skipped.");
+            }
+        }
+        ApplyWeather();
+        UpdateUIWeather();
+    }
 
-    #region -------------------- Data_Persistance --------------------
+    // Cheat: Force a thunder strike on the next update.
+    [ServerRpc(RequireOwnership = false)]
+    public void CheatTriggerThunderServerRpc() {
+        if (CurrentWeather == WeatherName.Thunder && IsWeatherPlaying) {
+            _timeSinceLastThunder = _nextThunderTime; // Forces a thunder strike on the next frame.
+        }
+    }
 
+    #endregion -------------------- Public API & Cheat Functions --------------------
+
+    #region -------------------- Data Persistence --------------------
+
+    // Saves the current weather forecast into game data.
     public void SaveData(GameData data) {
         if (!_saveData) return;
-
         if (_weatherForecast == null || _weatherForecast.Count == 0) {
-            // Provide fallback forecast.
-            _weatherForecast = new NetworkList<int>(new List<int>
-            {
-                (int)WeatherName.Sun,
-                (int)WeatherName.Thunder,
-                (int)WeatherName.Rain
+            _weatherForecast = new NetworkList<int>(new List<int> {
+                (int)WeatherName.Sun, (int)WeatherName.Thunder, (int)WeatherName.Rain
             });
         }
-
-        // Save entire forecast.
         data.WeatherForecast = new int[_weatherForecast.Count];
         for (int i = 0; i < _weatherForecast.Count; i++) {
             data.WeatherForecast[i] = _weatherForecast[i];
         }
     }
 
+    // Loads the weather forecast from saved game data.
     public void LoadData(GameData data) {
         if (!IsServer || data.WeatherForecast == null || !_loadData) return;
-
-        // Replace forecast.
         _weatherForecast.Clear();
         foreach (var wInt in data.WeatherForecast) {
             if (Enum.IsDefined(typeof(WeatherName), wInt)) {
                 _weatherForecast.Add(wInt);
             } else {
-                Debug.LogWarning($"Invalid weather index {wInt} in saved data. Skipping.");
+                Debug.LogWarning($"Saved data: Invalid weather index {wInt}. Skipped.");
             }
         }
-
-        // Now that the list changed, clients also get updated.
         ApplyWeather();
         UpdateUIWeather();
     }
 
-    #endregion -------------------- Data_Persistance --------------------
+    #endregion -------------------- Data Persistence --------------------
 }
