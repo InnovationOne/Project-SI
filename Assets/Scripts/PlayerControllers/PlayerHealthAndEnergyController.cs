@@ -281,4 +281,7 @@ public class PlayerHealthAndEnergyController : NetworkBehaviour, IDamageable, IP
         maxEnergy = _maxEnergy;
     }
 
+    public void SetRespawnPoint(Vector3 pos) {
+        _hospitalRespawnPosition = pos;
+    }
 }

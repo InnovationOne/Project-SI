@@ -2,19 +2,16 @@ using UnityEngine;
 
 public class DialogueTrigger : MonoBehaviour {
     [Header("Visual Cue")]
-    // Pop-Up over the NPC
-    [SerializeField] private GameObject _visualCue;
+    [Tooltip("The visual cue that appears over the NPC when the player is in range.")]
+    [SerializeField] GameObject _visualCue;
 
     [Header("Ink JSON")]
-    // JSON story file
-    [SerializeField] private TextAsset _inkJSON;
+    [Tooltip("The JSON file that contains the dialogue for this NPC.")]
+    [SerializeField] TextAsset _inkJSON;
 
-    // Is the player in range of the NPC
-    private bool _playerInRange;
-
+    bool _playerInRange;
 
     private void Awake() {
-        _playerInRange = false;
         _visualCue.SetActive(false);
     }
 
@@ -22,23 +19,20 @@ public class DialogueTrigger : MonoBehaviour {
         GameManager.Instance.InputManager.OnInteractAction += InputManager_OnInteractAction;
     }
 
+    private void OnDestroy() {
+        if (GameManager.Instance != null && GameManager.Instance.InputManager != null) {
+            GameManager.Instance.InputManager.OnInteractAction -= InputManager_OnInteractAction;
+        }
+    }
+
     private void InputManager_OnInteractAction() {
-        // Check if the player is in range and if no dialogue is playing
         if (_playerInRange && !GameManager.Instance.DialogueManager.DialogueIsPlaying) {
             GameManager.Instance.DialogueManager.EnterDialogueMode(_inkJSON);
         }
     }
 
     private void Update() {
-        // Check if the player is in range and if no dialogue is playing
-        if (_playerInRange && !GameManager.Instance.DialogueManager.DialogueIsPlaying) {
-            // Activate the pop-up over the NPC
-            _visualCue.SetActive(true);
-        } else {
-            // Disbale the pop-up over the NPC
-            _visualCue.SetActive(false);
-        }
-
+        _visualCue.SetActive(_playerInRange && !GameManager.Instance.DialogueManager.DialogueIsPlaying);
     }
 
     private void OnTriggerEnter2D(Collider2D collision) {

@@ -2,62 +2,50 @@ using Ink.Runtime;
 using System.Collections.Generic;
 using UnityEngine;
 
-// This script stores and manages the state of dialogue variables
+// Manages global Ink variables and synchronizes them with stories.
 public class DialogueVariables {
-    public Dictionary<string, Ink.Runtime.Object> variables { get; private set; }
+    public Dictionary<string, Ink.Runtime.Object> Variables { get; private set; }
+    Story _globalVariablesStory;
 
-    private Story globalVariablesStory;
+    public DialogueVariables(TextAsset loadGlobalsJSON, string loadedGlobalsJson = null) {
+        _globalVariablesStory = new Story(loadGlobalsJSON.text);
 
-    public DialogueVariables(TextAsset loadGlobalsJSON, string test = null) {
-        // Create the story
-        globalVariablesStory = new Story(loadGlobalsJSON.text);
-
-        if (!string.IsNullOrEmpty(test)) {
-            globalVariablesStory.state.LoadJson(test);
+        if (!string.IsNullOrEmpty(loadedGlobalsJson)) {
+            _globalVariablesStory.state.LoadJson(loadedGlobalsJson);
         }
 
-        // Initialize the dictionary
-        variables = new Dictionary<string, Ink.Runtime.Object>();
-        foreach (string name in globalVariablesStory.variablesState) {
-            Ink.Runtime.Object value = globalVariablesStory.variablesState.GetVariableWithName(name);
-            variables.Add(name, value);
+        Variables = new Dictionary<string, Ink.Runtime.Object>();
+        foreach (string name in _globalVariablesStory.variablesState) {
+            Variables[name] = _globalVariablesStory.variablesState.GetVariableWithName(name);
         }
     }
 
-    // This function subscribes the variableChanged function to the story, to listen for variable changes
     public void StartListening(Story story) {
-        VariablesToStory(story);
-
+        SetVariablesToStory(story);
         story.variablesState.variableChangedEvent += VariableChanged;
     }
 
-    // This function unsubscribes the variableChanged function to the story, to listen for variable changes
     public void StopListening(Story story) {
         story.variablesState.variableChangedEvent -= VariableChanged;
     }
 
-    // This function is called when a variable changed
-    private void VariableChanged(string name, Ink.Runtime.Object value) {
-        // Only maintain variables that were initialized from the globals ink file
-        if (variables.ContainsKey(name)) {
-            variables.Remove(name);
-            variables.Add(name, value);
+    void VariableChanged(string name, Ink.Runtime.Object value) {
+        if (Variables.ContainsKey(name)) {
+            Variables[name] = value;
         }
     }
 
-    // This function sets the variables in a story
-    private void VariablesToStory(Story story) {
-        foreach (KeyValuePair<string, Ink.Runtime.Object> variable in variables) {
+    private void SetVariablesToStory(Story story) {
+        foreach (var variable in Variables) {
             story.variablesState.SetGlobal(variable.Key, variable.Value);
         }
     }
 
     // This function saves the dialogue variables to game data
     public void SaveData(GameData data) {
-        if (globalVariablesStory != null) {
-            VariablesToStory(globalVariablesStory);
-
-            data.inkVariables = globalVariablesStory.state.ToJson();
+        if (_globalVariablesStory != null) {
+            SetVariablesToStory(_globalVariablesStory);
+            data.inkVariables = _globalVariablesStory.state.ToJson();
         }
     }
 }

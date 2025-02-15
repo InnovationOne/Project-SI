@@ -13,6 +13,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerCameraController))]
 [RequireComponent(typeof(PlayerFishingController))]
 [RequireComponent(typeof(PlayerAnimationController))]
+[RequireComponent(typeof(QuickChatController))]
 [RequireComponent(typeof(NetworkObject))]
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(BoxCollider2D))]
@@ -32,6 +33,7 @@ public class PlayerController : NetworkBehaviour {
     public PlayerFishingController PlayerFishingController { get; private set; }
     public RaindropController RaindropController { get; private set; }
     public PlayerAnimationController PlayerAnimationController { get; private set; }
+    public QuickChatController QuickChatController { get; private set; }
 
     GameManager _gameManager;
 
@@ -60,6 +62,7 @@ public class PlayerController : NetworkBehaviour {
         PlayerCameraController = GetComponent<PlayerCameraController>();
         PlayerFishingController = GetComponent<PlayerFishingController>();
         PlayerAnimationController = GetComponent<PlayerAnimationController>();
+        QuickChatController = GetComponent<QuickChatController>();
 
         RaindropController = GetComponentInChildren<RaindropController>();
     }

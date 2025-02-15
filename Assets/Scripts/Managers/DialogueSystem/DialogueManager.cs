@@ -1,15 +1,34 @@
 using Ink.Runtime;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static UnityEngine.Rendering.HableCurve;
 
+[Serializable]
+public class VoiceOverEntry {
+    public string id;
+    public AudioClip clip;
+}
+
+[Serializable]
+public class EmojiEntry {
+    public string id;
+    public Sprite sprite;
+}
 
 public class DialogueManager : MonoBehaviour, IDataPersistance {
+    public event Action DialogueComplete;
+
+    #region -------------------- Inspector Fields --------------------
+
     [Header("Parameters")]
-    [SerializeField] float _typingSpeed = 0.04f; // Speed the letters of a text are displayed on screen - lower = faster
+    [Tooltip("Speed at which the letters are displayed on screen. Lower = Faster")]
+    [SerializeField] public float _typingSpeed = 0.04f;
+    [Tooltip("JSON file containing global variables for Ink")]
     [SerializeField] TextAsset _loadGlobalsJSON;
 
     [Header("UI References")]
@@ -18,226 +37,234 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
     [SerializeField] TextMeshProUGUI _dialogueText;
     [SerializeField] TextMeshProUGUI _displayNameText;
     [SerializeField] Animator _portraitAnimator;
-    Animator _layoutAnimator;
     [SerializeField] Button[] _choiceButtons;
     [SerializeField] Image _skipCircleImage; // UI to show skipping progress
 
-    [Header("Audio")]
-    [SerializeField] DialogueAudioInfoSO _defaultAudioInfo;
-    [SerializeField] DialogueAudioInfoSO[] _audioInfos;
-    [SerializeField] bool _makeSoundPredictable; // At the moment only for the same OS
+    [Header("Voice Over")]
+    [SerializeField] VoiceOverEntry[] _voiceOverEntries;
+    Dictionary<string, AudioClip> _voiceOverDict;
 
-    // Internal fields
+    [Header("Emoji")]
+    [SerializeField] EmojiEntry[] _emojiEntries;
+    Dictionary<string, Sprite> _emojiDict;
+    QuickChatController _quickChatController;
+
+    #endregion -------------------- Inspector Fields --------------------
+
+    #region -------------------- Internal Fields --------------------
+
     TextMeshProUGUI[] _choicesText;
-    AudioSource _audioSource;
+    AudioSource _voiceAudioSource;
     Story _currentStoryFile;
     DialogueVariables _dialogueVariables;
-    InputManager _inputManager;
-    Dictionary<string, DialogueAudioInfoSO> _audioInfoDictionary;
-    DialogueAudioInfoSO _currentNPCAudioInfo;
-
-    bool _canContinueToNextLine = false;
-    public bool DialogueIsPlaying { get; private set; } = false;
-
     Coroutine _displayLineCoroutine;
+    Animator _layoutAnimator;
+    InputManager _inputManager;
 
-    // Skipping feature
+    // Typing & Skip
+    bool _canContinueToNextLine = false;
+    bool _continuePressedDuringTyping = false;
+    bool _isHoldingContinue = false;
     float _holdContinueTime = 0f;
     const float SKIP_THRESHOLD = 5f;
-    bool _isHoldingContinue = false;
 
-    // Flag to indicate if continue was pressed during typing
-    bool _continuePressedDuringTyping = false;
+    // Dialogue State
+    public bool DialogueIsPlaying { get; private set; }
 
     // Tag keys
     const string SPEAKER_TAG = "speaker";
     const string PORTRAIT_TAG = "portrait";
     const string LAYOUT_TAG = "layout";
-    const string AUDIO_TAG = "audio";
+    const string VOICE_TAG = "voice";
+    const string EMOJI_TAG = "emoji";
 
+    #endregion -------------------- Internal Fields --------------------
 
+    #region -------------------- Unity Lifecycle --------------------
     void Awake() {
-        _audioSource = gameObject.AddComponent<AudioSource>();
-        _currentNPCAudioInfo = _defaultAudioInfo;
+        DialogueIsPlaying = false;
+        _dialoguePanel.SetActive(false);
+        _layoutAnimator = _dialoguePanel.GetComponent<Animator>(); 
+        _voiceAudioSource = gameObject.AddComponent<AudioSource>();
+        _skipCircleImage.fillAmount = 0f;
+        _skipCircleImage.gameObject.SetActive(false);
     }
 
     void Start() {
-        DialogueIsPlaying = false;
-        _dialoguePanel.SetActive(false);
+        _inputManager = GameManager.Instance.InputManager;
+        _quickChatController = PlayerController.LocalInstance.QuickChatController;
 
-        _layoutAnimator = _dialoguePanel.GetComponent<Animator>();
-
-        // Cache choices text
+        // Cache choice button texts for quick updates.
         _choicesText = new TextMeshProUGUI[_choiceButtons.Length];
-
         for (int i = 0; i < _choiceButtons.Length; i++) {
             _choicesText[i] = _choiceButtons[i].GetComponentInChildren<TextMeshProUGUI>();
         }
 
-        _inputManager = GameManager.Instance.InputManager;
-        // Input events from new input system
+        // Subscribe to input events.
         _inputManager.Dialogue_OnContinueAction += OnContinuePressed;
         _inputManager.Dialogue_OnContinueStarted += OnContinueStarted;
         _inputManager.Dialogue_OnContinueCanceled += OnContinueEnded;
         _inputManager.Dialogue_OnResponseDown += OnResponseDown;
         _inputManager.Dialogue_OnResponseUp += OnResponseUp;
 
-        InitializeAudioInfoDictionary();
+        // Initialize voice over dictionary.
+        _voiceOverDict = new Dictionary<string, AudioClip>();
+        foreach (var entry in _voiceOverEntries) {
+            if (!_voiceOverDict.ContainsKey(entry.id)) {
+                _voiceOverDict[entry.id] = entry.clip;
+            } else {
+                Debug.LogWarning($"Duplicate voice over id: {entry.id}");
+            }
+        }
 
-        // Initialize skip circle
-        if (_skipCircleImage != null) {
-            _skipCircleImage.fillAmount = 0f;
-            _skipCircleImage.gameObject.SetActive(false);
+        // Initialize emoji dictionary.
+        _emojiDict = new Dictionary<string, Sprite>();
+        foreach (var entry in _emojiEntries) {
+            if (!_emojiDict.ContainsKey(entry.id)) {
+                _emojiDict[entry.id] = entry.sprite;
+            } else {
+                Debug.LogWarning($"Duplicate emoji id: {entry.id}");
+            }
+        }
+
+        if (_quickChatController != null) {
+            _quickChatController.ClearEmoji();
         }
     }
 
-    // Sets up the audio dictionary for quick lookups
-    void InitializeAudioInfoDictionary() {
-        _audioInfoDictionary = new Dictionary<string, DialogueAudioInfoSO>
-        {
-            { _defaultAudioInfo.id, _defaultAudioInfo }
-        };
-        foreach (var audioInfo in _audioInfos) {
-            _audioInfoDictionary.Add(audioInfo.id, audioInfo);
-        }
-    }
-
-    // Changes current audio based on speaker tag
-    void SetCurrentAudioInfo(string id) {
-        if (_audioInfoDictionary.TryGetValue(id, out var audioInfo)) {
-            _currentNPCAudioInfo = audioInfo;
-        } else {
-            Debug.LogWarning("Audio info not found for ID: " + id);
-        }
-    }
-
-    // Called from outside to start a dialogue
-    public void EnterDialogueMode(TextAsset inkJSON) {
-        _currentStoryFile = new Story(inkJSON.text);
-        DialogueIsPlaying = true;
-        _dialoguePanel.SetActive(true);
-        _inputManager.EnableDialogueActionMap();
-
-        // Start listening to variables
-        _dialogueVariables.StartListening(_currentStoryFile);
-
-        // Reset UI states
-        _displayNameText.text = "???";
-        _portraitAnimator.Play("default");
-        _layoutAnimator.Play("right");
-
-        // Start story
-        ContinueStory();
-    }
-
-    // Gracefully end dialogue
-    IEnumerator ExitDialogueMode() {
-        yield return new WaitForSeconds(0.2f);
-
-        _inputManager.EnablePlayerActionMap();
-        _dialogueVariables.StopListening(_currentStoryFile);
-        DialogueIsPlaying = false;
-        _dialoguePanel.SetActive(false);
-        _dialogueText.text = string.Empty;
-        SetCurrentAudioInfo(_defaultAudioInfo.id);
-    }
-
-    // Called when the player tries to continue the story
-    private void OnContinuePressed() {
-        if (!DialogueIsPlaying) {
-            return;
-        }
-
-        if (_displayLineCoroutine != null && !_canContinueToNextLine) {
-            // If typing is in progress, set flag to display full line
-            _continuePressedDuringTyping = true;
-            return;
-        }
-
-        if (!_canContinueToNextLine || _currentStoryFile.currentChoices.Count != 0) {
-            return;
-        }
-
-        ContinueStory();
-    }
-
-    // Called when the player holds the continue action
-    void OnContinueStarted() {
-        if (!DialogueIsPlaying) return;
-        _isHoldingContinue = true;
-        _holdContinueTime = 0f;
-        if (_skipCircleImage != null) {
-            _skipCircleImage.gameObject.SetActive(true);
-            _skipCircleImage.fillAmount = 0f;
-        }
-    }
-
-    // Called when the player releases the continue action
-    void OnContinueEnded() {
-        _isHoldingContinue = false;
-        if (_skipCircleImage != null) {
-            _skipCircleImage.fillAmount = 0f;
-            _skipCircleImage.gameObject.SetActive(false);
+    private void OnDestroy() {
+        if (_inputManager != null) {
+            _inputManager.Dialogue_OnContinueAction -= OnContinuePressed;
+            _inputManager.Dialogue_OnContinueStarted -= OnContinueStarted;
+            _inputManager.Dialogue_OnContinueCanceled -= OnContinueEnded;
+            _inputManager.Dialogue_OnResponseDown -= OnResponseDown;
+            _inputManager.Dialogue_OnResponseUp -= OnResponseUp;
         }
     }
 
     void Update() {
         if (_isHoldingContinue && DialogueIsPlaying && _currentStoryFile != null) {
             _holdContinueTime += Time.deltaTime;
-            if (_skipCircleImage != null) {
-                _skipCircleImage.fillAmount = Mathf.Clamp01(_holdContinueTime / SKIP_THRESHOLD);
-            }
-
+            _skipCircleImage.fillAmount = Mathf.Clamp01(_holdContinueTime / SKIP_THRESHOLD);
             if (_holdContinueTime >= SKIP_THRESHOLD) {
-                // Skip entire conversation
                 _isHoldingContinue = false;
-                if (_skipCircleImage != null) {
-                    _skipCircleImage.fillAmount = 0f;
-                    _skipCircleImage.gameObject.SetActive(false);
-                }
-
-                // End dialogue immediately
+                _skipCircleImage.fillAmount = 0f;
+                _skipCircleImage.gameObject.SetActive(false);
                 StartCoroutine(ExitDialogueMode());
             }
         }
     }
 
+    #endregion -------------------- Unity Lifecycle --------------------
+
+    #region -------------------- Dialogue Control --------------------
+
+
+    public void StartTextBubble(string text, GameObject target) {
+        StartCoroutine(target.GetComponent<QuickChatController>().SetChatBubble(_typingSpeed, text));
+    }
+
+    public void EnterDialogueMode(TextAsset inkJSON) {
+        _currentStoryFile = new Story(inkJSON.text);
+        DialogueIsPlaying = true;
+        _dialoguePanel.SetActive(true);
+        _inputManager.EnableDialogueActionMap();
+
+        _dialogueVariables.StartListening(_currentStoryFile);
+
+        // Reset UI state.
+        _displayNameText.text = "???";
+        _portraitAnimator.Play("default");
+        _layoutAnimator.Play("right");
+
+        ContinueStory();
+    }
+
+    IEnumerator ExitDialogueMode() {
+        yield return new WaitForSeconds(0.2f);
+        _inputManager.EnablePlayerActionMap();
+        _dialogueVariables.StopListening(_currentStoryFile);
+        DialogueIsPlaying = false;
+        _dialoguePanel.SetActive(false);
+        _dialogueText.text = string.Empty;
+        DialogueComplete?.Invoke();
+    }
+
+    void ContinueStory() {
+        StopVoiceOver();
+        if (!_currentStoryFile.canContinue) {
+            StartCoroutine(ExitDialogueMode());
+            return;
+        }
+
+        if (_displayLineCoroutine != null) {
+            StopCoroutine(_displayLineCoroutine);
+        }
+
+        string nextLine = _currentStoryFile.Continue();
+        HandleTags(_currentStoryFile.currentTags);
+        _displayLineCoroutine = StartCoroutine(DisplayLine(nextLine));
+    }
+
+    #endregion -------------------- Dialogue Control --------------------
+
+    #region -------------------- Input Handling --------------------
+
+    private void OnContinuePressed() {
+        if (!DialogueIsPlaying) return;
+        if (_displayLineCoroutine != null && !_canContinueToNextLine) {
+            _continuePressedDuringTyping = true;
+            return;
+        }
+        if (!_canContinueToNextLine || _currentStoryFile.currentChoices.Count != 0) return;
+        ContinueStory();
+    }
+
+    void OnContinueStarted() {
+        if (!DialogueIsPlaying) return;
+        _isHoldingContinue = true;
+        _holdContinueTime = 0f;
+        _skipCircleImage.gameObject.SetActive(true);
+        _skipCircleImage.fillAmount = 0f;
+    }
+
+    void OnContinueEnded() {
+        _isHoldingContinue = false;
+        _skipCircleImage.fillAmount = 0f;
+        _skipCircleImage.gameObject.SetActive(false);
+    }
+
     private void OnResponseDown() {
-        // Example TODO: Navigating choices down (custom logic can be implemented)
+        // TODO Placeholder for choice navigation (e.g. arrow key down).
     }
 
     private void OnResponseUp() {
-        // Example TODO: Navigating choices up (custom logic can be implemented)
+        // TODO Placeholder for choice navigation (e.g. arrow key up).
     }
 
-    // Displays text with typing effect
+    #endregion -------------------- Input Handling --------------------
+
+    #region -------------------- Text Display --------------------
+
     IEnumerator DisplayLine(string line) {
-        // Set the text to the full line, but set the visible letters to 0
         _dialogueText.text = line;
         _dialogueText.maxVisibleCharacters = 0;
         _continueIcon.gameObject.SetActive(false);
         HideChoices();
+        if (_quickChatController != null) _quickChatController.ClearEmoji();
 
         _canContinueToNextLine = false;
         _continuePressedDuringTyping = false;
-
         bool isAddingRichTextTag = false;
 
-        // Display each letter one at a time
         foreach (char letter in line.ToCharArray()) {
             if (_continuePressedDuringTyping) {
                 _dialogueText.maxVisibleCharacters = line.Length;
                 break;
             }
-
-            // Check for rich text tag, if found, add it without waiting
             if (letter == '<' || isAddingRichTextTag) {
-                isAddingRichTextTag = true;
-                if (letter == '>') {
-                    isAddingRichTextTag = false;
-                }
+                isAddingRichTextTag = letter != '>';
             } else {
-                //PlayDialogueSound(dialogueText.maxVisibleCharacters, dialogueText.text[dialogueText.maxVisibleCharacters]);
                 _dialogueText.maxVisibleCharacters++;
                 yield return new WaitForSeconds(_typingSpeed);
             }
@@ -248,45 +275,10 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
         _canContinueToNextLine = true;
     }
 
-    // Plays dialogue typing sound
-    void PlayDialogueSound(int currentDisplayedCharacterCount, char currentCharacter) {
-        var soundClips = _currentNPCAudioInfo.dialogueTypingSoundClips;
-        int frequencyLevel = _currentNPCAudioInfo.frequencyLevel;
-        float minPitch = _currentNPCAudioInfo.minPitch;
-        float maxPitch = _currentNPCAudioInfo.maxPitch;
-        bool stopAudioSource = _currentNPCAudioInfo.stopAudioSource;
+    #endregion -------------------- Text Display --------------------
 
-        // Plays the sound on every 2 characters, change modulo to change sound to another rythm
-        if (currentDisplayedCharacterCount % frequencyLevel == 0) {
-            if (stopAudioSource) {
-                _audioSource.Stop();
-            }
+    #region -------------------- Tag Handling --------------------
 
-            AudioClip soundClip;
-
-            if (_makeSoundPredictable) {
-                int hashCode = currentCharacter.GetHashCode();
-                int index = Mathf.Abs(hashCode) % soundClips.Length;
-                soundClip = soundClips[index];
-
-                // Pitch
-                int minPitchInt = (int)(minPitch * 100);
-                int maxPitchInt = (int)(maxPitch * 100);
-                int pitchRange = maxPitchInt - minPitchInt;
-                _audioSource.pitch = pitchRange != 0
-                    ? ((hashCode % pitchRange) + minPitchInt) / 100f
-                    : minPitch;
-            } else {
-                int randomIndex = UnityEngine.Random.Range(0, soundClips.Length);
-                soundClip = soundClips[randomIndex];
-                _audioSource.pitch = UnityEngine.Random.Range(maxPitch, maxPitch);
-            }
-
-            _audioSource.PlayOneShot(soundClip);
-        }
-    }
-
-    // This function gets the tag of the story and displays it on screen
     void HandleTags(List<string> currentTags) {
         foreach (string tag in currentTags) {
             string[] splitTag = tag.Split(':');
@@ -294,8 +286,7 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
                 Debug.LogError("Could not parse tag: " + tag);
                 continue;
             }
-
-            string key = splitTag[0].Trim();
+            string key = splitTag[0].Trim().ToLower();
             string value = splitTag[1].Trim();
 
             switch (key) {
@@ -308,8 +299,11 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
                 case LAYOUT_TAG:
                     _layoutAnimator.Play(value);
                     break;
-                case AUDIO_TAG:
-                    SetCurrentAudioInfo(value);
+                case VOICE_TAG:
+                    PlayVoiceOver(value);
+                    break;
+                case EMOJI_TAG:
+                    SetEmoji(value);
                     break;
                 default:
                     Debug.LogWarning("Unhandled tag: " + tag);
@@ -318,11 +312,51 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
         }
     }
 
-    // Displays current Ink choices
+    // Plays the voice over clip corresponding to the given id.
+    void PlayVoiceOver(string id) {
+        if (_voiceOverDict != null && _voiceOverDict.TryGetValue(id, out AudioClip clip)) {
+            _voiceAudioSource.clip = clip;
+            _voiceAudioSource.Play();
+        } else {
+            Debug.LogWarning("Voice over clip not found for id: " + id);
+        }
+    }
+
+    // Stops any currently playing voice over.
+    void StopVoiceOver() {
+        if (_voiceAudioSource != null && _voiceAudioSource.isPlaying) {
+            _voiceAudioSource.Stop();
+        }
+    }
+
+    // Sets the emoji image using the given id.
+    void SetEmoji(string id) {
+        if (_emojiDict != null && _emojiDict.TryGetValue(id, out Sprite emojiSprite)) {
+            _quickChatController.SetEmoji(emojiSprite);
+        } else {
+            Debug.LogWarning("Emoji not found for id: " + id);
+            _quickChatController.ClearEmoji();
+        }
+    }
+
+    public void SetEmoji(GameObject character, string id) {
+        if (character == null || !character.TryGetComponent<QuickChatController>(out var quickChatController)) return;
+        if (_emojiDict != null && _emojiDict.TryGetValue(id, out Sprite emojiSprite)) {
+            quickChatController.SetEmoji(emojiSprite);
+        } else {
+            Debug.LogWarning("Emoji not found for id: " + id);
+            quickChatController.ClearEmoji();
+        }
+    }
+
+    #endregion -------------------- Tag Handling --------------------
+
+    #region -------------------- Choice Handling --------------------
+
     void DisplayChoices() {
         if (_currentStoryFile == null) return;
-        List<Choice> currentChoices = _currentStoryFile.currentChoices;
 
+        List<Choice> currentChoices = _currentStoryFile.currentChoices;
         if (currentChoices.Count > _choiceButtons.Length) {
             Debug.LogError("More choices than UI supports: " + currentChoices.Count);
             return;
@@ -340,14 +374,12 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
         StartCoroutine(SelectFirstChoice());
     }
 
-    // Hides all choices
     void HideChoices() {
-        foreach (var choiceButton in _choiceButtons) {
-            choiceButton.gameObject.SetActive(false);
+        foreach (var btn in _choiceButtons) {
+            btn.gameObject.SetActive(false);
         }
     }
 
-    // Auto-selects the first choice button for navigation
     IEnumerator SelectFirstChoice() {
         EventSystem.current.SetSelectedGameObject(null);
         yield return new WaitForEndOfFrame();
@@ -356,7 +388,6 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
         }
     }
 
-    // Player makes a choice
     public void MakeChoice(int choiceIndex) {
         if (_canContinueToNextLine && _currentStoryFile.currentChoices.Count > choiceIndex) {
             _currentStoryFile.ChooseChoiceIndex(choiceIndex);
@@ -364,45 +395,27 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
         }
     }
 
-    // Called to continue the story
-    void ContinueStory() {
-        Debug.Log("Continue story");
-        if (!_currentStoryFile.canContinue) {
-            StartCoroutine(ExitDialogueMode());
-            return;
-        }
+    #endregion -------------------- Choice Handling --------------------
 
-        if (_displayLineCoroutine != null) {
-            StopCoroutine(_displayLineCoroutine);
-        }
-
-        string nextLine = _currentStoryFile.Continue();
-        HandleTags(_currentStoryFile.currentTags);
-
-        _displayLineCoroutine = StartCoroutine(DisplayLine(nextLine));
-    }
-
-    // Get a global variable from Ink
     public Ink.Runtime.Object GetVariableState(string variableName) {
-        _dialogueVariables.variables.TryGetValue(variableName, out var variableValue);
+        _dialogueVariables.Variables.TryGetValue(variableName, out var variableValue);
         if (variableValue == null) {
             Debug.LogWarning("Ink variable null: " + variableName);
         }
         return variableValue;
     }
 
+    #region -------------------- Data Persistance --------------------
 
-    #region Save & Load
     public void LoadData(GameData data) {
-        if (string.IsNullOrEmpty(data.inkVariables)) {
-            _dialogueVariables = new DialogueVariables(_loadGlobalsJSON);
-        } else {
-            _dialogueVariables = new DialogueVariables(_loadGlobalsJSON, data.inkVariables);
-        }
+        _dialogueVariables = string.IsNullOrEmpty(data.inkVariables)
+            ? new DialogueVariables(_loadGlobalsJSON)
+            : new DialogueVariables(_loadGlobalsJSON, data.inkVariables);
     }
 
     public void SaveData(GameData data) {
         _dialogueVariables.SaveData(data);
     }
-    #endregion
+
+    #endregion -------------------- Data Persistance --------------------
 }

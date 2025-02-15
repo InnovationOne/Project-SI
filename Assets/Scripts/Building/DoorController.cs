@@ -1,10 +1,6 @@
 using UnityEngine;
 
-/// <summary>
-/// Controls the exit door. In deluxe version: time and weather-controlled.
-/// In large versions: time-controlled.
-/// </summary>
-public class DoorController : MonoBehaviour {
+public class DoorController : MonoBehaviour, IInteractable {
     [SerializeField] private bool _isWeatherControlled = false;
     [SerializeField] private bool _isTimeControlled = false;
     [SerializeField] private Collider2D _doorCollider;
@@ -16,18 +12,28 @@ public class DoorController : MonoBehaviour {
     private TimeManager _timeManager;
     private WeatherManager _weatherManager;
 
+    public float MaxDistanceToPlayer => throw new System.NotImplementedException();
+
     private void Start() {
         _timeManager = GameManager.Instance.TimeManager;
         _weatherManager = GameManager.Instance.WeatherManager;
     }
 
-    public void OpenDoor() {
+    public void Interact(PlayerController player) {
+        if (_isOpen) {
+            Close();
+        } else {
+            Open();
+        }
+    }
+
+    public void Open() {
         _isOpen = true;
         if (_doorCollider != null) _doorCollider.enabled = false;
         Debug.Log("Door opened");
     }
 
-    public void CloseDoor() {
+    public void Close() {
         _isOpen = false;
         if (_doorCollider != null) _doorCollider.enabled = true;
         Debug.Log("Door closed");
@@ -39,18 +45,21 @@ public class DoorController : MonoBehaviour {
             if (hour >= OPEN_HOUR && hour <= CLOSE_HOUR  && !_isOpen) {
                 if (_isWeatherControlled) {
                     if (!_weatherManager.RainThunderSnow()) {
-                        OpenDoor();
+                        Open();
                     } else {
-                        CloseDoor();
+                        Close();
                     }
                 } else {
-                    OpenDoor();
+                    Open();
                 }
             }
 
             if (hour >= CLOSE_HOUR && _isOpen) {
-                CloseDoor();
+                Close();
             }
         }
     }
+
+    public void PickUpItemsInPlacedObject(PlayerController player) { }
+    public void InitializePreLoad(int itemId) { }
 }
