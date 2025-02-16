@@ -86,13 +86,12 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
         _dialoguePanel.SetActive(false);
         _layoutAnimator = _dialoguePanel.GetComponent<Animator>(); 
         _voiceAudioSource = gameObject.AddComponent<AudioSource>();
-        _skipCircleImage.fillAmount = 0f;
-        _skipCircleImage.gameObject.SetActive(false);
+        //_skipCircleImage.fillAmount = 0f;
+        //_skipCircleImage.gameObject.SetActive(false);
     }
 
     void Start() {
         _inputManager = GameManager.Instance.InputManager;
-        _quickChatController = PlayerController.LocalInstance.QuickChatController;
 
         // Cache choice button texts for quick updates.
         _choicesText = new TextMeshProUGUI[_choiceButtons.Length];
@@ -125,10 +124,6 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
             } else {
                 Debug.LogWarning($"Duplicate emoji id: {entry.id}");
             }
-        }
-
-        if (_quickChatController != null) {
-            _quickChatController.ClearEmoji();
         }
     }
 
@@ -251,7 +246,9 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
         _dialogueText.maxVisibleCharacters = 0;
         _continueIcon.gameObject.SetActive(false);
         HideChoices();
-        if (_quickChatController != null) _quickChatController.ClearEmoji();
+
+        if (_quickChatController == null) _quickChatController = PlayerController.LocalInstance.QuickChatController;
+        _quickChatController.ClearEmoji();
 
         _canContinueToNextLine = false;
         _continuePressedDuringTyping = false;
@@ -331,7 +328,9 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
 
     // Sets the emoji image using the given id.
     void SetEmoji(string id) {
-        if (_emojiDict != null && _emojiDict.TryGetValue(id, out Sprite emojiSprite)) {
+        if (_quickChatController == null) _quickChatController = PlayerController.LocalInstance.QuickChatController;
+
+        if (_emojiDict.TryGetValue(id, out Sprite emojiSprite)) {
             _quickChatController.SetEmoji(emojiSprite);
         } else {
             Debug.LogWarning("Emoji not found for id: " + id);

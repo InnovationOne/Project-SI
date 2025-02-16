@@ -20,7 +20,7 @@ public class PlayerInteractController : NetworkBehaviour {
         _inputManager.OnInteractAction += HandleInteractAction;
     }
 
-    new void OnDestroy() {
+    void OnDestroy() {
         _inputManager.OnInteractAction -= HandleInteractAction;
         base.OnDestroy();
     }
@@ -37,7 +37,7 @@ public class PlayerInteractController : NetworkBehaviour {
     }
 
     // Server finds the closest interactable and triggers interaction.
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     void RequestInteractServerRpc(ServerRpcParams serverRpcParams = default) {
         FindClosestInteractable();
         if (_currentInteractable != null) {
@@ -88,6 +88,11 @@ public class PlayerInteractController : NetworkBehaviour {
         }
 
         _currentInteractable = (Component)closest;
+    }
+
+    public void ReInteract() {
+        _currentInteractable.GetComponent<IInteractable>()?.Interact(_player);
+        _currentInteractable = null;
     }
 }
 

@@ -30,7 +30,6 @@ public class HostDisconnectPanel : MonoBehaviour
     }
 
     private void NetworkManager_OnClientDisconnectCallback(ulong clientId) {
-        Debug.Log("Client Disconnected");
         if (clientId == NetworkManager.ServerClientId) {
             // Server is shutting down
             Show();

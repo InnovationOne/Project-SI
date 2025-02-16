@@ -7,7 +7,7 @@ public class ClothingSO : ItemSO {
     }
 
     public enum ClothingType {
-        Belt, Feet, Hands, Helmet, Legs, Torso
+        Belt, Feet, Hands, Helmet, Legs, Torso, Dress,
     }
 
     [Header("General")]

@@ -39,4 +39,9 @@ public class FMODEvents : MonoBehaviour {
     [field: SerializeField] public EventReference Pull_Weapon { get; private set; }
     [field: SerializeField] public EventReference Shoot_Arrow { get; private set; }
     [field: SerializeField] public EventReference Whip_Weapon { get; private set; }
+
+    // UI
+    [field: SerializeField] public EventReference ItemPickup { get; private set; }
+    [field: SerializeField] public EventReference ItemDrop { get; private set; }
+    [field: SerializeField] public EventReference ItemShift { get; private set; }
 }

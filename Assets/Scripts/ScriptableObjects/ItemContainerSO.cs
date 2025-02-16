@@ -5,11 +5,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 
-/// <summary>
-/// Represents a container holding multiple ItemSlots (e.g., player inventory).
-/// Supports adding, removing, sorting, and saving/loading items.
-/// Optimized for clarity and mod-friendly extension.
-/// </summary>
 [CreateAssetMenu(menuName = "Container/Item Container SO")]
 public class ItemContainerSO : ScriptableObject {
 #if UNITY_EDITOR
@@ -37,9 +32,6 @@ public class ItemContainerSO : ScriptableObject {
     // Provides a read-only view of the current item slots.
     public IReadOnlyList<ItemSlot> ItemSlots => _itemSlots.AsReadOnly();
 
-    /// <summary>
-    /// Sets up the container with a specified number of empty slots.
-    /// </summary>
     public void Initialize(int slotsAmount) {
         _itemSlots = new List<ItemSlot>(slotsAmount);
         for (int i = 0; i < slotsAmount; i++) {
@@ -48,10 +40,6 @@ public class ItemContainerSO : ScriptableObject {
     }
 
     #region Add Item
-    /// <summary>
-    /// Attempts to add the given item to the container.
-    /// If the item is stackable, it tries to stack it onto existing slots first, then into empty slots.
-    /// </summary>
     public int AddItem(ItemSlot itemSlot, bool skipToolbelt) {
         if (itemSlot == null || itemSlot.IsEmpty) {
             Debug.LogError("Invalid itemSlot in AddItem.");
@@ -108,10 +96,6 @@ public class ItemContainerSO : ScriptableObject {
 
 
     #region Check To Add Item
-    /// <summary>
-    /// Checks if the given item can be fully added to the container.
-    /// Returns true if all items fit, false otherwise.
-    /// </summary>
     public bool CanAddItem(ItemSlot itemSlot, bool skipToolbelt = false) {
         if (itemSlot.IsEmpty) {
             Debug.LogError("Invalid itemId or amount.");
@@ -165,10 +149,7 @@ public class ItemContainerSO : ScriptableObject {
 
 
     #region Remove Item
-    /// <summary>
-    /// Removes a specified amount of a particular item from the container if available.
-    /// Returns true if successfully removed, false otherwise.
-    /// </summary>
+
     public bool RemoveItem(ItemSlot itemSlot) {
         if (itemSlot.IsEmpty) {
             Debug.LogWarning("Attempted to remove an empty item slot.");
@@ -188,10 +169,6 @@ public class ItemContainerSO : ScriptableObject {
         return true;
     }
 
-    /// <summary>
-    /// Combines the items in the container by type and rarity.
-    /// </summary>
-    /// <returns>A new list of item slots with combined items.</returns>
     public List<ItemSlot> CombineItemsByTypeAndRarity() {
         return _itemSlots
             .Where(slot => !slot.IsEmpty)
@@ -200,10 +177,6 @@ public class ItemContainerSO : ScriptableObject {
             .ToList();
     }
 
-    /// <summary>
-    /// Removes a specified amount of items from the inventory.
-    /// </summary>
-    /// <param name="itemSlot">The item slot containing item data to remove.</param>
     private void RemoveItemAmount(ItemSlot itemSlot) {
         var filteredItemSlots = _itemSlots
             .Where(x => !itemSlot.IsEmpty &&
@@ -229,9 +202,6 @@ public class ItemContainerSO : ScriptableObject {
 
 
     #region Sorting and Shifting
-    /// <summary>
-    /// Sorts the items in the container based on item type and rarity.
-    /// </summary>
     public void SortItems() {
         int toolbeltSize = PlayerController.LocalInstance.PlayerToolbeltController.ToolbeltSizes[^1];
 
@@ -259,10 +229,6 @@ public class ItemContainerSO : ScriptableObject {
         UpdateUI();
     }
 
-    /// <summary>
-    /// Shifts the slots in the container by the specified amount.
-    /// </summary>
-    /// <param name="shiftAmount">The amount by which to shift the slots. Positive values shift right; negative shift left.</param>
     public void ShiftSlots(int shiftAmount) {
         int slotsCount = _itemSlots.Count;
         if (slotsCount == 0) {
@@ -288,9 +254,6 @@ public class ItemContainerSO : ScriptableObject {
         UpdateUI();
     }
 
-    /// <summary>
-    /// Clears the item container by clearing all the slots except for the toolbelt slots.
-    /// </summary>
     public void ClearItemContainer() {
         int toolbeltSize = PlayerController.LocalInstance.PlayerToolbeltController.ToolbeltSizes[^1];
         foreach (var slot in _itemSlots.Skip(toolbeltSize)) {
@@ -298,10 +261,6 @@ public class ItemContainerSO : ScriptableObject {
         }
     }
 
-    /// <summary>
-    /// Clears the item slot at the specified index.
-    /// </summary>
-    /// <param name="id">The index of the item slot to clear.</param>
     public void ClearItemSlot(int id) {
         if (id < 0 || id >= _itemSlots.Count) {
             Debug.LogWarning($"Invalid slot ID: {id}. Cannot clear.");
@@ -335,11 +294,6 @@ public class ItemContainerSO : ScriptableObject {
     #endregion
 
     #region Helper Methods
-    /// <summary>
-    /// Retrieves the relevant item slots from the container, skipping the toolbelt if specified.
-    /// </summary>
-    /// <param name="skipToolbelt">Determines whether to skip the toolbelt slots.</param>
-    /// <returns>An enumerable collection of relevant item slots.</returns>
     private IEnumerable<ItemSlot> GetRelevantSlots(bool skipToolbelt) {
         if (skipToolbelt) {
             int toolbeltSize = PlayerController.LocalInstance.PlayerToolbeltController.ToolbeltSizes[^1];
@@ -348,9 +302,6 @@ public class ItemContainerSO : ScriptableObject {
         return _itemSlots;
     }
 
-    /// <summary>
-    /// Updates the UI and invokes the OnItemsUpdated event.
-    /// </summary>
     public void UpdateUI() => OnItemsUpdated?.Invoke();
     #endregion
 }

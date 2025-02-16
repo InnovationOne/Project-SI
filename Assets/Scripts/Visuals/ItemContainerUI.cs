@@ -10,10 +10,16 @@ public abstract class ItemContainerUI : MonoBehaviour {
     [SerializeField] protected Sprite[] RaritySprites;
 
     [Header("Right click menu")]
+    [SerializeField] bool _hasRightClickMenu;
+    [ConditionalHide("_hasRightClickMenu", true)]
     [SerializeField] RectTransform _rightClickMenu;
+    [ConditionalHide("_hasRightClickMenu", true)]
     [SerializeField] Slider _splitAmountSlider;
+    [ConditionalHide("_hasRightClickMenu", true)]
     [SerializeField] TextMeshProUGUI _splitAmountSliderText;
+    [ConditionalHide("_hasRightClickMenu", true)]
     [SerializeField] Button _splitButton;
+    [ConditionalHide("_hasRightClickMenu", true)]
     [SerializeField] Button _wikiButton;
 
     int _buttonIndex = -1;
@@ -21,9 +27,14 @@ public abstract class ItemContainerUI : MonoBehaviour {
 
 
     [Header("Item info")]
+    [SerializeField] bool _hasItemInfo;
+    [ConditionalHide("_hasItemInfo", true)]
     [SerializeField] RectTransform _itemInfo;
+    [ConditionalHide("_hasItemInfo", true)]
     [SerializeField] RectTransform _itemNameHeader;
+    [ConditionalHide("_hasItemInfo", true)]
     [SerializeField] TextMeshProUGUI _itemNameText;
+    [ConditionalHide("_hasItemInfo", true)]
     [SerializeField] TextMeshProUGUI _itemInfoText;
 
     const int QUEST_BODY_HIGHT_CORRECTURE = 6;
@@ -34,7 +45,9 @@ public abstract class ItemContainerUI : MonoBehaviour {
     bool _showInfo = false;
     float _currentTime = 0f;
 
-    // Initializes UI listeners and hides menus by default.
+    #region -------------------- Unity Lifecycle --------------------
+
+    // Initializes UI listeners and hides menus.
     public void ItemContainerUIAwake() {
         if (_splitButton != null) _splitButton.onClick.AddListener(() => SplitItem());
         if (_wikiButton != null) _wikiButton.onClick.AddListener(() => ShowItemInWiki());
@@ -43,43 +56,35 @@ public abstract class ItemContainerUI : MonoBehaviour {
 
     }
 
-    // Subscribes to the OnItemsUpdated event to refresh UI.
     void Start() {
         ItemContainer.OnItemsUpdated += ShowUIButtonContains;
         Init();
     }
 
     void Update() {
-        // Handle delayed display of item info
-        if (_showInfo) {
-            ShowItemInfo();
-        }
-
-        // Handle right-click menu and splitting updates
+        if (_showInfo) ShowItemInfo();
         if (_showRightClickMenu) {
             _splitAmountSliderText.text = _splitAmountSlider.value.ToString();
-            if (_showInfo) {
-                HideItemInfo();
-            }
+            if (_showInfo) HideItemInfo();
         }
 
-        // Hides info panels while dragging items.
         if (DragItemUI.Instance.gameObject.activeSelf) {
             HideItemInfo();
             HideRightClickMenu();
         }
     }
 
-    // Sets up slot indices and shows initial item data.
+    #endregion -------------------- Unity Lifecycle --------------------
+
+    // Initializes button indices and refreshes display.
     public void Init() {
         for (int i = 0; i < ItemContainer.ItemSlots.Count && i < ItemButtons.Length; i++) {
             ItemButtons[i].SetButtonIndex(i);
         }
-
         ShowUIButtonContains();
     }
 
-    // Updates the UI buttons to match the item slots in the container.
+    // Updates each button to match the corresponding item slot.
     public void ShowUIButtonContains() {
         for (int i = 0; i < ItemContainer.ItemSlots.Count && i < ItemButtons.Length; i++) {
             if (ItemContainer.ItemSlots[i].ItemId == -1) {
@@ -91,105 +96,88 @@ public abstract class ItemContainerUI : MonoBehaviour {
     }
 
     #region -------------------- Right Click Menu --------------------
-    // Displays the right-click menu for item splitting, wiki info, etc.
+
+    // Displays the right-click menu if valid, else hides it.
     public void ShowRightClickMenu(int buttonIndex, Vector3 position) {
         if (_rightClickMenu == null || ItemContainer.ItemSlots[buttonIndex].IsEmpty) return;
-
-        // Toggles the menu if already open on the same button.
         if (_rightClickMenu.gameObject.activeSelf && buttonIndex == _buttonIndex) {
             HideRightClickMenu();
             _showRightClickMenu = false;
             return;
         }
 
-        // Adjust position based on screen scaling
         int scalerWidth = Screen.width / 640;
         int scalerHeight = Screen.height / 360;
-
         _rightClickMenu.position = position + new Vector3(scalerWidth * 13, scalerHeight * 13);
-
         _showRightClickMenu = true;
         _splitAmountSlider.maxValue = ItemContainer.ItemSlots[buttonIndex].Amount;
         _splitAmountSlider.value = ItemContainer.ItemSlots[buttonIndex].Amount / 2;
         _rightClickMenu.gameObject.SetActive(true);
-
         _buttonIndex = buttonIndex;
     }
 
-    // Hides the right-click context menu.
+    // Hides the right-click menu.
     public void HideRightClickMenu() {
         if (_rightClickMenu == null) return;
         _rightClickMenu.gameObject.SetActive(false);
         _buttonIndex = -1;
     }
 
-    // TODO: Opens wiki data about the current selected item.
+    // Opens a wiki interface for the selected item (placeholder).
     void ShowItemInWiki() {
         if (_buttonIndex >= 0) {
+            // TODO Implement wiki display if available, e.g.:
             //PlayerWikiController.LocalInstance.ShowItemInWiki(ItemContainer.ItemSlots[_buttonIndex].Item.ItemID);
         } else {
             Debug.LogWarning("No valid button index was given!");
         }
-
         HideRightClickMenu();
     }
 
-    // Splits an item stack into two stacks and places the newly split stack on the cursor.
+    // Splits an item stack into two, placing the new stack on the cursor.
     void SplitItem() {
-        if (_buttonIndex >= 0) {
-            int splitValue = (int)_splitAmountSlider.value;
-            if (splitValue > 0) {
-                var originalSlot = ItemContainer.ItemSlots[_buttonIndex];
-                var newItemSlot = new ItemSlot(originalSlot.ItemId, splitValue, originalSlot.RarityId);
+        if (_buttonIndex < 0) return;
 
-                // Call the drag controller to pick up the newly split stack
-                PlayerController.LocalInstance.PlayerItemDragAndDropController.OnLeftClick(newItemSlot);
+        int splitValue = (int)_splitAmountSlider.value;
+        if (splitValue <= 0) return;
 
-                // Clear or update the original slot
-                if ((int)_splitAmountSlider.maxValue == splitValue) {
-                    originalSlot.Clear();
-                } else {
-                    int newAmount = (int)_splitAmountSlider.maxValue - splitValue;
-                    originalSlot.Set(new ItemSlot(originalSlot.ItemId, newAmount, originalSlot.RarityId));
-                }
+        var originalSlot = ItemContainer.ItemSlots[_buttonIndex];
+        var newItemSlot = new ItemSlot(originalSlot.ItemId, splitValue, originalSlot.RarityId);
+        PlayerController.LocalInstance.PlayerItemDragAndDropController.OnLeftClick(newItemSlot);
 
-                ShowUIButtonContains();
-            } else {
-                return;
-            }
-        } else {
-            Debug.LogWarning("No valid button index was set!");
+        if ((int)_splitAmountSlider.maxValue == splitValue) originalSlot.Clear();
+        else {
+            int newAmount = (int)_splitAmountSlider.maxValue - splitValue;
+            originalSlot.Set(new ItemSlot(originalSlot.ItemId, newAmount, originalSlot.RarityId));
         }
 
+        ShowUIButtonContains();
         HideRightClickMenu();
     }
     #endregion -------------------- Right Click Menu --------------------
 
 
     #region -------------------- Item Info --------------------
-    // Triggers delayed display of item information.
+
+    // Delays item info display.
     public void TriggerItemInfo(ItemSlot itemSlot) {
         if (itemSlot == null || _itemInfo == null) return;
-
         _showInfo = true;
         _itemSlotForShowInfo = itemSlot;
     }
 
-    // Hides the item info panel immediately.
+    // Hides the item info UI.
     public void HideItemInfo() {
         if (_itemSlotForShowInfo == null || _itemInfo == null) return;
-
         _itemInfo.gameObject.SetActive(false);
         _currentTime = 0f;
         _showInfo = false;
         _itemSlotForShowInfo = null;
     }
 
-    // TODO: Displays item info after a short delay.
+    // Shows item info after a short delay.
     void ShowItemInfo() {
         if (_itemSlotForShowInfo == null || _itemInfo == null) return;
-
-        // Show panel once the time threshold is reached
         if (_currentTime >= TIME_TO_SHOW_ITEM_INFO && !_itemInfo.gameObject.activeSelf) {
             _itemNameText.text = GameManager.Instance.ItemManager.ItemDatabase[_itemSlotForShowInfo.ItemId].ItemName;
 
@@ -199,6 +187,8 @@ public abstract class ItemContainerUI : MonoBehaviour {
                 //rarityOffset = 1;
             }
 
+            // TODO Add restore HP or sell price info
+            // TODO Display a side-by-side comparison with currently equipped items (e.g., for weapons, armor) to help players make quick decisions on upgrades.
             /*
             if (_itemSlotForShowInfo.Item.CanRestoreHpOrEnergy) {
                 itemSlotInfoStringBuilder.Append("<color=#992e2e>" + "+" + (int)(_itemSlotForShowInfo.Item.LowestRarityRestoringHpAmount *
@@ -209,24 +199,21 @@ public abstract class ItemContainerUI : MonoBehaviour {
             if (_itemSlotForShowInfo.Item.CanBeSold) {
                 itemSlotInfoStringBuilder.Append("<color=#2e6c99>" + "+" + (int)(_itemSlotForShowInfo.Item.LowestRaritySellPrice *
                     _itemSlotForShowInfo.Item.ItemRarityScaler[_itemSlotForShowInfo.RarityID - rarityOffset]) + " Gold" + "</color>");
-            }
-            */
+            }*/
+
 
             // Assign text to the UI
             _itemInfoText.text = itemSlotInfoStringBuilder.ToString();
+
             SetItemInfoNewSize();
             SetItemInfoPosition();
             _itemInfo.gameObject.SetActive(true);
-        } else if (_itemInfo.gameObject.activeSelf) {
-            // Update position if already visible
-            SetItemInfoPosition();
-        } else {
-            // Accumulate time until threshold
-            _currentTime += Time.deltaTime;
-        }
+        } 
+        else if (_itemInfo.gameObject.activeSelf) SetItemInfoPosition();
+        else _currentTime += Time.deltaTime;
     }
 
-    // Adjusts the size of the item info panel to fit text and headers.
+    // Resizes info panel to fit text.
     void SetItemInfoNewSize() {
         _itemInfo.sizeDelta = new Vector2(
             _itemInfo.sizeDelta.x,
@@ -249,7 +236,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
 
         // Offset the info panel near the cursor
         if (xValue == 1) _itemInfo.position = Input.mousePosition + new Vector3(-5, 5);
-        else             _itemInfo.position = Input.mousePosition + new Vector3(15, -15);
+        else _itemInfo.position = Input.mousePosition + new Vector3(15, -15);
 
         _itemInfo.anchorMin = new Vector2(xValue, yValue);
         _itemInfo.anchorMax = new Vector2(xValue, yValue);
@@ -257,9 +244,9 @@ public abstract class ItemContainerUI : MonoBehaviour {
     }
     #endregion -------------------- Item Info --------------------
 
-    // Override this to customize behavior for left-clicks on item slots.
+    // Override for handling left-click events.
     public virtual void OnPlayerLeftClick(int buttonIndex) { }
 
-    // Override this to customize behavior for right-clicks on item slots.
+    // Override for handling right-click events.
     public virtual void OnPlayerRightClick(int buttonIndex) { }
 }

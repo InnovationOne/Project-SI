@@ -54,7 +54,9 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     };
 
     [HideInInspector] public PlayerState ActivePlayerState { get; private set; }
-    public float AnimationTime => _weaponAnim != null ? _weaponAnim.GetCurrentAnimatorStateInfo(0).length / _weaponAnim.GetCurrentAnimatorStateInfo(0).speed : 0f;
+    public float AnimationTime => _weaponAnim != null 
+        ? _weaponAnim.GetCurrentAnimatorStateInfo(0).length / _weaponAnim.GetCurrentAnimatorStateInfo(0).speed 
+        : 0f;
 
     [Header("Animator References")]
     [SerializeField] Animator _weaponAnim;
@@ -98,6 +100,7 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         _audioManager = GameManager.Instance.AudioManager;
         _fmodEvents = GameManager.Instance.FMODEvents;
 
+        // Subscribe to clothing changes for visual updates.
         _playerClothingUI.PlayerClothingUIItemButtons[0].OnNewItem += SetFeet;
         _playerClothingUI.PlayerClothingUIItemButtons[1].OnNewItem += SetBelt;
         _playerClothingUI.PlayerClothingUIItemButtons[2].OnNewItem += SetHelmet;
@@ -107,13 +110,14 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         
         _pTC.OnToolbeltSlotChanged += OnToolbeltSlotChanged;
 
-        // DEBUG: Ensure the correct override controllers are applied.
+        // DEBUG: Apply correct override controllers.
         StartCoroutine(SetAnimationOverride(_bodyAnim, _bodyAnimator));
         StartCoroutine(SetAnimationOverride(_headAnim, _headAnimator));
         StartCoroutine(SetAnimationOverride(_shadowAnim, _shadowAnimator));
     }
 
     private void OnDestroy() {
+        // Unsubscribe to avoid memory leaks.
         _playerClothingUI.PlayerClothingUIItemButtons[0].OnNewItem -= SetFeet;
         _playerClothingUI.PlayerClothingUIItemButtons[1].OnNewItem -= SetBelt;
         _playerClothingUI.PlayerClothingUIItemButtons[2].OnNewItem -= SetHelmet;
@@ -130,71 +134,20 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
 
         anim.runtimeAnimatorController = runtimeAnimatorController;
         anim.Rebind();
-
-        // Wait a frame to ensure synchronization across the network
         yield return new WaitForEndOfFrame();
 
         ownerNetworkAnimator.enabled = true;
         SetAnimatorLastDirection(_pMC.LastMotionDirection);
     }
 
-    public void SetHands(int itemId) {
-        Debug.Log("SetHand");
-        if (itemId == 0) StartCoroutine(SetAnimationOverride(_handsAnim, _defaultAnimator));
-        else StartCoroutine(SetAnimationOverride(_handsAnim, (GameManager.Instance.ItemManager.ItemDatabase[itemId] as ClothingSO).Animator));
-    }
-
-    public void SetHelmet(int itemId) {
-        Debug.Log("SetHelmet");
-        if (itemId == 0) StartCoroutine(SetAnimationOverride(_helmetHairAnim, _defaultAnimator));
-        else StartCoroutine(SetAnimationOverride(_helmetHairAnim, (GameManager.Instance.ItemManager.ItemDatabase[itemId] as ClothingSO).Animator));
-    }
-
-    public void SetHair() {
-        // _hair = hair;
-    }
-
-    public void SetBelt(int itemId) {
-        Debug.Log("SetBelt");
-        if (itemId == 0) StartCoroutine(SetAnimationOverride(_beltAnim, _defaultAnimator));
-        else StartCoroutine(SetAnimationOverride(_beltAnim, (GameManager.Instance.ItemManager.ItemDatabase[itemId] as ClothingSO).Animator));
-    }
-
-    public void SetTorso(int itemId) {
-        Debug.Log("SetTorso");
-        if (itemId == 0) StartCoroutine(SetAnimationOverride(_torsoAnim, _defaultAnimator));
-        else StartCoroutine(SetAnimationOverride(_torsoAnim, (GameManager.Instance.ItemManager.ItemDatabase[itemId] as ClothingSO).Animator));
-    }
-
-    public void SetLegs(int itemId) {
-        Debug.Log("SetLegs");
-        if (itemId == 0) StartCoroutine(SetAnimationOverride(_legsAnim, _defaultAnimator));
-        else StartCoroutine(SetAnimationOverride(_legsAnim, (GameManager.Instance.ItemManager.ItemDatabase[itemId] as ClothingSO).Animator));
-    }
-
-    public void SetFeet(int itemId) {
-        Debug.Log("SetFeet");
-        if (itemId == 0) StartCoroutine(SetAnimationOverride(_feetAnim, _defaultAnimator));
-        else StartCoroutine(SetAnimationOverride(_feetAnim, (GameManager.Instance.ItemManager.ItemDatabase[itemId] as ClothingSO).Animator));
-    }
-
-    public void SetHead() {
-        // _head = head;
-    }
-
-    public void SetBody() {
-        // _body = body;
-    }
-
     void OnToolbeltSlotChanged() {
         int itemId = _pTC.GetCurrentlySelectedToolbeltItemSlot().ItemId;
-        ItemSO itemSO = GameManager.Instance.ItemManager.ItemDatabase[itemId];
+        var itemSO = GameManager.Instance.ItemManager.ItemDatabase[itemId];
 
         if (itemSO is WeaponSO weaponSO) {
             if (weaponSO.WeaponType == WeaponSO.WeaponTypes.Melee) {
                 _audioManager.PlayOneShot(_fmodEvents.Pull_Weapon, transform.position);
             }
-
             if (weaponSO.AnimatorFG != null) {
                 StartCoroutine(SetAnimationOverride(_weaponAnim, weaponSO.AnimatorFG));
             }
@@ -212,17 +165,13 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
             StartCoroutine(SetAnimationOverride(_weaponAnim, _defaultAnimator));
             StartCoroutine(SetAnimationOverride(_behindAnim, _defaultAnimator));
         }
-
-        // Force-update the current state so the new items play the correct animation
         ChangeState(ActivePlayerState, true);
     }
 
     public void ChangeState(PlayerState newState, bool forceUpdate = false) {
         if (ActivePlayerState == newState && !forceUpdate) return;
-
         string stateName = _playerStates[newState];
 
-        // Attempt to play the identified state on each relevant Animator
         TryPlayState(_weaponAnim, stateName);
         TryPlayState(_handsAnim, stateName);
         TryPlayState(_helmetHairAnim, stateName);
@@ -239,15 +188,12 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
 
     bool TryPlayState(Animator animator, string stateName) {
         if (animator == null) return false;
-
         int stateHash = Animator.StringToHash(stateName);
         if (animator.HasState(0, stateHash)) {
             animator.Play(stateHash);
             return true;
         }
-
-        // This warning addresses the case where the state doesn't exist in the Controller
-        Debug.LogWarning($"Animator '{animator.name}' does not have a state named '{stateName}' in its Controller.");
+        Debug.LogError($"Animator '{animator.name}' does not have a state named '{stateName}' in its Controller.");
         return false;
     }
 
@@ -274,15 +220,61 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         _behindAnim.SetFloat(axis, value);
     }
 
+    #region -------------------- Clothing equipment animation overrides --------------------
+
+    public void SetHands(int itemId) {
+        if (itemId == 0) StartCoroutine(SetAnimationOverride(_handsAnim, _defaultAnimator));
+        else StartCoroutine(SetAnimationOverride(_handsAnim, (GameManager.Instance.ItemManager.ItemDatabase[itemId] as ClothingSO).Animator));
+    }
+
+    public void SetHelmet(int itemId) {
+        if (itemId == 0) StartCoroutine(SetAnimationOverride(_helmetHairAnim, _defaultAnimator));
+        else StartCoroutine(SetAnimationOverride(_helmetHairAnim, (GameManager.Instance.ItemManager.ItemDatabase[itemId] as ClothingSO).Animator));
+    }
+
+    public void SetHair() {
+        // _hair = hair;
+    }
+
+    public void SetBelt(int itemId) {
+        if (itemId == 0) StartCoroutine(SetAnimationOverride(_beltAnim, _defaultAnimator));
+        else StartCoroutine(SetAnimationOverride(_beltAnim, (GameManager.Instance.ItemManager.ItemDatabase[itemId] as ClothingSO).Animator));
+    }
+
+    public void SetTorso(int itemId) {
+        if (itemId == 0) StartCoroutine(SetAnimationOverride(_torsoAnim, _defaultAnimator));
+        else StartCoroutine(SetAnimationOverride(_torsoAnim, (GameManager.Instance.ItemManager.ItemDatabase[itemId] as ClothingSO).Animator));
+    }
+
+    public void SetLegs(int itemId) {
+        if (itemId == 0) StartCoroutine(SetAnimationOverride(_legsAnim, _defaultAnimator));
+        else StartCoroutine(SetAnimationOverride(_legsAnim, (GameManager.Instance.ItemManager.ItemDatabase[itemId] as ClothingSO).Animator));
+    }
+
+    public void SetFeet(int itemId) {
+        if (itemId == 0) StartCoroutine(SetAnimationOverride(_feetAnim, _defaultAnimator));
+        else StartCoroutine(SetAnimationOverride(_feetAnim, (GameManager.Instance.ItemManager.ItemDatabase[itemId] as ClothingSO).Animator));
+    }
+
+    public void SetHead() {
+        // _head = head;
+    }
+
+    public void SetBody() {
+        // _body = body;
+    }
+
+    #endregion -------------------- Clothing equipment animation overrides --------------------
+
     #region -------------------- Save & Load --------------------
+
     public void SavePlayer(PlayerData playerData) {
-        Debug.Log("Saving player animation data.");
         playerData.LastDirection = new Vector2(_weaponAnim.GetFloat(LAST_X_AXIS), _weaponAnim.GetFloat(LAST_Y_AXIS));
     }
 
     public void LoadPlayer(PlayerData playerData) {
-        Debug.Log("Loading player animation data.");
         SetAnimatorLastDirection(playerData.LastDirection);
+
     }
     #endregion -------------------- Save & Load --------------------
 }

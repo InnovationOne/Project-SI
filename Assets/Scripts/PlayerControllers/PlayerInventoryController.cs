@@ -3,50 +3,35 @@ using System.Collections.ObjectModel;
 using Unity.Netcode;
 using UnityEngine;
 
-/// Manages the player's inventory.
-[RequireComponent(typeof(NetworkObject))]
-public class PlayerInventoryController : NetworkBehaviour, IPlayerDataPersistance {
-    // Predefined inventory sizes (read-only)
-    static readonly ReadOnlyCollection<int> INVENTORY_SIZES = Array.AsReadOnly(new int[] { 10, 20, 30 });
-    public ReadOnlyCollection<int> InventorySizes => INVENTORY_SIZES;
+public class PlayerInventoryController : MonoBehaviour, IPlayerDataPersistance {
+    // Predefined inventory sizes.
+    public ReadOnlyCollection<int> InventorySizes { get; private set; } = Array.AsReadOnly(new int[] { 10, 20, 30 });
+    public int CurrentInventorySize {get; private set; }
 
-    // Current inventory size (default: largest)
-    int _currentInventorySize = INVENTORY_SIZES[^1];
-    public int CurrentInventorySize => _currentInventorySize;
+    public ItemContainerSO InventoryContainer;
+    InventoryUI _inventoryUI;
 
-    // Inventory container (ScriptableObject reference)
-    [SerializeField] ItemContainerSO _inventoryContainer;
-    public ItemContainerSO InventoryContainer => _inventoryContainer;
-
-    // Cached UI reference for faster access
-    private InventoryUI _inventoryUI;
-
-
-    private void Start() {
+    void Start() {
         _inventoryUI = InventoryUI.Instance;
-        SetInventorySize(_currentInventorySize);
+        SetInventorySize(CurrentInventorySize);
     }
 
-    // Updates inventory size if valid and refreshes UI
+    // Sets and updates inventory size if valid.
     public void SetInventorySize(int inventorySize) {
-        if (inventorySize > INVENTORY_SIZES[^1]) {
-            Debug.LogError($"Inventory size can't exceed {INVENTORY_SIZES[^1]}.");
-            return;
-        }
-
-        _currentInventorySize = inventorySize;
+        if (inventorySize > InventorySizes[^1]) return;
+        CurrentInventorySize = inventorySize;
         _inventoryUI.InventoryOrToolbeltSizeChanged();
     }
 
-    // Saves inventory contents and size
+    // Saves inventory data to player persistence.
     public void SavePlayer(PlayerData playerData) {
-        playerData.Inventory = _inventoryContainer.SaveItemContainer();
-        playerData.InventorySize = _currentInventorySize;
+        playerData.Inventory = InventoryContainer.SaveItemContainer();
+        playerData.InventorySize = CurrentInventorySize;
     }
 
-    // Loads inventory contents and size
+    // Loads inventory data from player persistence.
     public void LoadPlayer(PlayerData playerData) {
-        _currentInventorySize = playerData.InventorySize;
-        _inventoryContainer.LoadItemContainer(playerData.Inventory);
+        CurrentInventorySize = playerData.InventorySize;
+        InventoryContainer.LoadItemContainer(playerData.Inventory);
     }
 }

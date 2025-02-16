@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -19,6 +20,7 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider2D))]
 public class PlayerController : NetworkBehaviour {
     public static PlayerController LocalInstance { get; private set; }
+    public static event Action<PlayerController> OnLocalPlayerSpawned;
 
     public PlayerCraftController PlayerCraftController { get; private set; }
     public PlayerHealthAndEnergyController PlayerHealthAndEnergyController { get; private set; }
@@ -65,6 +67,8 @@ public class PlayerController : NetworkBehaviour {
         QuickChatController = GetComponent<QuickChatController>();
 
         RaindropController = GetComponentInChildren<RaindropController>();
+
+        OnLocalPlayerSpawned?.Invoke(this);
     }
 
     public override void OnNetworkDespawn() {

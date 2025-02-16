@@ -9,79 +9,80 @@ using static ClothingSO;
 [RequireComponent(typeof(Button))]
 [RequireComponent(typeof(BoxCollider2D))]
 [RequireComponent(typeof(Rigidbody2D))]
-public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IBeginDragHandler, IEndDragHandler, IDropHandler, IDragHandler, IPointerEnterHandler, IPointerExitHandler {
+public class InventorySlot : MonoBehaviour, 
+    IPointerClickHandler, 
+    IPointerDownHandler, 
+    IBeginDragHandler, 
+    IEndDragHandler, 
+    IDropHandler, 
+    IDragHandler, 
+    IPointerEnterHandler, 
+    IPointerExitHandler {
+
     public event Action<int> OnNewItem;
 
     [Header("Item button referenzes")]
-    [SerializeField] private Image _inventorySlot_Normal;
-    [SerializeField] private Image _inventorySlot_Locked;
-
-    [SerializeField] private Image _itemRarityImage;
-    [SerializeField] private Image _itemIconImage;
-    [SerializeField] private Image _selectedImage;
-    [SerializeField] private TextMeshProUGUI _itemAmountText;
+    [SerializeField] Image _inventorySlotNormal;
+    [SerializeField] Image _inventorySlotLocked;
+    [SerializeField] Image _itemRarityImage;
+    [SerializeField] Image _itemIconImage;
+    [SerializeField] Image _selectedImage;
+    [SerializeField] TextMeshProUGUI _itemAmountText;
+    [SerializeField] TextMeshProUGUI _hotkeyText;
 
     [Header("Restrictions")]
     public bool IsClothingSlot;
     [ConditionalHide("IsClothingSlot", true)]
-    public ClothingType AcceptedClothingType;
+    public ClothingType[] AcceptedClothingType;
 
-    private int _buttonIndex;
-    private ItemContainerUI _itemPanel;
-    private ItemSlot _itemSlot;
+    int _buttonIdx;
+    ItemContainerUI _itemPanel;
+    ItemSlot _itemSlot;
+    ItemManager _itemManager;
+    CanvasGroup _dragItemCanvasGroup;
 
-    // Cached references for optimization
-    private ItemManager _itemManager;
-    private CanvasGroup _dragItemUICanvasGroup;
+    // Called when the object is created.
+    void Awake() => ClearItemSlot();
 
-    private void Awake() {
-        ClearItemSlot();
-    }
-
-    private void Start() {
+    // Caches references and initializes visuals.
+    void Start() {
         _itemManager = GameManager.Instance.ItemManager;
-        if (_itemManager == null) {
+        if (_itemManager == null)
             Debug.LogError("ItemManager instance is not available.");
-        }
 
-        _dragItemUICanvasGroup = DragItemUI.Instance.GetComponent<CanvasGroup>();
-
-        _selectedImage.gameObject.SetActive(false);
+        _dragItemCanvasGroup = DragItemUI.Instance.GetComponent<CanvasGroup>();
+        _selectedImage.enabled = false;
     }
 
+    // Shows item information when the pointer enters.
     public void OnPointerEnter(PointerEventData eventData) {
-        if (_itemPanel != null && _itemSlot != null) {
-            _itemPanel.TriggerItemInfo(_itemSlot);
-        }
+        if (_itemPanel != null) _itemPanel.TriggerItemInfo(_itemSlot);
     }
 
+    // Hides item information when the pointer exits.
     public void OnPointerExit(PointerEventData eventData) {
-        if (_itemPanel != null) {
-            _itemPanel.HideItemInfo();
-        }
+        if (_itemPanel != null) _itemPanel.HideItemInfo();
     }
 
-    public void SetButtonIndex(int buttonIndex) {
-        _buttonIndex = buttonIndex;
-
-        // Cache the ItemContainerUI reference
+    // Sets the slot index and caches the parent UI container.
+    public void SetButtonIndex(int idx) {
+        _buttonIdx = idx;
         if (_itemPanel == null) {
             _itemPanel = GetComponentInParent<ItemContainerUI>();
-            if (_itemPanel == null) {
-                Debug.LogError("ItemContainerUI not found in parent.");
-            }
+            if (_itemPanel == null) Debug.LogError("ItemContainerUI not found in parent.");
         }
     }
 
+    // Enables or disables interaction on this slot.
     public void SetInteractable(bool interactable) {
-        _inventorySlot_Normal.enabled = interactable;
-        _inventorySlot_Locked.enabled = !interactable;
+        _inventorySlotNormal.enabled = interactable;
+        _inventorySlotLocked.enabled = !interactable;
         GetComponent<Button>().interactable = interactable;
     }
 
+    // Assigns an item to the slot and updates its UI.
     public void SetItemSlot(ItemSlot newItemSlot, Sprite[] raritySprites) {
         _itemSlot = newItemSlot;
-
         if (_itemSlot == null) {
             OnNewItem?.Invoke(0);
             ClearItemSlot();
@@ -89,13 +90,12 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
         }
 
         OnNewItem?.Invoke(newItemSlot.ItemId);
-
-        _itemIconImage.gameObject.SetActive(true);
+        _itemIconImage.enabled = true;
 
         var item = GameManager.Instance.ItemManager.ItemDatabase[_itemSlot.ItemId];
         _itemIconImage.sprite = item.ItemIcon;
 
-        /* TODO
+        /* TODO Rarity system
         switch (item) {
             case ToolSO tool:
                 if (_itemSlot.RarityId > 0 && _itemSlot.RarityId - 1 < tool.ToolItemRarity.Length) {
@@ -104,64 +104,68 @@ public class InventorySlot : MonoBehaviour, IPointerClickHandler, IPointerDownHa
                 break;
             default:
                 if (_itemSlot.RarityId > 0 && _itemSlot.RarityId - 1 < raritySprites.Length) {
-                    _itemRarityImage.gameObject.SetActive(true);
+                    _itemRarityImage.enabled = true;
                     _itemRarityImage.sprite = raritySprites[_itemSlot.RarityId - 1];
                 }
                 break;
         }
         */
 
-        // Handle stackable items
-        if (item.IsStackable) {
-            _itemAmountText.SetText(_itemSlot.Amount.ToString());
-        } else {
-            _itemAmountText.SetText(string.Empty);
-        }
+        _itemAmountText.SetText(item.IsStackable ? _itemSlot.Amount.ToString() : string.Empty);
     }
 
+    // Clears the slot and resets its UI.
     public void ClearItemSlot() {
         OnNewItem?.Invoke(0);
-        _itemIconImage.gameObject.SetActive(false);
+        _itemIconImage.enabled = false;
         _itemAmountText.SetText(string.Empty);
         _itemRarityImage.sprite = null;
-        _itemRarityImage.gameObject.SetActive(false);
+        _itemRarityImage.enabled = false;
         _itemSlot = null;
     }
 
+    // Updates the hotkey text on the slot.
+    public void SetHotkey(string newHotkey) => _hotkeyText.text = newHotkey;
+
+    // Highlights or unhighlights this slot.
+    public void SetButtonHighlight(bool highlight) => _selectedImage.enabled = highlight;
+
+    // Retrieves the UI sprite for player clothing if available.
+    public Sprite GetPlayerClothingUiSprite() {
+        if (_itemSlot == null || _itemSlot.IsEmpty || _itemManager.ItemDatabase[_itemSlot.ItemId] as ClothingSO == null) return null;
+        return (_itemManager.ItemDatabase[_itemSlot.ItemId] as ClothingSO).PlayerClothingUiSprite; 
+    }
+
+    #region  -------------------- Drag and Drop Handlers --------------------
+
     public void OnPointerClick(PointerEventData eventData) {
-        if (eventData.button == PointerEventData.InputButton.Right) { // RMB Click
-            if (DragItemUI.Instance.gameObject.activeSelf) {
-                _itemPanel.OnPlayerRightClick(_buttonIndex);
-            } else {
-                _itemPanel.ShowRightClickMenu(_buttonIndex, transform.position);
-            }
+        // Right-click: process right-click action or show right-click menu.
+        if (eventData.button == PointerEventData.InputButton.Right) {
+            if (DragItemUI.Instance.gameObject.activeSelf) _itemPanel.OnPlayerRightClick(_buttonIdx);
+            else _itemPanel.ShowRightClickMenu(_buttonIdx, transform.position);
         }
     }
 
+    // Left-click: process left-click action.
     public void OnPointerDown(PointerEventData eventData) {
-        if (eventData.button == PointerEventData.InputButton.Left) _itemPanel.OnPlayerLeftClick(_buttonIndex); // LMB Click
+        if (eventData.button == PointerEventData.InputButton.Left) _itemPanel.OnPlayerLeftClick(_buttonIdx);
     }
 
+    // Allow dragging without blocking raycasts.
     public void OnBeginDrag(PointerEventData eventData) {
-        // Dragged item cannot block the button to trigger events
-        if (_dragItemUICanvasGroup != null) _dragItemUICanvasGroup.blocksRaycasts = false;
+        if (_dragItemCanvasGroup != null) _dragItemCanvasGroup.blocksRaycasts = false;
     }
 
     public void OnDrag(PointerEventData eventData) { }
 
     public void OnEndDrag(PointerEventData eventData) {
-        // Draged item can be clicked again
-        if (_dragItemUICanvasGroup != null) _dragItemUICanvasGroup.blocksRaycasts = true;
+        // Re-enable raycasts after dragging.
+        if (_dragItemCanvasGroup != null) _dragItemCanvasGroup.blocksRaycasts = true;
     }
 
     public void OnDrop(PointerEventData eventData) {
-        if (eventData.pointerDrag != null) _itemPanel.OnPlayerLeftClick(_buttonIndex);
+        if (eventData.pointerDrag != null) _itemPanel.OnPlayerLeftClick(_buttonIdx);
     }
 
-    public void SetButtonHighlight(bool highlight) => _selectedImage.gameObject.SetActive(highlight);
-
-    public Sprite GetPlayerClothingUiSprite() {
-        if (_itemSlot == null || _itemSlot.IsEmpty) return null;
-        return (GameManager.Instance.ItemManager.ItemDatabase[_itemSlot.ItemId] as ClothingSO).PlayerClothingUiSprite;
-    }
+    #endregion -------------------- Drag and Drop Handlers --------------------
 }
