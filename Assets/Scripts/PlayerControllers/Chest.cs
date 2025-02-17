@@ -9,7 +9,7 @@ public class Chest : PlaceableObject {
     [SerializeField] SpriteRenderer _openedSprite;
 
     // Maximum distance at which players can interact with this chest.
-    public float MaxDistanceToPlayer => 1.5f;
+    public override float MaxDistanceToPlayer => 1.5f;
 
     // Tracks if the chest is currently open. Updated by the server, read by clients.
     NetworkVariable<bool> _isOpenNetworked = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -19,13 +19,9 @@ public class Chest : PlaceableObject {
     ChestUI _chestUI;
     int _itemId;
 
-    // Ensures the item container is initialized when this object awakens.
-    void Awake() {
-        InitializeItemContainer();
-    }
-
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
+        _chestUI = ChestUI.Instance;
         // Whenever _isOpenNetworked changes, update the visuals/UI accordingly.
         _isOpenNetworked.OnValueChanged += (oldValue, newValue) => {
             UpdateVisual(newValue);
@@ -37,15 +33,10 @@ public class Chest : PlaceableObject {
         UpdateUI(_isOpenNetworked.Value);
     }
 
-    // Caches the chest UI singleton instance.
-    void Start() {
-        _chestUI = ChestUI.Instance;
-    }
-
     // Ensures the item container exists and is set up with the correct number of slots.
     void InitializeItemContainer() {
-        if (_itemContainer != null) return;
-        _itemContainer = ScriptableObject.CreateInstance<ItemContainerSO>();
+        if (_itemContainer != null) return; 
+        _itemContainer = ScriptableObject.CreateInstance<ItemContainerSO>(); 
         _itemContainer.Initialize(ChestSO.ItemSlots);
     }
 
@@ -58,7 +49,8 @@ public class Chest : PlaceableObject {
     }
 
     // Allows the player to interact with the chest, toggling its open/closed state.
-    public void Interact(PlayerController player) {
+    public override void Interact(PlayerController player) {
+        Debug.Log("Interacting with chest");
         // If we are the server (or host), we can directly toggle. Otherwise, request it.
         if (IsServer) TryToggleChestServer(player.OwnerClientId);
         else RequestToggleChestServerRpc(player.OwnerClientId, player.transform.position);
@@ -121,8 +113,8 @@ public class Chest : PlaceableObject {
 
     #region -------------------- Save & Load --------------------
 
-    public override string SaveObject() {
-        return _itemContainer.SaveItemContainer();
+    public override FixedString4096Bytes SaveObject() {
+        return new FixedString4096Bytes(_itemContainer.SaveItemContainer());
     }
 
     public override void LoadObject(FixedString4096Bytes data) {
@@ -133,5 +125,8 @@ public class Chest : PlaceableObject {
             _itemContainer.LoadItemContainer(jsonData);
         }
     }
+
     #endregion -------------------- Save & Load --------------------
+
+    public override void InitializePostLoad() { }
 }

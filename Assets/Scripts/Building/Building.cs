@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.Collections;
 
 public class Building : PlaceableObject {
     [SerializeField] protected BuildingSO _buildingSO;
@@ -12,8 +13,9 @@ public class Building : PlaceableObject {
     [SerializeField] protected DoorController _doorController;
     [SerializeField] protected int _buildingLevel = 0;
 
-    public float MaxDistanceToPlayer => 3f;
     public bool IsFull => _housedAnimals.Count >= _buildingSO.Capacity[_buildingLevel];
+
+    public override float MaxDistanceToPlayer => 0f;
 
     [SerializeField] private PolygonCollider2D _stallCollider;
     [SerializeField] private BoxCollider2D _doorCollider;
@@ -32,7 +34,7 @@ public class Building : PlaceableObject {
         }
     }
 
-    public virtual void Interact(PlayerController player) {
+    public override void Interact(PlayerController player) {
         // Öffnet z. B. ein UI, das zeigt, wie viele Tiere hier drin sind, 
         // ob Heu verteilt wurde, Incubator Status, etc.
         Debug.Log("Interacting with Stall: " + _buildingSO.BuildingName);
@@ -64,4 +66,14 @@ public class Building : PlaceableObject {
         }
         return animalsOutside;
     }
+
+    public override void InitializePreLoad(int itemId) { }
+
+    public override void InitializePostLoad() { }
+
+    public override void LoadObject(FixedString4096Bytes data) { }
+
+    public override FixedString4096Bytes SaveObject() { return new FixedString4096Bytes(string.Empty); }
+
+    public override void PickUpItemsInPlacedObject(PlayerController player) { }
 }

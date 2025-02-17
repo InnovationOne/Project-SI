@@ -1,3 +1,4 @@
+using Unity.Collections;
 using UnityEngine;
 
 public enum ScarecrowType {
@@ -19,5 +20,17 @@ public class Scarecrow : PlaceableObject {
     [SerializeField] ScarecrowSO _scarecrowSO;
     public ScarecrowSO ScarecrowSO => _scarecrowSO;
 
+    public override float MaxDistanceToPlayer => throw new System.NotImplementedException();
 
+    public override void InitializePostLoad() { }
+
+    public override void InitializePreLoad(int itemId) { }
+
+    public override void Interact(PlayerController player) { }
+
+    public override void LoadObject(FixedString4096Bytes data) { }
+
+    public override void PickUpItemsInPlacedObject(PlayerController player) { }
+
+    public override FixedString4096Bytes SaveObject() { return new FixedString4096Bytes(string.Empty); }
 }

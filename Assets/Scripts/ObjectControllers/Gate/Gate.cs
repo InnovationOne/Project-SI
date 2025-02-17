@@ -1,3 +1,5 @@
+using Unity.Collections;
+
 /// <summary>
 /// Represents a gate object that can be opened and closed.
 /// </summary>
@@ -96,4 +98,10 @@ public class Gate : AdjustingObject {
     public override void InitializePreLoad(int itemId) {
         base.InitializePreLoad(itemId);
     }
+
+    public override void InitializePostLoad() { }
+
+    public override void LoadObject(FixedString4096Bytes data) { }
+
+    public override FixedString4096Bytes SaveObject() { return new FixedString4096Bytes(string.Empty); }
 }

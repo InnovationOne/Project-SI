@@ -104,6 +104,7 @@ public class FinanceManager : NetworkBehaviour, IDataPersistance {
     }
 
     public void LoadData(GameData data) {
+        if (!IsServer) return;
         _networkedFarmMoney.Value = data.MoneyOfFarm;
         _networkedTownMoney.Value = data.MoneyOfTown;
     }

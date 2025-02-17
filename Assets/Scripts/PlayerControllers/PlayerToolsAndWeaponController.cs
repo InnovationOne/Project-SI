@@ -248,7 +248,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
     void HandleRightClickCanceled() {
         // Bogen loslassen
-        _audioManager.PlayOneShot(_fmodEvents.Shoot_Arrow, transform.position);
+        //_audioManager.PlayOneShot(_fmodEvents.Shoot_Arrow, transform.position);
         _pAC.ChangeState(PlayerState.Idle, true);
         StartMovement();
     }

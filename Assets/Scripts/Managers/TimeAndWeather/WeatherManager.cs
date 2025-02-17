@@ -48,13 +48,12 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     const float THUNDER_LIGHT = 0.5f;
 
     // Weather forecast (first element is the current weather).
-    NetworkList<int> _weatherForecast = new(
-        new List<int> { (int)WeatherName.Thunder, (int)WeatherName.Thunder, (int)WeatherName.Rain },
+    NetworkList<int> _weatherForecast = new(new List<int> { (int)WeatherName.Thunder, (int)WeatherName.Thunder, (int)WeatherName.Rain },
         NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Server);
 
     // Gets the current weather.
-    public WeatherName CurrentWeather => (WeatherName)_weatherForecast[0];
+    public WeatherName CurrentWeather => _weatherForecast.Count > 0 ? (WeatherName)_weatherForecast[0] : WeatherName.Sun;
 
     // Thunder timing logic.
     public bool IsWeatherPlaying;
@@ -319,11 +318,8 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     public void CheatSetForecastServerRpc(int[] forecast) {
         _weatherForecast.Clear();
         foreach (int weather in forecast) {
-            if (Enum.IsDefined(typeof(WeatherName), weather)) {
-                _weatherForecast.Add(weather);
-            } else {
-                Debug.LogWarning($"Cheat input: Invalid weather value {weather}. Skipped.");
-            }
+            if (Enum.IsDefined(typeof(WeatherName), weather)) _weatherForecast.Add(weather);
+            else Debug.LogWarning($"Cheat input: Invalid weather value {weather}. Skipped.");
         }
         ApplyWeather();
         UpdateUIWeather();
@@ -358,13 +354,11 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     // Loads the weather forecast from saved game data.
     public void LoadData(GameData data) {
         if (!IsServer || data.WeatherForecast == null || !_loadData) return;
+
         _weatherForecast.Clear();
         foreach (var wInt in data.WeatherForecast) {
-            if (Enum.IsDefined(typeof(WeatherName), wInt)) {
-                _weatherForecast.Add(wInt);
-            } else {
-                Debug.LogWarning($"Saved data: Invalid weather index {wInt}. Skipped.");
-            }
+            if (Enum.IsDefined(typeof(WeatherName), wInt)) _weatherForecast.Add(wInt);
+            else Debug.LogWarning($"Saved data: Invalid weather index {wInt}. Skipped.");
         }
         ApplyWeather();
         UpdateUIWeather();

@@ -183,6 +183,8 @@ public class InventoryMasterUI : MonoBehaviour {
         gameObject.SetActive(newActiveState);
         _tUI.ToggleToolbelt();
 
+        InventoryUI.Instance.ShowUIButtonContains();
+
         // If dragging an item and closing the inventory, return the item
         if (!newActiveState && DragItemUI.Instance != null && DragItemUI.Instance.gameObject.activeSelf) {
             _pIDADC.AddDragItemBackIntoBackpack(
@@ -190,6 +192,7 @@ public class InventoryMasterUI : MonoBehaviour {
             );
         }
     }
+
     #endregion -------------------- Panel Management --------------------
 
     /*
@@ -231,7 +234,7 @@ public class InventoryMasterUI : MonoBehaviour {
     }
     #endregion
 
-
+    /*
     #region Store
     public void ToggleStorePanel() {
         if (_storePanel.gameObject.activeSelf) {

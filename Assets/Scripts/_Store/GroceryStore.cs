@@ -46,6 +46,7 @@ public class GroceryStore : Store, IDataPersistance {
 
     #region Save & Load
     public void LoadData(GameData data) {
+        if (!IsServer) return;
         _groceryStoreLevel = data.GroceryStoreLevel;
     }
 

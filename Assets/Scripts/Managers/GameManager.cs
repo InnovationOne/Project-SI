@@ -26,7 +26,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     public static GameManager Instance { get; private set; }
 
     [Header("Game Settings")]
-    [SerializeField] private bool _singlePlayer;
+    [SerializeField] private bool _singlePlayer = true;
 
     [Header("Prefabs")]
     [SerializeField] private Transform _playerPrefab;
@@ -36,22 +36,22 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     public List<PlayerController> PlayerControllers { get; private set; } = new();
 
     // Cached references
-    public CropsManager CropsManager;
-    public DialogueManager DialogueManager;
-    public FinanceManager FinanceManager;
-    public InputManager InputManager;
-    public ItemManager ItemManager;
-    public ItemSpawnManager ItemSpawnManager;
-    public SI_LoadSceneManager LoadSceneManager;
-    public QuestManager QuestManager;
-    public TimeManager TimeManager;
-    public RecipeManager RecipeManager;
-    public PauseGameManager PauseGameManager;
-    public PlaceableObjectsManager PlaceableObjectsManager;
-    public EventsManager EventsManager;
-    public AudioManager AudioManager;
-    public FMODEvents FMODEvents;
-    public WeatherManager WeatherManager;
+    [HideInInspector] public CropsManager CropsManager;
+    [HideInInspector] public DialogueManager DialogueManager;
+    [HideInInspector] public FinanceManager FinanceManager;
+    [HideInInspector] public InputManager InputManager;
+    [HideInInspector] public ItemManager ItemManager;
+    [HideInInspector] public ItemSpawnManager ItemSpawnManager;
+    [HideInInspector] public SI_LoadSceneManager LoadSceneManager;
+    [HideInInspector] public QuestManager QuestManager;
+    [HideInInspector] public TimeManager TimeManager;
+    [HideInInspector] public RecipeManager RecipeManager;
+    [HideInInspector] public PauseGameManager PauseGameManager;
+    [HideInInspector] public PlaceableObjectsManager PlaceableObjectsManager;
+    [HideInInspector] public EventsManager EventsManager;
+    [HideInInspector] public AudioManager AudioManager;
+    [HideInInspector] public FMODEvents FMODEvents;
+    [HideInInspector] public WeatherManager WeatherManager;
 
     private NetworkManager _networkManager;
     private TestNetcodeUI _testNetcodeUI;
@@ -93,11 +93,8 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
 
         if (_singlePlayer) {
             _networkManager.StartHost();
-            if (_testNetcodeUI != null) {
-                _testNetcodeUI.gameObject.SetActive(false);
-            } else {
-                Debug.LogWarning("TestNetcodeUI instance is not assigned.");
-            }
+            if (_testNetcodeUI != null) _testNetcodeUI.gameObject.SetActive(false);
+            else Debug.LogWarning("TestNetcodeUI instance is not assigned.");
         }
     }
 
@@ -152,7 +149,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    
+
     public void RemovePlayerFromSleepingDict(ulong clientId) {
         if (_playerSleepingDict.ContainsKey(clientId)) {
             _playerSleepingDict.Remove(clientId);
@@ -251,7 +248,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     }
 
     public void LoadData(GameData data) {
-        if (string.IsNullOrEmpty(data.PlayerData)) return;
+        if (!IsServer || string.IsNullOrEmpty(data.PlayerData)) return;
         var playerDataList = JsonUtility.FromJson<PlayerDataList>(data.PlayerData);
 
         foreach (var pd in playerDataList._players) {

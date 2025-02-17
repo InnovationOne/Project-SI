@@ -13,8 +13,7 @@ public class ItemProducer : PlaceableObject {
     private int _timer;
     private int _itemId;
 
-    [NonSerialized] private float _maxDistanceToPlayer;
-    public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
+    public override float MaxDistanceToPlayer => 0f;
 
     /// <summary>
     /// Initializes and subscribes to time-based events.
@@ -94,6 +93,7 @@ public class ItemProducer : PlaceableObject {
     /// <returns>The ObjectSO associated with the current item.</returns>
     private ProducerSO ProducerSO => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as ProducerSO;
 
+
     /// <summary>
     /// Handles the collection of produced items when the object is dismanteled with.
     /// </summary>
@@ -112,14 +112,14 @@ public class ItemProducer : PlaceableObject {
         public int ItemId;
     }
 
-    public override string SaveObject() {
+    public override FixedString4096Bytes SaveObject() {
         var itemProducerJson = new ItemProducerData {
             RecipeId = _recipeId,
             Timer = _timer,
             ItemId = _itemId
         };
 
-        return JsonConvert.SerializeObject(itemProducerJson);
+        return new FixedString4096Bytes(JsonConvert.SerializeObject(itemProducerJson));
     }
 
     public override void LoadObject(FixedString4096Bytes data) {
@@ -132,5 +132,8 @@ public class ItemProducer : PlaceableObject {
             _itemId = itemProducerData.ItemId;
         }
     }
+
     #endregion
+
+    public override void InitializePostLoad() { }
 }

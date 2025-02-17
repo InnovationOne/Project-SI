@@ -90,15 +90,9 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
     }
 
     void VisualizePlaceableObjectOnMap(PlaceableObjectData obj, NetworkObject netObj) {
-        if (netObj.TryGetComponent<PlaceableObject>(out var placeableObjectComp)) {
-            placeableObjectComp.InitializePreLoad(obj.ObjectId);
-        }
-
+        if (netObj.TryGetComponent<PlaceableObject>(out var placeableObjectComp)) placeableObjectComp.InitializePreLoad(obj.ObjectId);
         netObj.GetComponent<IObjectDataPersistence>()?.LoadObject(obj.State);
-
-        if (placeableObjectComp != null) {
-            placeableObjectComp.InitializePostLoad();
-        }
+        if (placeableObjectComp != null) placeableObjectComp.InitializePostLoad();
     }
 
     void CreatePlaceableObjectsPrefab(ref PlaceableObjectData placeableObject, int itemId) {
@@ -184,42 +178,60 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         _positionToIndexMap.Remove(pos);
     }
 
+    #region -------------------- Save & Load --------------------
+
     public void SaveData(GameData data) {
         if (_saveObjects) {
-            data.PlacedObjects = JsonConvert.SerializeObject(PlaceableObjects);
+            // Convert the NetworkList into a plain List before serialization
+            var normalList = new List<PlaceableObjectData>();
+            for (int i = 0; i < PlaceableObjects.Count; i++) {
+                normalList.Add(PlaceableObjects[i]);
+            }
+
+            data.PlacedObjects = JsonConvert.SerializeObject(normalList);
+            Debug.Log($"PlaceableObjectsManager data saved: {data.PlacedObjects}");
         }
     }
 
     public void LoadData(GameData data) {
+        // Ensure we only load on the server, and only if we actually have data to load
         if (!IsServer || string.IsNullOrEmpty(data.PlacedObjects) || !_loadObjects) return;
+
+        // Deserialize into a normal List
         var list = JsonConvert.DeserializeObject<List<PlaceableObjectData>>(data.PlacedObjects);
+        if (list == null) {
+            Debug.LogWarning("No valid PlaceableObjectData found in the JSON!");
+            return;
+        }
+
         PlaceableObjects.Clear();
         _positionToIndexMap.Clear();
 
+        // Re-create the placed objects
         for (int i = 0; i < list.Count; i++) {
             var o = list[i];
-            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(o.PrefabNetworkObjectId, out var netObj)) {
-                VisualizePlaceableObjectOnMap(o, netObj);
-            }
             CreatePlaceableObjectsPrefab(ref o, o.ObjectId);
             PlaceableObjects.Add(o);
             _positionToIndexMap[o.Position] = PlaceableObjects.Count - 1;
+            if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(o.PrefabNetworkObjectId, out var netObj)) {
+                VisualizePlaceableObjectOnMap(o, netObj);
+            }
         }
     }
+
+
+    #endregion -------------------- Save & Load --------------------
 
     public PlaceableObjectData? GetCropTileAtPosition(Vector3Int position) => _positionToIndexMap.TryGetValue(position, out int idx) ? PlaceableObjects[idx] : null;
 
     int FindPlaceableObjectIndexAtPosition(Vector3Int pos) => _positionToIndexMap.TryGetValue(pos, out var idx) ? idx : -1;
-
 
     void HandleItemReduction(ServerRpcParams serverRpcParams, int itemId) {
         ulong clientId = serverRpcParams.Receive.SenderClientId;
         if (NetworkManager.ConnectedClients.TryGetValue(clientId, out var client)) {
             if (client.PlayerObject.TryGetComponent<PlayerInventoryController>(out var inventoryController)) {
                 inventoryController.InventoryContainer.RemoveItem(new ItemSlot(itemId, 1, 0));
-            } else {
-                Debug.LogError($"PlayerInventoryController not found on Client {clientId}");
-            }
+            } else Debug.LogError($"PlayerInventoryController not found on Client {clientId}");
         }
     }
 

@@ -74,7 +74,7 @@ public class ToolbeltUI : ItemContainerUI {
     // Toggles visibility of the toolbelt UI.
     public void ToggleToolbelt() {
         gameObject.SetActive(!gameObject.activeSelf);
-        // Optionally call ShowUIButtonContains() if you want to refresh on toggle.
+        ShowUIButtonContains();
     }
 
     // Notifies listeners about a left-click on a toolbelt slot.

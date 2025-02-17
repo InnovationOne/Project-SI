@@ -4,7 +4,4 @@ using UnityEngine;
 public class ChestSO : ObjectSO {
     [Header("Chest Settings")]
     public int ItemSlots;
-
-    public Sprite OpenSprite;
-    public Sprite ClosedSprite;
 }

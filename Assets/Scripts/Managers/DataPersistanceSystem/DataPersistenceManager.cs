@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Netcode;
 using System;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 // Manages data persistence, integrating with multiplayer (Netcode) and ensuring data is synced across connected players.
 [RequireComponent(typeof(NetworkObject))]
@@ -47,20 +48,35 @@ public class DataPersistenceManager : NetworkBehaviour {
         _dataPersistenceObjects = FindAllDataPersistanceObjects();
     }
 
-    void Start() {
-        //SceneManager.sceneLoaded += OnSceneLoaded;
+    public override void OnNetworkSpawn() {
+        // If the user is already *in* the GameScene when pressing Play in the Editor,
+        // Netcode won't call OnLoadEventCompleted. We do a fallback:
+        if (SceneManager.GetActiveScene().name == "GameScene") {
+            // Delay one frame so that scene objects are fully spawned
+            StartCoroutine(LoadGameNextFrame());
+        } else {
+            // If you do have a flow that calls SceneManager.LoadScene via Netcode,
+            // you can subscribe here for *future* scene loads:
+            NetworkManager.SceneManager.OnLoadEventCompleted += OnLoadEventCompleted;
+        }
+    }
+
+    private IEnumerator LoadGameNextFrame() {
+        yield return null;
         LoadGame();
     }
 
-    void OnDestroy() {
-        //SceneManager.sceneLoaded -= OnSceneLoaded;
+    // The callback for when a scene finishes loading (netcode side).
+    private void OnLoadEventCompleted(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsThatFinished, List<ulong> clientsThatTimedOut) {
+        if (sceneName == "GameScene") {
+            LoadGame();
+        }
     }
 
-    /*
-    // When the scene is loaded
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode) {
-        LoadGame();
-    }*/
+    public override void OnNetworkDespawn() {
+        if (IsServer) NetworkManager.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
+        base.OnNetworkDespawn();
+    }
 
     // Ensures data is saved when the application quits (TODO: For testing)
     void OnApplicationQuit() {
@@ -127,7 +143,7 @@ public class DataPersistenceManager : NetworkBehaviour {
         // Migrate if versions differ
         MigrateGameData(_gameData);
 
-        foreach (IDataPersistance dataPersistenceObj in _dataPersistenceObjects) {
+        foreach (var dataPersistenceObj in _dataPersistenceObjects) {
             dataPersistenceObj.LoadData(_gameData);
         }
     }

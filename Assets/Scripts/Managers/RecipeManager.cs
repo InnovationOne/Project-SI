@@ -70,6 +70,7 @@ public class RecipeManager : NetworkBehaviour, IDataPersistance {
     public void SaveData(GameData data) => data.Recipes = _recipeContainer.SerializeRecipeContainer();
 
     public void LoadData(GameData data) {
+        if (!IsServer) return;
         if (!string.IsNullOrEmpty(data.Recipes)) {
             UnboxRecipeContainerJson(data.Recipes);
         }

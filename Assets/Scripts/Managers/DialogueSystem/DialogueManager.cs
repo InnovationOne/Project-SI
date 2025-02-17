@@ -3,10 +3,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using static UnityEngine.Rendering.HableCurve;
 
 [Serializable]
 public class VoiceOverEntry {
@@ -20,7 +20,8 @@ public class EmojiEntry {
     public Sprite sprite;
 }
 
-public class DialogueManager : MonoBehaviour, IDataPersistance {
+[RequireComponent(typeof(NetworkObject))]
+public class DialogueManager : NetworkBehaviour, IDataPersistance {
     public event Action DialogueComplete;
 
     #region -------------------- Inspector Fields --------------------
@@ -407,6 +408,7 @@ public class DialogueManager : MonoBehaviour, IDataPersistance {
     #region -------------------- Data Persistance --------------------
 
     public void LoadData(GameData data) {
+        if (!IsServer) return;
         _dialogueVariables = string.IsNullOrEmpty(data.inkVariables)
             ? new DialogueVariables(_loadGlobalsJSON)
             : new DialogueVariables(_loadGlobalsJSON, data.inkVariables);

@@ -13,8 +13,7 @@ public class ItemConverter : PlaceableObject {
     private SelectRecipeUI _selectRecipeUI;
     private SpriteRenderer _visual;
 
-    private const float MAX_DISTANCE_TO_PLAYER = 1.5f;
-    public float MaxDistanceToPlayer { get => MAX_DISTANCE_TO_PLAYER; }
+    public override float MaxDistanceToPlayer => 1.5f;
 
     private int _recipeId;
     private int _timer;
@@ -228,7 +227,7 @@ public class ItemConverter : PlaceableObject {
         public List<string> StoredItemSlots = new();
     }
 
-    public override string SaveObject() {
+    public override FixedString4096Bytes SaveObject() {
         var itemConverterJson = new ItemConverterData {
             RecipeId = _recipeId,
             Timer = _timer,
@@ -238,12 +237,11 @@ public class ItemConverter : PlaceableObject {
             itemConverterJson.StoredItemSlots.Add(JsonConvert.SerializeObject(slot));
         }
 
-        return JsonConvert.SerializeObject(itemConverterJson);
+        return new FixedString4096Bytes(JsonConvert.SerializeObject(itemConverterJson));
     }
 
     public override void LoadObject(FixedString4096Bytes data) {
         string jsonData = data.ToString();
-
         if (!string.IsNullOrEmpty(jsonData)) {
             var itemConverterData = JsonConvert.DeserializeObject<ItemConverterData>(jsonData);
             _storedItemSlots.Clear();
@@ -254,5 +252,9 @@ public class ItemConverter : PlaceableObject {
             }
         }
     }
+
     #endregion
+
+
+    public override void InitializePostLoad() { }
 }

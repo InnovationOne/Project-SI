@@ -1,3 +1,4 @@
+using Unity.Collections;
 using UnityEngine;
 
 public class Fence : AdjustingObject {
@@ -37,4 +38,10 @@ public class Fence : AdjustingObject {
             _ => _patternIndex
         };
     }
+
+    public override void InitializePostLoad() { }
+
+    public override void LoadObject(FixedString4096Bytes data) { }
+
+    public override FixedString4096Bytes SaveObject() { return new FixedString4096Bytes(string.Empty); }
 }

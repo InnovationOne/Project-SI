@@ -25,14 +25,8 @@ MonoBehaviour:
   ItemInfoHoverText: 
   LeftClickAction:
   - {fileID: 11400000, guid: e5b4043eabb4dba4b9bd42c80b78d631, type: 2}
-  ObjectType: 2
   ItemsToCraftList: []
-  ItemToPickUpObject: {fileID: 11400000, guid: 0455e7dd00e1df9479f2289b436f95bf, type: 2}
-  InactiveSprite: {fileID: 1088684563, guid: 30b573e44bee4814d847a611a39c0cb0, type: 3}
-  ActiveSprite: {fileID: 0}
-  PolygonColliderPath:
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  ItemSlots: 10
+  ObjectToSpawn: {fileID: 696604592903231111, guid: 6a493f854f5bc054ab41008e02af6854, type: 3}
+  ObjectRotationSprites: []
+  tileSpriteOffset: {x: 0, y: 0, z: 0}
+  ItemSlots: 12

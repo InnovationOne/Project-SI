@@ -68,8 +68,10 @@ public class InventorySlot : MonoBehaviour,
     public void SetButtonIndex(int idx) {
         _buttonIdx = idx;
         if (_itemPanel == null) {
-            _itemPanel = GetComponentInParent<ItemContainerUI>();
-            if (_itemPanel == null) Debug.LogError("ItemContainerUI not found in parent.");
+            _itemPanel = GetComponentInParentIncludeInactive<ItemContainerUI>();
+            if (_itemPanel == null) {
+                Debug.LogError("ItemContainerUI not found in parent.");
+            }
         }
     }
 
@@ -168,4 +170,16 @@ public class InventorySlot : MonoBehaviour,
     }
 
     #endregion -------------------- Drag and Drop Handlers --------------------
+
+    private T GetComponentInParentIncludeInactive<T>() where T : Component {
+        Transform current = transform;
+        while (current != null) {
+            T component = current.GetComponent<T>();
+            if (component != null) {
+                return component;
+            }
+            current = current.parent;
+        }
+        return null;
+    }
 }

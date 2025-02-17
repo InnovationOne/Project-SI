@@ -18,7 +18,7 @@ public abstract class AdjustingObject : PlaceableObject {
     protected int _patternIndex;
 
     [NonSerialized] private float _maxDistanceToPlayer;
-    public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
+    public override float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
 
    
 
@@ -51,7 +51,7 @@ public abstract class AdjustingObject : PlaceableObject {
     /// Initializes the AdjustingObject with the specified item ID.
     /// </summary>
     /// <param name="itemId">The ID of the item.</param>
-    public virtual void InitializePreLoad(int itemId) {
+    public override void InitializePreLoad(int itemId) {
         _itemId = itemId;
         _fencePosition = _grid.WorldToCell(transform.position);
         InitializeAdjacentPositions();
@@ -133,11 +133,11 @@ public abstract class AdjustingObject : PlaceableObject {
     /// <summary>
     /// Picks up the object and updates neighbor connections.
     /// </summary>
-    public virtual void PickUpItemsInPlacedObject(PlayerController player) {
+    public override void PickUpItemsInPlacedObject(PlayerController player) {
         UpdateNeighborConnections(false);
         // Additional pick up logic can be implemented here
     }
-    public virtual void Interact(PlayerController player) { }
+    public override void Interact(PlayerController player) { }
 
     /// <summary>
     /// Compares two boolean arrays for equality.

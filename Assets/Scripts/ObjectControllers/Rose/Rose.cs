@@ -329,7 +329,8 @@ public class Rose : PlaceableObject {
     private RoseSO RoseSO => GameManager.Instance.ItemManager.ItemDatabase[ItemId] as RoseSO;
 
     [NonSerialized] private float _maxDistanceToPlayer;
-    public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
+    public override float MaxDistanceToPlayer => throw new NotImplementedException();
+
 
     /// <summary>
     /// Gets the RoseSO associated with the partner Rose.
@@ -344,7 +345,7 @@ public class Rose : PlaceableObject {
         public Vector3 PartnerPosition;
     }
 
-    public override string SaveObject() {
+    public override FixedString4096Bytes SaveObject() {
         var roseDataJson = new RoseData {
             ItemId = ItemId,
             Timer = _timer,
@@ -352,7 +353,7 @@ public class Rose : PlaceableObject {
             PartnerPosition = PartnerPosition
         };
 
-        return JsonConvert.SerializeObject(roseDataJson);
+        return new FixedString4096Bytes(JsonConvert.SerializeObject(roseDataJson));
     }
 
     public override void LoadObject(FixedString4096Bytes data) {
@@ -366,5 +367,9 @@ public class Rose : PlaceableObject {
             PartnerPosition = roseData.PartnerPosition;
         }
     }
+
     #endregion
+
+
+    public override void InitializePreLoad(int itemId) { }
 }

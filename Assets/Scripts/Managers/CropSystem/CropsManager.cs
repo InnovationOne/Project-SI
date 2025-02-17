@@ -960,7 +960,7 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     }
 
     public void LoadData(GameData data) {
-        if (string.IsNullOrEmpty(data.CropsOnMap) || !_loadCrops) return;
+        if (!IsServer || string.IsNullOrEmpty(data.CropsOnMap) || !_loadCrops) return;
         var loadedList = JsonConvert.DeserializeObject<List<CropTile>>(data.CropsOnMap);
         CropTiles.Clear();
 

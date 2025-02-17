@@ -152,7 +152,7 @@ public class QuestManager : NetworkBehaviour, IDataPersistance {
 
     public void LoadData(GameData data) {
         // Check if an found item container exists
-        if (string.IsNullOrEmpty(data.QuestData)) {
+        if (!IsServer || string.IsNullOrEmpty(data.QuestData)) {
             return;
         }
 

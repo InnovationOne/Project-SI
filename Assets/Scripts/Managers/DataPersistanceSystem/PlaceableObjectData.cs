@@ -13,26 +13,26 @@ public abstract class PlaceableObject : NetworkBehaviour, IObjectDataPersistence
     // Stores data about this placeable object, including its position and state.
     public PlaceableObjectData PlaceableObjectData;
 
-    // This property is implemented by subclasses to define interaction distance.
-    public virtual float MaxDistanceToPlayer => throw new NotImplementedException();
+    // This property is implemented by subclasses to define interaction distance (How far a player can still interact with a placed object).
+    public abstract float MaxDistanceToPlayer { get; }
 
     // Called before object data loading. Used by subclasses to set up initial state if needed.
-    public virtual void InitializePreLoad(int itemId) { }
+    public abstract void InitializePreLoad(int itemId);
 
     // Called after object data loading. Used by subclasses to finalize initialization.
-    public virtual void InitializePostLoad() { }
+    public abstract void InitializePostLoad();
 
     // Loads object state from the given data string.
-    public virtual void LoadObject(FixedString4096Bytes data) { }
+    public abstract void LoadObject(FixedString4096Bytes data);
 
     // Saves the current state of the object as a serialized string.
-    public virtual string SaveObject() { return string.Empty; }
+    public abstract FixedString4096Bytes SaveObject();
 
     // Called when a player interacts with this object.
-    public virtual void Interact(PlayerController player) { }
+    public abstract void Interact(PlayerController player);
 
     // Called when a player picks up items stored within this placed object.
-    public virtual void PickUpItemsInPlacedObject(PlayerController player) { }
+    public abstract void PickUpItemsInPlacedObject(PlayerController player);
 }
 
 /// <summary>

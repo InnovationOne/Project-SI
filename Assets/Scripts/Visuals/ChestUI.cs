@@ -52,11 +52,12 @@ public class ChestUI : ItemContainerUI {
 
         if (_sortBtn != null) _sortBtn.onClick.AddListener(() => _playerInventoryController.InventoryContainer.SortItems());
         if (_trashBtn != null) _trashBtn.onClick.AddListener(() => _playerItemDragAndDropController.ClearDragItem());
-        if (_closeButton != null) _closeButton.onClick.AddListener(() => _playerInteractController.ReInteract());
+        if (_closeButton != null) _closeButton.onClick.AddListener(() => _playerInteractController.StopInteract());
     }
 
     // Displays dynamic chest slots.
     public void ShowChestUI(ItemContainerSO itemContainer) {
+        Debug.Log("Showing chest UI");
         gameObject.SetActive(true);
         ItemContainer = itemContainer;
 

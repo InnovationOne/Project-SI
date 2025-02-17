@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60a0d3fc367136548bd09bfcbdac624d, type: 3}
   m_Name: Gold Chest
   m_EditorClassIdentifier: 
-  ItemId: 0
+  ItemId: 334
   ItemType: 4
   ItemName: Gold Chest
   ItemIcon: {fileID: 72597295, guid: 30b573e44bee4814d847a611a39c0cb0, type: 3}
@@ -25,14 +25,8 @@ MonoBehaviour:
   ItemInfoHoverText: 
   LeftClickAction:
   - {fileID: 11400000, guid: e5b4043eabb4dba4b9bd42c80b78d631, type: 2}
-  ObjectType: 2
   ItemsToCraftList: []
-  ItemToPickUpObject: {fileID: 11400000, guid: 0455e7dd00e1df9479f2289b436f95bf, type: 2}
-  InactiveSprite: {fileID: 72597295, guid: 30b573e44bee4814d847a611a39c0cb0, type: 3}
-  ActiveSprite: {fileID: 1749757623, guid: 54fea385bd79db34c9d53a1f8c582934, type: 3}
-  PolygonColliderPath:
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  ItemSlots: 40
+  ObjectToSpawn: {fileID: 5927002560458439285, guid: 7d07178aa1e0d5545a1e04b190eaafcf, type: 3}
+  ObjectRotationSprites: []
+  tileSpriteOffset: {x: 0, y: 0, z: 0}
+  ItemSlots: 32
