@@ -1,10 +1,10 @@
 #if UNITY_EDITOR
 using UnityEngine;
-using UnityEditor;
-using UnityEditor.Animations;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEditor;
+using UnityEditor.Animations;
 
 /// <summary>
 /// Provides a custom Editor Window to generate animation clips and override controllers from sliced textures.

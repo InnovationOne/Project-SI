@@ -42,7 +42,8 @@ RenderSettings:
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 12
+  serializedVersion: 13
+  m_BakeOnSceneLoad: 0
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -267,6 +268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6719dd64341a0d43898c140b65b8b7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _textComponent: {fileID: 0}
 --- !u!1 &127973796
 GameObject:
   m_ObjectHideFlags: 0
@@ -418,6 +420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6719dd64341a0d43898c140b65b8b7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _textComponent: {fileID: 0}
 --- !u!1 &168574756
 GameObject:
   m_ObjectHideFlags: 0
@@ -462,34 +465,62 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70a80619c43be22488e3e73a23e25373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <SeasonTheme>k__BackingField:
-    Guid:
-      Data1: 390591266
-      Data2: 1163801395
-      Data3: 1834422146
-      Data4: -171855394
-    Path: event:/Music/Seasons
-  <TitleTheme>k__BackingField:
+  <Title>k__BackingField:
     Guid:
       Data1: -2079989818
       Data2: 1230313502
       Data3: -969746801
       Data4: 2101430498
-    Path: event:/Music/TitleTheme
-  <LoadingTheme>k__BackingField:
+    Path: event:/Music/Title
+  <Loading>k__BackingField:
     Guid:
       Data1: -1982843576
       Data2: 1253425051
       Data3: -490326095
       Data4: 1004416554
     Path: event:/Music/Loading
-  <WeatherAmbience>k__BackingField:
+  <Seasons>k__BackingField:
     Guid:
-      Data1: 1995691291
-      Data2: 1294888818
-      Data3: -1187991652
-      Data4: 1183881452
-    Path: event:/Ambience/Weather
+      Data1: -342040179
+      Data2: 1130309669
+      Data3: -1377239659
+      Data4: 724150718
+    Path: event:/Music/Seasons
+  <CaveMusic>k__BackingField:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  <BossFight>k__BackingField:
+    Guid:
+      Data1: 1005851953
+      Data2: 1162706703
+      Data3: 1789404345
+      Data4: 1679632539
+    Path: event:/Music/BossFight
+  <Church_Bells>k__BackingField:
+    Guid:
+      Data1: 967344135
+      Data2: 1187438675
+      Data3: 1573745044
+      Data4: -555914655
+    Path: event:/Ambience/Curch Bells
+  <Ocean_Shore>k__BackingField:
+    Guid:
+      Data1: 35173990
+      Data2: 1154369533
+      Data3: -343020865
+      Data4: -1149394709
+    Path: event:/Ambience/Ocean Shore
+  <River>k__BackingField:
+    Guid:
+      Data1: -1972405970
+      Data2: 1133531171
+      Data3: 94872748
+      Data4: -937256662
+    Path: event:/Ambience/River
   <Thunder>k__BackingField:
     Guid:
       Data1: 1722642744
@@ -497,34 +528,146 @@ MonoBehaviour:
       Data3: 205176194
       Data4: -1540709306
     Path: event:/Ambience/Thunder
-  <HitTreeSFX>k__BackingField:
+  <Waterfall>k__BackingField:
     Guid:
-      Data1: -1447766655
-      Data2: 1128049754
-      Data3: 1992628630
-      Data4: -418733698
-    Path: event:/SFX/Cut Tree
-  <WaterDropSFX>k__BackingField:
+      Data1: 481243150
+      Data2: 1215408113
+      Data3: -146458237
+      Data4: -754156380
+    Path: event:/Ambience/Waterfall
+  <Weather>k__BackingField:
     Guid:
-      Data1: 937288993
-      Data2: 1139382816
-      Data3: -1169112131
-      Data4: 144566856
-    Path: event:/SFX/BlobberInWater
-  <FishBitSFX>k__BackingField:
+      Data1: 1884884746
+      Data2: 1305018255
+      Data3: 930076306
+      Data4: 2104860549
+    Path: event:/Ambience/Weather
+  <CaveAmbience>k__BackingField:
     Guid:
-      Data1: -692671678
-      Data2: 1165563584
-      Data3: -1094563196
-      Data4: 560370460
-    Path: event:/SFX/FishBit
-  <PlayerWalkGrassSFX>k__BackingField:
+      Data1: 1731233541
+      Data2: 1282740997
+      Data3: -355820647
+      Data4: -556489479
+    Path: event:/Ambience/Cave
+  <Footsteps>k__BackingField:
     Guid:
-      Data1: -208925091
-      Data2: 1105752206
-      Data3: 2121531326
-      Data4: 882437239
-    Path: event:/SFX/PlayerFootstepsGras
+      Data1: -1303700149
+      Data2: 1178105785
+      Data3: 1388194479
+      Data4: 468844703
+    Path: event:/SFX/Footsteps
+  <Dash>k__BackingField:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  <Teleport>k__BackingField:
+    Guid:
+      Data1: 1434472155
+      Data2: 1241141350
+      Data3: 1669304977
+      Data4: -750372729
+    Path: event:/SFX/Teleport
+  <Axe_Hit_Wood>k__BackingField:
+    Guid:
+      Data1: 1166190329
+      Data2: 1161585379
+      Data3: 1565107847
+      Data4: 2094498868
+    Path: event:/SFX/Tools/Axe Hit Wood
+  <Axe_Breake_Wood>k__BackingField:
+    Guid:
+      Data1: -1521712696
+      Data2: 1191119797
+      Data3: 1382946184
+      Data4: 110408763
+    Path: event:/SFX/Tools/Axe Breake Wood
+  <Pickaxe_Hit_Rock>k__BackingField:
+    Guid:
+      Data1: 78790227
+      Data2: 1331170837
+      Data3: 1079737527
+      Data4: 2122553435
+    Path: event:/SFX/Tools/Pickaxe Hit Rock
+  <Pickaxe_Breake_Rock>k__BackingField:
+    Guid:
+      Data1: -1612395923
+      Data2: 1295033190
+      Data3: -1644911205
+      Data4: -1526729245
+    Path: event:/SFX/Tools/Pickaxe Breake Rock
+  <Fishing_Water_Drop>k__BackingField:
+    Guid:
+      Data1: -506909033
+      Data2: 1093740625
+      Data3: 1793578398
+      Data4: 1267022596
+    Path: event:/SFX/Tools/Fishing Water Drop
+  <Fishing_Reel_Backwards>k__BackingField:
+    Guid:
+      Data1: -1751174205
+      Data2: 1148322266
+      Data3: -437032023
+      Data4: -32585114
+    Path: event:/SFX/Tools/Fishing Reel Backwards
+  <Fishing_Quickly_Reel_In>k__BackingField:
+    Guid:
+      Data1: 1718343219
+      Data2: 1100790680
+      Data3: 853361027
+      Data4: 489459999
+    Path: event:/SFX/Tools/Fishing Quickly Reel In
+  <Hit_Unhittable_Object>k__BackingField:
+    Guid:
+      Data1: -30653675
+      Data2: 1102888701
+      Data3: -177912442
+      Data4: -1326088565
+    Path: event:/SFX/Weapon/Hit Unhittable Object
+  <Pull_Weapon>k__BackingField:
+    Guid:
+      Data1: 266570646
+      Data2: 1227967843
+      Data3: 1521145999
+      Data4: -221059067
+    Path: event:/SFX/Weapon/Pull Weapon
+  <Shoot_Arrow>k__BackingField:
+    Guid:
+      Data1: 298487633
+      Data2: 1187477494
+      Data3: -1047772226
+      Data4: 2101242808
+    Path: event:/SFX/Weapon/Shoot Arrow
+  <Whip_Weapon>k__BackingField:
+    Guid:
+      Data1: 1629887324
+      Data2: 1163004716
+      Data3: -889643852
+      Data4: 1522378969
+    Path: event:/SFX/Weapon/Whip Weapon
+  <ItemPickup>k__BackingField:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  <ItemDrop>k__BackingField:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  <ItemShift>k__BackingField:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
 --- !u!1 &279979928
 GameObject:
   m_ObjectHideFlags: 0
@@ -803,6 +946,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6719dd64341a0d43898c140b65b8b7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _textComponent: {fileID: 0}
 --- !u!1 &529650458
 GameObject:
   m_ObjectHideFlags: 0
@@ -2076,6 +2220,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6719dd64341a0d43898c140b65b8b7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _textComponent: {fileID: 0}
 --- !u!1 &1843486455
 GameObject:
   m_ObjectHideFlags: 0

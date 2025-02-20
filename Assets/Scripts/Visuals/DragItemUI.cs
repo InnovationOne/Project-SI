@@ -3,39 +3,22 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class DragItemUI : MonoBehaviour {
-    public static DragItemUI Instance { get; private set; }
-
     [SerializeField] private Image _itemIconImage;
-    [SerializeField] private Image _itemAmountBackgroundImage;
     [SerializeField] private TextMeshProUGUI _itemAmountText;
 
-
-    private void Awake() {
-        if (Instance != null) {
-            Debug.LogError("There is more than one instance of DragItemPanel in the scene!");
-            return;
-        }
-        Instance = this;
+    private void Start() {
+        gameObject.SetActive(false);
     }
-
-    private void Start() => gameObject.SetActive(false);
 
     public void SetItemSlot(ItemSlot itemSlot) {
-        _itemIconImage.gameObject.SetActive(true);
-        _itemIconImage.sprite = GameManager.Instance.ItemManager.ItemDatabase[itemSlot.ItemId].ItemIcon;
-
-        if (GameManager.Instance.ItemManager.ItemDatabase[itemSlot.ItemId].IsStackable) {
-            _itemAmountBackgroundImage.gameObject.SetActive(true);
-            _itemAmountText.text = itemSlot.Amount.ToString();
-        } else {
-            _itemAmountBackgroundImage.gameObject.SetActive(false);
-            _itemAmountText.text = string.Empty;
+        if (itemSlot.IsEmpty) {
+            gameObject.SetActive(false);
+            return;
         }
-    }
 
-    public void ClearItemSlot() {
-        _itemIconImage.gameObject.SetActive(false);
-        _itemAmountText.text = string.Empty;
-        _itemAmountBackgroundImage.gameObject.SetActive(false);
+        var item = GameManager.Instance.ItemManager.ItemDatabase[itemSlot.ItemId];
+        _itemIconImage.sprite = item.ItemIcon;
+        _itemAmountText.text = item.IsStackable ? itemSlot.Amount.ToString() : string.Empty;
+        gameObject.SetActive(true);
     }
 }

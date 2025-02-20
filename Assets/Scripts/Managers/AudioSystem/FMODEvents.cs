@@ -3,6 +3,17 @@ using FMODUnity;
 using Unity.VisualScripting;
 
 public class FMODEvents : MonoBehaviour {
+    public static FMODEvents Instance { get; private set; }
+
+    void Awake() {
+        if (Instance != null) {
+            Debug.LogError("There is more than one instance of FMODEvents in the scene!");
+            Destroy(this);
+            return;
+        }
+        Instance = this;
+    }
+
     [field: Header("Music")]
     [field: SerializeField] public EventReference Title { get; private set; }
     [field: SerializeField] public EventReference Loading { get; private set; }

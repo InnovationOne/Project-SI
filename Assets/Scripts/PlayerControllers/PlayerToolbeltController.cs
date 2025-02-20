@@ -12,7 +12,7 @@ public class PlayerToolbeltController : MonoBehaviour, IPlayerDataPersistance {
     public ReadOnlyCollection<int> ToolbeltSizes { get; private set; } = Array.AsReadOnly(new int[] { 5, 7, 10 });
     public int CurrentToolbeltSize { get; private set; }
 
-    const int MAX_TOOLBELTS = 3;
+    const int MAX_TOOLBELTS = 4;
     int _selectedToolSlot = 0;
     int _selectedToolbelt = 0;
     bool _toolbeltSelectionBlocked = false;
@@ -28,8 +28,8 @@ public class PlayerToolbeltController : MonoBehaviour, IPlayerDataPersistance {
     #region -------------------- Unity Lifecycle --------------------
 
     void Start() {
-        _toolbeltUI = ToolbeltUI.Instance;
-        _inventoryUI = InventoryUI.Instance;
+        _toolbeltUI = UIManager.Instance.ToolbeltUI;
+        _inventoryUI = UIManager.Instance.InventoryUI;
         _inputManager = GameManager.Instance.InputManager;
         _pauseGameManager = GameManager.Instance.PauseGameManager;
         _playerMovement = GetComponent<PlayerMovementController>();
@@ -112,7 +112,7 @@ public class PlayerToolbeltController : MonoBehaviour, IPlayerDataPersistance {
             : (_selectedToolbelt - 1 + MAX_TOOLBELTS) % MAX_TOOLBELTS;
 
         _toolbeltUI.ToolbeltChanged(_selectedToolbelt);
-        int shiftAmount = isNext ? ToolbeltSizes[^1] : -ToolbeltSizes[^1];
+        int shiftAmount = isNext ? -ToolbeltSizes[^1] : ToolbeltSizes[^1];
         _inventoryController.InventoryContainer.ShiftSlots(shiftAmount);
 
         _toolbeltUI.ShowUIButtonContains();
@@ -131,7 +131,7 @@ public class PlayerToolbeltController : MonoBehaviour, IPlayerDataPersistance {
 
     // Drops an item from the selected slot if drag UI is inactive.
     void OnDropItemAction() {
-        if (DragItemUI.Instance.gameObject.activeSelf) return;
+        if (UIManager.Instance.DragItemUI.gameObject.activeSelf) return;
         var toolbeltItem = GetCurrentlySelectedToolbeltItemSlot();
         if (toolbeltItem == null) return;
 
@@ -164,7 +164,7 @@ public class PlayerToolbeltController : MonoBehaviour, IPlayerDataPersistance {
         CurrentToolbeltSize = ToolbeltSizes[toolbeltSizeId];
         _toolbeltUI.SetToolbeltSize(CurrentToolbeltSize);
         _toolbeltUI.SetToolbeltSlotHighlight(_selectedToolSlot);
-        _inventoryUI.InventoryOrToolbeltSizeChanged();
+        _inventoryUI.ToolbeltSizeChanged();
     }
 
     // Clears the item in the current toolbelt slot.
@@ -175,6 +175,7 @@ public class PlayerToolbeltController : MonoBehaviour, IPlayerDataPersistance {
 
     // Retrieves the currently selected item slot.
     public ItemSlot GetCurrentlySelectedToolbeltItemSlot() {
+        if (_inventoryController == null) return null;
         var slots = _inventoryController.InventoryContainer.ItemSlots;
         return (slots != null && slots.Count > _selectedToolSlot) 
             ? slots[_selectedToolSlot] 

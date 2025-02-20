@@ -19,8 +19,6 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(PauseGameManager))]
 [RequireComponent(typeof(PlaceableObjectsManager))]
 [RequireComponent(typeof(EventsManager))]
-[RequireComponent(typeof(AudioManager))]
-[RequireComponent(typeof(FMODEvents))]
 [RequireComponent(typeof(WeatherManager))]
 public class GameManager : NetworkBehaviour, IDataPersistance {
     public static GameManager Instance { get; private set; }
@@ -82,8 +80,8 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         PauseGameManager = GetComponent<PauseGameManager>();
         PlaceableObjectsManager = GetComponent<PlaceableObjectsManager>();
         EventsManager = GetComponent<EventsManager>();
-        AudioManager = GetComponent<AudioManager>();
-        FMODEvents = GetComponent<FMODEvents>();
+        AudioManager = AudioManager.Instance;
+        FMODEvents = FMODEvents.Instance;
         WeatherManager = GetComponent<WeatherManager>();
     }
 

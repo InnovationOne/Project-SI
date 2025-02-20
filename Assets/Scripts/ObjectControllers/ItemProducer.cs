@@ -112,21 +112,19 @@ public class ItemProducer : PlaceableObject {
         public int ItemId;
     }
 
-    public override FixedString4096Bytes SaveObject() {
+    public override string SaveObject() {
         var itemProducerJson = new ItemProducerData {
             RecipeId = _recipeId,
             Timer = _timer,
             ItemId = _itemId
         };
 
-        return new FixedString4096Bytes(JsonConvert.SerializeObject(itemProducerJson));
+        return JsonConvert.SerializeObject(itemProducerJson);
     }
 
-    public override void LoadObject(FixedString4096Bytes data) {
-        string jsonData = data.ToString();
-
-        if (!string.IsNullOrEmpty(jsonData)) {
-            var itemProducerData = JsonConvert.DeserializeObject<ItemProducerData>(jsonData);
+    public override void LoadObject(string data) {
+        if (!string.IsNullOrEmpty(data)) {
+            var itemProducerData = JsonConvert.DeserializeObject<ItemProducerData>(data);
             _recipeId = itemProducerData.RecipeId;
             _timer = itemProducerData.Timer;
             _itemId = itemProducerData.ItemId;

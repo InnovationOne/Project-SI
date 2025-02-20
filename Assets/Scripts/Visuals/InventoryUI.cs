@@ -3,31 +3,32 @@ using UnityEngine.UI;
 
 // Backpack panel UI for displaying and interacting with the player’s inventory.
 public class InventoryUI : ItemContainerUI {
-    public static InventoryUI Instance { get; private set; }
-    public int LastSlotId { get; private set; }
+    public int LastSlotId { get; private set; } = -1;
 
     [Header("Buttons")]
     [SerializeField] Button _sortButton;
     [SerializeField] Button _trashButton;
+    [SerializeField] Button _upBtn;
+    [SerializeField] Button _downBtn;
 
     ItemSpawnManager _itemSpawnManager;
     PlayerInventoryController _playerInventoryController;
     PlayerToolbeltController _playerToolbeltController;
     PlayerItemDragAndDropController _playerItemDragAndDropController;
     PlayerMovementController _playerMovementController;
+    ClothingUI _clothingUI;
+    ChestUI _chestUI;
+    DragItemUI _dragItemUI;
 
     void Awake() {
-        if (Instance != null) {
-            Debug.LogError("There is more than one instance of InventoryPanel in the scene!");
-            return;
-        }
-        Instance = this;
         PlayerController.OnLocalPlayerSpawned += CatchReferences;
-
     }
 
     void Start() {
         _itemSpawnManager = GameManager.Instance.ItemSpawnManager;
+        _clothingUI = UIManager.Instance.ClothingUI;
+        _chestUI = UIManager.Instance.ChestUI;
+        _dragItemUI = UIManager.Instance.DragItemUI;
         ItemContainerUIAwake();
         ItemContainer.OnItemsUpdated += ShowUIButtonContains;
         Init();
@@ -47,68 +48,111 @@ public class InventoryUI : ItemContainerUI {
         _playerItemDragAndDropController = playerController.PlayerItemDragAndDropController;
         _playerMovementController = playerController.PlayerMovementController;
 
-        _sortButton.onClick.AddListener(() => _playerInventoryController.InventoryContainer.SortItems());
+        _sortButton.onClick.AddListener(() => _playerInventoryController.InventoryContainer.SortItems(true));
         _trashButton.onClick.AddListener(() => _playerItemDragAndDropController.ClearDragItem());
+        _upBtn.onClick.AddListener(() => playerController.PlayerToolbeltController.ToggleToolbelt(false));
+        _downBtn.onClick.AddListener(() => playerController.PlayerToolbeltController.ToggleToolbelt(true));
     }
 
     // Refreshes UI after changes in inventory or toolbelt capacity.
-    public void InventoryOrToolbeltSizeChanged() {
+    public void InventorySizeChanged() {
         if (_playerInventoryController == null || _playerToolbeltController == null || _playerItemDragAndDropController == null) CatchReferences(PlayerController.LocalInstance);
 
-        int toolbeltSize = _playerToolbeltController.CurrentToolbeltSize;
         int maxToolbeltSize = _playerToolbeltController.ToolbeltSizes[^1];
         int inventorySize = _playerInventoryController.CurrentInventorySize;
 
         for (int i = 0; i < ItemButtons.Length; i++) {
-            if (i < maxToolbeltSize) ItemButtons[i].SetInteractable(i < toolbeltSize);  // Toolbelt slots.
-            else ItemButtons[i].SetInteractable(i < (maxToolbeltSize + inventorySize)); // Inventory slots.
+            if (i >= maxToolbeltSize) ItemButtons[i].SetInteractable(i < (maxToolbeltSize + inventorySize));
+        }
+    }
+
+    public void ToolbeltSizeChanged() {
+        int toolbeltSize = _playerToolbeltController.CurrentToolbeltSize;
+        int maxToolbeltSize = _playerToolbeltController.ToolbeltSizes[^1];
+
+        for (int i = 0; i < maxToolbeltSize; i++) {
+            ItemButtons[i].SetInteractable(i < toolbeltSize);
         }
     }
 
     // Handles left-click events on slots; shift-click merges items, otherwise picks up or drags the item.
     public override void OnPlayerLeftClick(int buttonIndex) {
         var slot = ItemContainer.ItemSlots[buttonIndex];
+        int toolbeltSize = _playerToolbeltController.CurrentToolbeltSize;
 
-        // SHIFT-CLICK BEHAVIOR
+        // ----- SHIFT-CLICK logic -----
         if (GameManager.Instance.InputManager.GetShiftPressed()) {
-            // 1) Inventory => Chest
-            if (ChestUI.Instance != null && ChestUI.Instance.gameObject.activeSelf) {
+            // TOOLBELT -> CLOTHING (if clothing UI is open and the item is clothing)
+            if (buttonIndex < toolbeltSize && !slot.IsEmpty) {
+                var itemSO = GameManager.Instance.ItemManager.ItemDatabase[slot.ItemId];
+                if (_clothingUI != null && _clothingUI.gameObject.activeSelf && itemSO is ClothingSO clothingItem) {
+                    TryShiftClothingItemToClothingUI(clothingItem, slot);
+                    ShowUIButtonContains();
+                    ItemContainer.UpdateUI();
+                    _clothingUI.ShowUIButtonContains();
+                    _clothingUI.UpdatePlayerVisual();
+                    return;
+                }
+            }
+
+            // TOOLBELT -> INVENTORY (if clicked slot is within toolbelt range)
+            if (buttonIndex < toolbeltSize) {
                 if (!slot.IsEmpty) {
-                    int leftover = ChestUI.Instance.PublicItemContainer.AddItem(slot, true);
+                    int leftover = _playerInventoryController.InventoryContainer.AddItem(slot, true);
                     if (leftover > 0) slot.Set(new ItemSlot(slot.ItemId, leftover, slot.RarityId));
                     else slot.Clear();
                     GameManager.Instance.AudioManager.PlayOneShot(GameManager.Instance.FMODEvents.ItemShift, transform.position);
+                    ShowUIButtonContains();
+                    ItemContainer.UpdateUI();
                 }
-                ShowUIButtonContains();
                 return;
             }
 
-            // 2) Inventory => Clothing (if it's a Clothing item)
-            if (ClothingUI.Instance != null && ClothingUI.Instance.gameObject.activeSelf) {
-                var itemSO = GameManager.Instance.ItemManager.ItemDatabase[slot.ItemId];
-                if (itemSO is ClothingSO clothingItem) {
-                    TryShiftClothingItemToClothingUI(clothingItem, slot);
+            // INVENTORY -> CLOTHING (if clothing UI is open)
+            if (_clothingUI != null && _clothingUI.gameObject.activeSelf) {
+                if (!slot.IsEmpty) {
+                    var itemSO = GameManager.Instance.ItemManager.ItemDatabase[slot.ItemId];
+                    if (itemSO is ClothingSO clothingItem) {
+                        TryShiftClothingItemToClothingUI(clothingItem, slot);
+                        ShowUIButtonContains();
+                        ItemContainer.UpdateUI();
+                        _clothingUI.ShowUIButtonContains();
+                        _clothingUI.UpdatePlayerVisual();
+                        return;
+                    }
                 }
-                ShowUIButtonContains();
+            }
+
+            // INVENTORY -> CHEST (if chest UI is open)
+            if (_chestUI != null && _chestUI.gameObject.activeSelf) {
+                if (!slot.IsEmpty) {
+                    int leftover = _chestUI.PublicItemContainer.AddItem(slot, true);
+                    if (leftover > 0)
+                        slot.Set(new ItemSlot(slot.ItemId, leftover, slot.RarityId));
+                    else
+                        slot.Clear();
+                    GameManager.Instance.AudioManager.PlayOneShot(GameManager.Instance.FMODEvents.ItemShift, transform.position);
+                    ShowUIButtonContains();
+                    _chestUI.ShowUIButtonContains();
+                    _chestUI.PublicItemContainer.UpdateUI();
+                }
                 return;
             }
 
-            // 3) Inventory => Toolbelt (check if slot is in inventory)
-            int toolbeltSize = _playerToolbeltController.CurrentToolbeltSize;
-            if (buttonIndex < toolbeltSize) return;
-
-            // 4) Inventory => Toolbelt (default)
+            // Default SHIFT behavior (Inventory -> Toolbelt)
             if (!slot.IsEmpty) {
                 int leftover = _playerInventoryController.InventoryContainer.AddItem(slot, false);
-                if (leftover > 0) slot.Set(new ItemSlot(slot.ItemId, leftover, slot.RarityId));
-                else slot.Clear();
+                if (leftover > 0)
+                    slot.Set(new ItemSlot(slot.ItemId, leftover, slot.RarityId));
+                else
+                    slot.Clear();
                 GameManager.Instance.AudioManager.PlayOneShot(GameManager.Instance.FMODEvents.ItemShift, transform.position);
+                ShowUIButtonContains();
             }
-            ShowUIButtonContains();
             return;
         }
         LastSlotId = buttonIndex;
-        _playerItemDragAndDropController.OnLeftClick(ItemContainer.ItemSlots[buttonIndex]);
+        _playerItemDragAndDropController.OnLeftClick(slot);
         ShowUIButtonContains();
     }
 
@@ -120,7 +164,7 @@ public class InventoryUI : ItemContainerUI {
         int newItemRarity = inventorySlot.RarityId;
         inventorySlot.Clear();
 
-        var clothingSlots = ClothingUI.Instance.PlayerClothingUIItemContainer.ItemSlots;
+        var clothingSlots = _clothingUI.PlayerClothingUIItemContainer.ItemSlots;
         var torsoSlot = clothingSlots[(int)ClothingSO.ClothingType.Torso];
         var legsSlot = clothingSlots[(int)ClothingSO.ClothingType.Legs];
 
@@ -199,6 +243,6 @@ public class InventoryUI : ItemContainerUI {
     // Handles right-click actions for drag-and-drop.
     public override void OnPlayerRightClick(int buttonIndex) {
         LastSlotId = buttonIndex;
-        if (DragItemUI.Instance.gameObject.activeSelf) _playerItemDragAndDropController.OnRightClick(ItemContainer.ItemSlots[buttonIndex]);
+        if (_dragItemUI.gameObject.activeSelf) _playerItemDragAndDropController.OnRightClick(ItemContainer.ItemSlots[buttonIndex]);
     }
 }

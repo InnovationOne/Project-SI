@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -9,20 +10,38 @@ public class Chest : PlaceableObject {
     [SerializeField] SpriteRenderer _openedSprite;
 
     // Maximum distance at which players can interact with this chest.
-    public override float MaxDistanceToPlayer => 1.5f;
+    public override float MaxDistanceToPlayer => 2f;
 
     // Tracks if the chest is currently open. Updated by the server, read by clients.
     NetworkVariable<bool> _isOpenNetworked = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     NetworkVariable<ulong> _chestOpenedByClientId = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     ItemContainerSO _itemContainer;
-    ChestUI _chestUI;
+    UIManager _uIManager;
     int _itemId;
+
+    string _lastChestState = "";
+    bool _isLoading = false;
+    bool _isSubscribed = false;
+
+    void OnChestItemsUpdated() {
+        if (_isLoading) return;
+        var data = SaveObject();
+        if (data == _lastChestState) return;
+        _lastChestState = data;
+        Vector3Int cellPos = Vector3Int.FloorToInt(transform.position - new Vector3(0f, 0.5f, 0f));
+        if (PlaceableObjectsManager.Instance != null) {
+            PlaceableObjectsManager.Instance.UpdatePlaceableObjectStateServerRpc(new Vector3IntSerializable(cellPos), data);
+        }
+        UpdateVisual(_isOpenNetworked.Value);
+        UIManager.Instance.ChestUI.ShowUIButtonContains();
+        //UpdateUI(_isOpenNetworked.Value);
+    }
 
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
-        _chestUI = ChestUI.Instance;
-        // Whenever _isOpenNetworked changes, update the visuals/UI accordingly.
+        _uIManager = UIManager.Instance;
+
         _isOpenNetworked.OnValueChanged += (oldValue, newValue) => {
             UpdateVisual(newValue);
             UpdateUI(newValue);
@@ -33,11 +52,39 @@ public class Chest : PlaceableObject {
         UpdateUI(_isOpenNetworked.Value);
     }
 
+    private void Update() {
+        // Auto-close chest when the opener moves too far away.
+        if (_isOpenNetworked.Value && _chestOpenedByClientId.Value == NetworkManager.Singleton.LocalClientId) {
+            var localPlayer = PlayerController.LocalInstance;
+            if (localPlayer != null && Vector3.Distance(transform.position, localPlayer.transform.position) > MaxDistanceToPlayer) {
+                if (IsServer) TryToggleChestServer(NetworkManager.Singleton.LocalClientId);
+                else RequestToggleChestServerRpc(NetworkManager.Singleton.LocalClientId, localPlayer.transform.position);
+            }
+        }
+
+        // Check for chest content changes
+        if (_itemContainer != null) {
+            string currentState = SaveObject();
+            if (currentState != _lastChestState) {
+                _lastChestState = currentState;
+                Vector3Int cellPos = Vector3Int.FloorToInt(transform.position - new Vector3(0f, 0.5f, 0f));
+                if (PlaceableObjectsManager.Instance != null) {
+                    PlaceableObjectsManager.Instance.UpdatePlaceableObjectStateServerRpc(new Vector3IntSerializable(cellPos), currentState);
+                }
+            }
+        }
+    }
+
     // Ensures the item container exists and is set up with the correct number of slots.
     void InitializeItemContainer() {
-        if (_itemContainer != null) return; 
-        _itemContainer = ScriptableObject.CreateInstance<ItemContainerSO>(); 
+        if (_itemContainer != null) return;
+        _itemContainer = ScriptableObject.CreateInstance<ItemContainerSO>();
         _itemContainer.Initialize(ChestSO.ItemSlots);
+        _itemContainer.MarkAsChestContainer();
+        if (!_isSubscribed) {
+            _itemContainer.OnItemsUpdated += OnChestItemsUpdated;
+            _isSubscribed = true;
+        }
     }
 
     // Sets up the chest data and visuals before it's fully loaded.
@@ -50,8 +97,6 @@ public class Chest : PlaceableObject {
 
     // Allows the player to interact with the chest, toggling its open/closed state.
     public override void Interact(PlayerController player) {
-        Debug.Log("Interacting with chest");
-        // If we are the server (or host), we can directly toggle. Otherwise, request it.
         if (IsServer) TryToggleChestServer(player.OwnerClientId);
         else RequestToggleChestServerRpc(player.OwnerClientId, player.transform.position);
     }
@@ -66,18 +111,12 @@ public class Chest : PlaceableObject {
 
     // If the chest is closed, open it; if open, close it. Only toggles if it's not already open by another client.
     void TryToggleChestServer(ulong requestingClientId) {
-        bool isCurrentlyOpen = _isOpenNetworked.Value;
-
-        // If the chest is closed, open it and mark the opener
-        if (!isCurrentlyOpen) {
+        if (!_isOpenNetworked.Value) {
             _isOpenNetworked.Value = true;
             _chestOpenedByClientId.Value = requestingClientId;
-        } else {
-            // If it's already open, ensure only the client who opened it can close it
-            if (_chestOpenedByClientId.Value == requestingClientId) {
-                _isOpenNetworked.Value = false;
-                _chestOpenedByClientId.Value = 0;
-            }
+        } else if (_chestOpenedByClientId.Value == requestingClientId) {
+            _isOpenNetworked.Value = false;
+            _chestOpenedByClientId.Value = 0;
         }
     }
 
@@ -90,17 +129,17 @@ public class Chest : PlaceableObject {
     // Updates the UI for this chest based on the open state.
     void UpdateUI(bool isOpen) {
         bool chestOpenedByMe = _chestOpenedByClientId.Value == NetworkManager.Singleton.LocalClientId;
-        if (isOpen && chestOpenedByMe) _chestUI.ShowChestUI(_itemContainer);
-        else _chestUI.HideChestUI();
+        if (isOpen && chestOpenedByMe) _uIManager.OpenChestUI(_itemContainer);
+        else _uIManager.CloseChestUI();
     }
 
     // Grants the player any items still inside the chest.
     public override void PickUpItemsInPlacedObject(PlayerController player) {
         foreach (var slot in _itemContainer.ItemSlots) {
-            int remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(slot, false);
-            if (remainingAmount > 0) {
+            int leftover = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(slot, false);
+            if (leftover > 0) {
                 GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
-                    slot,
+                    new ItemSlot(slot.ItemId, leftover, slot.RarityId),
                     transform.position,
                     PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
                     spreadType: ItemSpawnManager.SpreadType.Circle);
@@ -113,17 +152,20 @@ public class Chest : PlaceableObject {
 
     #region -------------------- Save & Load --------------------
 
-    public override FixedString4096Bytes SaveObject() {
-        return new FixedString4096Bytes(_itemContainer.SaveItemContainer());
+    public override string SaveObject() {
+        return _itemContainer.SaveItemContainer();
     }
 
-    public override void LoadObject(FixedString4096Bytes data) {
-        string jsonData = data.ToString();
+    public override void LoadObject(string data) {
+        if (string.IsNullOrEmpty(data) || data == _lastChestState) return;
+        _isLoading = true;
+        InitializeItemContainer();
 
-        if (!string.IsNullOrEmpty(jsonData)) {
-            InitializeItemContainer();
-            _itemContainer.LoadItemContainer(jsonData);
-        }
+        // Use the raw JSON string directly.
+        _itemContainer.LoadItemContainer(data);
+
+        _lastChestState = data;
+        _isLoading = false;
     }
 
     #endregion -------------------- Save & Load --------------------

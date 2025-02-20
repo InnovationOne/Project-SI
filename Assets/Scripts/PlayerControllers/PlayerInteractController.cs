@@ -1,4 +1,3 @@
-using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider2D))]
@@ -45,6 +44,11 @@ public class PlayerInteractController : MonoBehaviour {
 
     // Triggered by the interact button; finds and interacts with the closest valid interactable.
     void HandleInteractAction() {
+        if (UIManager.Instance.IsAnyBlockingUIOpen()) {
+            _currentInteractable?.Interact(_player);
+            return; 
+        }
+
         FindClosestInteractable();
         _currentInteractable?.Interact(_player);
     }

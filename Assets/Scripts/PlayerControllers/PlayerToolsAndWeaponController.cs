@@ -20,7 +20,6 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     PlayerMovementController _pMC;
     PlayerAnimationController _pAC;
     InputManager _inputManager;
-    InventoryMasterUI _inventoryMasterUI;
     AudioManager _audioManager;
     FMODEvents _fmodEvents;
 
@@ -47,7 +46,6 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
         _playerToolbeltController = GetComponent<PlayerToolbeltController>();
         _pHEC = GetComponent<PlayerHealthAndEnergyController>();
         _pMC = GetComponent<PlayerMovementController>();
-        _inventoryMasterUI = InventoryMasterUI.Instance;
         _pAC = GetComponent<PlayerAnimationController>();
 
         _audioManager = GameManager.Instance.AudioManager;
@@ -77,6 +75,7 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     }
 
     void HandleLeftClick() {
+        if (UIManager.Instance.IsAnyBlockingUIOpen()) return;
         var itemSO = GetItemSO();
         if (itemSO == null) return;
 
@@ -356,8 +355,6 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
     }
 
     ItemSO GetItemSO() {
-        if (_inventoryMasterUI.gameObject.activeSelf) return null;
-
         var selectedItemSlot = _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot();
         if (selectedItemSlot == null) return null;
         return GameManager.Instance.ItemManager.ItemDatabase[selectedItemSlot.ItemId];

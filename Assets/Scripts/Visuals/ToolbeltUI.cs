@@ -4,8 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class ToolbeltUI : ItemContainerUI {
-    public static ToolbeltUI Instance { get; private set; }
-
     public Action<int> OnToolbeltSlotLeftClick;
 
     [Header("Toolbelt Selection")]
@@ -23,15 +21,10 @@ public class ToolbeltUI : ItemContainerUI {
     int _lastSelectedToolbelt;
 
     void Awake() {
-        if (Instance != null) {
-            Debug.LogError("Multiple instances of ToolbeltUI found.");
-            return;
-        }
-        Instance = this;
         PlayerController.OnLocalPlayerSpawned += CatchReferences;
 
         // Assign button events.
-        _inventoryButton.onClick.AddListener(() => InventoryMasterUI.Instance.HandleInventoryToggle());
+        _inventoryButton.onClick.AddListener(() => UIManager.Instance.ToggleInventory());
     }
 
     void Start() {
@@ -45,8 +38,8 @@ public class ToolbeltUI : ItemContainerUI {
     }
 
     void CatchReferences(PlayerController playerController) {
-        _upBtn.onClick.AddListener(() => playerController.PlayerToolbeltController.ToggleToolbelt(true));
-        _downBtn.onClick.AddListener(() => playerController.PlayerToolbeltController.ToggleToolbelt(false));
+        _upBtn.onClick.AddListener(() => playerController.PlayerToolbeltController.ToggleToolbelt(false));
+        _downBtn.onClick.AddListener(() => playerController.PlayerToolbeltController.ToggleToolbelt(true));
     }
 
     // Adjusts how many slots are interactable.

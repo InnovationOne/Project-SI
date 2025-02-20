@@ -85,7 +85,7 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
 
     private PlayerToolbeltController _pTC;
     private PlayerMovementController _pMC;
-    private ClothingUI _playerClothingUI;
+    private ClothingUI _clothingUI;
     private AudioManager _audioManager;
     private FMODEvents _fmodEvents;
 
@@ -96,17 +96,17 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     }
 
     private void Start() {
-        _playerClothingUI = ClothingUI.Instance;
+        _clothingUI = UIManager.Instance.ClothingUI;
         _audioManager = GameManager.Instance.AudioManager;
         _fmodEvents = GameManager.Instance.FMODEvents;
 
         // Subscribe to clothing changes for visual updates.
-        _playerClothingUI.PlayerClothingUIItemButtons[0].OnNewItem += SetFeet;
-        _playerClothingUI.PlayerClothingUIItemButtons[1].OnNewItem += SetBelt;
-        _playerClothingUI.PlayerClothingUIItemButtons[2].OnNewItem += SetHelmet;
-        _playerClothingUI.PlayerClothingUIItemButtons[3].OnNewItem += SetLegs;
-        _playerClothingUI.PlayerClothingUIItemButtons[4].OnNewItem += SetHands;
-        _playerClothingUI.PlayerClothingUIItemButtons[5].OnNewItem += SetTorso;
+        _clothingUI.PlayerClothingUIItemButtons[0].OnNewItem += SetFeet;
+        _clothingUI.PlayerClothingUIItemButtons[1].OnNewItem += SetBelt;
+        _clothingUI.PlayerClothingUIItemButtons[2].OnNewItem += SetHelmet;
+        _clothingUI.PlayerClothingUIItemButtons[3].OnNewItem += SetLegs;
+        _clothingUI.PlayerClothingUIItemButtons[4].OnNewItem += SetHands;
+        _clothingUI.PlayerClothingUIItemButtons[5].OnNewItem += SetTorso;
         
         _pTC.OnToolbeltSlotChanged += OnToolbeltSlotChanged;
 
@@ -118,12 +118,12 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
 
     private void OnDestroy() {
         // Unsubscribe to avoid memory leaks.
-        _playerClothingUI.PlayerClothingUIItemButtons[0].OnNewItem -= SetFeet;
-        _playerClothingUI.PlayerClothingUIItemButtons[1].OnNewItem -= SetBelt;
-        _playerClothingUI.PlayerClothingUIItemButtons[2].OnNewItem -= SetHelmet;
-        _playerClothingUI.PlayerClothingUIItemButtons[3].OnNewItem -= SetLegs;
-        _playerClothingUI.PlayerClothingUIItemButtons[4].OnNewItem -= SetHands;
-        _playerClothingUI.PlayerClothingUIItemButtons[5].OnNewItem -= SetTorso;
+        _clothingUI.PlayerClothingUIItemButtons[0].OnNewItem -= SetFeet;
+        _clothingUI.PlayerClothingUIItemButtons[1].OnNewItem -= SetBelt;
+        _clothingUI.PlayerClothingUIItemButtons[2].OnNewItem -= SetHelmet;
+        _clothingUI.PlayerClothingUIItemButtons[3].OnNewItem -= SetLegs;
+        _clothingUI.PlayerClothingUIItemButtons[4].OnNewItem -= SetHands;
+        _clothingUI.PlayerClothingUIItemButtons[5].OnNewItem -= SetTorso;
         
         _pTC.OnToolbeltSlotChanged -= OnToolbeltSlotChanged;
     }

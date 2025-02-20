@@ -28,7 +28,9 @@ public class IntroManager : MonoBehaviour {
     private const float MINIMUM_TIME = 4f;
     private const float FADE_DURATION = 1f;
 
-    private void Awake() {
+    private void Start() {
+        AudioManager.Instance.InitializeMusic(FMODEvents.Instance.Title);
+
         if (_skipIntro) {
             _background.gameObject.SetActive(false);
             this.enabled = false;
@@ -43,11 +45,6 @@ public class IntroManager : MonoBehaviour {
         _photosensitivityBodyTextMeshPro.gameObject.SetActive(false);
         _octiwareLogo.gameObject.SetActive(false);
         _fmodLogo.gameObject.SetActive(false);
-    }
-
-
-    private void Start() {
-        GameManager.Instance.AudioManager.InitializeMusic(GameManager.Instance.FMODEvents.Title);
 
         _alphaHeaderTextMeshPro.text = _alphaHeaderText;
         _alphaBodyTextMeshPro.text = _alphaBodyText;

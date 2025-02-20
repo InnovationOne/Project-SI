@@ -29,6 +29,7 @@ public class GameData {
 
     [Header("Objects Manager")]
     public string PlacedObjects;
+    public string PlaceableObjectStates;
 
     public string Recipes;
     public string Quests;

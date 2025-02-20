@@ -345,7 +345,7 @@ public class Rose : PlaceableObject {
         public Vector3 PartnerPosition;
     }
 
-    public override FixedString4096Bytes SaveObject() {
+    public override string SaveObject() {
         var roseDataJson = new RoseData {
             ItemId = ItemId,
             Timer = _timer,
@@ -353,14 +353,12 @@ public class Rose : PlaceableObject {
             PartnerPosition = PartnerPosition
         };
 
-        return new FixedString4096Bytes(JsonConvert.SerializeObject(roseDataJson));
+        return JsonConvert.SerializeObject(roseDataJson);
     }
 
-    public override void LoadObject(FixedString4096Bytes data) {
-        string jsonData = data.ToString();
-
-        if (!string.IsNullOrEmpty(jsonData)) {
-            var roseData = JsonConvert.DeserializeObject<RoseData>(jsonData);
+    public override void LoadObject(string data) {
+        if (!string.IsNullOrEmpty(data)) {
+            var roseData = JsonConvert.DeserializeObject<RoseData>(data);
             ItemId = roseData.ItemId;
             _timer = roseData.Timer;
             _roseToSpawnId = roseData.RoseToSpawnId;

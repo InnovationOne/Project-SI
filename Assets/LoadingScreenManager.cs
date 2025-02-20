@@ -27,7 +27,7 @@ public class LoadingScreenManager : MonoBehaviour {
     private LoadingTask _loadingTask = new();
 
     private void Start() {
-        GameManager.Instance.AudioManager.InitializeMusic(GameManager.Instance.FMODEvents.Loading);
+        AudioManager.Instance.InitializeMusic(FMODEvents.Instance.Loading);
         InitializeUI();
         StartCoroutine(StartLoading());
         StartCoroutine(CycleLoadingImages());
@@ -91,7 +91,7 @@ public class LoadingScreenManager : MonoBehaviour {
 
                 // Artificial delay for testing
                 await Task.Delay(_minimumDisplayTime * 1000);
-                GameManager.Instance.AudioManager.StopMusic();
+                AudioManager.Instance.StopMusic();
 
                 asyncOp.allowSceneActivation = true;
             }

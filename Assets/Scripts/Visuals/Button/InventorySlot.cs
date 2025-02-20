@@ -50,7 +50,7 @@ public class InventorySlot : MonoBehaviour,
         if (_itemManager == null)
             Debug.LogError("ItemManager instance is not available.");
 
-        _dragItemCanvasGroup = DragItemUI.Instance.GetComponent<CanvasGroup>();
+        _dragItemCanvasGroup = UIManager.Instance.DragItemUI.GetComponent<CanvasGroup>();
         _selectedImage.enabled = false;
     }
 
@@ -138,12 +138,22 @@ public class InventorySlot : MonoBehaviour,
         return (_itemManager.ItemDatabase[_itemSlot.ItemId] as ClothingSO).PlayerClothingUiSprite; 
     }
 
+    public bool AllowsThisClothingType(ClothingType typeToCheck) {
+        if (!IsClothingSlot) return false;
+        if (AcceptedClothingType == null || AcceptedClothingType.Length == 0) return true;
+        // if no explicit restrictions or array is empty => allow
+        foreach (var ct in AcceptedClothingType) {
+            if (ct == typeToCheck) return true;
+        }
+        return false;
+    }
+
     #region  -------------------- Drag and Drop Handlers --------------------
 
     public void OnPointerClick(PointerEventData eventData) {
         // Right-click: process right-click action or show right-click menu.
         if (eventData.button == PointerEventData.InputButton.Right) {
-            if (DragItemUI.Instance.gameObject.activeSelf) _itemPanel.OnPlayerRightClick(_buttonIdx);
+            if (UIManager.Instance.DragItemUI.gameObject.activeSelf) _itemPanel.OnPlayerRightClick(_buttonIdx);
             else _itemPanel.ShowRightClickMenu(_buttonIdx, transform.position);
         }
     }
@@ -162,7 +172,7 @@ public class InventorySlot : MonoBehaviour,
 
     public void OnEndDrag(PointerEventData eventData) {
         // Re-enable raycasts after dragging.
-        if (_dragItemCanvasGroup != null) _dragItemCanvasGroup.blocksRaycasts = true;
+        if (_dragItemCanvasGroup != null) _dragItemCanvasGroup.blocksRaycasts = false;
     }
 
     public void OnDrop(PointerEventData eventData) {
@@ -174,8 +184,7 @@ public class InventorySlot : MonoBehaviour,
     private T GetComponentInParentIncludeInactive<T>() where T : Component {
         Transform current = transform;
         while (current != null) {
-            T component = current.GetComponent<T>();
-            if (component != null) {
+            if (current.TryGetComponent<T>(out var component)) {
                 return component;
             }
             current = current.parent;

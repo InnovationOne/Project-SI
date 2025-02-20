@@ -23,10 +23,10 @@ public abstract class PlaceableObject : NetworkBehaviour, IObjectDataPersistence
     public abstract void InitializePostLoad();
 
     // Loads object state from the given data string.
-    public abstract void LoadObject(FixedString4096Bytes data);
+    public abstract void LoadObject(string data);
 
     // Saves the current state of the object as a serialized string.
-    public abstract FixedString4096Bytes SaveObject();
+    public abstract string SaveObject();
 
     // Called when a player interacts with this object.
     public abstract void Interact(PlayerController player);
@@ -44,24 +44,16 @@ public struct PlaceableObjectData : INetworkSerializable, IEquatable<PlaceableOb
     public int ObjectId;
     public int RotationIdx;
     public Vector3Int Position;
-    public FixedString4096Bytes State;
+    public int StateId;
     public ulong PrefabNetworkObjectId;
 
-    // Initializes the data to a default invalid state.
-    public PlaceableObjectData(bool initialize = true) {
-        ObjectId = -1;
-        RotationIdx = 0;
-        Position = Vector3Int.zero;
-        State = new FixedString4096Bytes();
-        PrefabNetworkObjectId = 0;
-    }
 
     // Serializes/Deserializes the object data over the network.
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter {
         serializer.SerializeValue(ref ObjectId);
         serializer.SerializeValue(ref RotationIdx);
         serializer.SerializeValue(ref Position);
-        serializer.SerializeValue(ref State);
+        serializer.SerializeValue(ref StateId);
         serializer.SerializeValue(ref PrefabNetworkObjectId);
     }
 
@@ -70,7 +62,7 @@ public struct PlaceableObjectData : INetworkSerializable, IEquatable<PlaceableOb
         ObjectId == other.ObjectId &&
         RotationIdx == other.RotationIdx &&
         Position.Equals(other.Position) &&
-        State.Equals(other.State) &&
+        StateId == other.StateId &&
         PrefabNetworkObjectId == other.PrefabNetworkObjectId;
 
     public override bool Equals(object obj) => obj is PlaceableObjectData other && Equals(other);
@@ -80,7 +72,7 @@ public struct PlaceableObjectData : INetworkSerializable, IEquatable<PlaceableOb
         hash.Add(ObjectId);
         hash.Add(RotationIdx);
         hash.Add(Position);
-        hash.Add(State);
+        hash.Add(StateId);
         hash.Add(PrefabNetworkObjectId);
         return hash.ToHashCode();
     }

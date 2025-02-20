@@ -227,7 +227,7 @@ public class ItemConverter : PlaceableObject {
         public List<string> StoredItemSlots = new();
     }
 
-    public override FixedString4096Bytes SaveObject() {
+    public override string SaveObject() {
         var itemConverterJson = new ItemConverterData {
             RecipeId = _recipeId,
             Timer = _timer,
@@ -237,13 +237,12 @@ public class ItemConverter : PlaceableObject {
             itemConverterJson.StoredItemSlots.Add(JsonConvert.SerializeObject(slot));
         }
 
-        return new FixedString4096Bytes(JsonConvert.SerializeObject(itemConverterJson));
+        return JsonConvert.SerializeObject(itemConverterJson);
     }
 
-    public override void LoadObject(FixedString4096Bytes data) {
-        string jsonData = data.ToString();
-        if (!string.IsNullOrEmpty(jsonData)) {
-            var itemConverterData = JsonConvert.DeserializeObject<ItemConverterData>(jsonData);
+    public override void LoadObject(string data) {
+        if (!string.IsNullOrEmpty(data)) {
+            var itemConverterData = JsonConvert.DeserializeObject<ItemConverterData>(data);
             _storedItemSlots.Clear();
             _recipeId = itemConverterData.RecipeId;
             _timer = itemConverterData.Timer;

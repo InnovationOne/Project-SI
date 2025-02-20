@@ -168,7 +168,7 @@ public class PickUpItem : NetworkBehaviour {
         _itemManager = _gameManager.ItemManager;
         _eventsManager = _gameManager.EventsManager;
         _timeManager.OnNextDayStarted += OnNextDay;
-        _dragItemUI = DragItemUI.Instance;
+        _dragItemUI = UIManager.Instance.DragItemUI;
 
         _canPickUpTimer = ItemSpawnManager.LEAN_MOVE_TIME;
 

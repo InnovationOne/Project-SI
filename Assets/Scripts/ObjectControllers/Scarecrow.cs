@@ -28,9 +28,9 @@ public class Scarecrow : PlaceableObject {
 
     public override void Interact(PlayerController player) { }
 
-    public override void LoadObject(FixedString4096Bytes data) { }
+    public override void LoadObject(string data) { }
 
     public override void PickUpItemsInPlacedObject(PlayerController player) { }
 
-    public override FixedString4096Bytes SaveObject() { return new FixedString4096Bytes(string.Empty); }
+    public override string SaveObject() { return string.Empty; }
 }

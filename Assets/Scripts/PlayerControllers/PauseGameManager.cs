@@ -51,10 +51,10 @@ public class PauseGameManager : NetworkBehaviour {
     private void Start() {
         GameManager.Instance.InputManager.OnEscapeAction += InputManager_TogglePauseGame;
 
-        PauseGamePanel.Instance.OnResumeGameButtonPressed += InputManager_TogglePauseGame;
-        PauseGamePanel.Instance.OnOptionsButtonPressed += PauseGamePanel_OnOptionsButtonPressed;
-        PauseGamePanel.Instance.OnTitleScreenButtonPressed += PauseGamePanel_OnTitleScreenButtonPressed;
-        PauseGamePanel.Instance.OnExitGameButtonPressed += PauseGamePanel_OnExitGameButtonPressed;
+        UIManager.Instance.PauseGameUI.OnResumeGameButtonPressed += InputManager_TogglePauseGame;
+        UIManager.Instance.PauseGameUI.OnOptionsButtonPressed += PauseGamePanel_OnOptionsButtonPressed;
+        UIManager.Instance.PauseGameUI.OnTitleScreenButtonPressed += PauseGamePanel_OnTitleScreenButtonPressed;
+        UIManager.Instance.PauseGameUI.OnExitGameButtonPressed += PauseGamePanel_OnExitGameButtonPressed;
     }
 
     private void LateUpdate() {
@@ -68,7 +68,7 @@ public class PauseGameManager : NetworkBehaviour {
 
     public void InputManager_TogglePauseGame() {
         // Close inventory first
-        if (InventoryMasterUI.Instance.gameObject.activeSelf) {
+        if (UIManager.Instance.InventoryRoot.activeSelf) {
             return;
         }
 

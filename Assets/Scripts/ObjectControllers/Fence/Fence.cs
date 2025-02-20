@@ -41,7 +41,7 @@ public class Fence : AdjustingObject {
 
     public override void InitializePostLoad() { }
 
-    public override void LoadObject(FixedString4096Bytes data) { }
+    public override void LoadObject(string data) { }
 
-    public override FixedString4096Bytes SaveObject() { return new FixedString4096Bytes(string.Empty); }
+    public override string SaveObject() { return string.Empty; }
 }

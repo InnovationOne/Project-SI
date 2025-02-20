@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/*
 public enum InventorySubUIs {
     Inventory,
     Tool,
@@ -272,4 +273,3 @@ public class InventoryMasterUI : MonoBehaviour {
     }
     #endregion
     */
-}

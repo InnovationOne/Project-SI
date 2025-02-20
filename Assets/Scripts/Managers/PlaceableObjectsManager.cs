@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -10,16 +11,14 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
 
     [SerializeField] bool _saveObjects;
     [SerializeField] bool _loadObjects;
-    
+
     public NetworkList<PlaceableObjectData> PlaceableObjects { get; private set; }
+    Dictionary<int, string> _stateDictionary = new Dictionary<int, string>();
+    int _nextStateId = 1;
 
     [SerializeField] Tilemap _targetTilemap;
     ItemDatabaseSO _itemDatabase;
     CropsManager _cropsManager;
-
-    [Header("Galaxy Rose")]
-    [SerializeField] RoseSO _galaxyRose;
-    [SerializeField] RuntimeAnimatorController _roseDestroyAnimator;
 
     // Position-to-index lookup
     Dictionary<Vector3Int, int> _positionToIndexMap;
@@ -58,24 +57,25 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         }
     }
 
-    void HandlePlaceableObjectAdd(PlaceableObjectData placeableObject) {
-        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(placeableObject.PrefabNetworkObjectId, out NetworkObject netObj)) {
-            VisualizePlaceableObjectOnMap(placeableObject, netObj);
+    void HandlePlaceableObjectAdd(PlaceableObjectData placeableObjectData) {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(placeableObjectData.PrefabNetworkObjectId, out NetworkObject netObj)) {
+            VisualizePlaceableObjectOnMap(placeableObjectData, netObj);
         }
 
-        if (!_positionToIndexMap.ContainsKey(placeableObject.Position)) {
-            _positionToIndexMap[placeableObject.Position] = PlaceableObjects.Count - 1;
+        if (!_positionToIndexMap.ContainsKey(placeableObjectData.Position)) {
+            _positionToIndexMap[placeableObjectData.Position] = PlaceableObjects.Count - 1;
         }
     }
 
-    void HandlePlaceableObjectRemoveAt(PlaceableObjectData placeableObject) {
-        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(placeableObject.PrefabNetworkObjectId, out NetworkObject netObj)) {
+    void HandlePlaceableObjectRemoveAt(PlaceableObjectData placeableObjectData) {
+        RemoveObjectState(placeableObjectData.StateId);
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(placeableObjectData.PrefabNetworkObjectId, out NetworkObject netObj)) {
             netObj.Despawn();
         }
-        _positionToIndexMap.Remove(placeableObject.Position);
+        _positionToIndexMap.Remove(placeableObjectData.Position);
     }
 
-    void HandlePlaceableObjectValueChange(PlaceableObjectData placeableObject) {
+    void HandlePlaceableObjectValueChange(PlaceableObjectData placeableObjectData) {
         // TODO: Update visuals if object state changes.
     }
 
@@ -89,9 +89,10 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         _positionToIndexMap.Clear();
     }
 
-    void VisualizePlaceableObjectOnMap(PlaceableObjectData obj, NetworkObject netObj) {
-        if (netObj.TryGetComponent<PlaceableObject>(out var placeableObjectComp)) placeableObjectComp.InitializePreLoad(obj.ObjectId);
-        netObj.GetComponent<IObjectDataPersistence>()?.LoadObject(obj.State);
+    void VisualizePlaceableObjectOnMap(PlaceableObjectData placeableObjectData, NetworkObject netObj) {
+        if (netObj.TryGetComponent<PlaceableObject>(out var placeableObjectComp)) placeableObjectComp.InitializePreLoad(placeableObjectData.ObjectId);
+        string state = GetObjectState(placeableObjectData.StateId);
+        netObj.GetComponent<IObjectDataPersistence>()?.LoadObject(state);
         if (placeableObjectComp != null) placeableObjectComp.InitializePostLoad();
     }
 
@@ -142,7 +143,7 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
             ObjectId = itemId,
             RotationIdx = rotationIdx,
             Position = pos,
-            State = string.Empty,
+            StateId = RegisterObjectState(""),
             PrefabNetworkObjectId = 0
         };
 
@@ -182,22 +183,25 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
 
     public void SaveData(GameData data) {
         if (_saveObjects) {
-            // Convert the NetworkList into a plain List before serialization
             var normalList = new List<PlaceableObjectData>();
             for (int i = 0; i < PlaceableObjects.Count; i++) {
                 normalList.Add(PlaceableObjects[i]);
             }
-
             data.PlacedObjects = JsonConvert.SerializeObject(normalList);
-            Debug.Log($"PlaceableObjectsManager data saved: {data.PlacedObjects}");
+            data.PlaceableObjectStates = JsonConvert.SerializeObject(_stateDictionary);
         }
     }
 
     public void LoadData(GameData data) {
-        // Ensure we only load on the server, and only if we actually have data to load
         if (!IsServer || string.IsNullOrEmpty(data.PlacedObjects) || !_loadObjects) return;
+        if (!string.IsNullOrEmpty(data.PlaceableObjectStates)) {
+            _stateDictionary = JsonConvert.DeserializeObject<Dictionary<int, string>>(data.PlaceableObjectStates);
+            _nextStateId = _stateDictionary.Count > 0 ? _stateDictionary.Keys.Max() + 1 : 1;
+        } else {
+            _stateDictionary = new Dictionary<int, string>();
+            _nextStateId = 1;
+        }
 
-        // Deserialize into a normal List
         var list = JsonConvert.DeserializeObject<List<PlaceableObjectData>>(data.PlacedObjects);
         if (list == null) {
             Debug.LogWarning("No valid PlaceableObjectData found in the JSON!");
@@ -207,7 +211,6 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         PlaceableObjects.Clear();
         _positionToIndexMap.Clear();
 
-        // Re-create the placed objects
         for (int i = 0; i < list.Count; i++) {
             var o = list[i];
             CreatePlaceableObjectsPrefab(ref o, o.ObjectId);
@@ -218,7 +221,6 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
             }
         }
     }
-
 
     #endregion -------------------- Save & Load --------------------
 
@@ -239,6 +241,33 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         ulong clientId = serverRpcParams.Receive.SenderClientId;
         if (NetworkManager.ConnectedClients.TryGetValue(clientId, out var client)) {
             client.PlayerObject.GetComponent<PlayerToolsAndWeaponController>().ClientCallbackClientRpc(success);
+        }
+    }
+
+    // Liefert den Zustand anhand des Schlüssels.
+    public string GetObjectState(int stateId) {
+        return _stateDictionary.TryGetValue(stateId, out var state) ? state : "";
+    }
+
+    // Registriert einen neuen Zustand und gibt einen eindeutigen Schlüssel zurück.
+    public int RegisterObjectState(string state) {
+        int id = _nextStateId++;
+        _stateDictionary[id] = state;
+        return id;
+    }
+
+    public void RemoveObjectState(int stateId) {
+        _stateDictionary.Remove(stateId);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void UpdatePlaceableObjectStateServerRpc(Vector3IntSerializable cellPosSer, string newState) {
+        var cellPos = cellPosSer.ToVector3Int();
+        for (int i = 0; i < PlaceableObjects.Count; i++) {
+            if (PlaceableObjects[i].Position == cellPos) {
+                _stateDictionary[PlaceableObjects[i].StateId] = newState;
+                break;
+            }
         }
     }
 }

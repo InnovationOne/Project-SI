@@ -6,21 +6,21 @@ using UnityEngine;
 public class PlayerInventoryController : MonoBehaviour, IPlayerDataPersistance {
     // Predefined inventory sizes.
     public ReadOnlyCollection<int> InventorySizes { get; private set; } = Array.AsReadOnly(new int[] { 10, 20, 30 });
-    public int CurrentInventorySize {get; private set; }
+    public int CurrentInventorySize { get; private set; }
 
     public ItemContainerSO InventoryContainer;
     InventoryUI _inventoryUI;
 
     void Start() {
-        _inventoryUI = InventoryUI.Instance;
-        SetInventorySize(CurrentInventorySize);
+        _inventoryUI = UIManager.Instance.InventoryUI;
+        SetInventorySize(InventorySizes[^1]);
     }
 
     // Sets and updates inventory size if valid.
     public void SetInventorySize(int inventorySize) {
         if (inventorySize > InventorySizes[^1]) return;
         CurrentInventorySize = inventorySize;
-        _inventoryUI.InventoryOrToolbeltSizeChanged();
+        _inventoryUI.InventorySizeChanged();
     }
 
     // Saves inventory data to player persistence.

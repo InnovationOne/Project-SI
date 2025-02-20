@@ -1,29 +1,15 @@
 using System;
 using Unity.Netcode;
 using UnityEngine;
-using static ClothingSO;
 
 [Serializable]
 public class ItemSlot : INetworkSerializable {
     public const int EmptyItemId = -1;
 
-    [SerializeField] int _itemId;
-    public int ItemId {
-        get => _itemId;
-        private set => _itemId = value;
-    }
 
-    [SerializeField] int _amount;
-    public int Amount {
-        get => _amount;
-        private set => _amount = value;
-    }
-
-    [SerializeField] int _rarityId;
-    public int RarityId {
-        get => _rarityId;
-        private set => _rarityId = value;
-    }
+    public int ItemId;
+    public int Amount;
+    public int RarityId;
 
     public bool IsEmpty => ItemId == EmptyItemId;
 
@@ -36,21 +22,21 @@ public class ItemSlot : INetworkSerializable {
     public void Set(ItemSlot itemSlot) => InitializeSlot(itemSlot);
 
     void InitializeSlot(ItemSlot itemSlot) {
-        _itemId = itemSlot._itemId;
-        _amount = itemSlot._amount;
-        _rarityId = itemSlot._rarityId;
+        ItemId = itemSlot.ItemId;
+        Amount = itemSlot.Amount;
+        RarityId = itemSlot.RarityId;
     }
 
     void InitializeSlot(int itemId, int amount, int rarityId) {
-        _itemId = itemId;
-        _amount = amount;
-        _rarityId = rarityId;
+        ItemId = itemId;
+        Amount = amount;
+        RarityId = rarityId;
     }
 
     public void Clear() {
-        _itemId = EmptyItemId;
-        _amount = 0;
-        _rarityId = 0;
+        ItemId = EmptyItemId;
+        Amount = 0;
+        RarityId = 0;
     }
 
     public int AddAmount(int amountToAdd, int maxStackableAmount) {
@@ -59,17 +45,17 @@ public class ItemSlot : INetworkSerializable {
             return 0;
         }
 
-        int spaceLeft = maxStackableAmount - _amount;
+        int spaceLeft = maxStackableAmount - Amount;
         int actualAdded = Mathf.Min(amountToAdd, spaceLeft);
-        _amount += actualAdded;
+        Amount += actualAdded;
         return actualAdded;
     }
 
     public int RemoveAmount(int amountToRemove) {
-        int actualRemoved = Mathf.Min(amountToRemove, _amount);
-        _amount -= actualRemoved;
+        int actualRemoved = Mathf.Min(amountToRemove, Amount);
+        Amount -= actualRemoved;
 
-        if (_amount == 0) {
+        if (Amount == 0) {
             Clear();
         }
 
@@ -78,20 +64,20 @@ public class ItemSlot : INetworkSerializable {
 
     public bool CanStackWith(ItemSlot other) {
         if (IsEmpty || other.IsEmpty) return false;
-        if (_itemId != other._itemId || _rarityId != other._rarityId) return false;
-        int maxStack = GameManager.Instance.ItemManager.GetMaxStackableAmount(_itemId);
-        return _amount < maxStack;
+        if (ItemId != other.ItemId || RarityId != other.RarityId) return false;
+        int maxStack = GameManager.Instance.ItemManager.GetMaxStackableAmount(ItemId);
+        return Amount < maxStack;
     }
 
     public void SwapWith(ItemSlot other) {
-        (_itemId, other._itemId) = (other._itemId, _itemId);
-        (_amount, other._amount) = (other._amount, _amount);
-        (_rarityId, other._rarityId) = (other._rarityId, _rarityId);
+        (ItemId, other.ItemId) = (other.ItemId, ItemId);
+        (Amount, other.Amount) = (other.Amount, Amount);
+        (RarityId, other.RarityId) = (other.RarityId, RarityId);
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter {
-        serializer.SerializeValue(ref _itemId);
-        serializer.SerializeValue(ref _amount);
-        serializer.SerializeValue(ref _rarityId);
+        serializer.SerializeValue(ref ItemId);
+        serializer.SerializeValue(ref Amount);
+        serializer.SerializeValue(ref RarityId);
     }
 }

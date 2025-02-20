@@ -1,10 +1,11 @@
 using FMODUnity;
 using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
 [Serializable]
-public abstract class CutsceneSegmentContainer {
+public class CutsceneSegmentContainer {
     public enum SegmentTypes {
         End,
         MainNPCChat,
@@ -106,9 +107,7 @@ public abstract class CutsceneSegmentContainer {
     [Tooltip("Duration of the letterboxing animation (in seconds).")]
     public float LetterboxingDuration = 1.0f;
 
-    [Tooltip("UI images for letterboxing (e.g. top and bottom of the canvas). " +
-             "Bei einer Canvas-Auflösung von 640x360 sollten diese Elemente ca. 44 Pixel hoch sein, " +
-             "um einen filmischen Look zu erzielen.")]
+    [Tooltip("UI images for letterboxing (e.g. top and bottom of the canvas).")]
     public Image[] LetterboxElements;
     [Tooltip("Toggle for the letterboxing effect. Enables letterboxing if true.")]
     public bool EnableLetterboxing;
@@ -117,4 +116,6 @@ public abstract class CutsceneSegmentContainer {
     [Tooltip("Moving object (e.g. the player or an NPC) for movement segments.")]
     public GameObject PrimaryTarget;
 }
+
+
 

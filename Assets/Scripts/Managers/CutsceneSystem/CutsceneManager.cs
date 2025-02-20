@@ -12,7 +12,7 @@ public class CutsceneManager : NetworkBehaviour {
     private void Awake() {
         // Singleton setup.
         if (Instance != null && Instance != this) {
-            Destroy(gameObject);
+            Destroy(this);
             return;
         }
         Instance = this;
@@ -136,7 +136,7 @@ public class CutsceneManager : NetworkBehaviour {
                         void callback(Vector3[] path, bool success) {
                             if (success) {
                                 // Starte das Path-Following – nach Beendigung setzt der Callback pathCompleted auf true.
-                                StartCoroutine(FollowPathCoroutine(segment.PrimaryTarget, path, segment.ArrivalThreshold, () => {
+                                StartCoroutine(FollowPath(segment.PrimaryTarget, path, segment.ArrivalThreshold, () => {
                                     pathCompleted = true;
                                 }));
                             } else {
@@ -160,7 +160,7 @@ public class CutsceneManager : NetworkBehaviour {
 
                         void callback(Vector3[] path, bool success) {
                             if (success) {
-                                StartCoroutine(FollowPathCoroutine(segment.PrimaryTarget, path, segment.ArrivalThreshold, () => {
+                                StartCoroutine(FollowPath(segment.PrimaryTarget, path, segment.ArrivalThreshold, () => {
                                     pathCompleted = true;
                                 }));
                             } else {
@@ -174,7 +174,7 @@ public class CutsceneManager : NetworkBehaviour {
                     }
                 }
                 break;
-
+                
             // Directs a character toward an exit point (e.g., leaving a room or area).
             case SegmentTypes.CharacterTargetExit: {
                     if (segment.PrimaryTarget != null && segment.ExitPoint != null) {
@@ -184,7 +184,7 @@ public class CutsceneManager : NetworkBehaviour {
 
                         void callback(Vector3[] path, bool success) {
                             if (success) {
-                                StartCoroutine(FollowPathCoroutine(segment.PrimaryTarget, path, segment.ArrivalThreshold, () => {
+                                StartCoroutine(FollowPath(segment.PrimaryTarget, path, segment.ArrivalThreshold, () => {
                                     pathCompleted = true;
                                 }));
                             } else {

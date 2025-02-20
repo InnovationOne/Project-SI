@@ -7,6 +7,8 @@ using static TimeManager;
 using static SwitchMusicTrigger;
 
 public class AudioManager : MonoBehaviour {
+    public static AudioManager Instance { get; private set; }
+
     [Header("Volume")]
     [Range(0f, 1f)]
     public float MasterVolume = 1f;
@@ -37,6 +39,12 @@ public class AudioManager : MonoBehaviour {
     private EventInstance _music;
 
     private void Awake() {
+        if (Instance != null) {
+            Debug.LogError("There is more than one instance of AudioManager in the scene!");
+            Destroy(this);
+            return;
+        }
+        Instance = this;
         DontDestroyOnLoad(gameObject);
 
         _eventInstances = new List<EventInstance>();
@@ -154,6 +162,7 @@ public class AudioManager : MonoBehaviour {
     }
 
     private void OnDestroy() {
+        if (_eventInstances == null) return;
         foreach (var eventInstance in _eventInstances) {
             StopEvent(eventInstance);
         }

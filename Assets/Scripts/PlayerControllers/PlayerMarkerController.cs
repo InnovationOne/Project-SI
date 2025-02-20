@@ -95,9 +95,7 @@ public class PlayerMarkerController : NetworkBehaviour {
         if (_useAreaIndicator) {
             DisplayAreaMarker(gridPosition, motionDirection);
             _lastCellPosition = Vector3Int.zero;
-        } else {
-            ShowSingleMarker(gridPosition);
-        }
+        } else ShowSingleMarker(gridPosition);
     }
 
     // Disable area indicator if toolbelt changes mid-drag
@@ -234,6 +232,7 @@ public class PlayerMarkerController : NetworkBehaviour {
     private void ShowSingleMarker(Vector3Int position) {
         // Update the single marker position for quick actions like placing a single object
         MarkedCellPosition = position;
+        if (_toolbeltController.GetCurrentlySelectedToolbeltItemSlot() == null) return;
         int id = _toolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId;
         var itemSO = GameManager.Instance.ItemManager.ItemDatabase[id];
 

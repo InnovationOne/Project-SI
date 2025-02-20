@@ -53,7 +53,6 @@ public abstract class ItemContainerUI : MonoBehaviour {
         if (_wikiButton != null) _wikiButton.onClick.AddListener(() => ShowItemInWiki());
         if (_rightClickMenu != null) _rightClickMenu.gameObject.SetActive(false);
         if (_itemInfo != null) _itemInfo.gameObject.SetActive(false);
-
     }
 
     void Start() {
@@ -68,7 +67,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
             if (_showInfo) HideItemInfo();
         }
 
-        if (DragItemUI.Instance.gameObject.activeSelf) {
+        if (UIManager.Instance.DragItemUI.gameObject.activeSelf) {
             HideItemInfo();
             HideRightClickMenu();
         }
@@ -87,11 +86,8 @@ public abstract class ItemContainerUI : MonoBehaviour {
     // Updates each button to match the corresponding item slot.
     public void ShowUIButtonContains() {
         for (int i = 0; i < ItemContainer.ItemSlots.Count && i < ItemButtons.Length; i++) {
-            if (ItemContainer.ItemSlots[i].ItemId == -1) {
-                ItemButtons[i].ClearItemSlot();
-            } else {
-                ItemButtons[i].SetItemSlot(ItemContainer.ItemSlots[i], RaritySprites);
-            }
+            if (ItemContainer.ItemSlots[i].ItemId == -1) ItemButtons[i].ClearItemSlot();
+            else ItemButtons[i].SetItemSlot(ItemContainer.ItemSlots[i], RaritySprites);
         }
     }
 
@@ -108,13 +104,40 @@ public abstract class ItemContainerUI : MonoBehaviour {
 
         int scalerWidth = Screen.width / 640;
         int scalerHeight = Screen.height / 360;
-        _rightClickMenu.position = position + new Vector3(scalerWidth * 13, scalerHeight * 13);
+        Vector3 newPosition = position + new Vector3(scalerWidth * 18, scalerHeight * 18);
+
+        // Standardmäßig: oben links (Pivot und Anchor (0,1))
+        var defaultPivot = new Vector2(0, 1);
+        _rightClickMenu.pivot = defaultPivot;
+        _rightClickMenu.anchorMin = defaultPivot;
+        _rightClickMenu.anchorMax = defaultPivot;
+
+        // Berechne die tatsächliche Menügröße in Bildschirmkoordinaten
+        Vector2 menuSize = _rightClickMenu.rect.size;
+        menuSize.x *= _rightClickMenu.lossyScale.x;
+        menuSize.y *= _rightClickMenu.lossyScale.y;
+
+        // Mit defaultPivot (0,1) ist die obere linke Ecke bei newPosition.
+        float rightEdge = newPosition.x + menuSize.x;
+        float bottomEdge = newPosition.y - menuSize.y;
+
+        // Falls die Box außerhalb liegt (z.B. rechts oder unten), ändern wir Pivot und Anchors zu (1,1)
+        if (rightEdge > Screen.width || bottomEdge < 0) {
+            Vector2 newPivot = new Vector2(1, 1);
+            newPosition = position + new Vector3(scalerWidth * -18, scalerHeight * 18);
+            _rightClickMenu.pivot = newPivot;
+            _rightClickMenu.anchorMin = newPivot;
+            _rightClickMenu.anchorMax = newPivot;
+        }
+
+        _rightClickMenu.position = newPosition;
         _showRightClickMenu = true;
         _splitAmountSlider.maxValue = ItemContainer.ItemSlots[buttonIndex].Amount;
         _splitAmountSlider.value = ItemContainer.ItemSlots[buttonIndex].Amount / 2;
         _rightClickMenu.gameObject.SetActive(true);
         _buttonIndex = buttonIndex;
     }
+
 
     // Hides the right-click menu.
     public void HideRightClickMenu() {
@@ -136,6 +159,7 @@ public abstract class ItemContainerUI : MonoBehaviour {
 
     // Splits an item stack into two, placing the new stack on the cursor.
     void SplitItem() {
+        Debug.Log("Splitting item stack.");
         if (_buttonIndex < 0) return;
 
         int splitValue = (int)_splitAmountSlider.value;

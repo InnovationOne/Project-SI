@@ -3,14 +3,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class ChestUI : ItemContainerUI {
-    public static ChestUI Instance { get; private set; }
 
     [Header("Buttons")]
     [SerializeField] Button _invenToChestBtn;
     [SerializeField] Button _chestToInvenBtn;
     [SerializeField] Button _sortBtn;
     [SerializeField] Button _trashBtn;
-    [SerializeField] Button _closeButton;
+    [SerializeField] Button _closeBtn;
 
     [Header("Prefabs")]
     [SerializeField] InventorySlot _inventoryButtonPrefab;
@@ -25,24 +24,20 @@ public class ChestUI : ItemContainerUI {
     PlayerInteractController _playerInteractController;
 
     private void Awake() {
-        if (Instance != null) {
-            Debug.LogError("There is more than one instance of ChestPanel in the scene!");
-            return;
-        }
-        Instance = this;
         PlayerController.OnLocalPlayerSpawned += CatchReferences;
     }
 
     private void Start() {
+        ItemContainerUIAwake();
         if (_invenToChestBtn != null) _invenToChestBtn.onClick.AddListener(StoreAllValidItemsInChest);
         if (_chestToInvenBtn != null) _chestToInvenBtn.onClick.AddListener(TakeAllItemsFromChest);
     }
 
     private void OnDestroy() {
+        PlayerController.OnLocalPlayerSpawned -= CatchReferences;
         if (_sortBtn != null) _sortBtn.onClick.RemoveAllListeners();
         if (_trashBtn != null) _trashBtn.onClick.RemoveAllListeners();
-        if (_closeButton != null) _closeButton.onClick.RemoveAllListeners();
-        PlayerController.OnLocalPlayerSpawned -= CatchReferences;
+        if (_closeBtn != null) _closeBtn.onClick.RemoveAllListeners();
     }
 
     void CatchReferences(PlayerController playerController) {
@@ -50,20 +45,15 @@ public class ChestUI : ItemContainerUI {
         _playerItemDragAndDropController = playerController.PlayerItemDragAndDropController;
         _playerInteractController = playerController.PlayerInteractionController;
 
-        if (_sortBtn != null) _sortBtn.onClick.AddListener(() => _playerInventoryController.InventoryContainer.SortItems());
+        if (_sortBtn != null) _sortBtn.onClick.AddListener(() => ItemContainer.SortItems(false));
         if (_trashBtn != null) _trashBtn.onClick.AddListener(() => _playerItemDragAndDropController.ClearDragItem());
-        if (_closeButton != null) _closeButton.onClick.AddListener(() => _playerInteractController.StopInteract());
+        if (_closeBtn != null) _closeBtn.onClick.AddListener(() => _playerInteractController.StopInteract());
     }
 
     // Displays dynamic chest slots.
-    public void ShowChestUI(ItemContainerSO itemContainer) {
-        Debug.Log("Showing chest UI");
-        gameObject.SetActive(true);
+    public void InitChestUI(ItemContainerSO itemContainer) {
         ItemContainer = itemContainer;
-
-        foreach (Transform child in _content) {
-            Destroy(child.gameObject);
-        }
+        foreach (Transform child in _content) Destroy(child.gameObject);
 
         ItemButtons = new InventorySlot[ItemContainer.ItemSlots.Count];
         for (int i = 0; i < ItemContainer.ItemSlots.Count; i++) {
@@ -73,36 +63,49 @@ public class ChestUI : ItemContainerUI {
         Init();
     }
 
-    // Hides the chest UI entirely.
-    public void HideChestUI() {
-        gameObject.SetActive(false);
-    }
-
     public override void OnPlayerLeftClick(int buttonIndex) {
-        // SHIFT => Move item from chest to inventory; otherwise do normal drag
+        // SHIFT => from chest to inventory
         if (GameManager.Instance.InputManager.GetShiftPressed()) {
             var slot = ItemContainer.ItemSlots[buttonIndex];
             if (!slot.IsEmpty) {
-                int remainingAmount = _playerInventoryController.InventoryContainer.AddItem(ItemContainer.ItemSlots[buttonIndex], true);
-                if (remainingAmount > 0) slot.Set(new ItemSlot(slot.ItemId, remainingAmount, slot.RarityId));
-                else ItemContainer.ItemSlots[buttonIndex].Clear();
+                int leftover = _playerInventoryController.InventoryContainer.AddItem(slot, true);
+                if (leftover > 0) slot.Set(new ItemSlot(slot.ItemId, leftover, slot.RarityId)); else slot.Clear();
                 GameManager.Instance.AudioManager.PlayOneShot(GameManager.Instance.FMODEvents.ItemShift, transform.position);
             }
-        } else _playerItemDragAndDropController.OnLeftClick(ItemContainer.ItemSlots[buttonIndex]);
+            ShowUIButtonContains();
+            _playerInventoryController.InventoryContainer.UpdateUI();
+            return;
+        }
+        // Normal left-click: pick up / swap / stack with drag
+        _playerItemDragAndDropController.OnLeftClick(ItemContainer.ItemSlots[buttonIndex]);
         ShowUIButtonContains();
     }
+
+    public override void OnPlayerRightClick(int buttonIndex) {
+        // Right-click => deposit from DragItem to chest slot
+        if (UIManager.Instance.DragItemUI.gameObject.activeSelf) {
+            _playerItemDragAndDropController.OnRightClick(ItemContainer.ItemSlots[buttonIndex]);
+            ShowUIButtonContains();
+            return;
+        }
+        // If no drag item, do nothing or show right-click menu
+        ShowRightClickMenu(buttonIndex, Input.mousePosition);
+    }
+
 
     // Moves all items from chest to player inventory.
     void TakeAllItemsFromChest() {
         for (int i = 0; i < ItemContainer.ItemSlots.Count; i++) {
-            if (!ItemContainer.ItemSlots[i].IsEmpty) {
-                int remaining = _playerInventoryController.InventoryContainer.AddItem(ItemContainer.ItemSlots[i], true);
-                if (remaining <= 0) ItemContainer.ItemSlots[i].Clear();
-                else ItemContainer.ItemSlots[i].Set(new ItemSlot(ItemContainer.ItemSlots[i].ItemId, remaining, ItemContainer.ItemSlots[i].RarityId));
+            var slot = ItemContainer.ItemSlots[i];
+            if (!slot.IsEmpty) {
+                int leftover = _playerInventoryController.InventoryContainer.AddItem(slot, true);
+                if (leftover <= 0) slot.Clear();
+                else slot.Set(new ItemSlot(slot.ItemId, leftover, slot.RarityId));
             }
         }
         GameManager.Instance.AudioManager.PlayOneShot(GameManager.Instance.FMODEvents.ItemDrop, transform.position);
         ShowUIButtonContains();
+        _playerInventoryController.InventoryContainer.UpdateUI();
     }
 
     // Moves valid items from player inventory to chest.
@@ -122,6 +125,9 @@ public class ChestUI : ItemContainerUI {
             }
         }
         GameManager.Instance.AudioManager.PlayOneShot(GameManager.Instance.FMODEvents.ItemDrop, transform.position);
+
+        // Update chest and the player's inventory
         ShowUIButtonContains();
+        _playerInventoryController.InventoryContainer.UpdateUI();
     }
 }

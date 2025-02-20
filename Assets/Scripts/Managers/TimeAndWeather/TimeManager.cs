@@ -4,11 +4,11 @@ using Unity.Netcode;
 using System;
 using FMODUnity;
 using UnityEngine.Rendering.Universal;
-using UnityEditor.UIElements;
+using UnityEngine.UIElements;
 
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 #endif
 
 /// <summary>
@@ -425,7 +425,6 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
 
     public void SaveData(GameData data) {
         if (!_saveData) return;
-        Debug.Log("TimeManager: Saving data...");
         data.CurrentDay = _currentDate.Day;
         data.CurrentSeason = _currentDate.Season;
         data.CurrentYear = _currentDate.Year;
@@ -433,8 +432,6 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
 
     public void LoadData(GameData data) {
         if (!IsServer || !_loadData) return;
-        Debug.Log("TimeManager: Loading data...");
-
         _currentDate.Day = Mathf.Clamp(data.CurrentDay, 0, DAYS_PER_SEASON - 1);
         _currentDate.Season = Mathf.Clamp(data.CurrentSeason, 0, SEASONS_PER_YEAR - 1);
         _currentDate.Year = Mathf.Max(data.CurrentYear, 0);
