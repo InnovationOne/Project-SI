@@ -1,6 +1,5 @@
 using FMODUnity;
 using System;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -116,6 +115,3 @@ public class CutsceneSegmentContainer {
     [Tooltip("Moving object (e.g. the player or an NPC) for movement segments.")]
     public GameObject PrimaryTarget;
 }
-
-
-

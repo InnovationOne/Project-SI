@@ -85,12 +85,14 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
 
     private PlayerToolbeltController _pTC;
     private PlayerMovementController _pMC;
+    private InputManager _iM;
     private ClothingUI _clothingUI;
     private AudioManager _audioManager;
     private FMODEvents _fmodEvents;
 
     private void Awake() {
         ChangeState(PlayerState.Idle, true);
+        _iM = GameManager.Instance.InputManager;
         _pTC = GetComponent<PlayerToolbeltController>();
         _pMC = GetComponent<PlayerMovementController>();
     }
@@ -166,6 +168,9 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
             StartCoroutine(SetAnimationOverride(_behindAnim, _defaultAnimator));
         }
         ChangeState(ActivePlayerState, true);
+
+        SetAnimatorDirection(_iM.GetMovementVectorNormalized());
+        SetAnimatorLastDirection(_pMC.LastMotionDirection);
     }
 
     public void ChangeState(PlayerState newState, bool forceUpdate = false) {

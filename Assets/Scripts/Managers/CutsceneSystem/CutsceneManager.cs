@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -12,7 +11,7 @@ public class CutsceneManager : NetworkBehaviour {
     private void Awake() {
         // Singleton setup.
         if (Instance != null && Instance != this) {
-            Destroy(this);
+            Destroy(gameObject);
             return;
         }
         Instance = this;
@@ -124,86 +123,86 @@ public class CutsceneManager : NetworkBehaviour {
                     }
                 }
                 break;
-                /*
-            // Commands a character to move to a target position using a NavMeshAgent.
-            case SegmentTypes.CharacterMove: {
-                    if (segment.PrimaryTarget != null) {
-                        Vector3 startPos = segment.PrimaryTarget.transform.position;
-                        // Umwandlung des Vector2-Ziels in einen Vector3 (Y bleibt unverändert)
-                        Vector3 endPos = new Vector3(segment.MoveDestination.x, startPos.y, segment.MoveDestination.y);
-                        bool pathCompleted = false;
+            /*
+        // Commands a character to move to a target position using a NavMeshAgent.
+        case SegmentTypes.CharacterMove: {
+                if (segment.PrimaryTarget != null) {
+                    Vector3 startPos = segment.PrimaryTarget.transform.position;
+                    // Umwandlung des Vector2-Ziels in einen Vector3 (Y bleibt unverändert)
+                    Vector3 endPos = new Vector3(segment.MoveDestination.x, startPos.y, segment.MoveDestination.y);
+                    bool pathCompleted = false;
 
-                        void callback(Vector3[] path, bool success) {
-                            if (success) {
-                                // Starte das Path-Following – nach Beendigung setzt der Callback pathCompleted auf true.
-                                StartCoroutine(FollowPath(segment.PrimaryTarget, path, segment.ArrivalThreshold, () => {
-                                    pathCompleted = true;
-                                }));
-                            } else {
-                                Debug.LogWarning("CharacterMove: Pathfinding fehlgeschlagen.");
+                    void callback(Vector3[] path, bool success) {
+                        if (success) {
+                            // Starte das Path-Following – nach Beendigung setzt der Callback pathCompleted auf true.
+                            StartCoroutine(FollowPathCoroutine(segment.PrimaryTarget, path, segment.ArrivalThreshold, () => {
                                 pathCompleted = true;
-                            }
-                        }
-
-                        PathRequestManager.RequestPath(new PathRequest(startPos, endPos, callback));
-                        yield return new WaitUntil(() => pathCompleted);
-                    }
-                }
-                break;
-
-            // Similar to CharacterMove, but semantically indicates the character is moving toward furniture (or an object of interaction).
-            case SegmentTypes.CharacterTargetFurniture: {
-                    if (segment.PrimaryTarget != null && segment.TargetFurniture != null) {
-                        Vector3 startPos = segment.PrimaryTarget.transform.position;
-                        Vector3 endPos = segment.TargetFurniture.position;
-                        bool pathCompleted = false;
-
-                        void callback(Vector3[] path, bool success) {
-                            if (success) {
-                                StartCoroutine(FollowPath(segment.PrimaryTarget, path, segment.ArrivalThreshold, () => {
-                                    pathCompleted = true;
-                                }));
-                            } else {
-                                Debug.LogWarning("CharacterTargetFurniture: Pathfinding fehlgeschlagen.");
-                                pathCompleted = true;
-                            }
-                        }
-
-                        PathRequestManager.RequestPath(new PathRequest(startPos, endPos, callback));
-                        yield return new WaitUntil(() => pathCompleted);
-                    }
-                }
-                break;
-                
-            // Directs a character toward an exit point (e.g., leaving a room or area).
-            case SegmentTypes.CharacterTargetExit: {
-                    if (segment.PrimaryTarget != null && segment.ExitPoint != null) {
-                        Vector3 startPos = segment.PrimaryTarget.transform.position;
-                        Vector3 endPos = segment.ExitPoint.position;
-                        bool pathCompleted = false;
-
-                        void callback(Vector3[] path, bool success) {
-                            if (success) {
-                                StartCoroutine(FollowPath(segment.PrimaryTarget, path, segment.ArrivalThreshold, () => {
-                                    pathCompleted = true;
-                                }));
-                            } else {
-                                Debug.LogWarning("CharacterTargetExit: Pathfinding fehlgeschlagen.");
-                                pathCompleted = true;
-                            }
-                        }
-
-                        PathRequestManager.RequestPath(new PathRequest(startPos, endPos, callback));
-                        yield return new WaitUntil(() => pathCompleted);
-
-                        // Nach dem Erreichen des Exit-Punktes: Falls eine Exit-ID angegeben wurde, wird die Szenenlogik getriggert.
-                        if (!string.IsNullOrEmpty(segment.ExitPointID)) {
-                            SceneTransitionManager.Instance.TransitionToExit(segment.ExitPointID);
+                            }));
+                        } else {
+                            Debug.LogWarning("CharacterMove: Pathfinding fehlgeschlagen.");
+                            pathCompleted = true;
                         }
                     }
+
+                    PathRequestManager.RequestPath(new PathRequest(startPos, endPos, callback));
+                    yield return new WaitUntil(() => pathCompleted);
                 }
-                break;
-                */
+            }
+            break;
+
+        // Similar to CharacterMove, but semantically indicates the character is moving toward furniture (or an object of interaction).
+        case SegmentTypes.CharacterTargetFurniture: {
+                if (segment.PrimaryTarget != null && segment.TargetFurniture != null) {
+                    Vector3 startPos = segment.PrimaryTarget.transform.position;
+                    Vector3 endPos = segment.TargetFurniture.position;
+                    bool pathCompleted = false;
+
+                    void callback(Vector3[] path, bool success) {
+                        if (success) {
+                            StartCoroutine(FollowPathCoroutine(segment.PrimaryTarget, path, segment.ArrivalThreshold, () => {
+                                pathCompleted = true;
+                            }));
+                        } else {
+                            Debug.LogWarning("CharacterTargetFurniture: Pathfinding fehlgeschlagen.");
+                            pathCompleted = true;
+                        }
+                    }
+
+                    PathRequestManager.RequestPath(new PathRequest(startPos, endPos, callback));
+                    yield return new WaitUntil(() => pathCompleted);
+                }
+            }
+            break;
+
+        // Directs a character toward an exit point (e.g., leaving a room or area).
+        case SegmentTypes.CharacterTargetExit: {
+                if (segment.PrimaryTarget != null && segment.ExitPoint != null) {
+                    Vector3 startPos = segment.PrimaryTarget.transform.position;
+                    Vector3 endPos = segment.ExitPoint.position;
+                    bool pathCompleted = false;
+
+                    void callback(Vector3[] path, bool success) {
+                        if (success) {
+                            StartCoroutine(FollowPathCoroutine(segment.PrimaryTarget, path, segment.ArrivalThreshold, () => {
+                                pathCompleted = true;
+                            }));
+                        } else {
+                            Debug.LogWarning("CharacterTargetExit: Pathfinding fehlgeschlagen.");
+                            pathCompleted = true;
+                        }
+                    }
+
+                    PathRequestManager.RequestPath(new PathRequest(startPos, endPos, callback));
+                    yield return new WaitUntil(() => pathCompleted);
+
+                    // Nach dem Erreichen des Exit-Punktes: Falls eine Exit-ID angegeben wurde, wird die Szenenlogik getriggert.
+                    if (!string.IsNullOrEmpty(segment.ExitPointID)) {
+                        SceneTransitionManager.Instance.TransitionToExit(segment.ExitPointID);
+                    }
+                }
+            }
+            break;
+            */
             // Instructs the camera to move to a target position.
             case SegmentTypes.CameraMove: {
                     if (Camera.main.TryGetComponent<CinemachineCamera>(out var cam)) {

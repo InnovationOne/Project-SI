@@ -12,4 +12,3 @@ public class CutsceneInfo : ScriptableObject {
     [Tooltip("List of segments that make up this cutscene.")]
     public List<CutsceneSegmentContainer> Segments;
 }
-
