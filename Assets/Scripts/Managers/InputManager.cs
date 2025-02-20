@@ -324,6 +324,20 @@ public class InputManager : MonoBehaviour {
         _playerInputActions.Fishing.Enable();
     }
 
+    public void DisableAll() {
+        _playerInputActions.DebugConsole.Disable();
+        _playerInputActions.Player.Disable();
+        _playerInputActions.Dialogue.Disable();
+        _playerInputActions.Fishing.Disable();
+    }
+
+    public void EnableAll() {
+        _playerInputActions.DebugConsole.Enable();
+        _playerInputActions.Player.Enable();
+        _playerInputActions.Dialogue.Enable();
+        _playerInputActions.Fishing.Enable();
+    }
+
     #endregion
 
     /// <summary>

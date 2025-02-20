@@ -10,11 +10,14 @@ public class UIManager : MonoBehaviour {
     public ChestUI ChestUI;
 
     [Header("UI außerhalb des Inventarbereichs")]
+    public ClockUI ClockUI;
     public ToolbeltUI ToolbeltUI;
     public DragItemUI DragItemUI;
     public DialogueUI DialogueUI;
     public PauseGameUI PauseGameUI;
     public HostDisconnectedUI HostDisconnectedUI;
+    public LetterboxingUI LetterboxingUI;
+    public FishCatchUI FishCatchUI;
 
     Canvas _mainCanvas;
     InputManager _inputManager;
@@ -138,22 +141,24 @@ public class UIManager : MonoBehaviour {
 
     #region -------------------- External UIs --------------------
 
-    // Toggles additional UI panels.
-    public void TogglePauseMenu() => PauseGameUI.gameObject.SetActive(!PauseGameUI.gameObject.activeSelf);
-    public void ToggleDialogueUI() => DialogueUI.gameObject.SetActive(!DialogueUI.gameObject.activeSelf);
-    public void ToggleHostDisconnectedUI() => HostDisconnectedUI.gameObject.SetActive(!HostDisconnectedUI.gameObject.activeSelf);
-
     public bool IsAnyBlockingUIOpen() {
         return InventoryRoot.activeSelf
             || PauseGameUI.gameObject.activeSelf
             || DialogueUI.gameObject.activeSelf
-            || HostDisconnectedUI.gameObject.activeSelf;
+            || HostDisconnectedUI.gameObject.activeSelf
+            || LetterboxingUI.gameObject.activeSelf;
     }
 
-    // Check for whether certain sub-panels are open.
-    public bool IsChestUIOpen() => ChestUI.gameObject.activeSelf;
-    public bool IsClothingUIOpen() => ClothingUI.gameObject.activeSelf;
-    public bool IsInventoryUIOpen() => InventoryUI.gameObject.activeSelf;
+    public void DisableAllUI() {
+        InventoryRoot.SetActive(false);
+        ClockUI.gameObject.SetActive(false);
+        ToolbeltUI.gameObject.SetActive(false);
+        PauseGameUI.gameObject.SetActive(false);
+        DialogueUI.gameObject.SetActive(false);
+        HostDisconnectedUI.gameObject.SetActive(false);
+        LetterboxingUI.gameObject.SetActive(false);
+        FishCatchUI.gameObject.SetActive(false);
+    }
 
     #endregion -------------------- External UIs --------------------
 }

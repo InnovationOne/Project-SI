@@ -6,20 +6,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(NetworkObject))]
-[RequireComponent(typeof(CropsManager))]
-[RequireComponent(typeof(DialogueManager))]
-[RequireComponent(typeof(FinanceManager))]
-[RequireComponent(typeof(InputManager))]
-[RequireComponent(typeof(ItemManager))]
-[RequireComponent(typeof(ItemSpawnManager))]
-[RequireComponent(typeof(SI_LoadSceneManager))]
-[RequireComponent(typeof(QuestManager))]
-[RequireComponent(typeof(TimeManager))]
-[RequireComponent(typeof(RecipeManager))]
-[RequireComponent(typeof(PauseGameManager))]
-[RequireComponent(typeof(PlaceableObjectsManager))]
-[RequireComponent(typeof(EventsManager))]
-[RequireComponent(typeof(WeatherManager))]
 public class GameManager : NetworkBehaviour, IDataPersistance {
     public static GameManager Instance { get; private set; }
 
@@ -50,6 +36,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     [HideInInspector] public AudioManager AudioManager;
     [HideInInspector] public FMODEvents FMODEvents;
     [HideInInspector] public WeatherManager WeatherManager;
+    [HideInInspector] public CutsceneManager CutsceneManager;
 
     private NetworkManager _networkManager;
     private TestNetcodeUI _testNetcodeUI;
@@ -83,6 +70,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         AudioManager = AudioManager.Instance;
         FMODEvents = FMODEvents.Instance;
         WeatherManager = GetComponent<WeatherManager>();
+        CutsceneManager = GetComponent<CutsceneManager>();
     }
 
     private void Start() {

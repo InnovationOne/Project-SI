@@ -30,7 +30,6 @@ public class PlayerFishingController : MonoBehaviour {
     [SerializeField] FishingRodToolSO _fishingRod;
 
     [Header("UI Elements")]
-    [SerializeField] Image _fishCatchText;
     [SerializeField] SpriteRenderer _alertPopup;
 
     [Header("Visual Settings")]
@@ -38,7 +37,6 @@ public class PlayerFishingController : MonoBehaviour {
 
     // Fishing system constants
     const string FISHING_TILEMAP_TAG = "FishingTilemap";
-    const string CATCH_TEXT_TAG = "CatchText";
     const float MAX_ROD_CASTING_DISTANCE = 2.5f;
     const float CASTING_SPEED = 1.8f;
     const float LINE_RENDER_WIDTH = 0.04f;
@@ -47,8 +45,6 @@ public class PlayerFishingController : MonoBehaviour {
     const float CAST_ARC_HEIGHT = 1.5f;
     const float LINE_SAG_HEIGHT = 0.1f;
     const int SEGMENT_COUNT = 20;
-    const float CATCH_TEXT_SHOW_TIME = 5f;
-    const float UI_FADE_DURATION = 0.2f;
     const float TIME_TO_CATCH_FISH = 4.5f;
     const float TIME_TO_START_MINIGAME = 0.8f;
     const float COOLDOWN_TO_FISH_AGAIN = 0.8f;
@@ -84,7 +80,6 @@ public class PlayerFishingController : MonoBehaviour {
     GameObject _bobberInstance;
     LineRenderer _lineRenderer;
     SpriteRenderer _bobberSpriteRenderer;
-    TextMeshProUGUI _catchTextTMP;
     FishingState _currentState = FishingState.Idle;
     Vector3 _fishingRodTip;
     float _currentCastingDistance = 0f;
@@ -99,7 +94,6 @@ public class PlayerFishingController : MonoBehaviour {
     bool _isLeftClickHeld = false;
 
     // References
-    PlayerController _playerController;
     PlayerToolbeltController _playerToolbeltController;
     PlayerMovementController _playerMovementController;
     PlayerInventoryController _playerInventoryController;
@@ -115,7 +109,6 @@ public class PlayerFishingController : MonoBehaviour {
     readonly Vector3[] _linePositionsBuffer = new Vector3[SEGMENT_COUNT];
 
     void Awake() {
-        _playerController = GetComponent<PlayerController>();
         _playerToolbeltController = GetComponent<PlayerToolbeltController>();
         _playerMovementController = GetComponent<PlayerMovementController>();
         _playerInventoryController = GetComponent<PlayerInventoryController>();
@@ -134,13 +127,7 @@ public class PlayerFishingController : MonoBehaviour {
         // Initialize fish data from the database
         _fishDatabaseSO.InitializeFishData();
 
-        // Retrieve the catch text UI element
-        GameObject catchTextGO = GameObject.FindGameObjectWithTag(CATCH_TEXT_TAG);
-        if (catchTextGO.TryGetComponent(out Image fishCatchImage)) {
-            _fishCatchText = fishCatchImage;
-            _catchTextTMP = fishCatchImage.GetComponentInChildren<TextMeshProUGUI>();
-            _fishCatchText.gameObject.SetActive(false);
-        }
+        // TODO: UI Manager reference to fish catch text
     }
 
     void OnDestroy() {
@@ -355,9 +342,9 @@ public class PlayerFishingController : MonoBehaviour {
         if (_currentButtonPresses < _requiredButtonPresses) return;
 
         _currentState = FishingState.Fishing;
-        StartCoroutine(DisplayCatchMessage(
+        UIManager.Instance.FishCatchUI.ShowFishCatchUI(
             $"You caught a {_currentFish.FishItem.ItemName}. It is {_currentFish.CalculateFishSize()} cm long.\n" +
-            $"{_currentFish.CatchText[UnityEngine.Random.Range(0, _currentFish.CatchText.Length)]}"));
+            $"{_currentFish.CatchText[UnityEngine.Random.Range(0, _currentFish.CatchText.Length)]}");
 
         _playerInventoryController.InventoryContainer.AddItem(new ItemSlot(_currentFish.FishItem.ItemId, 1, 0), false);
         _currentCooldown = COOLDOWN_TO_FISH_AGAIN;
@@ -386,17 +373,6 @@ public class PlayerFishingController : MonoBehaviour {
         }
         _lineRenderer.positionCount = segmentCount;
         _lineRenderer.SetPositions(_linePositionsBuffer);
-    }
-
-    private IEnumerator DisplayCatchMessage(string text) {
-        _fishCatchText.gameObject.SetActive(true);
-        _catchTextTMP.text = text;
-        _fishCatchText.canvasRenderer.SetAlpha(0f);
-        _fishCatchText.CrossFadeAlpha(1f, UI_FADE_DURATION, false);
-        yield return new WaitForSeconds(CATCH_TEXT_SHOW_TIME);
-        _fishCatchText.CrossFadeAlpha(0f, UI_FADE_DURATION, false);
-        yield return new WaitForSeconds(UI_FADE_DURATION);
-        _fishCatchText.gameObject.SetActive(false);
     }
 
     void ResetVariables() {

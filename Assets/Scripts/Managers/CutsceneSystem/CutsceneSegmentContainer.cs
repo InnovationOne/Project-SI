@@ -1,7 +1,6 @@
 using FMODUnity;
 using System;
 using UnityEngine;
-using UnityEngine.UI;
 
 [Serializable]
 public class CutsceneSegmentContainer {
@@ -30,7 +29,8 @@ public class CutsceneSegmentContainer {
         ShowGameCanvas,
         HideGameCanvas,
         CharacterDirection,
-        Letterboxing,
+        ShowLetterboxing,
+        HideLetterboxing,
         ChangeScene
     }
 
@@ -64,15 +64,15 @@ public class CutsceneSegmentContainer {
     [Tooltip("Character prefab to spawn.")]
     public GameObject CharacterPrefab;
     [Tooltip("Spawn point for the character.")]
-    public Transform SpawnPoint;
+    public Vector2 SpawnPoint;
 
     [Header("Movement Settings")]
     [Tooltip("Target position (Vector2) for CharacterMove (Pfadfindung).")]
-    public Vector3 MoveDestination;
+    public Vector2 MoveDestination;
     [Tooltip("Target object (Transform) for CharacterTargetFurniture (e.g. a piece of furniture).")]
-    public Transform TargetFurniture;
+    public Vector2 TargetFurniture;
     [Tooltip("Exit point (Transform) for CharacterTargetExit.")]
-    public Transform ExitPoint;
+    public Vector2 ExitPoint;
     [Tooltip("Optional: ID of the exit point for scene logic.")]
     public string ExitPointID;
     [Tooltip("Distance threshold to consider movement complete.")]
@@ -80,7 +80,7 @@ public class CutsceneSegmentContainer {
 
     [Header("Camera Settings")]
     [Tooltip("Target position (Vector3) for the camera (CameraMove).")]
-    public Vector3 TargetPosition;
+    public Vector2 TargetPosition;
 
     [Header("Audio Settings")]
     [Tooltip("FMOD event to be played.")]
@@ -101,15 +101,6 @@ public class CutsceneSegmentContainer {
     [Header("Scene Settings")]
     [Tooltip("Name of the scene to be loaded (ChangeScene).")]
     public string SceneName;
-
-    [Header("Letterboxing settings")]
-    [Tooltip("Duration of the letterboxing animation (in seconds).")]
-    public float LetterboxingDuration = 1.0f;
-
-    [Tooltip("UI images for letterboxing (e.g. top and bottom of the canvas).")]
-    public Image[] LetterboxElements;
-    [Tooltip("Toggle for the letterboxing effect. Enables letterboxing if true.")]
-    public bool EnableLetterboxing;
 
     [Header("Pathfinding & Movement")]
     [Tooltip("Moving object (e.g. the player or an NPC) for movement segments.")]

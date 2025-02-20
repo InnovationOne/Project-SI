@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 [CreateAssetMenu(fileName = "NewCutscene", menuName = "Cutscene/CutsceneInfo")]
 public class CutsceneInfo : ScriptableObject {
     [Tooltip("A general description of the cutscene.")]

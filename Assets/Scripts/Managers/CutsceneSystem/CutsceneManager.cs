@@ -4,28 +4,42 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Unity.Cinemachine;
 using static CutsceneSegmentContainer;
+using System.Collections.Generic;
 
 public class CutsceneManager : NetworkBehaviour {
-    public static CutsceneManager Instance { get; private set; }
+    [SerializeField] List<CutsceneInfo> _cutsceneInfos;
 
     private void Awake() {
-        // Singleton setup.
-        if (Instance != null && Instance != this) {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
         DontDestroyOnLoad(gameObject);
     }
 
-    public void PlayCutscene(CutsceneInfo cutscene) {
-        if (IsServer) {
-            Debug.Log("Server starting cutscene: " + cutscene.CutsceneId);
-            StartCoroutine(PlayCutsceneSequence(cutscene));
-            PlayCutsceneClientRpc(); // Notify clients to run the same sequence.
-        } else {
-            Debug.LogWarning("Only the server can initiate cutscenes.");
+    private void Update() {
+        if (Input.GetKeyDown(KeyCode.L)) {
+            PlayCutsceneServerRPC(0);
         }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void PlayCutsceneServerRPC(int cutsceneId) {
+        CutsceneInfo cutscene = _cutsceneInfos[cutsceneId];
+        if (cutscene != null) {
+            Debug.Log("Server starting cutscene: " + cutscene.CutsceneId);
+            DisableAllClientRPC();
+            StartCoroutine(PlayCutsceneSequence(cutscene));
+            PlayCutsceneClientRpc();
+        } else {
+            Debug.LogWarning("Cutscene not found for id: " + cutsceneId);
+        }
+    }
+
+    [ClientRpc]
+    public void DisableAllClientRPC() {
+        GameManager.Instance.InputManager.DisableAll();
+    }
+
+    [ClientRpc]
+    public void EnableAllClientRPC() {
+        GameManager.Instance.InputManager.EnableAll();
     }
 
     private IEnumerator PlayCutsceneSequence(CutsceneInfo cutscene) {
@@ -49,6 +63,7 @@ public class CutsceneManager : NetworkBehaviour {
             }
         }
         Debug.Log("Cutscene sequence completed.");
+        EnableAllClientRPC();
     }
 
     /// <summary>
@@ -96,8 +111,8 @@ public class CutsceneManager : NetworkBehaviour {
             // Instantiates a character prefab at a designated spawn point.
             case SegmentTypes.SpawnCharacter: {
                     if (segment.CharacterPrefab != null && segment.SpawnPoint != null) {
-                        Instantiate(segment.CharacterPrefab, segment.SpawnPoint.position, segment.SpawnPoint.rotation);
-                        Debug.Log("SpawnCharacter: Spawned character at " + segment.SpawnPoint.position);
+                        Instantiate(segment.CharacterPrefab, segment.SpawnPoint, Quaternion.identity);
+                        Debug.Log("SpawnCharacter: Spawned character at " + segment.SpawnPoint);
                     } else {
                         Debug.LogWarning("SpawnCharacter: Missing prefab or spawn point.");
                     }
@@ -154,7 +169,7 @@ public class CutsceneManager : NetworkBehaviour {
         case SegmentTypes.CharacterTargetFurniture: {
                 if (segment.PrimaryTarget != null && segment.TargetFurniture != null) {
                     Vector3 startPos = segment.PrimaryTarget.transform.position;
-                    Vector3 endPos = segment.TargetFurniture.position;
+                    Vector3 endPos = segment.TargetFurniture;
                     bool pathCompleted = false;
 
                     void callback(Vector3[] path, bool success) {
@@ -178,7 +193,7 @@ public class CutsceneManager : NetworkBehaviour {
         case SegmentTypes.CharacterTargetExit: {
                 if (segment.PrimaryTarget != null && segment.ExitPoint != null) {
                     Vector3 startPos = segment.PrimaryTarget.transform.position;
-                    Vector3 endPos = segment.ExitPoint.position;
+                    Vector3 endPos = segment.ExitPoint;
                     bool pathCompleted = false;
 
                     void callback(Vector3[] path, bool success) {
@@ -206,14 +221,11 @@ public class CutsceneManager : NetworkBehaviour {
             // Instructs the camera to move to a target position.
             case SegmentTypes.CameraMove: {
                     if (Camera.main.TryGetComponent<CinemachineCamera>(out var cam)) {
-                        Vector3 startPos = cam.transform.position;
                         Vector3 targetPos = segment.TargetPosition;
-                        float elapsed = 0f;
-                        float duration = segment.SegmentTimer; // Nutzt segmentTimer als Bewegungsdauer
+                        float moveSpeed = 5f;
 
-                        while (elapsed < duration) {
-                            elapsed += Time.deltaTime;
-                            cam.transform.position = Vector3.Lerp(startPos, targetPos, elapsed / duration);
+                        while (Vector3.Distance(cam.transform.position, targetPos) > 0.01f) {
+                            cam.transform.position = Vector3.MoveTowards(cam.transform.position, targetPos, moveSpeed * Time.deltaTime);
                             yield return null;
                         }
                         cam.transform.position = targetPos;
@@ -348,43 +360,19 @@ public class CutsceneManager : NetworkBehaviour {
                 }
                 break;
 
-            // Toggles a letterboxing effect (black bars on the top and bottom of the screen) to create a cinematic look.
-            case SegmentTypes.Letterboxing: {
-                    if (segment.LetterboxElements != null && segment.LetterboxElements.Length >= 2) {
-                        float targetHeight = 64f;
-                        RectTransform topRect = segment.LetterboxElements[0].rectTransform;
-                        RectTransform bottomRect = segment.LetterboxElements[1].rectTransform;
-
-                        // Annahme: Die Ausgangspositionen sind so gewählt, dass die Letterboxen außerhalb des sichtbaren Bereichs liegen.
-                        Vector2 topStart = topRect.anchoredPosition;
-                        Vector2 bottomStart = bottomRect.anchoredPosition;
-
-                        Vector2 topTarget, bottomTarget;
-                        if (segment.EnableLetterboxing) {
-                            // Beim Aktivieren fahren die Letterboxen in den Bildschirm (z. B. y=0)
-                            topTarget = new Vector2(topStart.x, 0);
-                            bottomTarget = new Vector2(bottomStart.x, 0);
-                        } else {
-                            // Beim Deaktivieren fahren sie wieder außerhalb – top nach unten (+targetHeight), bottom nach oben (-targetHeight)
-                            topTarget = new Vector2(topStart.x, targetHeight);
-                            bottomTarget = new Vector2(bottomStart.x, -targetHeight);
-                        }
-
-                        float elapsed = 0f;
-                        float duration = segment.LetterboxingDuration;
-                        while (elapsed < duration) {
-                            elapsed += Time.deltaTime;
-                            float t = elapsed / duration;
-                            topRect.anchoredPosition = Vector2.Lerp(topStart, topTarget, t);
-                            bottomRect.anchoredPosition = Vector2.Lerp(bottomStart, bottomTarget, t);
-                            yield return null;
-                        }
-                        topRect.anchoredPosition = topTarget;
-                        bottomRect.anchoredPosition = bottomTarget;
-                        Debug.Log("Letterboxing: Letterboxing-Effekt " + (segment.EnableLetterboxing ? "aktiviert" : "deaktiviert") + ".");
-                    }
-                    break;
+            // Shows the letterboxing effect.
+            case SegmentTypes.ShowLetterboxing: {
+                    Debug.Log("ShowLetterboxing: Letterboxing effect shown.");
+                    UIManager.Instance.LetterboxingUI.ShowLetterboxes();
                 }
+                break;
+
+            // Hides the letterboxing effect.
+            case SegmentTypes.HideLetterboxing: {
+                    Debug.Log("HideLetterboxing: Letterboxing effect hidden.");
+                    UIManager.Instance.LetterboxingUI.HideLetterboxes();
+                }
+                break;
 
             // Transitions to a new scene.
             case SegmentTypes.ChangeScene: {

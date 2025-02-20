@@ -289,28 +289,47 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
 
     #region -------------------- Tool Action --------------------
     void ToolAction(ItemSO itemSO) {
-        var actionEnumerator = itemSO.LeftClickAction.GetEnumerator();
-        StartToolAction(actionEnumerator);
+        // Cast itemSO to your toolSO type
+        var toolSO = itemSO as ToolSO;
+        if (toolSO == null) return;
+
+        var actionEnumerator = toolSO.LeftClickAction.GetEnumerator();
+        StartToolAction(toolSO, actionEnumerator);
     }
 
-    void StartToolAction(IEnumerator<ToolActionSO> enumerator) {
-        // Attempt to move to the next tool action
+    void StartToolAction(ToolSO toolSO, IEnumerator<ToolActionSO> enumerator) {
         if (!enumerator.MoveNext()) return;
-
         var toolAction = enumerator.Current;
         if (toolAction == null) return;
 
-        // Reset callback flags and start the coroutine for this action
         _callbackSuccessful = false;
         _success = false;
         _timeout = MAX_TIMEOUT;
         _elapsedTime = 0f;
 
-        StartCoroutine(PerformToolAction(toolAction, enumerator));
+        StartCoroutine(PerformToolAction(toolSO, toolAction, enumerator));
     }
 
-    IEnumerator PerformToolAction(ToolActionSO toolAction, IEnumerator<ToolActionSO> enumerator) {
+    IEnumerator PerformToolAction(ToolSO toolSO, ToolActionSO toolAction, IEnumerator<ToolActionSO> enumerator) {
         StopMovement();
+
+        // Check which animation to use based on toolSO properties
+        if (toolSO.HasThrustAnimation) {
+            // First play the RaiseStaff animation, similar to the weapon flow
+            _pAC.ChangeState(PlayerState.RaiseStaff, true);
+            yield return null;
+            // Wait for the raise staff animation to finish before proceeding
+            var animInfo = _weaponAnim.GetCurrentAnimatorStateInfo(0);
+            yield return new WaitForSeconds(animInfo.length / animInfo.speed);
+            // Now switch to the ThrustLoop animation
+            _pAC.ChangeState(PlayerState.ThrustLoop, true);
+        } else if (toolSO.HasSlashAnimation) {
+            // Use the standard slash animation
+            _pAC.ChangeState(PlayerState.Slash, true);
+        } else {
+            // Fallback to idle if no animation is specified
+            _pAC.ChangeState(PlayerState.Idle, true);
+        }
 
         // Apply the tool action to the tile map at the player's marked position
         toolAction.OnApplyToTileMap(_playerMarkerController.MarkedCellPosition, _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot());
@@ -321,16 +340,15 @@ public class PlayerToolsAndWeaponController : NetworkBehaviour {
             _elapsedTime += Time.deltaTime;
         }
 
-        // If not successful, log and try the next action
         if (!_success) {
             if (_elapsedTime >= _timeout) {
                 Debug.LogError($"{toolAction.name} | ToolAction timeout!");
             }
-
-            // Proceed to the next action regardless of success
-            StartToolAction(enumerator);
+            StartToolAction(toolSO, enumerator);
         }
 
+        // Revert to idle state after the tool action completes
+        _pAC.ChangeState(PlayerState.Idle, true);
         StartMovement();
     }
 

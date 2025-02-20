@@ -74,6 +74,8 @@ public class CutsceneSegmentContainerDrawer : PropertyDrawer {
             case CutsceneSegmentContainer.SegmentTypes.End:
             case CutsceneSegmentContainer.SegmentTypes.ShowGameCanvas:
             case CutsceneSegmentContainer.SegmentTypes.HideGameCanvas:
+            case CutsceneSegmentContainer.SegmentTypes.ShowLetterboxing:
+            case CutsceneSegmentContainer.SegmentTypes.HideLetterboxing:
                 // no extra fields
                 break;
 
@@ -124,7 +126,6 @@ public class CutsceneSegmentContainerDrawer : PropertyDrawer {
 
             case CutsceneSegmentContainer.SegmentTypes.CameraMove:
                 totalHeight += PropH("TargetPosition");
-                totalHeight += PropH("SegmentTimer"); // We also reuse SegmentTimer
                 break;
 
             case CutsceneSegmentContainer.SegmentTypes.PlayAudio:
@@ -152,12 +153,6 @@ public class CutsceneSegmentContainerDrawer : PropertyDrawer {
             case CutsceneSegmentContainer.SegmentTypes.CharacterDirection:
                 totalHeight += PropH("Direction");
                 totalHeight += PropH("PrimaryTarget");
-                break;
-
-            case CutsceneSegmentContainer.SegmentTypes.Letterboxing:
-                totalHeight += PropH("LetterboxElements");
-                totalHeight += PropH("EnableLetterboxing");
-                totalHeight += PropH("LetterboxingDuration");
                 break;
 
             case CutsceneSegmentContainer.SegmentTypes.ChangeScene:
@@ -209,6 +204,8 @@ public class CutsceneSegmentContainerDrawer : PropertyDrawer {
             case CutsceneSegmentContainer.SegmentTypes.End:
             case CutsceneSegmentContainer.SegmentTypes.ShowGameCanvas:
             case CutsceneSegmentContainer.SegmentTypes.HideGameCanvas:
+            case CutsceneSegmentContainer.SegmentTypes.ShowLetterboxing:
+            case CutsceneSegmentContainer.SegmentTypes.HideLetterboxing:
                 // no extra fields
                 break;
 
@@ -259,7 +256,6 @@ public class CutsceneSegmentContainerDrawer : PropertyDrawer {
 
             case CutsceneSegmentContainer.SegmentTypes.CameraMove:
                 y = DrawProperty(property, "TargetPosition", position, y);
-                y = DrawProperty(property, "SegmentTimer", position, y);
                 break;
 
             case CutsceneSegmentContainer.SegmentTypes.PlayAudio:
@@ -287,12 +283,6 @@ public class CutsceneSegmentContainerDrawer : PropertyDrawer {
             case CutsceneSegmentContainer.SegmentTypes.CharacterDirection:
                 y = DrawProperty(property, "Direction", position, y);
                 y = DrawProperty(property, "PrimaryTarget", position, y);
-                break;
-
-            case CutsceneSegmentContainer.SegmentTypes.Letterboxing:
-                y = DrawProperty(property, "LetterboxElements", position, y);
-                y = DrawProperty(property, "EnableLetterboxing", position, y);
-                y = DrawProperty(property, "LetterboxingDuration", position, y);
                 break;
 
             case CutsceneSegmentContainer.SegmentTypes.ChangeScene:
