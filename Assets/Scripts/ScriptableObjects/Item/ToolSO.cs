@@ -30,6 +30,7 @@ public class ToolSO : ItemSO {
 
     [Header("Animator")]
     public bool HasBowAnimation;
+    public bool HasFishingAnimation;
     public bool HasHurtAnimation;
     public bool HasSlashAnimation;
     public bool HasSlashReverseAnimation;

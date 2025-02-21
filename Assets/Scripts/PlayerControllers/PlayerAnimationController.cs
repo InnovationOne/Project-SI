@@ -6,7 +6,7 @@ using UnityEngine;
 public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     public enum PlayerState {
         RaiseBowAndAim, LooseArrow, GrabNewArrow, AimNewArrow,
-        Fishing_Throw, Fishing_ReelLoop, Fishing_Land,
+        FishingThrow, FishingReelLoop, FishingLand,
         Hurt,
         Idle,
         Slash, SlashReverse,
@@ -25,9 +25,9 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     const string LOOSE_ARROW = "LooseArrow";
     const string GRAB_NEW_ARROW = "GrabNewArrow";
     const string AIM_NEW_ARROW = "AimNewArrow";
-    const string FISHING_THROW = "Fishing_Throw";
-    const string FISHING_REEL_LOOP = "Fishing_ReelLoop";
-    const string FISHING_LAND = "Fishing_Land";
+    const string FISHING_THROW = "FishingThrow";
+    const string FISHING_REEL_LOOP = "FishingReelLoop";
+    const string FISHING_LAND = "FishingLand";
     const string HURT = "Hurt";
     const string IDLE = "Idle";
     const string SLASH = "Slash";
@@ -44,9 +44,9 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         { PlayerState.LooseArrow,     LOOSE_ARROW           },
         { PlayerState.GrabNewArrow,   GRAB_NEW_ARROW        },
         { PlayerState.AimNewArrow,    AIM_NEW_ARROW         },
-        { PlayerState.Fishing_Throw,    FISHING_THROW       },
-        { PlayerState.Fishing_ReelLoop, FISHING_REEL_LOOP   },
-        { PlayerState.Fishing_Land,     FISHING_LAND        },
+        { PlayerState.FishingThrow,  FISHING_THROW         },
+        { PlayerState.FishingReelLoop, FISHING_REEL_LOOP   },
+        { PlayerState.FishingLand,   FISHING_LAND          },
         { PlayerState.Hurt,           HURT                  },
         { PlayerState.Idle,           IDLE                  },
         { PlayerState.Slash,          SLASH                 },
@@ -164,6 +164,7 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
                 StartCoroutine(SetAnimationOverride(_behindAnim, weaponSO.AnimatorBG));
             }
         } else if (itemSO is ToolSO toolSO) {
+            Debug.Log($"ToolSO: {toolSO.name}");
             if (toolSO.AnimatorFG != null) {
                 StartCoroutine(SetAnimationOverride(_weaponAnim, toolSO.AnimatorFG));
             }

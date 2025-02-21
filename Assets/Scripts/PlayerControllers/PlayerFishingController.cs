@@ -103,9 +103,10 @@ public class PlayerFishingController : MonoBehaviour {
     PlayerToolbeltController _playerToolbeltController;
     PlayerMovementController _playerMovementController;
     PlayerInventoryController _playerInventoryController;
+    PlayerAnimationController _playerAnimationController;
     Tilemap _fishingTilemap;
     AudioManager _audioManager;
-    InputManager _inputManager;
+    InputManager _inputManager;    
 
     // Coroutine references
     Coroutine _castLineCoroutine;
@@ -118,6 +119,7 @@ public class PlayerFishingController : MonoBehaviour {
         _playerToolbeltController = GetComponent<PlayerToolbeltController>();
         _playerMovementController = GetComponent<PlayerMovementController>();
         _playerInventoryController = GetComponent<PlayerInventoryController>();
+        _playerAnimationController = GetComponent<PlayerAnimationController>();
         _alertPopup.enabled = false;
     }
 
@@ -198,6 +200,37 @@ public class PlayerFishingController : MonoBehaviour {
         }
     }
 
+    #region -------------------- Animation Handling --------------------
+
+    private void SetFishingState(FishingState newState) {
+        _currentState = newState;
+        SwitchAnimation(newState);
+    }
+
+    private void SwitchAnimation(FishingState st) {
+        if (_playerAnimationController == null) return;
+
+        switch (st) {
+            case FishingState.Idle:
+                _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.Idle, true);
+                break;
+
+            case FishingState.Casting:
+                _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingThrow, true);
+                break;
+
+            case FishingState.Fishing:
+                _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingReelLoop, true);
+                break;
+
+            case FishingState.ReelingIn:
+                _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingLand, true);
+                break;
+        }
+    }
+
+    #endregion
+
     #region -------------------- Input Handlers --------------------
     // Input handlers focusing on state transitions rather than logic
     void OnLeftClickAction() {
@@ -227,7 +260,7 @@ public class PlayerFishingController : MonoBehaviour {
         if (_currentCooldown > 0 || _currentState != FishingState.Casting) return;
         _isLeftClickHeld = false;
         StopPreviewThrowArc();
-        _currentState = FishingState.Fishing;
+        SetFishingState(FishingState.Fishing);
         _castLineCoroutine ??= StartCoroutine(CastLine());
 
     }
@@ -236,7 +269,7 @@ public class PlayerFishingController : MonoBehaviour {
     #region -------------------- State Handlers --------------------
     // State-specific handlers
     void StartCastingPreview() {
-        _currentState = FishingState.Casting;
+        SetFishingState(FishingState.Casting);
         ShowPreview();
     }
 
@@ -345,7 +378,7 @@ public class PlayerFishingController : MonoBehaviour {
 
     void StartMinigame() {
         _alertPopup.enabled = false;
-        _currentState = FishingState.ReelingIn;
+        SetFishingState(FishingState.ReelingIn);
         _timeToCatchFish = TIME_TO_CATCH_FISH;
         _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.Fishing_Quickly_Reel_In, transform.position);
 
@@ -358,7 +391,7 @@ public class PlayerFishingController : MonoBehaviour {
         _currentButtonPresses++;
         if (_currentButtonPresses < _requiredButtonPresses) return;
 
-        _currentState = FishingState.Fishing;
+        SetFishingState(FishingState.Fishing);
         string catchMessage = $"You caught a {_currentFish.FishItem.ItemName}. It is {_currentFish.CalculateFishSize()} cm long.\n" +
                               $"{_currentFish.CatchText[UnityEngine.Random.Range(0, _currentFish.CatchText.Length)]}";
         UIManager.Instance.FishCatchUI.ShowFishCatchUI(catchMessage);
@@ -373,7 +406,7 @@ public class PlayerFishingController : MonoBehaviour {
         _currentFish = null;
         _fishIsBiting = false;
         _currentTimeToStartMinigame = TIME_TO_START_MINIGAME;
-        _currentState = FishingState.Fishing;
+        SetFishingState(FishingState.Fishing);
         _waitForFishCoroutine ??= StartCoroutine(WaitForFish());
     }
 
@@ -396,7 +429,7 @@ public class PlayerFishingController : MonoBehaviour {
         _currentButtonPresses = 0;
         _currentTimeToStartMinigame = TIME_TO_START_MINIGAME;
         _bobberTileId = -1;
-        _currentState = FishingState.Idle;
+        SetFishingState(FishingState.Idle);
 
         if (_castLineCoroutine != null) {
             StopCoroutine(_castLineCoroutine);

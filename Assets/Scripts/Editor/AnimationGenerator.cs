@@ -15,11 +15,26 @@ public class AnimationGenerator : EditorWindow {
     public bool hasFgBg = false;
     public bool useSlashReverseFromSlash = false;
 
+    [Header("Fishing Animation")]
+    public bool createFishingAnimation = false;
+    public bool isFishingRod = false;
+
     [Header("Single-Sheet Mode")]
     public AnimatorController baseControllerSingle;
 
+    [Header("One Texture Mode (optional)")]
+    public bool oneTextureMode = false;
+    public Texture2D oneTexture;
+    const int spellcastFrameCount = 7;
+    const int thrustFrameCount = 8;
+    const int walkcycleFrameCount = 9;
+    const int slashFrameCount = 6;
+    const int bowFrameCount = 13;
+    const int hurtFrameCount = 6;
+
     [Header("Textures (Single-Sheet)")]
     public Texture2D bowTexture;
+    public Texture2D fishingRodTexture;
     public Texture2D hurtTexture;
     public Texture2D slashTexture;
     public Texture2D slashReverseTexture;
@@ -35,6 +50,7 @@ public class AnimationGenerator : EditorWindow {
 
     [Header("Textures (FG)")]
     public Texture2D bowTextureFG;
+    public Texture2D fishingRodTextureFG;
     public Texture2D hurtTextureFG;
     public Texture2D slashTextureFG;
     public Texture2D slashReverseTextureFG;
@@ -44,6 +60,7 @@ public class AnimationGenerator : EditorWindow {
 
     [Header("Textures (BG)")]
     public Texture2D bowTextureBG;
+    public Texture2D fishingRodTextureBG;
     public Texture2D hurtTextureBG;
     public Texture2D slashTextureBG;
     public Texture2D slashReverseTextureBG;
@@ -61,6 +78,12 @@ public class AnimationGenerator : EditorWindow {
     private enum Direction { Up, Left, Down, Right }
     private enum PositionType { None, FG, BG }
 
+    private static readonly int[] CHAR_INDICES = { 0, 1, 2, 3, 4, 5, 4, 4, 4, 5, 4, 2, 3 };
+
+    private static readonly int[] ROD_INDICES = { 0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9, 10, 11 };
+
+
+
     [MenuItem("Tools/Animation Generator")]
     public static void ShowWindow() {
         GetWindow<AnimationGenerator>("Animation Generator");
@@ -72,6 +95,12 @@ public class AnimationGenerator : EditorWindow {
         EditorGUILayout.LabelField("Mode Settings", EditorStyles.boldLabel);
         hasFgBg = EditorGUILayout.Toggle("Has FG/BG?", hasFgBg);
         useSlashReverseFromSlash = EditorGUILayout.Toggle("Use SlashReverse from Slash?", useSlashReverseFromSlash);
+
+        EditorGUILayout.Space();
+        createFishingAnimation = EditorGUILayout.Toggle("Create Fishing Animation?", createFishingAnimation);
+        if (createFishingAnimation) {
+            isFishingRod = EditorGUILayout.Toggle("Is Fishing Rod?", isFishingRod);
+        }
 
         EditorGUILayout.Space();
         if (!hasFgBg) DrawSingleSheetGUI();
@@ -100,16 +129,22 @@ public class AnimationGenerator : EditorWindow {
         EditorGUILayout.LabelField("Single-Sheet Mode", EditorStyles.boldLabel);
         baseControllerSingle = (AnimatorController)EditorGUILayout.ObjectField("Base Controller (Single)", baseControllerSingle, typeof(AnimatorController), false);
 
-        EditorGUILayout.Space();
-        bowTexture = (Texture2D)EditorGUILayout.ObjectField("Bow Texture", bowTexture, typeof(Texture2D), false);
-        hurtTexture = (Texture2D)EditorGUILayout.ObjectField("Hurt Texture", hurtTexture, typeof(Texture2D), false);
-        slashTexture = (Texture2D)EditorGUILayout.ObjectField("Slash Texture", slashTexture, typeof(Texture2D), false);
-        if (!useSlashReverseFromSlash)
-            slashReverseTexture = (Texture2D)EditorGUILayout.ObjectField("SlashReverse Texture", slashReverseTexture, typeof(Texture2D), false);
-
-        spellcastTexture = (Texture2D)EditorGUILayout.ObjectField("Spellcast Texture", spellcastTexture, typeof(Texture2D), false);
-        thrustTexture = (Texture2D)EditorGUILayout.ObjectField("Thrust Texture", thrustTexture, typeof(Texture2D), false);
-        walkcycleTexture = (Texture2D)EditorGUILayout.ObjectField("Walkcycle Texture", walkcycleTexture, typeof(Texture2D), false);
+        oneTextureMode = EditorGUILayout.Toggle("One Texture Mode", oneTextureMode);
+        if (oneTextureMode) {
+            oneTexture = (Texture2D)EditorGUILayout.ObjectField("Große Texture", oneTexture, typeof(Texture2D), false);
+        } else {
+            EditorGUILayout.Space();
+            bowTexture = (Texture2D)EditorGUILayout.ObjectField("Bow Texture", bowTexture, typeof(Texture2D), false);
+            if (isFishingRod)
+                fishingRodTexture = (Texture2D)EditorGUILayout.ObjectField("Fishing Rod Texture", fishingRodTexture, typeof(Texture2D), false);
+            hurtTexture = (Texture2D)EditorGUILayout.ObjectField("Hurt Texture", hurtTexture, typeof(Texture2D), false);
+            slashTexture = (Texture2D)EditorGUILayout.ObjectField("Slash Texture", slashTexture, typeof(Texture2D), false);
+            if (!useSlashReverseFromSlash)
+                slashReverseTexture = (Texture2D)EditorGUILayout.ObjectField("SlashReverse Texture", slashReverseTexture, typeof(Texture2D), false);
+            spellcastTexture = (Texture2D)EditorGUILayout.ObjectField("Spellcast Texture", spellcastTexture, typeof(Texture2D), false);
+            thrustTexture = (Texture2D)EditorGUILayout.ObjectField("Thrust Texture", thrustTexture, typeof(Texture2D), false);
+            walkcycleTexture = (Texture2D)EditorGUILayout.ObjectField("Walkcycle Texture", walkcycleTexture, typeof(Texture2D), false);
+        }
 
         EditorGUILayout.Space();
         if (GUILayout.Button("Clear Textures")) {
@@ -131,6 +166,8 @@ public class AnimationGenerator : EditorWindow {
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Texture2D (FG)", EditorStyles.boldLabel);
         bowTextureFG = (Texture2D)EditorGUILayout.ObjectField("Bow FG", bowTextureFG, typeof(Texture2D), false);
+        if (isFishingRod)
+            fishingRodTextureFG = (Texture2D)EditorGUILayout.ObjectField("Fishing Rod FG", fishingRodTextureFG, typeof(Texture2D), false);
         hurtTextureFG = (Texture2D)EditorGUILayout.ObjectField("Hurt FG", hurtTextureFG, typeof(Texture2D), false);
         slashTextureFG = (Texture2D)EditorGUILayout.ObjectField("Slash FG", slashTextureFG, typeof(Texture2D), false);
         if (!useSlashReverseFromSlash)
@@ -143,6 +180,8 @@ public class AnimationGenerator : EditorWindow {
         EditorGUILayout.Space();
         EditorGUILayout.LabelField("Texture2D (BG)", EditorStyles.boldLabel);
         bowTextureBG = (Texture2D)EditorGUILayout.ObjectField("Bow BG", bowTextureBG, typeof(Texture2D), false);
+        if (isFishingRod)
+            fishingRodTextureBG = (Texture2D)EditorGUILayout.ObjectField("Fishing Rod BG", fishingRodTextureBG, typeof(Texture2D), false);
         hurtTextureBG = (Texture2D)EditorGUILayout.ObjectField("Hurt BG", hurtTextureBG, typeof(Texture2D), false);
         slashTextureBG = (Texture2D)EditorGUILayout.ObjectField("Slash BG", slashTextureBG, typeof(Texture2D), false);
         if (!useSlashReverseFromSlash)
@@ -159,7 +198,9 @@ public class AnimationGenerator : EditorWindow {
     }
 
     private void RemoveTextures() {
+        oneTexture = null;
         bowTexture = null;
+        fishingRodTexture = null;
         hurtTexture = null;
         slashTexture = null;
         slashReverseTexture = null;
@@ -168,6 +209,7 @@ public class AnimationGenerator : EditorWindow {
         walkcycleTexture = null;
 
         bowTextureFG = null;
+        fishingRodTextureFG = null;
         hurtTextureFG = null;
         slashTextureFG = null;
         slashReverseTextureFG = null;
@@ -176,6 +218,7 @@ public class AnimationGenerator : EditorWindow {
         walkcycleTextureFG = null;
 
         bowTextureBG = null;
+        fishingRodTextureBG = null;
         hurtTextureBG = null;
         slashTextureBG = null;
         slashReverseTextureBG = null;
@@ -235,16 +278,50 @@ public class AnimationGenerator : EditorWindow {
         }
 
         var generated = new Dictionary<string, AnimationClip>();
-        GenerateBowAnimations(LoadAndSortSprites(bowTexture), generated, animFolder, PositionType.None);
-        GenerateHurtAnimation(LoadAndSortSprites(hurtTexture), generated, animFolder, PositionType.None);
 
-        var slashSprites = LoadAndSortSprites(slashTexture);
-        var slashRevSprites = LoadAndSortSprites(slashReverseTexture);
-        GenerateSlashAnimations(slashSprites, slashRevSprites, useSlashReverseFromSlash, generated, animFolder, PositionType.None);
+        if (oneTextureMode) {
+            // One Texture Mode: Nutze die große Texture und teile die Sprites in Blöcke auf.
+            var allSprites = LoadAndSortSprites(oneTexture);
+            // Sortierung: Oben nach unten (größeres Rect.y zuerst)
+            allSprites = allSprites.OrderByDescending(s => s.rect.y).ToList();
 
-        GenerateSpellcastAnimation(LoadAndSortSprites(spellcastTexture), generated, animFolder, PositionType.None);
-        GenerateThrustAnimation(LoadAndSortSprites(thrustTexture), generated, animFolder, PositionType.None);
-        GenerateWalkcycleAnimation(LoadAndSortSprites(walkcycleTexture), generated, animFolder, PositionType.None);
+            int index = 0;
+            // Annahme: Die große Texture enthält (von oben nach unten) die Blöcke in folgender Reihenfolge:
+            // Spellcast, Thrust, Walkcycle, Slash, Bow und Hurt – jeweils 4 Richtungen
+            List<Sprite> spellcastSprites = allSprites.GetRange(index, spellcastFrameCount * 4);
+            index += spellcastFrameCount * 4;
+            List<Sprite> thrustSprites = allSprites.GetRange(index, thrustFrameCount * 4);
+            index += thrustFrameCount * 4;
+            List<Sprite> walkcycleSprites = allSprites.GetRange(index, walkcycleFrameCount * 4);
+            index += walkcycleFrameCount * 4;
+            List<Sprite> slashSprites = allSprites.GetRange(index, slashFrameCount * 4);
+            index += slashFrameCount * 4;
+            List<Sprite> bowSprites = allSprites.GetRange(index, bowFrameCount * 4);
+            index += bowFrameCount * 4;
+            List<Sprite> hurtSprites = allSprites.GetRange(index, hurtFrameCount);
+            index += hurtFrameCount;
+
+            GenerateBowAnimations(bowSprites, generated, animFolder, PositionType.None);
+            GenerateHurtAnimation(hurtSprites, generated, animFolder, PositionType.None);
+            GenerateFishingAnimations(thrustSprites, LoadAndSortSprites(fishingRodTexture), generated, animFolder, PositionType.None);
+            GenerateSlashAnimations(slashSprites, null, useSlashReverseFromSlash, generated, animFolder, PositionType.None);
+            GenerateSpellcastAnimation(spellcastSprites, generated, animFolder, PositionType.None);
+            GenerateThrustAnimation(thrustSprites, generated, animFolder, PositionType.None);
+            GenerateWalkcycleAnimation(walkcycleSprites, generated, animFolder, PositionType.None);
+        } else {
+            // Herkömmlicher Modus mit separaten Texture2D Feldern
+            GenerateBowAnimations(LoadAndSortSprites(bowTexture), generated, animFolder, PositionType.None);
+            GenerateHurtAnimation(LoadAndSortSprites(hurtTexture), generated, animFolder, PositionType.None);
+            GenerateFishingAnimations(LoadAndSortSprites(thrustTexture), LoadAndSortSprites(fishingRodTexture), generated, animFolder, PositionType.None);
+
+            var slashSprites = LoadAndSortSprites(slashTexture);
+            var slashRevSprites = LoadAndSortSprites(slashReverseTexture);
+            GenerateSlashAnimations(slashSprites, slashRevSprites, useSlashReverseFromSlash, generated, animFolder, PositionType.None);
+
+            GenerateSpellcastAnimation(LoadAndSortSprites(spellcastTexture), generated, animFolder, PositionType.None);
+            GenerateThrustAnimation(LoadAndSortSprites(thrustTexture), generated, animFolder, PositionType.None);
+            GenerateWalkcycleAnimation(LoadAndSortSprites(walkcycleTexture), generated, animFolder, PositionType.None);
+        }
 
         PopulateOverridesExact(singleOverride, generated);
         RemoveTextures();
@@ -286,9 +363,11 @@ public class AnimationGenerator : EditorWindow {
         GenerateSpellcastAnimation(LoadAndSortSprites(spellcastTextureFG), fgClips, animFolderFG, PositionType.FG);
         GenerateThrustAnimation(LoadAndSortSprites(thrustTextureFG), fgClips, animFolderFG, PositionType.FG);
         GenerateWalkcycleAnimation(LoadAndSortSprites(walkcycleTextureFG), fgClips, animFolderFG, PositionType.FG);
+        GenerateFishingAnimations(LoadAndSortSprites(thrustTextureFG), LoadAndSortSprites(fishingRodTextureFG), fgClips, animFolderFG, PositionType.FG);
 
         var bgClips = new Dictionary<string, AnimationClip>();
         GenerateBowAnimations(LoadAndSortSprites(bowTextureBG), bgClips, animFolderBG, PositionType.BG);
+        GenerateFishingAnimations(LoadAndSortSprites(thrustTextureBG), LoadAndSortSprites(fishingRodTextureBG), bgClips, animFolderBG, PositionType.BG);
         GenerateHurtAnimation(LoadAndSortSprites(hurtTextureBG), bgClips, animFolderBG, PositionType.BG);
         GenerateSlashAnimations(LoadAndSortSprites(slashTextureBG), LoadAndSortSprites(slashReverseTextureBG), useSlashReverseFromSlash, bgClips, animFolderBG, PositionType.BG);
         GenerateSpellcastAnimation(LoadAndSortSprites(spellcastTextureBG), bgClips, animFolderBG, PositionType.BG);
@@ -465,6 +544,96 @@ public class AnimationGenerator : EditorWindow {
         SetAnimationLooping(output, "Walkcycle_Idle", true);
         GenerateDirectionalAnimation(sprites, "Walkcycle_Walkcycle", new[] { 1, 10, 19, 28 }, 8, output, folder, pos);
         SetAnimationLooping(output, "Walkcycle_Walkcycle", true);
+    }
+
+    private void GenerateFishingAnimations(
+        List<Sprite> charSprites,
+        List<Sprite> rodSprites,
+        Dictionary<string, AnimationClip> output,
+        string folder,
+        PositionType pos) {
+        // 1) Wenn wir im Inspector "Create Fishing Animation" nicht angehakt haben => Abbruch
+        if (!createFishingAnimation) return;
+
+        // 2) Wir brauchen 13 Frames gesamt
+        //    => CHAR_INDICES oder ROD_INDICES
+        int[] indices = isFishingRod ? ROD_INDICES : CHAR_INDICES;
+
+        // 3) Wieviele Frames pro Richtung hat dein Ausgangs-Spritesheet?
+        //    z.B. Thrust: 6 oder 8 pro Richtung
+        //    FishingRod: 12 oder 13 pro Richtung
+        //    => Passe diese Werte an dein tatsächliches Sheet an:
+        int framesPerDirection = isFishingRod ? 13 : 8;
+
+        // 4) Über 4 Richtungen loopen
+        for (int dir = 0; dir < 4; dir++) {
+            int offset = dir * framesPerDirection;
+
+            // Baue eine Liste von 13 finalen Frames:
+            var finalFrames = new List<Sprite>();
+            for (int i = 0; i < 13; i++) {
+                int actualIndex = offset + indices[i];
+
+                // Falls wir über das Ende hinausgehen, nimm den letzten existierenden Frame
+                if (actualIndex >= 0 && actualIndex < (isFishingRod ? rodSprites.Count : charSprites.Count)) {
+                    // Je nach isFishingRod aus rodSprites oder charSprites holen
+                    finalFrames.Add(isFishingRod ? rodSprites[actualIndex] : charSprites[actualIndex]);
+                } else {
+                    // Fallback: Wiederhole den letzten Frame, um OutOfRange zu vermeiden
+                    if (isFishingRod && rodSprites.Count > 0)
+                        finalFrames.Add(rodSprites[rodSprites.Count - 1]);
+                    else if (!isFishingRod && charSprites.Count > 0)
+                        finalFrames.Add(charSprites[charSprites.Count - 1]);
+                }
+            }
+
+            // 5) Die 13 Frames in drei Teilanimationen aufsplitten:
+            //    Throw (0..5), ReelLoop (6..9), Land (10..12)
+            var holdFrames = finalFrames.GetRange(0, 4);   // 6 Frames
+            var throwFrames = finalFrames.GetRange(4, 2);   // 6 Frames
+            var reelLoopFrames = finalFrames.GetRange(6, 4);   // 4 Frames
+            var landFrames = finalFrames.GetRange(10, 3);  // 3 Frames
+
+            // Clip-Namen: z.B. "Fishing_Throw_Up", "Fishing_ReelLoop_Up", "Fishing_Land_Up"
+            // Wir brauchen die Richtung (Up, Left, Down, Right)
+            string directionName = GetDirectionName(dir);
+
+            // Throw-Clip
+            CreateAndStoreClip(throwFrames, "Fishing_Hold", directionName, pos, output, folder, loop: false);
+
+            // Throw-Clip
+            CreateAndStoreClip(throwFrames, "Fishing_Throw", directionName, pos, output, folder, loop: false);
+
+            // ReelLoop-Clip (Loop=true)
+            CreateAndStoreClip(reelLoopFrames, "Fishing_ReelLoop", directionName, pos, output, folder, loop: true);
+
+            // Land-Clip
+            CreateAndStoreClip(landFrames, "Fishing_Land", directionName, pos, output, folder, loop: false);
+        }
+    }
+
+    private void CreateAndStoreClip(
+        List<Sprite> frames,
+        string baseName,
+        string directionName,
+        PositionType pos,
+        Dictionary<string, AnimationClip> output,
+        string folder,
+        bool loop) {
+        if (frames == null || frames.Count == 0) return;
+
+        // finaler Clip-Name, z.B. "Fishing_Throw_Up_FG"
+        string clipName = BuildClipName(baseName, directionName, pos);
+
+        var clip = SaveAnimationClip(clipName, frames.ToArray(), folder);
+        if (clip != null) {
+            if (loop) {
+                var settings = AnimationUtility.GetAnimationClipSettings(clip);
+                settings.loopTime = true;
+                AnimationUtility.SetAnimationClipSettings(clip, settings);
+            }
+            output[clip.name] = clip;
+        }
     }
 
     /// <summary>
