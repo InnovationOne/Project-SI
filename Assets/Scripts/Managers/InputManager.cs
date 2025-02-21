@@ -61,6 +61,7 @@ public class InputManager : MonoBehaviour {
     // Toolbelt Slot Actions
     private readonly Dictionary<int, Action> _toolbeltSlotActions = new();
 
+    private bool _blockPlayerActions = false;
 
     /// <summary>
     /// Initializes the singleton instance and input actions.
@@ -144,6 +145,7 @@ public class InputManager : MonoBehaviour {
         _playerInputActions.DebugConsole.ArrowUp.performed += DebugConsoleArrowUp_performed;
         _playerInputActions.DebugConsole.ArrowDown.performed += DebugConsoleArrowDown_performed;
 
+        // Dialogue
         _playerInputActions.Dialogue.Continue.performed += Dialogue_Continue_performed;
         _playerInputActions.Dialogue.Continue.started += Dialogue_Continue_started;
         _playerInputActions.Dialogue.Continue.canceled += Dialogue_Continue_canceled;
@@ -176,38 +178,83 @@ public class InputManager : MonoBehaviour {
     }
 
     #region Player Input Handlers
-    private void Run_performed(InputAction.CallbackContext obj) => OnRunAction?.Invoke();
+    private void Run_performed(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return;
+        OnRunAction?.Invoke();
+    }
 
-    private void Dash_performed(InputAction.CallbackContext obj) => OnDashAction?.Invoke();
+    private void Dash_performed(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return;
+        OnDashAction?.Invoke();
+    }
 
-    private void DropItem_performed(InputAction.CallbackContext obj) => OnDropItemAction?.Invoke();
+    private void DropItem_performed(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return;
+        OnDropItemAction?.Invoke();
+    }
 
-    private void Interact_performed(InputAction.CallbackContext obj) => OnInteractAction?.Invoke();
+    private void Interact_performed(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return;
+        OnInteractAction?.Invoke();
+    }
 
-    private void Inventory_performed(InputAction.CallbackContext obj) => OnInventoryAction?.Invoke();
+    private void Inventory_performed(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return;
+        OnInventoryAction?.Invoke();
+    }
 
-    private void Escape_performed(InputAction.CallbackContext obj) => OnEscapeAction?.Invoke();
+    private void Escape_performed(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return;
+        OnEscapeAction?.Invoke();
+    }
 
-    private void RotateObj_Performed(InputAction.CallbackContext obj) => OnRotateAction?.Invoke();
+    private void RotateObj_Performed(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return;
+        OnRotateAction?.Invoke();
+    }
 
-    private void VMirrorObj_Performed(InputAction.CallbackContext obj) => OnVMirrorAction?.Invoke();
+    private void VMirrorObj_Performed(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return;
+        OnVMirrorAction?.Invoke();
+    }
 
-    private void HMirrorObj_Performed(InputAction.CallbackContext obj) => OnHMirrorAction?.Invoke();
+    private void HMirrorObj_Performed(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return;
+        OnHMirrorAction?.Invoke();
+    }
+
 
     private void LeftClick_performed(InputAction.CallbackContext obj) => OnLeftClickAction?.Invoke();
+
     private void LeftClick_started(InputAction.CallbackContext obj) => OnLeftClickStarted?.Invoke();
 
     private void LeftClick_canceled(InputAction.CallbackContext obj) => OnLeftClickCanceled?.Invoke();
 
-    private void RightClick_performed(InputAction.CallbackContext obj) => OnRightClickAction?.Invoke();
 
-    private void RightClick_started(InputAction.CallbackContext obj) => OnRightClickStarted?.Invoke();
+    private void RightClick_performed(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return; 
+        OnRightClickAction?.Invoke();
+    }
 
-    private void RightClick_canceled(InputAction.CallbackContext obj) => OnRightClickCanceled?.Invoke();
+    private void RightClick_started(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return; 
+        OnRightClickStarted?.Invoke(); 
+    }
 
-    private void LeftControl_performed(InputAction.CallbackContext obj) => OnLeftControlAction?.Invoke();
+    private void RightClick_canceled(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return; 
+        OnRightClickCanceled?.Invoke(); 
+    }
 
-    private void LeftControl_canceled(InputAction.CallbackContext obj) => OnLeftControlAction?.Invoke();
+    private void LeftControl_performed(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return;
+        OnLeftControlAction?.Invoke();
+    }
+
+    private void LeftControl_canceled(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return;
+        OnLeftControlAction?.Invoke();
+    }
     #endregion
 
     #region Toolbelt Slot Handling
@@ -216,6 +263,7 @@ public class InputManager : MonoBehaviour {
     /// </summary>
     /// <param name="slotNumber">The toolbelt slot number (1-10).</param>
     private void InvokeToolbeltSlotAction(int slotNumber) {
+        if (_blockPlayerActions) return;
         if (_toolbeltSlotActions.TryGetValue(slotNumber, out var action)) {
             action?.Invoke();
         }
@@ -225,7 +273,10 @@ public class InputManager : MonoBehaviour {
     #region Debug Console Handlers
     private void DebugConsole_DebugConsole_performed(InputAction.CallbackContext obj) => DebugConsole_OnDebugConsoleAction?.Invoke();
 
-    private void Player_DebugConsole_performed(InputAction.CallbackContext obj) => Player_OnDebugConsoleAction?.Invoke();
+    private void Player_DebugConsole_performed(InputAction.CallbackContext obj) {
+        if (_blockPlayerActions) return; 
+        Player_OnDebugConsoleAction?.Invoke();
+    }
 
     private void DebugConsole_CheatConsole_performed(InputAction.CallbackContext obj) => DebugConsole_OnCheatConsoleAction?.Invoke();
 
@@ -254,15 +305,12 @@ public class InputManager : MonoBehaviour {
         return _playerInputActions.Player.Movement.ReadValue<Vector2>().normalized;
     }
 
-    public Vector2 GetFishingOffsetNormalized() {
-        return _playerInputActions.Fishing.FishingOffset.ReadValue<Vector2>().normalized;
-    }
-
     /// <summary>
     /// Retrieves the mouse wheel input vector.
     /// </summary>
     /// <returns>Mouse wheel vector.</returns>
     public Vector2 GetMouseWheelVector() {
+        if (_blockPlayerActions) return Vector2.zero;
         return _playerInputActions.Player.MouseWheel.ReadValue<Vector2>();
     }
 
@@ -271,6 +319,7 @@ public class InputManager : MonoBehaviour {
     /// </summary>
     /// <returns>Pointer position vector.</returns>
     public Vector2 GetPointerPosition() {
+        if (_blockPlayerActions) return Vector2.zero;
         return _playerInputActions.Player.PointerPosition.ReadValue<Vector2>();
     }
 
@@ -279,6 +328,7 @@ public class InputManager : MonoBehaviour {
     /// </summary>
     /// <returns>True if shift is pressed; otherwise, false.</returns>
     public bool GetShiftPressed() {
+        if (_blockPlayerActions) return false;
         return _playerInputActions.Player.Run.ReadValue<float>() > 0;
     }
 
@@ -287,6 +337,7 @@ public class InputManager : MonoBehaviour {
     /// </summary>
     /// <returns>True if left control is pressed; otherwise, false.</returns>
     public bool GetLeftControlPressed() {
+        if (_blockPlayerActions) return false;
         return _playerInputActions.Player.LeftControl.ReadValue<float>() > 0;
     }
 
@@ -295,7 +346,6 @@ public class InputManager : MonoBehaviour {
     public void EnableDebugConsoleActionMap() {
         _playerInputActions.Player.Disable();
         _playerInputActions.Dialogue.Disable();
-        _playerInputActions.Fishing.Disable();
 
         _playerInputActions.DebugConsole.Enable();
     }
@@ -303,7 +353,6 @@ public class InputManager : MonoBehaviour {
     public void EnablePlayerActionMap() {
         _playerInputActions.DebugConsole.Disable();
         _playerInputActions.Dialogue.Disable();
-        _playerInputActions.Fishing.Disable();
 
         _playerInputActions.Player.Enable();
     }
@@ -311,31 +360,20 @@ public class InputManager : MonoBehaviour {
     public void EnableDialogueActionMap() {
         _playerInputActions.DebugConsole.Disable();
         _playerInputActions.Player.Disable();
-        _playerInputActions.Fishing.Disable();
 
         _playerInputActions.Dialogue.Enable();
-    }
-
-    public void EnableFishingActionMap() {
-        _playerInputActions.DebugConsole.Disable();
-        _playerInputActions.Player.Disable();
-        _playerInputActions.Dialogue.Disable();
-
-        _playerInputActions.Fishing.Enable();
     }
 
     public void DisableAll() {
         _playerInputActions.DebugConsole.Disable();
         _playerInputActions.Player.Disable();
         _playerInputActions.Dialogue.Disable();
-        _playerInputActions.Fishing.Disable();
     }
 
     public void EnableAll() {
         _playerInputActions.DebugConsole.Enable();
         _playerInputActions.Player.Enable();
         _playerInputActions.Dialogue.Enable();
-        _playerInputActions.Fishing.Enable();
     }
 
     #endregion

@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.UI;
 using static FishSO;
 
 [Serializable]
@@ -34,6 +32,14 @@ public class PlayerFishingController : MonoBehaviour {
 
     [Header("Visual Settings")]
     [SerializeField, Range(0f, 1f)] float _bobberAlphaAdjustment = 0.5f;
+
+    [Header("Lateral Offset Settings")]
+    [SerializeField, Tooltip("Maximum lateral offset in tiles")]
+    float _maxLateralOffset = 0.5f;
+
+    [SerializeField, Tooltip("Rate (in tiles per second) at which lateral offset increases")]
+    float _lateralOffsetRate = 0.1f;
+    float _currentLateralOffset = 0f;
 
     // Fishing system constants
     const string FISHING_TILEMAP_TAG = "FishingTilemap";
@@ -126,8 +132,6 @@ public class PlayerFishingController : MonoBehaviour {
 
         // Initialize fish data from the database
         _fishDatabaseSO.InitializeFishData();
-
-        // TODO: UI Manager reference to fish catch text
     }
 
     void OnDestroy() {
@@ -161,8 +165,27 @@ public class PlayerFishingController : MonoBehaviour {
         switch (_currentState) {
             case FishingState.Casting:
                 if (_isLeftClickHeld) {
+
                     _currentCastingDistance += CASTING_SPEED * Time.deltaTime;
                     _currentCastingDistance = Mathf.Clamp(_currentCastingDistance, 0, MAX_ROD_CASTING_DISTANCE);
+
+                    // Update lateral offset based on input
+                    Vector2 offsetInput = _inputManager.GetMovementVectorNormalized(); // WASD input
+                    Vector2 throwDir = _playerMovementController.LastMotionDirection.normalized;
+                    if (throwDir == Vector2.zero) {
+                        throwDir = Vector2.up; // Fallback direction if needed
+                    }
+                    // Get the perpendicular axis (only lateral movement)
+                    Vector2 perpAxis = new Vector2(-throwDir.y, throwDir.x);
+                    // Determine target offset (dot product gives sign and magnitude, clamped between -1 and 1)
+                    float targetOffset = 0f;
+                    if (offsetInput.sqrMagnitude > 0.01f) {
+                        float dot = Vector2.Dot(offsetInput, perpAxis);
+                        targetOffset = Mathf.Clamp(dot, -1f, 1f) * _maxLateralOffset;
+                    }
+                    // Gradually move the current lateral offset toward the target offset
+                    _currentLateralOffset = Mathf.MoveTowards(_currentLateralOffset, targetOffset, _lateralOffsetRate * Time.deltaTime);
+
                     UpdatePreviewThrowArc();
                 }
                 break;
@@ -182,7 +205,6 @@ public class PlayerFishingController : MonoBehaviour {
 
         switch (_currentState) {
             case FishingState.Idle:
-                _inputManager.EnableFishingActionMap();
                 StartCastingPreview();
                 break;
 
@@ -246,7 +268,6 @@ public class PlayerFishingController : MonoBehaviour {
     void UpdatePreviewThrowArc() {
         Vector3 castPos = GetCastPosition();
         _bobberInstance.transform.position = castPos;
-
         for (int i = 0; i < SEGMENT_COUNT; i++) {
             float t = i / (float)(SEGMENT_COUNT - 1);
             _linePositionsBuffer[i] = CalculateArcPoint(t, _fishingRodTip, castPos, CAST_ARC_HEIGHT);
@@ -263,7 +284,6 @@ public class PlayerFishingController : MonoBehaviour {
 
     IEnumerator CastLine() {
         Vector3 castPos = GetCastPosition();
-
         // Animate the bobber moving along the casting arc
         for (int i = 0; i < SEGMENT_COUNT; i++) {
             float t = i / (float)(SEGMENT_COUNT - 1);
@@ -275,14 +295,13 @@ public class PlayerFishingController : MonoBehaviour {
 
         var tile = _fishingTilemap.GetTile(_fishingTilemap.WorldToCell(castPos));
         if (tile == null) {
-            Debug.Log("The landed tile is not a valid fishing position.");
             ReelInWithoutCatch();
             yield break;
         }
 
         // Retrieve the tile type based on its name using the TileType enum
         if (!Enum.TryParse(tile.name, out TileType tileType)) {
-            Debug.LogError($"Landed tile '{tile.name}' has an invalid name.");
+            Debug.LogError($"CastLine: Landed tile '{tile.name}' has an invalid name.");
             tileType = TileType.Invalid;
         }
         _bobberTileId = (int)tileType;
@@ -292,12 +311,6 @@ public class PlayerFishingController : MonoBehaviour {
         _castLineCoroutine = null;
     }
 
-    Vector3 GetCastPosition() {
-        Vector2 direction = _playerMovementController.LastMotionDirection.normalized;
-        Vector2 offset = _inputManager.GetFishingOffsetNormalized() * MAX_OFFSET_DISTANCE;
-        Vector3 finalPos = _fishingRodTip + (Vector3)direction * _currentCastingDistance + (Vector3)offset;
-        return finalPos;
-    }
     #endregion -------------------- State Handlers --------------------
 
     #region -------------------- Fishing --------------------
@@ -309,12 +322,12 @@ public class PlayerFishingController : MonoBehaviour {
         }
 
         float timeToBite = UnityEngine.Random.Range(MIN_TIME_TO_BITE, MAX_TIME_TO_BITE) * biteRateAdjustment;
-        // TODO: _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.Fishing_Reel_Backwards, transform.position);
+        _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.Fishing_Reel_Backwards, transform.position);
         yield return new WaitForSeconds(timeToBite);
 
         _currentFish = _fishDatabaseSO.GetFish(_fishingRod, _bobberTileId, CatchingMethod.FishingRod);
         if (_currentFish == null) {
-            Debug.LogError($"No fish found for tileId {_bobberTileId} using FishingRod method.");
+            Debug.LogError($"WaitForFish: No fish found for tileId {_bobberTileId} using FishingRod method.");
             ReelInWithoutCatch();
             yield break;
         }
@@ -325,12 +338,16 @@ public class PlayerFishingController : MonoBehaviour {
         _waitForFishCoroutine = null;
     }
 
-    void ReelInWithoutCatch() => ResetVariables();
+    void ReelInWithoutCatch() {
+        _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.Fishing_Quickly_Reel_In, transform.position);
+        ResetVariables();
+    }
 
     void StartMinigame() {
         _alertPopup.enabled = false;
         _currentState = FishingState.ReelingIn;
         _timeToCatchFish = TIME_TO_CATCH_FISH;
+        _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.Fishing_Quickly_Reel_In, transform.position);
 
         var sizeIndex = (int)_currentFish.FishSize;
         sizeIndex = Mathf.Clamp(sizeIndex, 0, _pressRanges.Length - 1);
@@ -342,9 +359,9 @@ public class PlayerFishingController : MonoBehaviour {
         if (_currentButtonPresses < _requiredButtonPresses) return;
 
         _currentState = FishingState.Fishing;
-        UIManager.Instance.FishCatchUI.ShowFishCatchUI(
-            $"You caught a {_currentFish.FishItem.ItemName}. It is {_currentFish.CalculateFishSize()} cm long.\n" +
-            $"{_currentFish.CatchText[UnityEngine.Random.Range(0, _currentFish.CatchText.Length)]}");
+        string catchMessage = $"You caught a {_currentFish.FishItem.ItemName}. It is {_currentFish.CalculateFishSize()} cm long.\n" +
+                              $"{_currentFish.CatchText[UnityEngine.Random.Range(0, _currentFish.CatchText.Length)]}";
+        UIManager.Instance.FishCatchUI.ShowFishCatchUI(catchMessage);
 
         _playerInventoryController.InventoryContainer.AddItem(new ItemSlot(_currentFish.FishItem.ItemId, 1, 0), false);
         _currentCooldown = COOLDOWN_TO_FISH_AGAIN;
@@ -358,21 +375,6 @@ public class PlayerFishingController : MonoBehaviour {
         _currentTimeToStartMinigame = TIME_TO_START_MINIGAME;
         _currentState = FishingState.Fishing;
         _waitForFishCoroutine ??= StartCoroutine(WaitForFish());
-    }
-    #endregion -------------------- Fishing --------------------
-
-    #region -------------------- Utility --------------------
-    Vector3 CalculateArcPoint(float t, Vector3 start, Vector3 end, float height) => Vector3.Lerp(start, end, t) + height * Mathf.Sin(t * Mathf.PI) * Vector3.up;
-
-    Vector3 CalculateSagPoint(float t, Vector3 start, Vector3 end, float sagHeight) => Vector3.Lerp(start, end, t) - Mathf.Sin(t * Mathf.PI) * sagHeight * Vector3.up;
-
-    void DrawFishingLine(Vector3 start, Vector3 end, int segmentCount) {
-        for (int i = 0; i < segmentCount; i++) {
-            float t = i / (float)(segmentCount - 1);
-            _linePositionsBuffer[i] = CalculateSagPoint(t, start, end, LINE_SAG_HEIGHT);
-        }
-        _lineRenderer.positionCount = segmentCount;
-        _lineRenderer.SetPositions(_linePositionsBuffer);
     }
 
     void ResetVariables() {
@@ -415,5 +417,35 @@ public class PlayerFishingController : MonoBehaviour {
         _currentTimeToStartMinigame = TIME_TO_START_MINIGAME;
         _waitForFishCoroutine ??= StartCoroutine(WaitForFish());
     }
-    #endregion -------------------- Utility --------------------
+    #endregion -------------------- Fishing --------------------
+
+    #region -------------------- Utility --------------------
+    Vector3 CalculateArcPoint(float t, Vector3 start, Vector3 end, float height) {
+        Vector3 arcPoint = Vector3.Lerp(start, end, t) + height * Mathf.Sin(t * Mathf.PI) * Vector3.up;
+        return arcPoint;
+    }
+
+    Vector3 CalculateSagPoint(float t, Vector3 start, Vector3 end, float sagHeight) {
+        Vector3 sagPoint = Vector3.Lerp(start, end, t) - Mathf.Sin(t * Mathf.PI) * sagHeight * Vector3.up;
+        return sagPoint;
+    }
+
+    void DrawFishingLine(Vector3 start, Vector3 end, int segmentCount) {
+        for (int i = 0; i < segmentCount; i++) {
+            float t = i / (float)(segmentCount - 1);
+            _linePositionsBuffer[i] = CalculateSagPoint(t, start, end, LINE_SAG_HEIGHT);
+        }
+        _lineRenderer.positionCount = segmentCount;
+        _lineRenderer.SetPositions(_linePositionsBuffer);
+    }
+
+    Vector3 GetCastPosition() {
+        Vector2 direction = _playerMovementController.LastMotionDirection.normalized;
+        if (direction == Vector2.zero)
+            direction = Vector2.up; // Fallback if no direction is set
+        // Compute the final cast position without lateral offset (this version doesn't include lateral offset logic)
+        Vector3 finalPos = _fishingRodTip + (Vector3)direction * _currentCastingDistance;
+        return finalPos;
+    }
+    #endregion
 }

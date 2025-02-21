@@ -6,6 +6,7 @@ using UnityEngine;
 public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     public enum PlayerState {
         RaiseBowAndAim, LooseArrow, GrabNewArrow, AimNewArrow,
+        Fishing_Throw, Fishing_ReelLoop, Fishing_Land,
         Hurt,
         Idle,
         Slash, SlashReverse,
@@ -20,42 +21,48 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     }
 
     // Animation state string constants
-    const string RAISE_BOW_AND_AIM  = "RaiseBowAndAim";
-    const string LOOSE_ARROW        = "LooseArrow";
-    const string GRAB_NEW_ARROW     = "GrabNewArrow";
-    const string AIM_NEW_ARROW      = "AimNewArrow";
-    const string HURT               = "Hurt";
-    const string IDLE               = "Idle";
-    const string SLASH              = "Slash";
-    const string SlashReverse       = "SlashReverse";
-    const string SPELLCAST          = "Spellcast";
-    const string RAISE_STAFF        = "RaiseStaff";
-    const string THRUST_LOOP        = "ThrustLoop";
-    const string WALKCYCLE          = "Walkcycle";
+    const string RAISE_BOW_AND_AIM = "RaiseBowAndAim";
+    const string LOOSE_ARROW = "LooseArrow";
+    const string GRAB_NEW_ARROW = "GrabNewArrow";
+    const string AIM_NEW_ARROW = "AimNewArrow";
+    const string FISHING_THROW = "Fishing_Throw";
+    const string FISHING_REEL_LOOP = "Fishing_ReelLoop";
+    const string FISHING_LAND = "Fishing_Land";
+    const string HURT = "Hurt";
+    const string IDLE = "Idle";
+    const string SLASH = "Slash";
+    const string SlashReverse = "SlashReverse";
+    const string SPELLCAST = "Spellcast";
+    const string RAISE_STAFF = "RaiseStaff";
+    const string THRUST_LOOP = "ThrustLoop";
+    const string WALKCYCLE = "Walkcycle";
 
     // Mapping of PlayerStates to Animator state names
     readonly Dictionary<PlayerState, string> _playerStates = new()
     {
-        { PlayerState.RaiseBowAndAim, RAISE_BOW_AND_AIM },
-        { PlayerState.LooseArrow,     LOOSE_ARROW       },
-        { PlayerState.GrabNewArrow,   GRAB_NEW_ARROW    },
-        { PlayerState.AimNewArrow,    AIM_NEW_ARROW     },
-        { PlayerState.Hurt,           HURT              },
-        { PlayerState.Idle,           IDLE              },
-        { PlayerState.Slash,          SLASH             },
-        { PlayerState.SlashReverse,   SlashReverse      },
-        { PlayerState.Spellcast,      SPELLCAST         },
-        { PlayerState.RaiseStaff,     RAISE_STAFF       },
-        { PlayerState.ThrustLoop,     THRUST_LOOP       },
-        { PlayerState.Walkcycle,      WALKCYCLE         },
-        { PlayerState.Sleeping,       IDLE              }, // No animations yet
-        { PlayerState.Stunned,        IDLE              }, // No animations yet
-        { PlayerState.Dashing,        IDLE              }, // No animations yet
+        { PlayerState.RaiseBowAndAim, RAISE_BOW_AND_AIM     },
+        { PlayerState.LooseArrow,     LOOSE_ARROW           },
+        { PlayerState.GrabNewArrow,   GRAB_NEW_ARROW        },
+        { PlayerState.AimNewArrow,    AIM_NEW_ARROW         },
+        { PlayerState.Fishing_Throw,    FISHING_THROW       },
+        { PlayerState.Fishing_ReelLoop, FISHING_REEL_LOOP   },
+        { PlayerState.Fishing_Land,     FISHING_LAND        },
+        { PlayerState.Hurt,           HURT                  },
+        { PlayerState.Idle,           IDLE                  },
+        { PlayerState.Slash,          SLASH                 },
+        { PlayerState.SlashReverse,   SlashReverse          },
+        { PlayerState.Spellcast,      SPELLCAST             },
+        { PlayerState.RaiseStaff,     RAISE_STAFF           },
+        { PlayerState.ThrustLoop,     THRUST_LOOP           },
+        { PlayerState.Walkcycle,      WALKCYCLE             },
+        { PlayerState.Sleeping,       IDLE                  }, // No animations yet
+        { PlayerState.Stunned,        IDLE                  }, // No animations yet
+        { PlayerState.Dashing,        IDLE                  }, // No animations yet
     };
 
     [HideInInspector] public PlayerState ActivePlayerState { get; private set; }
-    public float AnimationTime => _weaponAnim != null 
-        ? _weaponAnim.GetCurrentAnimatorStateInfo(0).length / _weaponAnim.GetCurrentAnimatorStateInfo(0).speed 
+    public float AnimationTime => _weaponAnim != null
+        ? _weaponAnim.GetCurrentAnimatorStateInfo(0).length / _weaponAnim.GetCurrentAnimatorStateInfo(0).speed
         : 0f;
 
     [Header("Animator References")]
@@ -109,7 +116,7 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         _clothingUI.PlayerClothingUIItemButtons[3].OnNewItem += SetLegs;
         _clothingUI.PlayerClothingUIItemButtons[4].OnNewItem += SetHands;
         _clothingUI.PlayerClothingUIItemButtons[5].OnNewItem += SetTorso;
-        
+
         _pTC.OnToolbeltSlotChanged += OnToolbeltSlotChanged;
 
         // DEBUG: Apply correct override controllers.
@@ -126,7 +133,7 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         _clothingUI.PlayerClothingUIItemButtons[3].OnNewItem -= SetLegs;
         _clothingUI.PlayerClothingUIItemButtons[4].OnNewItem -= SetHands;
         _clothingUI.PlayerClothingUIItemButtons[5].OnNewItem -= SetTorso;
-        
+
         _pTC.OnToolbeltSlotChanged -= OnToolbeltSlotChanged;
     }
 

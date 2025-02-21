@@ -58,7 +58,6 @@ public class AnimationGenerator : EditorWindow {
     private const float FPS = 15f;
     private Vector2 scrollPosition;
 
-    private enum AnimationType { Bow, Hurt, Slash, Spellcast, Thrust, Walkcycle }
     private enum Direction { Up, Left, Down, Right }
     private enum PositionType { None, FG, BG }
 
