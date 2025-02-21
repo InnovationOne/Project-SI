@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Animations;
+using System.Diagnostics.Eventing.Reader;
 
 /// <summary>
 /// Provides a custom Editor Window to generate animation clips and override controllers from sliced textures.
@@ -25,6 +26,11 @@ public class AnimationGenerator : EditorWindow {
     [Header("One Texture Mode (optional)")]
     public bool oneTextureMode = false;
     public Texture2D oneTexture;
+
+    [Header("Multiple Textures Mode (optional)")]
+    public bool multipleTexturesMode = false;
+    public List<Texture2D> multipleTextures = new();
+
     const int spellcastFrameCount = 7;
     const int thrustFrameCount = 8;
     const int walkcycleFrameCount = 9;
@@ -108,7 +114,8 @@ public class AnimationGenerator : EditorWindow {
 
         EditorGUILayout.Space();
         outputControllerDirectory = EditorGUILayout.TextField("Output Directory", outputControllerDirectory);
-        outputControllerName = EditorGUILayout.TextField("Output Controller Name", outputControllerName);
+        if (!multipleTexturesMode)
+            outputControllerName = EditorGUILayout.TextField("Output Controller Name", outputControllerName);
 
         EditorGUILayout.Space();
         if (GUILayout.Button("Generate Animations & Override(s)")) {
@@ -130,8 +137,14 @@ public class AnimationGenerator : EditorWindow {
         baseControllerSingle = (AnimatorController)EditorGUILayout.ObjectField("Base Controller (Single)", baseControllerSingle, typeof(AnimatorController), false);
 
         oneTextureMode = EditorGUILayout.Toggle("One Texture Mode", oneTextureMode);
+        multipleTexturesMode = EditorGUILayout.Toggle("Multiple Textures Mode", multipleTexturesMode);
         if (oneTextureMode) {
             oneTexture = (Texture2D)EditorGUILayout.ObjectField("Große Texture", oneTexture, typeof(Texture2D), false);
+        } else if (multipleTexturesMode) {
+            SerializedObject so = new SerializedObject(this);
+            SerializedProperty texturesProp = so.FindProperty("multipleTextures");
+            EditorGUILayout.PropertyField(texturesProp, true);
+            so.ApplyModifiedProperties();
         } else {
             EditorGUILayout.Space();
             bowTexture = (Texture2D)EditorGUILayout.ObjectField("Bow Texture", bowTexture, typeof(Texture2D), false);
@@ -266,66 +279,119 @@ public class AnimationGenerator : EditorWindow {
     /// Generates a single override controller and animations for single-sheet usage.
     /// </summary>
     private void GenerateSingleSheetOverride() {
-        var singleOverride = new AnimatorOverrideController(baseControllerSingle);
-        var overridePath = SaveAnimatorOverrideController(singleOverride, outputControllerDirectory, outputControllerName);
-        singleOverride = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(overridePath);
+        if (multipleTexturesMode && multipleTextures.Count > 0) {
+            foreach (Texture2D tex in multipleTextures) {
+                if (tex == null) continue;
+                string outputName = tex.name; // Hier wird der Name der Texture als Output-Name genutzt
 
-        var folderPath = Path.GetDirectoryName(overridePath);
-        var animFolder = Path.Combine(folderPath, outputControllerName);
-        if (!Directory.Exists(animFolder)) {
-            Directory.CreateDirectory(animFolder);
-            AssetDatabase.Refresh();
-        }
+                // Erzeuge den Override Controller aus dem Basis-Controller
+                var singleOverride = new AnimatorOverrideController(baseControllerSingle);
+                var overridePath = SaveAnimatorOverrideController(singleOverride, outputControllerDirectory, outputName);
+                singleOverride = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(overridePath);
 
-        var generated = new Dictionary<string, AnimationClip>();
+                // Erstelle einen Ordner für die Animationen, benannt nach der Texture
+                var folderPath = Path.GetDirectoryName(overridePath);
+                var animFolder = Path.Combine(folderPath, outputName);
+                if (!Directory.Exists(animFolder)) {
+                    Directory.CreateDirectory(animFolder);
+                    AssetDatabase.Refresh();
+                }
 
-        if (oneTextureMode) {
-            // One Texture Mode: Nutze die große Texture und teile die Sprites in Blöcke auf.
-            var allSprites = LoadAndSortSprites(oneTexture);
-            // Sortierung: Oben nach unten (größeres Rect.y zuerst)
-            allSprites = allSprites.OrderByDescending(s => s.rect.y).ToList();
+                var generated = new Dictionary<string, AnimationClip>();
+                // Laden und Sortieren der Sprites aus der aktuellen Texture
+                var allSprites = LoadAndSortSprites(tex);
+                allSprites = allSprites.OrderByDescending(s => s.rect.y).ToList();
 
-            int index = 0;
-            // Annahme: Die große Texture enthält (von oben nach unten) die Blöcke in folgender Reihenfolge:
-            // Spellcast, Thrust, Walkcycle, Slash, Bow und Hurt – jeweils 4 Richtungen
-            List<Sprite> spellcastSprites = allSprites.GetRange(index, spellcastFrameCount * 4);
-            index += spellcastFrameCount * 4;
-            List<Sprite> thrustSprites = allSprites.GetRange(index, thrustFrameCount * 4);
-            index += thrustFrameCount * 4;
-            List<Sprite> walkcycleSprites = allSprites.GetRange(index, walkcycleFrameCount * 4);
-            index += walkcycleFrameCount * 4;
-            List<Sprite> slashSprites = allSprites.GetRange(index, slashFrameCount * 4);
-            index += slashFrameCount * 4;
-            List<Sprite> bowSprites = allSprites.GetRange(index, bowFrameCount * 4);
-            index += bowFrameCount * 4;
-            List<Sprite> hurtSprites = allSprites.GetRange(index, hurtFrameCount);
-            index += hurtFrameCount;
+                int index = 0;
+                // Annahme: Die große Texture enthält die Blöcke in folgender Reihenfolge:
+                // Spellcast, Thrust, Walkcycle, Slash, Bow und Hurt – jeweils 4 Richtungen
+                List<Sprite> spellcastSprites = allSprites.GetRange(index, spellcastFrameCount * 4);
+                index += spellcastFrameCount * 4;
+                List<Sprite> thrustSprites = allSprites.GetRange(index, thrustFrameCount * 4);
+                index += thrustFrameCount * 4;
+                List<Sprite> walkcycleSprites = allSprites.GetRange(index, walkcycleFrameCount * 4);
+                index += walkcycleFrameCount * 4;
+                List<Sprite> slashSprites = allSprites.GetRange(index, slashFrameCount * 4);
+                index += slashFrameCount * 4;
+                List<Sprite> bowSprites = allSprites.GetRange(index, bowFrameCount * 4);
+                index += bowFrameCount * 4;
+                List<Sprite> hurtSprites = allSprites.GetRange(index, hurtFrameCount);
+                index += hurtFrameCount;
 
-            GenerateBowAnimations(bowSprites, generated, animFolder, PositionType.None);
-            GenerateHurtAnimation(hurtSprites, generated, animFolder, PositionType.None);
-            GenerateFishingAnimations(thrustSprites, LoadAndSortSprites(fishingRodTexture), generated, animFolder, PositionType.None);
-            GenerateSlashAnimations(slashSprites, null, useSlashReverseFromSlash, generated, animFolder, PositionType.None);
-            GenerateSpellcastAnimation(spellcastSprites, generated, animFolder, PositionType.None);
-            GenerateThrustAnimation(thrustSprites, generated, animFolder, PositionType.None);
-            GenerateWalkcycleAnimation(walkcycleSprites, generated, animFolder, PositionType.None);
+                // Erzeuge die Animationen – hier wird der gleiche Code wie bei oneTextureMode verwendet.
+                // Du kannst die generierten Clips ggf. noch um den Texture-Namen erweitern,
+                // falls du dies in den Clip-Namen integrieren möchtest.
+                GenerateBowAnimations(bowSprites, generated, animFolder, PositionType.None);
+                GenerateHurtAnimation(hurtSprites, generated, animFolder, PositionType.None);
+                GenerateFishingAnimations(thrustSprites, LoadAndSortSprites(fishingRodTexture), generated, animFolder, PositionType.None);
+                GenerateSlashAnimations(slashSprites, null, useSlashReverseFromSlash, generated, animFolder, PositionType.None);
+                GenerateSpellcastAnimation(spellcastSprites, generated, animFolder, PositionType.None);
+                GenerateThrustAnimation(thrustSprites, generated, animFolder, PositionType.None);
+                GenerateWalkcycleAnimation(walkcycleSprites, generated, animFolder, PositionType.None);
+
+                PopulateOverridesExact(singleOverride, generated);
+            }
+            RemoveTextures();
+            Debug.Log("Multiple Textures Override generation complete!");
+            return;
         } else {
-            // Herkömmlicher Modus mit separaten Texture2D Feldern
-            GenerateBowAnimations(LoadAndSortSprites(bowTexture), generated, animFolder, PositionType.None);
-            GenerateHurtAnimation(LoadAndSortSprites(hurtTexture), generated, animFolder, PositionType.None);
-            GenerateFishingAnimations(LoadAndSortSprites(thrustTexture), LoadAndSortSprites(fishingRodTexture), generated, animFolder, PositionType.None);
+            var singleOverride = new AnimatorOverrideController(baseControllerSingle);
+            var overridePath = SaveAnimatorOverrideController(singleOverride, outputControllerDirectory, outputControllerName);
+            singleOverride = AssetDatabase.LoadAssetAtPath<AnimatorOverrideController>(overridePath);
 
-            var slashSprites = LoadAndSortSprites(slashTexture);
-            var slashRevSprites = LoadAndSortSprites(slashReverseTexture);
-            GenerateSlashAnimations(slashSprites, slashRevSprites, useSlashReverseFromSlash, generated, animFolder, PositionType.None);
+            var folderPath = Path.GetDirectoryName(overridePath);
+            var animFolder = Path.Combine(folderPath, outputControllerName);
+            if (!Directory.Exists(animFolder)) {
+                Directory.CreateDirectory(animFolder);
+                AssetDatabase.Refresh();
+            }
 
-            GenerateSpellcastAnimation(LoadAndSortSprites(spellcastTexture), generated, animFolder, PositionType.None);
-            GenerateThrustAnimation(LoadAndSortSprites(thrustTexture), generated, animFolder, PositionType.None);
-            GenerateWalkcycleAnimation(LoadAndSortSprites(walkcycleTexture), generated, animFolder, PositionType.None);
+            var generated = new Dictionary<string, AnimationClip>();
+
+            if (oneTextureMode) {
+                var allSprites = LoadAndSortSprites(oneTexture);
+                allSprites = allSprites.OrderByDescending(s => s.rect.y).ToList();
+
+                int index = 0;
+                List<Sprite> spellcastSprites = allSprites.GetRange(index, spellcastFrameCount * 4);
+                index += spellcastFrameCount * 4;
+                List<Sprite> thrustSprites = allSprites.GetRange(index, thrustFrameCount * 4);
+                index += thrustFrameCount * 4;
+                List<Sprite> walkcycleSprites = allSprites.GetRange(index, walkcycleFrameCount * 4);
+                index += walkcycleFrameCount * 4;
+                List<Sprite> slashSprites = allSprites.GetRange(index, slashFrameCount * 4);
+                index += slashFrameCount * 4;
+                List<Sprite> bowSprites = allSprites.GetRange(index, bowFrameCount * 4);
+                index += bowFrameCount * 4;
+                List<Sprite> hurtSprites = allSprites.GetRange(index, hurtFrameCount);
+                index += hurtFrameCount;
+
+                GenerateBowAnimations(bowSprites, generated, animFolder, PositionType.None);
+                GenerateHurtAnimation(hurtSprites, generated, animFolder, PositionType.None);
+                GenerateFishingAnimations(thrustSprites, LoadAndSortSprites(fishingRodTexture), generated, animFolder, PositionType.None);
+                GenerateSlashAnimations(slashSprites, null, useSlashReverseFromSlash, generated, animFolder, PositionType.None);
+                GenerateSpellcastAnimation(spellcastSprites, generated, animFolder, PositionType.None);
+                GenerateThrustAnimation(thrustSprites, generated, animFolder, PositionType.None);
+                GenerateWalkcycleAnimation(walkcycleSprites, generated, animFolder, PositionType.None);
+            } else {
+                // Herkömmlicher Modus mit separaten Texture2D Feldern
+                GenerateBowAnimations(LoadAndSortSprites(bowTexture), generated, animFolder, PositionType.None);
+                GenerateHurtAnimation(LoadAndSortSprites(hurtTexture), generated, animFolder, PositionType.None);
+                GenerateFishingAnimations(LoadAndSortSprites(thrustTexture), LoadAndSortSprites(fishingRodTexture), generated, animFolder, PositionType.None);
+
+                var slashSprites = LoadAndSortSprites(slashTexture);
+                var slashRevSprites = LoadAndSortSprites(slashReverseTexture);
+                GenerateSlashAnimations(slashSprites, slashRevSprites, useSlashReverseFromSlash, generated, animFolder, PositionType.None);
+
+                GenerateSpellcastAnimation(LoadAndSortSprites(spellcastTexture), generated, animFolder, PositionType.None);
+                GenerateThrustAnimation(LoadAndSortSprites(thrustTexture), generated, animFolder, PositionType.None);
+                GenerateWalkcycleAnimation(LoadAndSortSprites(walkcycleTexture), generated, animFolder, PositionType.None);
+            }
+
+            PopulateOverridesExact(singleOverride, generated);
+            RemoveTextures();
+            Debug.Log("Single-Sheet Override generation complete!");
         }
-
-        PopulateOverridesExact(singleOverride, generated);
-        RemoveTextures();
-        Debug.Log("Single-Sheet Override generation complete!");
     }
 
     /// <summary>
