@@ -134,6 +134,7 @@ public class InventorySlot : MonoBehaviour,
 
     // Retrieves the UI sprite for player clothing if available.
     public Sprite GetPlayerClothingUiSprite() {
+        if (_itemManager == null) _itemManager = GameManager.Instance.ItemManager;
         if (_itemSlot == null || _itemSlot.IsEmpty || _itemManager.ItemDatabase[_itemSlot.ItemId] as ClothingSO == null) return null;
         return (_itemManager.ItemDatabase[_itemSlot.ItemId] as ClothingSO).PlayerClothingUiSprite; 
     }

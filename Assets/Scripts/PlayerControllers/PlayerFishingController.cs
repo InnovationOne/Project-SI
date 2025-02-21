@@ -214,17 +214,14 @@ public class PlayerFishingController : MonoBehaviour {
             case FishingState.Idle:
                 _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.Idle, true);
                 break;
-
             case FishingState.Casting:
+                _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingHold, true);
+                break;
+            case FishingState.Fishing:
                 _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingThrow, true);
                 break;
-
-            case FishingState.Fishing:
-                _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingReelLoop, true);
-                break;
-
             case FishingState.ReelingIn:
-                _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingLand, true);
+                _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingReelLoop, true);
                 break;
         }
     }

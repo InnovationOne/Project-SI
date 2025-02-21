@@ -6,7 +6,7 @@ using UnityEngine;
 public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     public enum PlayerState {
         RaiseBowAndAim, LooseArrow, GrabNewArrow, AimNewArrow,
-        FishingThrow, FishingReelLoop, FishingLand,
+        FishingHold, FishingThrow, FishingReelLoop, FishingLand,
         Hurt,
         Idle,
         Slash, SlashReverse,
@@ -25,6 +25,7 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     const string LOOSE_ARROW = "LooseArrow";
     const string GRAB_NEW_ARROW = "GrabNewArrow";
     const string AIM_NEW_ARROW = "AimNewArrow";
+    const string FISHING_HOLD = "FishingHold";
     const string FISHING_THROW = "FishingThrow";
     const string FISHING_REEL_LOOP = "FishingReelLoop";
     const string FISHING_LAND = "FishingLand";
@@ -44,9 +45,10 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         { PlayerState.LooseArrow,     LOOSE_ARROW           },
         { PlayerState.GrabNewArrow,   GRAB_NEW_ARROW        },
         { PlayerState.AimNewArrow,    AIM_NEW_ARROW         },
-        { PlayerState.FishingThrow,  FISHING_THROW         },
-        { PlayerState.FishingReelLoop, FISHING_REEL_LOOP   },
-        { PlayerState.FishingLand,   FISHING_LAND          },
+        { PlayerState.FishingHold,    FISHING_HOLD          },
+        { PlayerState.FishingThrow,  FISHING_THROW          },
+        { PlayerState.FishingReelLoop, FISHING_REEL_LOOP    },
+        { PlayerState.FishingLand,   FISHING_LAND           },
         { PlayerState.Hurt,           HURT                  },
         { PlayerState.Idle,           IDLE                  },
         { PlayerState.Slash,          SLASH                 },
@@ -98,7 +100,6 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
     private FMODEvents _fmodEvents;
 
     private void Awake() {
-        ChangeState(PlayerState.Idle, true);
         _iM = GameManager.Instance.InputManager;
         _pTC = GetComponent<PlayerToolbeltController>();
         _pMC = GetComponent<PlayerMovementController>();
@@ -123,6 +124,8 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         StartCoroutine(SetAnimationOverride(_bodyAnim, _bodyAnimator));
         StartCoroutine(SetAnimationOverride(_headAnim, _headAnimator));
         StartCoroutine(SetAnimationOverride(_shadowAnim, _shadowAnimator));
+
+        ChangeState(PlayerState.Idle, true);
     }
 
     private void OnDestroy() {

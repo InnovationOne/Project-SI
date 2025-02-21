@@ -38,6 +38,8 @@ public class AudioManager : MonoBehaviour {
     private EventInstance _ambience;
     private EventInstance _music;
 
+    private Dictionary<string, EventInstance> loopingSoundInstances = new();
+
     private void Awake() {
         if (Instance != null) {
             Debug.LogError("There is more than one instance of AudioManager in the scene!");
@@ -140,6 +142,22 @@ public class AudioManager : MonoBehaviour {
     // Plays a sound once at the given position
     public void PlayOneShot(EventReference sound, Vector3 worldPosition) {
         RuntimeManager.PlayOneShot(sound, worldPosition);
+    }
+
+    public void PlayLoopingSound(EventReference sound, Vector3 position) {
+        if (loopingSoundInstances.ContainsKey(sound.Path)) return;
+        EventInstance instance = RuntimeManager.CreateInstance(sound.Path);
+        instance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
+        instance.start();
+        loopingSoundInstances.Add(sound.Path, instance);
+    }
+
+    public void StopSound(EventReference sound) {
+        if (loopingSoundInstances.TryGetValue(sound.Path, out EventInstance instance)) {
+            instance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+            instance.release();
+            loopingSoundInstances.Remove(sound.Path);
+        }
     }
 
     public EventInstance CreateEventInstance(EventReference eventReference) {

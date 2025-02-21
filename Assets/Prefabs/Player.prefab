@@ -219,12 +219,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: -196268649, guid: b9a7cb6cd27e56448bdcc6e3fe948dd1, type: 3}
+  m_Sprite: {fileID: 1229864355, guid: 7ffc42cc1834f9747a5e9beca0500127, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1.75, y: 1.75}
+  m_Size: {x: 2, y: 2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -502,12 +502,12 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
-  m_Sprite: {fileID: -1508687137, guid: 368b8250e0c8bc1499f7e42b92af48fa, type: 3}
+  m_Sprite: {fileID: -1782464150, guid: 51b0d65a27702ab46bac7fbcfcc09cb8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1.75, y: 1.75}
+  m_Size: {x: 2, y: 2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -6785,6 +6785,7 @@ MonoBehaviour:
   _lineRendererPrefab: {fileID: 9017382974603803563, guid: 0a007eec223d8c4418600c54705b95f5, type: 3}
   _fishDatabaseSO: {fileID: 11400000, guid: aafc625afddacaf45a37c442d7b6dea6, type: 2}
   _fishingRod: {fileID: 11400000, guid: 952fdc32da7e30447a14bbec56ba44e8, type: 2}
+  _weaponAnim: {fileID: 5765592103375599873}
   _alertPopup: {fileID: 7798567739198905670}
   _bobberAlphaAdjustment: 0.5
   _maxLateralOffset: 0.5
@@ -6812,9 +6813,9 @@ MonoBehaviour:
   _bodyAnim: {fileID: 3118519855168128262}
   _behindAnim: {fileID: 5781001525910838751}
   _shadowAnim: {fileID: 7201274514891240194}
-  _shadowAnimator: {fileID: 22100000, guid: 276f0b69db9e50446b9a0dc3d5d92272, type: 2}
+  _shadowAnimator: {fileID: 22100000, guid: e37c17e8808e6ff4fbd8a92f4f4e0703, type: 2}
   _bodyAnimator: {fileID: 22100000, guid: 9df608e52e2bd9946a2aa49143e360aa, type: 2}
-  _headAnimator: {fileID: 22100000, guid: e8a50483d4932f2458dd43277c258695, type: 2}
+  _headAnimator: {fileID: 22100000, guid: 17738e65a584a454382f884245387b00, type: 2}
   _defaultAnimator: {fileID: 22100000, guid: 538095765b7e86249baceb81d5a2d7db, type: 2}
 --- !u!114 &3602904602870221471
 MonoBehaviour:
