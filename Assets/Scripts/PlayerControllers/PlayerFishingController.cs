@@ -26,6 +26,15 @@ public class PlayerFishingController : MonoBehaviour {
     [SerializeField] LineRenderer _lineRendererPrefab;
     [SerializeField] FishDatabaseSO _fishDatabaseSO;
     [SerializeField] FishingRodToolSO _fishingRod;
+    [SerializeField] Animator _weaponAnim;
+
+    [Header("Animation Settings")]
+    [SerializeField] private string bobberIdleAnimation = "BobberIdle";
+    [SerializeField] private string bobberActionAnimation = "BobberAction";
+    [SerializeField] private float bobberRotationSpeed = 360f; // Grad pro Sekunde
+    [SerializeField] private float bobberRotationRadius = 0.2f;  // Radius des Kreises
+    private Vector3 _bobberCenterPosition;
+
 
     [Header("UI Elements")]
     [SerializeField] SpriteRenderer _alertPopup;
@@ -192,6 +201,13 @@ public class PlayerFishingController : MonoBehaviour {
                 }
                 break;
             case FishingState.ReelingIn:
+                if (_bobberInstance != null) {
+                    float angle = bobberRotationSpeed * Time.time;
+                    float rad = angle * Mathf.Deg2Rad;
+                    Vector3 offset = new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f) * bobberRotationRadius;
+                    _bobberInstance.transform.position = _bobberCenterPosition + offset;
+                }
+
                 _timeToCatchFish -= Time.deltaTime;
                 if (_timeToCatchFish <= 0) {
                     ResetMinigame();
@@ -218,12 +234,21 @@ public class PlayerFishingController : MonoBehaviour {
                 _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingHold, true);
                 break;
             case FishingState.Fishing:
-                _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingThrow, true);
+                StartCoroutine(PlayFishingThrowAnimation());
                 break;
             case FishingState.ReelingIn:
                 _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingReelLoop, true);
                 break;
         }
+    }
+
+    IEnumerator PlayFishingThrowAnimation() {
+        _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingThrow, true);
+
+        var animInfo = _weaponAnim.GetCurrentAnimatorStateInfo(0);
+        yield return new WaitForSeconds(animInfo.length / animInfo.speed);
+
+        _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingReelLoop, true);
     }
 
     #endregion
@@ -266,6 +291,7 @@ public class PlayerFishingController : MonoBehaviour {
     #region -------------------- State Handlers --------------------
     // State-specific handlers
     void StartCastingPreview() {
+        _inputManager.BlockPlayerActions(true);
         SetFishingState(FishingState.Casting);
         ShowPreview();
     }
@@ -337,6 +363,14 @@ public class PlayerFishingController : MonoBehaviour {
         _bobberTileId = (int)tileType;
 
         _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.Fishing_Water_Drop, transform.position);
+
+        // Setze den Zentrumspunkt des Bobbers und spiele die Idle-Animation
+        _bobberCenterPosition = _bobberInstance.transform.position;
+        var bobberAnim = _bobberInstance.GetComponent<Animator>();
+        if (bobberAnim != null) {
+            bobberAnim.Play(bobberIdleAnimation);
+        }
+
         _waitForFishCoroutine ??= StartCoroutine(WaitForFish());
         _castLineCoroutine = null;
     }
@@ -369,31 +403,50 @@ public class PlayerFishingController : MonoBehaviour {
     }
 
     void ReelInWithoutCatch() {
-        _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.Fishing_Quickly_Reel_In, transform.position);
-        ResetVariables();
+        StartCoroutine(EndFishingWithAnimation(false));
     }
 
     void StartMinigame() {
         _alertPopup.enabled = false;
         SetFishingState(FishingState.ReelingIn);
         _timeToCatchFish = TIME_TO_CATCH_FISH;
-        _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.Fishing_Quickly_Reel_In, transform.position);
+
+        _audioManager.PlayLoopingSound(GameManager.Instance.FMODEvents.Fishing_Quickly_Reel_In, transform.position);
+
+        // Spielt die Bobber Action Animation ab
+        var bobberAnim = _bobberInstance.GetComponent<Animator>();
+        if (bobberAnim != null) {
+            bobberAnim.Play(bobberActionAnimation);
+        }
 
         var sizeIndex = (int)_currentFish.FishSize;
         sizeIndex = Mathf.Clamp(sizeIndex, 0, _pressRanges.Length - 1);
         _requiredButtonPresses = UnityEngine.Random.Range(_pressRanges[sizeIndex].MinPresses, _pressRanges[sizeIndex].MaxPresses + 1);
+        _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingReelLoop, true);
     }
 
     void ProcessMinigamePress() {
         _currentButtonPresses++;
         if (_currentButtonPresses < _requiredButtonPresses) return;
 
-        SetFishingState(FishingState.Fishing);
-        string catchMessage = $"You caught a {_currentFish.FishItem.ItemName}. It is {_currentFish.CalculateFishSize()} cm long.\n" +
-                              $"{_currentFish.CatchText[UnityEngine.Random.Range(0, _currentFish.CatchText.Length)]}";
-        UIManager.Instance.FishCatchUI.ShowFishCatchUI(catchMessage);
+        StartCoroutine(EndFishingWithAnimation(true));
+    }
 
-        _playerInventoryController.InventoryContainer.AddItem(new ItemSlot(_currentFish.FishItem.ItemId, 1, 0), false);
+    IEnumerator EndFishingWithAnimation(bool caughtFish) {
+        _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingLand, true);
+        _audioManager.StopSound(GameManager.Instance.FMODEvents.Fishing_Quickly_Reel_In);
+
+        var animInfo = _weaponAnim.GetCurrentAnimatorStateInfo(0);
+        yield return new WaitForSeconds(animInfo.length / animInfo.speed);
+
+        if (caughtFish) {
+            string catchMessage = $"You caught a {_currentFish.FishItem.ItemName}. It is {_currentFish.CalculateFishSize()} cm long.\n" +
+                                  $"{_currentFish.CatchText[UnityEngine.Random.Range(0, _currentFish.CatchText.Length)]}";
+            UIManager.Instance.FishCatchUI.ShowFishCatchUI(catchMessage);
+
+            _playerInventoryController.InventoryContainer.AddItem(new ItemSlot(_currentFish.FishItem.ItemId, 1, 0), false);
+        }
+
         _currentCooldown = COOLDOWN_TO_FISH_AGAIN;
         ResetVariables();
     }
@@ -404,10 +457,14 @@ public class PlayerFishingController : MonoBehaviour {
         _fishIsBiting = false;
         _currentTimeToStartMinigame = TIME_TO_START_MINIGAME;
         SetFishingState(FishingState.Fishing);
+
         _waitForFishCoroutine ??= StartCoroutine(WaitForFish());
     }
 
     void ResetVariables() {
+        _inputManager.BlockPlayerActions(false);
+        _audioManager.StopSound(GameManager.Instance.FMODEvents.Fishing_Quickly_Reel_In);
+
         if (_bobberInstance != null) {
             Destroy(_bobberInstance);
             _bobberInstance = null;
@@ -437,8 +494,6 @@ public class PlayerFishingController : MonoBehaviour {
             StopCoroutine(_waitForFishCoroutine);
             _waitForFishCoroutine = null;
         }
-
-        _inputManager.EnablePlayerActionMap();
     }
 
     private void ResetBitingState() {

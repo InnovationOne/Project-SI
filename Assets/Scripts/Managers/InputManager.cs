@@ -376,6 +376,10 @@ public class InputManager : MonoBehaviour {
         _playerInputActions.Dialogue.Enable();
     }
 
+    public void BlockPlayerActions(bool block) {
+        _blockPlayerActions = block;
+    }
+
     #endregion
 
     /// <summary>

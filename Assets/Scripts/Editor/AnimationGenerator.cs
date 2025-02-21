@@ -618,17 +618,9 @@ public class AnimationGenerator : EditorWindow {
         Dictionary<string, AnimationClip> output,
         string folder,
         PositionType pos) {
-        // 1) Wenn wir im Inspector "Create Fishing Animation" nicht angehakt haben => Abbruch
         if (!createFishingAnimation) return;
 
-        // 2) Wir brauchen 13 Frames gesamt
-        //    => CHAR_INDICES oder ROD_INDICES
         int[] indices = isFishingRod ? ROD_INDICES : CHAR_INDICES;
-
-        // 3) Wieviele Frames pro Richtung hat dein Ausgangs-Spritesheet?
-        //    z.B. Thrust: 6 oder 8 pro Richtung
-        //    FishingRod: 12 oder 13 pro Richtung
-        //    => Passe diese Werte an dein tatsächliches Sheet an:
         int framesPerDirection = isFishingRod ? 13 : 8;
 
         // 4) Über 4 Richtungen loopen
@@ -644,35 +636,26 @@ public class AnimationGenerator : EditorWindow {
                 if (actualIndex >= 0 && actualIndex < (isFishingRod ? rodSprites.Count : charSprites.Count)) {
                     // Je nach isFishingRod aus rodSprites oder charSprites holen
                     finalFrames.Add(isFishingRod ? rodSprites[actualIndex] : charSprites[actualIndex]);
-                } else {
-                    // Fallback: Wiederhole den letzten Frame, um OutOfRange zu vermeiden
-                    if (isFishingRod && rodSprites.Count > 0)
-                        finalFrames.Add(rodSprites[rodSprites.Count - 1]);
-                    else if (!isFishingRod && charSprites.Count > 0)
-                        finalFrames.Add(charSprites[charSprites.Count - 1]);
                 }
             }
 
             // 5) Die 13 Frames in drei Teilanimationen aufsplitten:
-            //    Throw (0..5), ReelLoop (6..9), Land (10..12)
-            var holdFrames = finalFrames.GetRange(0, 4);   // 6 Frames
-            var throwFrames = finalFrames.GetRange(4, 2);   // 6 Frames
+            var holdFrames = finalFrames.GetRange(2, 4);   // 2 Frames
+            var throwFrames = finalFrames.GetRange(4, 2);   // 2 Frames
             var reelLoopFrames = finalFrames.GetRange(6, 4);   // 4 Frames
             var landFrames = finalFrames.GetRange(10, 3);  // 3 Frames
+            landFrames.Add(holdFrames[1]); // +1 Frame
 
             // Clip-Namen: z.B. "Fishing_Throw_Up", "Fishing_ReelLoop_Up", "Fishing_Land_Up"
             // Wir brauchen die Richtung (Up, Left, Down, Right)
             string directionName = GetDirectionName(dir);
 
-            // Throw-Clip
-            CreateAndStoreClip(throwFrames, "Fishing_Hold", directionName, pos, output, folder, loop: false);
-
+            // Hold-Clip
+            CreateAndStoreClip(holdFrames, "Fishing_Hold", directionName, pos, output, folder, loop: false);
             // Throw-Clip
             CreateAndStoreClip(throwFrames, "Fishing_Throw", directionName, pos, output, folder, loop: false);
-
             // ReelLoop-Clip (Loop=true)
             CreateAndStoreClip(reelLoopFrames, "Fishing_ReelLoop", directionName, pos, output, folder, loop: true);
-
             // Land-Clip
             CreateAndStoreClip(landFrames, "Fishing_Land", directionName, pos, output, folder, loop: false);
         }
