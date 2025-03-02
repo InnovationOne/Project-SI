@@ -125,6 +125,8 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
         StartCoroutine(SetAnimationOverride(_shadowAnim, _shadowAnimator));
 
         ChangeState(PlayerState.Idle, true);
+        SetAnimatorDirection(_iM.GetMovementVectorNormalized());
+        SetAnimatorLastDirection(_pMC.LastMotionDirection);
     }
 
     private void OnDestroy() {
@@ -166,7 +168,6 @@ public class PlayerAnimationController : MonoBehaviour, IPlayerDataPersistance {
                 StartCoroutine(SetAnimationOverride(_behindAnim, weaponSO.AnimatorBG));
             }
         } else if (itemSO is ToolSO toolSO) {
-            Debug.Log($"ToolSO: {toolSO.name}");
             if (toolSO.AnimatorFG != null) {
                 StartCoroutine(SetAnimationOverride(_weaponAnim, toolSO.AnimatorFG));
             }

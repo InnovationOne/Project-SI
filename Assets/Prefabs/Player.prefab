@@ -1158,7 +1158,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6844683432502041718
 Transform:
   m_ObjectHideFlags: 0
@@ -6786,10 +6786,16 @@ MonoBehaviour:
   _fishDatabaseSO: {fileID: 11400000, guid: aafc625afddacaf45a37c442d7b6dea6, type: 2}
   _fishingRod: {fileID: 11400000, guid: 952fdc32da7e30447a14bbec56ba44e8, type: 2}
   _weaponAnim: {fileID: 5765592103375599873}
+  bobberRotationSpeed: 360
+  bobberRotationRadius: 0.2
   _alertPopup: {fileID: 7798567739198905670}
   _bobberAlphaAdjustment: 0.5
   _maxLateralOffset: 0.5
   _lateralOffsetRate: 0.1
+  MAX_ROD_CASTING_DISTANCE: 5
+  CASTING_SPEED: 1.8
+  CAST_ARC_HEIGHT: 2
+  LINE_SAG_HEIGHT: 0.2
 --- !u!114 &1644743227822221196
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7049,7 +7055,7 @@ Transform:
   m_GameObject: {fileID: 7045639714815927447}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.0833, z: 0}
+  m_LocalPosition: {x: 0, y: 2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7388,7 +7394,7 @@ Transform:
   m_GameObject: {fileID: 8135136938889273650}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.35, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

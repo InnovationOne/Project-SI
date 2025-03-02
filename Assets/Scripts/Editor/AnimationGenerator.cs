@@ -1,15 +1,14 @@
 #if UNITY_EDITOR
 using UnityEngine;
+using UnityEditor;
+using UnityEditor.Animations;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEditor;
-using UnityEditor.Animations;
-using System.Diagnostics.Eventing.Reader;
 
 /// <summary>
-/// Provides a custom Editor Window to generate animation clips and override controllers from sliced textures.
-/// Supports both single-sheet and FG/BG modes, with optional reversed slash frames.
+/// Custom Editor Window that generates animation clips and override controllers from sliced textures.
+/// Supports single-sheet and FG/BG modes with optional reversed slash frames.
 /// </summary>
 public class AnimationGenerator : EditorWindow {
     [Header("Mode")]
@@ -31,12 +30,13 @@ public class AnimationGenerator : EditorWindow {
     public bool multipleTexturesMode = false;
     public List<Texture2D> multipleTextures = new();
 
-    const int spellcastFrameCount = 7;
-    const int thrustFrameCount = 8;
-    const int walkcycleFrameCount = 9;
-    const int slashFrameCount = 6;
-    const int bowFrameCount = 13;
-    const int hurtFrameCount = 6;
+    // Frame counts for various animations
+    private const int spellcastFrameCount = 7;
+    private const int thrustFrameCount = 8;
+    private const int walkcycleFrameCount = 9;
+    private const int slashFrameCount = 6;
+    private const int bowFrameCount = 13;
+    private const int hurtFrameCount = 6;
 
     [Header("Textures (Single-Sheet)")]
     public Texture2D bowTexture;
@@ -640,7 +640,7 @@ public class AnimationGenerator : EditorWindow {
             }
 
             // 5) Die 13 Frames in drei Teilanimationen aufsplitten:
-            var holdFrames = finalFrames.GetRange(2, 4);   // 2 Frames
+            var holdFrames = finalFrames.GetRange(2, 2);   // 2 Frames
             var throwFrames = finalFrames.GetRange(4, 2);   // 2 Frames
             var reelLoopFrames = finalFrames.GetRange(6, 4);   // 4 Frames
             var landFrames = finalFrames.GetRange(10, 3);  // 3 Frames

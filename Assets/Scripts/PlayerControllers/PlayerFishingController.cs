@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using static FishSO;
@@ -29,12 +30,11 @@ public class PlayerFishingController : MonoBehaviour {
     [SerializeField] Animator _weaponAnim;
 
     [Header("Animation Settings")]
-    [SerializeField] private string bobberIdleAnimation = "BobberIdle";
-    [SerializeField] private string bobberActionAnimation = "BobberAction";
-    [SerializeField] private float bobberRotationSpeed = 360f; // Grad pro Sekunde
-    [SerializeField] private float bobberRotationRadius = 0.2f;  // Radius des Kreises
-    private Vector3 _bobberCenterPosition;
-
+    const string bobberIdleAnimation = "BobberIdle";
+    const string bobberActionAnimation = "BobberAction";
+    [SerializeField] float bobberRotationSpeed = 360f; // Grad pro Sekunde
+    [SerializeField] float bobberRotationRadius = 0.2f;  // Radius des Kreises
+    Vector3 _bobberCenterPosition;
 
     [Header("UI Elements")]
     [SerializeField] SpriteRenderer _alertPopup;
@@ -52,18 +52,49 @@ public class PlayerFishingController : MonoBehaviour {
 
     // Fishing system constants
     const string FISHING_TILEMAP_TAG = "FishingTilemap";
-    const float MAX_ROD_CASTING_DISTANCE = 2.5f;
-    const float CASTING_SPEED = 1.8f;
+    [SerializeField] float MAX_ROD_CASTING_DISTANCE = 2.5f;
+    [SerializeField] float CASTING_SPEED = 1.8f;
     const float LINE_RENDER_WIDTH = 0.04f;
     const float MIN_TIME_TO_BITE = 5f;
     const float MAX_TIME_TO_BITE = 15f;
-    const float CAST_ARC_HEIGHT = 1.5f;
-    const float LINE_SAG_HEIGHT = 0.1f;
+    [SerializeField] float CAST_ARC_HEIGHT = 1.5f;
+    [SerializeField] float LINE_SAG_HEIGHT = 0.1f;
     const int SEGMENT_COUNT = 20;
     const float TIME_TO_CATCH_FISH = 4.5f;
     const float TIME_TO_START_MINIGAME = 0.8f;
-    const float COOLDOWN_TO_FISH_AGAIN = 0.8f;
+    const float COOLDOWN_TO_FISH_AGAIN = 2f;
     const float MAX_OFFSET_DISTANCE = 1.0f;
+
+    // Frame‐timing and animation info
+    private float _animationStateStartTime = 0f;
+    private string _currentFishingAnimName = "";
+    private readonly int _animationFPS = 15;
+    private readonly Dictionary<string, int> _animationFrameCounts = new Dictionary<string, int> {
+        { "FishingHold", 2 },
+        { "FishingThrow", 2 },
+        { "FishingReelLoop", 4 },
+        { "FishingLand", 4 }
+    };
+
+    Vector2[] _fishingHoldAnimationPositionsLeft = new Vector2[] { new(-1.4692f, 1.1874f), new(1.6876f, 1.0937f) };
+    Vector2[] _fishingThrowAnimationPositionsLeft = new Vector2[] { new(0.5625f, 1.0313f), new(-1.9373f, 1.1872f) };
+    Vector2[] _fishingReelLoopAnimationPositionsLeft = new Vector2[] { new(-1.87503f, 0.90627f), new(-1.87503f, 0.90627f), new(-1.87503f, 0.90627f), new(-1.9062f, 0.7812f) };
+    Vector2[] _fishingLandAnimationPositionsLeft = new Vector2[] { new(-1.9062f, 0.9064f), new(-0.7185f, 1.6252f), new(-0.5935f, 1.5622f), new(1.6876f, 1.0937f) };
+
+    Vector2[] _fishingHoldAnimationPositionsDown = new Vector2[] { new(0.1564f, 2.0625f), new(-1.0623f, 1.719f) };
+    Vector2[] _fishingThrowAnimationPositionsDown = new Vector2[] { new(-0.6565f, 1.6249f), new(0.906f, 0.8434f) };
+    Vector2[] _fishingReelLoopAnimationPositionsDown = new Vector2[] { new(0.8749f, 0.8126f), new(0.8752f, 0.8437f), new(0.8752f, 0.8437f), new(0.8748f, 0.8124f) };
+    Vector2[] _fishingLandAnimationPositionsDown = new Vector2[] { new(0.6562f, 0.9692f), new(0.2499f, 1.5936f), new(-0.1249f, 1.7186f), new(-1.0623f, 1.719f) };
+
+    Vector2[] _fishingHoldAnimationPositionsRight = new Vector2[] { new(1.4692f, 1.1874f), new(-1.6876f, 1.0937f) };
+    Vector2[] _fishingThrowAnimationPositionsRight = new Vector2[] { new(-0.5625f, 1.0313f), new(1.9373f, 1.1872f) };
+    Vector2[] _fishingReelLoopAnimationPositionsRight = new Vector2[] { new(1.87503f, 0.90627f), new(1.87503f, 0.90627f), new(1.87503f, 0.90627f), new(1.9062f, 0.7812f) };
+    Vector2[] _fishingLandAnimationPositionsRight = new Vector2[] { new(1.9062f, 0.9064f), new(0.7185f, 1.6252f), new(0.5935f, 1.5622f), new(-1.6876f, 1.0937f) };
+
+    Vector2[] _fishingHoldAnimationPositionsUp = new Vector2[] { new(0.6251f, 1.9372f), new(-0.7809f, 1.7501f) };
+    Vector2[] _fishingThrowAnimationPositionsUp = new Vector2[] { new(-0.2496f, 1.7813f), new(1.4063f, 1.7188f) };
+    Vector2[] _fishingReelLoopAnimationPositionsUp = new Vector2[] { new(1.4063f, 1.5004f), new(1.4063f, 1.5004f), new(1.4063f, 1.5004f), new(1.4063f, 1.6878f) };
+    Vector2[] _fishingLandAnimationPositionsUp = new Vector2[] { new(1.2813f, 1.844f), new(0.4064f, 2.0934f), new(-0.1564f, 2f), new(-0.7809f, 1.7501f) };
 
     enum TileType {
         Invalid = -1,
@@ -96,7 +127,6 @@ public class PlayerFishingController : MonoBehaviour {
     LineRenderer _lineRenderer;
     SpriteRenderer _bobberSpriteRenderer;
     FishingState _currentState = FishingState.Idle;
-    Vector3 _fishingRodTip;
     float _currentCastingDistance = 0f;
     bool _fishIsBiting = false;
     FishSO _currentFish;
@@ -115,7 +145,7 @@ public class PlayerFishingController : MonoBehaviour {
     PlayerAnimationController _playerAnimationController;
     Tilemap _fishingTilemap;
     AudioManager _audioManager;
-    InputManager _inputManager;    
+    InputManager _inputManager;
 
     // Coroutine references
     Coroutine _castLineCoroutine;
@@ -161,9 +191,6 @@ public class PlayerFishingController : MonoBehaviour {
             return;
         }
 
-        // Update the fishing rod tip position relative to player position
-        _fishingRodTip = transform.position;
-
         // Manage fish biting timer
         if (_fishIsBiting && _currentState == FishingState.Fishing) {
             _currentTimeToStartMinigame -= Time.deltaTime;
@@ -176,7 +203,6 @@ public class PlayerFishingController : MonoBehaviour {
         switch (_currentState) {
             case FishingState.Casting:
                 if (_isLeftClickHeld) {
-
                     _currentCastingDistance += CASTING_SPEED * Time.deltaTime;
                     _currentCastingDistance = Mathf.Clamp(_currentCastingDistance, 0, MAX_ROD_CASTING_DISTANCE);
 
@@ -206,8 +232,11 @@ public class PlayerFishingController : MonoBehaviour {
                     float rad = angle * Mathf.Deg2Rad;
                     Vector3 offset = new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f) * bobberRotationRadius;
                     _bobberInstance.transform.position = _bobberCenterPosition + offset;
-                }
 
+                    // Update the line renderer's start position using our frame-perfect offset.
+                    Vector3 lineStart = GetLineStartPosition();
+                    DrawFishingLine(lineStart, _bobberInstance.transform.position, SEGMENT_COUNT);
+                }
                 _timeToCatchFish -= Time.deltaTime;
                 if (_timeToCatchFish <= 0) {
                     ResetMinigame();
@@ -220,15 +249,23 @@ public class PlayerFishingController : MonoBehaviour {
 
     private void SetFishingState(FishingState newState) {
         _currentState = newState;
+        _currentFishingAnimName = newState switch {
+            FishingState.Casting => "FishingHold",
+            FishingState.Fishing => "FishingThrow",
+            FishingState.ReelingIn => "FishingReelLoop",
+            _ => "FishingLand",// For other states (or if you trigger FishingLand elsewhere) set appropriately.
+        };
+        _animationStateStartTime = Time.time;
         SwitchAnimation(newState);
     }
+
 
     private void SwitchAnimation(FishingState st) {
         if (_playerAnimationController == null) return;
 
         switch (st) {
             case FishingState.Idle:
-                _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.Idle, true);
+                StartCoroutine(PlayIdleAnimation());
                 break;
             case FishingState.Casting:
                 _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingHold, true);
@@ -244,11 +281,18 @@ public class PlayerFishingController : MonoBehaviour {
 
     IEnumerator PlayFishingThrowAnimation() {
         _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingThrow, true);
-
+        yield return null;
         var animInfo = _weaponAnim.GetCurrentAnimatorStateInfo(0);
         yield return new WaitForSeconds(animInfo.length / animInfo.speed);
-
         _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingReelLoop, true);
+    }
+
+    IEnumerator PlayIdleAnimation() {
+        _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingLand, true);
+        yield return null;
+        var animInfo = _weaponAnim.GetCurrentAnimatorStateInfo(0);
+        yield return new WaitForSeconds(animInfo.length / animInfo.speed);
+        _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.Idle, true);
     }
 
     #endregion
@@ -257,7 +301,6 @@ public class PlayerFishingController : MonoBehaviour {
     // Input handlers focusing on state transitions rather than logic
     void OnLeftClickAction() {
         if (_currentCooldown > 0 || _fishingRod.ItemId != _playerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId) return;
-
         switch (_currentState) {
             case FishingState.Idle:
                 StartCastingPreview();
@@ -307,7 +350,7 @@ public class PlayerFishingController : MonoBehaviour {
 
     void ShowPreview() {
         if (_bobberInstance == null) {
-            _bobberInstance = Instantiate(_bobberPrefab, _fishingRodTip, Quaternion.identity);
+            _bobberInstance = Instantiate(_bobberPrefab, transform.position, Quaternion.identity);
             if (_bobberInstance.TryGetComponent(out _bobberSpriteRenderer)) {
                 var c = _bobberSpriteRenderer.color;
                 _bobberSpriteRenderer.color = new Color(c.r, c.g, c.b, Mathf.Clamp01(c.a - _bobberAlphaAdjustment));
@@ -315,7 +358,7 @@ public class PlayerFishingController : MonoBehaviour {
         }
 
         if (_lineRenderer == null) {
-            if (Instantiate(_lineRendererPrefab.gameObject, _fishingRodTip, Quaternion.identity).TryGetComponent(out _lineRenderer)) {
+            if (Instantiate(_lineRendererPrefab.gameObject, transform.position, Quaternion.identity).TryGetComponent(out _lineRenderer)) {
                 _lineRenderer.startWidth = LINE_RENDER_WIDTH;
             }
         }
@@ -324,9 +367,10 @@ public class PlayerFishingController : MonoBehaviour {
     void UpdatePreviewThrowArc() {
         Vector3 castPos = GetCastPosition();
         _bobberInstance.transform.position = castPos;
+        Vector3 lineStart = GetLineStartPosition();
         for (int i = 0; i < SEGMENT_COUNT; i++) {
             float t = i / (float)(SEGMENT_COUNT - 1);
-            _linePositionsBuffer[i] = CalculateArcPoint(t, _fishingRodTip, castPos, CAST_ARC_HEIGHT);
+            _linePositionsBuffer[i] = CalculateArcPoint(t, lineStart, castPos, CAST_ARC_HEIGHT);
         }
 
         _lineRenderer.positionCount = SEGMENT_COUNT;
@@ -340,12 +384,13 @@ public class PlayerFishingController : MonoBehaviour {
 
     IEnumerator CastLine() {
         Vector3 castPos = GetCastPosition();
+        Vector3 lineStart = GetLineStartPosition();
         // Animate the bobber moving along the casting arc
         for (int i = 0; i < SEGMENT_COUNT; i++) {
             float t = i / (float)(SEGMENT_COUNT - 1);
-            Vector3 arcPoint = CalculateArcPoint(t, _fishingRodTip, castPos, CAST_ARC_HEIGHT);
+            Vector3 arcPoint = CalculateArcPoint(t, lineStart, castPos, CAST_ARC_HEIGHT);
             _bobberInstance.transform.position = arcPoint;
-            DrawFishingLine(_fishingRodTip, _bobberInstance.transform.position, SEGMENT_COUNT);
+            DrawFishingLine(transform.position, _bobberInstance.transform.position, SEGMENT_COUNT);
             yield return null;
         }
 
@@ -366,8 +411,7 @@ public class PlayerFishingController : MonoBehaviour {
 
         // Setze den Zentrumspunkt des Bobbers und spiele die Idle-Animation
         _bobberCenterPosition = _bobberInstance.transform.position;
-        var bobberAnim = _bobberInstance.GetComponent<Animator>();
-        if (bobberAnim != null) {
+        if (_bobberInstance.TryGetComponent<Animator>(out var bobberAnim)) {
             bobberAnim.Play(bobberIdleAnimation);
         }
 
@@ -386,7 +430,7 @@ public class PlayerFishingController : MonoBehaviour {
         }
 
         float timeToBite = UnityEngine.Random.Range(MIN_TIME_TO_BITE, MAX_TIME_TO_BITE) * biteRateAdjustment;
-        _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.Fishing_Reel_Backwards, transform.position);
+        _audioManager.PlayLoopingSound(GameManager.Instance.FMODEvents.Fishing_Reel_Backwards, transform.position);
         yield return new WaitForSeconds(timeToBite);
 
         _currentFish = _fishDatabaseSO.GetFish(_fishingRod, _bobberTileId, CatchingMethod.FishingRod);
@@ -399,6 +443,9 @@ public class PlayerFishingController : MonoBehaviour {
         _fishIsBiting = true;
         //TODO: _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.FishBitSFX, transform.position);
         _alertPopup.enabled = true;
+        if (_bobberInstance.TryGetComponent<Animator>(out var bobberAnim)) {
+            bobberAnim.Play(bobberActionAnimation);
+        }
         _waitForFishCoroutine = null;
     }
 
@@ -411,18 +458,9 @@ public class PlayerFishingController : MonoBehaviour {
         SetFishingState(FishingState.ReelingIn);
         _timeToCatchFish = TIME_TO_CATCH_FISH;
 
-        _audioManager.PlayLoopingSound(GameManager.Instance.FMODEvents.Fishing_Quickly_Reel_In, transform.position);
-
-        // Spielt die Bobber Action Animation ab
-        var bobberAnim = _bobberInstance.GetComponent<Animator>();
-        if (bobberAnim != null) {
-            bobberAnim.Play(bobberActionAnimation);
-        }
-
         var sizeIndex = (int)_currentFish.FishSize;
         sizeIndex = Mathf.Clamp(sizeIndex, 0, _pressRanges.Length - 1);
         _requiredButtonPresses = UnityEngine.Random.Range(_pressRanges[sizeIndex].MinPresses, _pressRanges[sizeIndex].MaxPresses + 1);
-        _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingReelLoop, true);
     }
 
     void ProcessMinigamePress() {
@@ -433,28 +471,32 @@ public class PlayerFishingController : MonoBehaviour {
     }
 
     IEnumerator EndFishingWithAnimation(bool caughtFish) {
-        _playerAnimationController.ChangeState(PlayerAnimationController.PlayerState.FishingLand, true);
-        _audioManager.StopSound(GameManager.Instance.FMODEvents.Fishing_Quickly_Reel_In);
-
-        var animInfo = _weaponAnim.GetCurrentAnimatorStateInfo(0);
-        yield return new WaitForSeconds(animInfo.length / animInfo.speed);
+        _audioManager.PlayOneShot(GameManager.Instance.FMODEvents.Fishing_Quickly_Reel_In, transform.position);
+        _audioManager.StopSound(GameManager.Instance.FMODEvents.Fishing_Reel_Backwards);
+        SetFishingState(FishingState.Idle);
+        ResetVariables();
 
         if (caughtFish) {
+            Debug.Log(_currentFish == null);
+            Debug.Log(_currentFish.FishItem == null);
+            Debug.Log(_currentFish.FishItem.ItemName);
+            Debug.Log(_currentFish.CalculateFishSize());
+            yield break;
             string catchMessage = $"You caught a {_currentFish.FishItem.ItemName}. It is {_currentFish.CalculateFishSize()} cm long.\n" +
                                   $"{_currentFish.CatchText[UnityEngine.Random.Range(0, _currentFish.CatchText.Length)]}";
             UIManager.Instance.FishCatchUI.ShowFishCatchUI(catchMessage);
 
             _playerInventoryController.InventoryContainer.AddItem(new ItemSlot(_currentFish.FishItem.ItemId, 1, 0), false);
         }
-
-        _currentCooldown = COOLDOWN_TO_FISH_AGAIN;
-        ResetVariables();
     }
 
     void ResetMinigame() {
         _currentButtonPresses = 0;
         _currentFish = null;
         _fishIsBiting = false;
+        if (_bobberInstance.TryGetComponent<Animator>(out var bobberAnim)) {
+            bobberAnim.Play(bobberIdleAnimation);
+        }
         _currentTimeToStartMinigame = TIME_TO_START_MINIGAME;
         SetFishingState(FishingState.Fishing);
 
@@ -463,7 +505,6 @@ public class PlayerFishingController : MonoBehaviour {
 
     void ResetVariables() {
         _inputManager.BlockPlayerActions(false);
-        _audioManager.StopSound(GameManager.Instance.FMODEvents.Fishing_Quickly_Reel_In);
 
         if (_bobberInstance != null) {
             Destroy(_bobberInstance);
@@ -476,6 +517,7 @@ public class PlayerFishingController : MonoBehaviour {
             _lineRenderer = null;
         }
 
+        _currentCooldown = COOLDOWN_TO_FISH_AGAIN;
         _fishIsBiting = false;
         _currentCastingDistance = 0f;
         _currentFish = null;
@@ -483,7 +525,6 @@ public class PlayerFishingController : MonoBehaviour {
         _currentButtonPresses = 0;
         _currentTimeToStartMinigame = TIME_TO_START_MINIGAME;
         _bobberTileId = -1;
-        SetFishingState(FishingState.Idle);
 
         if (_castLineCoroutine != null) {
             StopCoroutine(_castLineCoroutine);
@@ -529,8 +570,75 @@ public class PlayerFishingController : MonoBehaviour {
         if (direction == Vector2.zero)
             direction = Vector2.up; // Fallback if no direction is set
         // Compute the final cast position without lateral offset (this version doesn't include lateral offset logic)
-        Vector3 finalPos = _fishingRodTip + (Vector3)direction * _currentCastingDistance;
+        Vector3 finalPos = transform.position + (Vector3)direction * _currentCastingDistance;
         return finalPos;
     }
+
+    Vector2 GetFishingLineStartOffset() {
+        // Use our current animation name determined by our state logic.
+        string animName = _currentFishingAnimName;
+
+        // Determine the player's facing direction.
+        Vector2 direction = _playerMovementController.LastMotionDirection.normalized;
+        if (direction == Vector2.zero)
+            direction = Vector2.up;
+        string dirKey = (Mathf.Abs(direction.x) >= Mathf.Abs(direction.y))
+                        ? (direction.x < 0 ? "Left" : "Right")
+                        : (direction.y < 0 ? "Down" : "Up");
+
+        // Select the corresponding positions array based on the animation name and direction.
+        Vector2[] positionsArray = null;
+        switch (animName) {
+            case "FishingHold":
+                switch (dirKey) {
+                    case "Left": positionsArray = _fishingHoldAnimationPositionsLeft; break;
+                    case "Right": positionsArray = _fishingHoldAnimationPositionsRight; break;
+                    case "Up": positionsArray = _fishingHoldAnimationPositionsUp; break;
+                    case "Down": positionsArray = _fishingHoldAnimationPositionsDown; break;
+                }
+                break;
+            case "FishingThrow":
+                switch (dirKey) {
+                    case "Left": positionsArray = _fishingThrowAnimationPositionsLeft; break;
+                    case "Right": positionsArray = _fishingThrowAnimationPositionsRight; break;
+                    case "Up": positionsArray = _fishingThrowAnimationPositionsUp; break;
+                    case "Down": positionsArray = _fishingThrowAnimationPositionsDown; break;
+                }
+                break;
+            case "FishingReelLoop":
+                switch (dirKey) {
+                    case "Left": positionsArray = _fishingReelLoopAnimationPositionsLeft; break;
+                    case "Right": positionsArray = _fishingReelLoopAnimationPositionsRight; break;
+                    case "Up": positionsArray = _fishingReelLoopAnimationPositionsUp; break;
+                    case "Down": positionsArray = _fishingReelLoopAnimationPositionsDown; break;
+                }
+                break;
+            case "FishingLand":
+                switch (dirKey) {
+                    case "Left": positionsArray = _fishingLandAnimationPositionsLeft; break;
+                    case "Right": positionsArray = _fishingLandAnimationPositionsRight; break;
+                    case "Up": positionsArray = _fishingLandAnimationPositionsUp; break;
+                    case "Down": positionsArray = _fishingLandAnimationPositionsDown; break;
+                }
+                break;
+        }
+        if (positionsArray == null || positionsArray.Length == 0)
+            return Vector2.zero;
+
+        // Get the correct frame count (falling back to the array length if necessary).
+        int frameCount = _animationFrameCounts.ContainsKey(animName) ? _animationFrameCounts[animName] : positionsArray.Length;
+
+        // Compute elapsed time since the animation started.
+        float elapsed = Time.time - _animationStateStartTime;
+        int frameIndex = (int)(elapsed * _animationFPS) % frameCount;
+
+        return positionsArray[frameIndex];
+    }
+
+
+    Vector3 GetLineStartPosition() {
+        return transform.position + (Vector3)GetFishingLineStartOffset();
+    }
+
     #endregion
 }

@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8396358249812645820}
-  - component: {fileID: 7475078094628987883}
-  - component: {fileID: 4419887536635656719}
+  - component: {fileID: 4087852164302217680}
+  - component: {fileID: 66589811693195470}
   m_Layer: 0
   m_Name: Bobber
   m_TagString: Untagged
@@ -28,12 +28,12 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &7475078094628987883
+--- !u!212 &4087852164302217680
 SpriteRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -74,10 +74,10 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -58219705
-  m_SortingLayer: 3
+  m_SortingLayerID: -910379275
+  m_SortingLayer: 2
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 88083d3b6d0da3847bde231ffb40cf1e, type: 3}
+  m_Sprite: {fileID: 1471554507, guid: 22e9d2b3791343440be44e0521c2fdb0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -88,7 +88,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 1
---- !u!95 &4419887536635656719
+--- !u!95 &66589811693195470
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0
@@ -98,7 +98,7 @@ Animator:
   m_GameObject: {fileID: 3998897679639624659}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: b71e0e75b8bdf8a4da1ce0017367b9e0, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
