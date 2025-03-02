@@ -91,12 +91,17 @@ public class PlayerInteractController : MonoBehaviour {
             var interactableComp = interactable as Component;
             if (interactableComp == null) continue;
 
-            // Skip if the interactable is not in front of the player.
+            // Calculate vector from player to the interactable.
             Vector2 playerToObj = (Vector2)interactableComp.transform.position - playerPos;
-            float dot = Vector2.Dot(playerToObj.normalized, facingDirection);
-            if (dot < DIRECTION_DOT_THRESHHOLD) continue;
 
-            // Keep track of whichever interactable is closest to the player.
+            // If the interactable does not allow circular interaction,
+            // enforce the "in front" check.
+            if (!interactable.CircleInteract) {
+                float dot = Vector2.Dot(playerToObj.normalized, facingDirection);
+                if (dot < DIRECTION_DOT_THRESHHOLD) continue;
+            }
+
+            // Track the closest interactable.
             float sqrDist = playerToObj.sqrMagnitude;
             if (sqrDist < closestSqrDistance) {
                 closestSqrDistance = sqrDist;

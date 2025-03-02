@@ -8,7 +8,8 @@ public class NPC : MonoBehaviour, IInteractable {
     private int _locationId;
     private int _weekDay => GameManager.Instance.TimeManager.CurrentDate.Day % TimeManager.DAYS_PER_WEEK;
 
-    public float MaxDistanceToPlayer => 0f;
+    public float MaxDistanceToPlayer => 1f;
+    public bool CircleInteract => false;
 
     private float _moveSpeed = 1f;
 

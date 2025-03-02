@@ -12,7 +12,8 @@ public class DoorController : MonoBehaviour, IInteractable {
     private TimeManager _timeManager;
     private WeatherManager _weatherManager;
 
-    public float MaxDistanceToPlayer => throw new System.NotImplementedException();
+    public float MaxDistanceToPlayer => 1.5f;
+    public bool CircleInteract => false;
 
     private void Start() {
         _timeManager = GameManager.Instance.TimeManager;

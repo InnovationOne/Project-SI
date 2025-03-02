@@ -13,7 +13,8 @@ public class ItemProducer : PlaceableObject {
     private int _timer;
     private int _itemId;
 
-    public override float MaxDistanceToPlayer => 0f;
+    public override float MaxDistanceToPlayer => 2f;
+    public override bool CircleInteract => false;
 
     /// <summary>
     /// Initializes and subscribes to time-based events.

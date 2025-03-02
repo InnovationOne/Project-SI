@@ -12,6 +12,7 @@ public class HayDistributor : NetworkBehaviour, IInteractable {
     private int _hayInFeeder = 0;
     public int HayInFeeder => _hayInFeeder;
     public float MaxDistanceToPlayer => 2f;
+    public bool CircleInteract => false;
 
     private PlayerToolbeltController _pTC;
     private PlayerInventoryController _pIC;

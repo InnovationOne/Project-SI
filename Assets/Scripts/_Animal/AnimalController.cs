@@ -28,8 +28,9 @@ public class AnimalController : MonoBehaviour, IInteractable {
     private AnimalNavigation _navigation;
     private TimeManager _timeManager;
 
-    [NonSerialized] private float _maxDistanceToPlayer;
-    public float MaxDistanceToPlayer => _maxDistanceToPlayer;
+
+    public float MaxDistanceToPlayer => 2f;
+    public bool CircleInteract => false;
 
     private void Awake() {
         _stateMachine = GetComponent<AnimalStateMachine>();

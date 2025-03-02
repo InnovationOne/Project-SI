@@ -20,7 +20,8 @@ public class Scarecrow : PlaceableObject {
     [SerializeField] ScarecrowSO _scarecrowSO;
     public ScarecrowSO ScarecrowSO => _scarecrowSO;
 
-    public override float MaxDistanceToPlayer => throw new System.NotImplementedException();
+    public override float MaxDistanceToPlayer => 2f;
+    public override bool CircleInteract => false;
 
     public override void InitializePostLoad() { }
 

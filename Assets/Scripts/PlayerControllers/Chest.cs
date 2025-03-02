@@ -11,6 +11,7 @@ public class Chest : PlaceableObject {
 
     // Maximum distance at which players can interact with this chest.
     public override float MaxDistanceToPlayer => 2f;
+    public override bool CircleInteract => false;
 
     // Tracks if the chest is currently open. Updated by the server, read by clients.
     NetworkVariable<bool> _isOpenNetworked = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);

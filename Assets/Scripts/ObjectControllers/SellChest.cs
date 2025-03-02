@@ -1,10 +1,10 @@
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 public class SellChest : MonoBehaviour, IInteractable {
     [SerializeField] ItemContainerSO _sellBoxContainer;
 
     public float MaxDistanceToPlayer => 0.5f;
+    public bool CircleInteract => false;
 
     public void Interact(PlayerController playerController) {
         if (playerController == null) return;

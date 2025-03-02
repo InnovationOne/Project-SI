@@ -1,12 +1,11 @@
-using System;
 using UnityEngine;
 
 public class Bed : MonoBehaviour, IInteractable {
     private SpriteRenderer _visual;
     private int _itemId;
 
-    [NonSerialized] private float _maxDistanceToPlayer;
-    public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
+    public float MaxDistanceToPlayer => 2f;
+    public bool CircleInteract => false;
 
     /// <summary>
     /// Initializes the bed object with the specified item ID.

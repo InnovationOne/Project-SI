@@ -16,6 +16,7 @@ public class Building : PlaceableObject {
     public bool IsFull => _housedAnimals.Count >= _buildingSO.Capacity[_buildingLevel];
 
     public override float MaxDistanceToPlayer => 0f;
+    public override bool CircleInteract => false;
 
     [SerializeField] private PolygonCollider2D _stallCollider;
     [SerializeField] private BoxCollider2D _doorCollider;

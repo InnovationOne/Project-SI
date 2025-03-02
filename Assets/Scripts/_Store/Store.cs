@@ -9,6 +9,7 @@ public class Store : NetworkBehaviour, IInteractable {
 
     protected float _maxDistanceToPlayer;
     public virtual float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
+    public virtual bool CircleInteract { get => false; }
 
     public virtual void InitializePreLoad(int itemId) { }
 

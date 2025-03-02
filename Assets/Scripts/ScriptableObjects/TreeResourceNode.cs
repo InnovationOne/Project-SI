@@ -18,7 +18,8 @@ public class TreeResourceNode : ResourceNodeBase, IInteractable {
     const float PROBABILITY_TO_SEED_AFTER_SHAKE = 0.02f;
     const float BEE_NEST_PROBABILITY = 0.05f;
 
-    public float MaxDistanceToPlayer => 0f;
+    public float MaxDistanceToPlayer => 1f;
+    public bool CircleInteract => true;
 
     private bool _doneGrowing {
         get {

@@ -328,8 +328,8 @@ public class Rose : PlaceableObject {
     /// </summary>
     private RoseSO RoseSO => GameManager.Instance.ItemManager.ItemDatabase[ItemId] as RoseSO;
 
-    [NonSerialized] private float _maxDistanceToPlayer;
-    public override float MaxDistanceToPlayer => throw new NotImplementedException();
+    public override float MaxDistanceToPlayer => 2f;
+    public override bool CircleInteract => false;
 
 
     /// <summary>

@@ -4,8 +4,8 @@ using UnityEngine;
 
 [RequireComponent(typeof(NetworkObject))]
 public class HarvestCrop : NetworkBehaviour, IInteractable {
-    [NonSerialized] float _maxDistanceToPlayer;
-    public float MaxDistanceToPlayer => _maxDistanceToPlayer;
+    public float MaxDistanceToPlayer => 1.5f;
+    public bool CircleInteract => true;
     Vector3Int _cropPosition;
 
     public void Interact(PlayerController player) {

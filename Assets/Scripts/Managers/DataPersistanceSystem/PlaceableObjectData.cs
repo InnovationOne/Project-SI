@@ -16,6 +16,9 @@ public abstract class PlaceableObject : NetworkBehaviour, IObjectDataPersistence
     // This property is implemented by subclasses to define interaction distance (How far a player can still interact with a placed object).
     public abstract float MaxDistanceToPlayer { get; }
 
+    // This property is implemented by subclasses to define whether the object is interactable in a circle around the object or a cone in front of the player.
+    public abstract bool CircleInteract { get; }
+
     // Called before object data loading. Used by subclasses to set up initial state if needed.
     public abstract void InitializePreLoad(int itemId);
 

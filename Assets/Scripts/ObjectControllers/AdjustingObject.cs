@@ -17,10 +17,11 @@ public abstract class AdjustingObject : PlaceableObject {
     protected int _itemId;
     protected int _patternIndex;
 
-    [NonSerialized] private float _maxDistanceToPlayer;
-    public override float MaxDistanceToPlayer { get => _maxDistanceToPlayer; }
+    public override float MaxDistanceToPlayer => 2f;
+    public override bool CircleInteract => false;
 
-   
+
+
 
     private static readonly bool[][] _neighborhoodPatterns = {
         new bool[] { false, false, false, false }, // None              Gate: Horizontal

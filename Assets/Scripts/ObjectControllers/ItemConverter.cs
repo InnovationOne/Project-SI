@@ -13,7 +13,8 @@ public class ItemConverter : PlaceableObject {
     private SelectRecipeUI _selectRecipeUI;
     private SpriteRenderer _visual;
 
-    public override float MaxDistanceToPlayer => 1.5f;
+    public override float MaxDistanceToPlayer => 2f;
+    public override bool CircleInteract => false;
 
     private int _recipeId;
     private int _timer;

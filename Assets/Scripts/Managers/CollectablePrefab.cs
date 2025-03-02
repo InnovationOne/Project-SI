@@ -5,8 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkObject))]
 [RequireComponent(typeof(Collider2D))]
 public class CollectablePrefab : NetworkBehaviour, IInteractable {
-    [NonSerialized] float _maxDistanceToPlayer = 1.5f;
-    public float MaxDistanceToPlayer => _maxDistanceToPlayer;
+    public float MaxDistanceToPlayer => 1.5f;
+    public bool CircleInteract => true;
     [SerializeField] private ItemSO _itemSO;
 
     public void Interact(PlayerController player) {

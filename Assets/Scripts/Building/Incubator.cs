@@ -19,6 +19,7 @@ public class Incubator : NetworkBehaviour, IInteractable {
     private PlayerInventoryController _pIC;
 
     public float MaxDistanceToPlayer => 2f;
+    public bool CircleInteract => false;
 
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
