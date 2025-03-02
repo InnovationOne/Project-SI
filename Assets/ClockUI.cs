@@ -55,9 +55,10 @@ public class ClockUI : MonoBehaviour {
 
     // Updates the displayed time and clock hands.
     void HandleTimeUpdate(int currentHour, int currentMinute) {
-        _timeText.text = $"{currentHour:00}:{currentMinute:00}";
+        int roundedMinute = (currentMinute / 5) * 5;
+        _timeText.text = $"{currentHour:00}:{roundedMinute:00}";
         _bigHand.sprite = _bigHandSprites[currentHour % 12];
-        _smallHand.sprite = _smallHandSprites[(currentMinute / 5) % 12];
+        _smallHand.sprite = _smallHandSprites[(roundedMinute / 5) % 12];
     }
 
     void HandleDateUpdate(int currentDay, int currentSeason, int currentYear, int oldSeason) {
