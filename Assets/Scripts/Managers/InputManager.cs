@@ -7,6 +7,8 @@ using UnityEngine.InputSystem;
 /// Handles custom input actions and manages input-related events.
 /// </summary>
 public class InputManager : MonoBehaviour {
+    public static InputManager Instance { get; private set; }
+
     // Input Action Maps
     private PlayerInputActions _playerInputActions;
 
@@ -67,6 +69,13 @@ public class InputManager : MonoBehaviour {
     /// Initializes the singleton instance and input actions.
     /// </summary>
     private void Awake() {
+        if (Instance != null) {
+            Debug.LogError("There is more than one instance of InputManager in the scene!");
+            Destroy(this);
+            return;
+        }
+        Instance = this;
+
         _playerInputActions = new PlayerInputActions();
     }
 
@@ -381,6 +390,18 @@ public class InputManager : MonoBehaviour {
     }
 
     #endregion
+
+
+    #region Intro
+
+    public void InitIntro() => _playerInputActions.Intro.Enable();
+    public bool SkipPressed() => _playerInputActions.Intro.Skip.ReadValue<float>() > 0;
+    public void CleanupIntro() => _playerInputActions.Intro.Disable();
+
+    #endregion
+
+
+
 
     /// <summary>
     /// Cleans up event subscriptions to prevent memory leaks.

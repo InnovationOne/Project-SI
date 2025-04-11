@@ -1001,6 +1001,56 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Intro"",
+            ""id"": ""0353851c-802b-4e3b-a746-a1f96e4d15af"",
+            ""actions"": [
+                {
+                    ""name"": ""Skip"",
+                    ""type"": ""Button"",
+                    ""id"": ""eb1caa63-e3ce-466c-8bc0-2fb5ce95b765"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""55c36ccf-8d5a-4858-9560-502eff55b5ec"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""Skip"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c39df528-1d22-44f9-9946-cc90c23ace25"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""Skip"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8d818980-2ac9-4ae8-be8f-7d47b576c2f5"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""Skip"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -1062,6 +1112,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Dialogue_Continue = m_Dialogue.FindAction("Continue", throwIfNotFound: true);
         m_Dialogue_ResponseDown = m_Dialogue.FindAction("ResponseDown", throwIfNotFound: true);
         m_Dialogue_ResponseUp = m_Dialogue.FindAction("ResponseUp", throwIfNotFound: true);
+        // Intro
+        m_Intro = asset.FindActionMap("Intro", throwIfNotFound: true);
+        m_Intro_Skip = m_Intro.FindAction("Skip", throwIfNotFound: true);
     }
 
     ~@PlayerInputActions()
@@ -1069,6 +1122,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_Player.enabled, "This will cause a leak and performance issues, PlayerInputActions.Player.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_DebugConsole.enabled, "This will cause a leak and performance issues, PlayerInputActions.DebugConsole.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Dialogue.enabled, "This will cause a leak and performance issues, PlayerInputActions.Dialogue.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_Intro.enabled, "This will cause a leak and performance issues, PlayerInputActions.Intro.Disable() has not been called.");
     }
 
     public void Dispose()
@@ -1512,6 +1566,52 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         }
     }
     public DialogueActions @Dialogue => new DialogueActions(this);
+
+    // Intro
+    private readonly InputActionMap m_Intro;
+    private List<IIntroActions> m_IntroActionsCallbackInterfaces = new List<IIntroActions>();
+    private readonly InputAction m_Intro_Skip;
+    public struct IntroActions
+    {
+        private @PlayerInputActions m_Wrapper;
+        public IntroActions(@PlayerInputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Skip => m_Wrapper.m_Intro_Skip;
+        public InputActionMap Get() { return m_Wrapper.m_Intro; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(IntroActions set) { return set.Get(); }
+        public void AddCallbacks(IIntroActions instance)
+        {
+            if (instance == null || m_Wrapper.m_IntroActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_IntroActionsCallbackInterfaces.Add(instance);
+            @Skip.started += instance.OnSkip;
+            @Skip.performed += instance.OnSkip;
+            @Skip.canceled += instance.OnSkip;
+        }
+
+        private void UnregisterCallbacks(IIntroActions instance)
+        {
+            @Skip.started -= instance.OnSkip;
+            @Skip.performed -= instance.OnSkip;
+            @Skip.canceled -= instance.OnSkip;
+        }
+
+        public void RemoveCallbacks(IIntroActions instance)
+        {
+            if (m_Wrapper.m_IntroActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IIntroActions instance)
+        {
+            foreach (var item in m_Wrapper.m_IntroActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_IntroActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public IntroActions @Intro => new IntroActions(this);
     private int m_KeyboardSchemeIndex = -1;
     public InputControlScheme KeyboardScheme
     {
@@ -1572,5 +1672,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnContinue(InputAction.CallbackContext context);
         void OnResponseDown(InputAction.CallbackContext context);
         void OnResponseUp(InputAction.CallbackContext context);
+    }
+    public interface IIntroActions
+    {
+        void OnSkip(InputAction.CallbackContext context);
     }
 }
