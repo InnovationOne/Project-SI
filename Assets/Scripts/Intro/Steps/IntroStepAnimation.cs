@@ -13,8 +13,6 @@ public class IntroStepAnimation : IntroStepBase {
     [SerializeField] private float _duration = 2f;
 
     public override IEnumerator RunStep(GameObject context) {
-        if (_animatorPrefab == null || string.IsNullOrEmpty(_triggerName)) yield break;
-
         var _animator = Instantiate(_animatorPrefab, context.transform);
         _animator.SetTrigger(_triggerName);
 

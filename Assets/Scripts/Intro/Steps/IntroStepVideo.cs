@@ -8,8 +8,6 @@ public class IntroStepVideo : IntroStepBase {
     [SerializeField] private VideoPlayer _videoPlayerPrefab;
 
     public override IEnumerator RunStep(GameObject context) {
-        if (_videoPlayerPrefab == null) yield break;
-
         var _videoPlayer = Instantiate(_videoPlayerPrefab, context.transform);
         _videoPlayer.Play();
 

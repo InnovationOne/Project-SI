@@ -14,8 +14,6 @@ public class IntroStepDualImage : IntroStepBase {
     [SerializeField] private float _displayTime = 4f;
 
     public override IEnumerator RunStep(GameObject context) {
-        if (_leftImagePrefab == null || _rightImagePrefab == null) yield break;
-
         var _leftImage = Instantiate(_leftImagePrefab, context.transform);
         var _rightImage = Instantiate(_rightImagePrefab, context.transform);
 
