@@ -6,7 +6,10 @@ using System;
 using UnityEngine.SceneManagement;
 using System.Collections;
 
-// Manages data persistence, integrating with multiplayer (Netcode) and ensuring data is synced across connected players.
+/// <summary>
+/// Manages game data persistence with support for multiplayer (Netcode for GameObjects), cloud saves, 
+/// and modding-friendly architecture. Also responsible for in-game save/quit functionality.
+/// </summary>
 [RequireComponent(typeof(NetworkObject))]
 public class DataPersistenceManager : NetworkBehaviour {
     public static DataPersistenceManager Instance { get; private set; }
@@ -22,9 +25,10 @@ public class DataPersistenceManager : NetworkBehaviour {
     string CurrentGameVersion => Application.version;
     string _selectedProfileId;
     GameData _gameData;
+    private DateTime _sessionStartTime;
     List<IDataPersistance> _dataPersistenceObjects;
     FileDataHandler _dataHandler;
-    ICloudSaveProvider _cloudSaveProvider;
+    ICloudSaveProvider _cloudSaveProvider; // TODO Implement cloud save provider (e.g., SteamCloudSaveProvider)
 
     void Awake() {
         if (Instance != null && Instance != this) {
@@ -38,39 +42,36 @@ public class DataPersistenceManager : NetworkBehaviour {
 
         _dataHandler = new FileDataHandler(Application.persistentDataPath, _fileName, _useEncryption);
 
-        if (_useCloudSaves) {
-            _cloudSaveProvider = new SteamCloudSaveProvider();
-        } else {
-            _cloudSaveProvider = null;
-        }
+        if (_useCloudSaves) _cloudSaveProvider = new SteamCloudSaveProvider();
+        else _cloudSaveProvider = null;
 
         InitializeSelectedProfileId();
         _dataPersistenceObjects = FindAllDataPersistanceObjects();
     }
 
+    void OnApplicationQuit() {
+        // Ensure data is saved when quitting the application. (TODO: Remove this in production)
+        SaveGame();
+    }
+
+    #region Network Methods
+
     public override void OnNetworkSpawn() {
-        // If the user is already *in* the GameScene when pressing Play in the Editor,
-        // Netcode won't call OnLoadEventCompleted. We do a fallback:
+        // Ensure that the game loads data when the GameScene is active. (TODO: Remove this in production)
         if (SceneManager.GetActiveScene().name == "GameScene") {
-            // Delay one frame so that scene objects are fully spawned
             StartCoroutine(LoadGameNextFrame());
         } else {
-            // If you do have a flow that calls SceneManager.LoadScene via Netcode,
-            // you can subscribe here for *future* scene loads:
             NetworkManager.SceneManager.OnLoadEventCompleted += OnLoadEventCompleted;
         }
     }
 
-    private IEnumerator LoadGameNextFrame() {
+    IEnumerator LoadGameNextFrame() {
         yield return null;
         LoadGame();
     }
 
-    // The callback for when a scene finishes loading (netcode side).
-    private void OnLoadEventCompleted(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsThatFinished, List<ulong> clientsThatTimedOut) {
-        if (sceneName == "GameScene") {
-            LoadGame();
-        }
+    void OnLoadEventCompleted(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsThatFinished, List<ulong> clientsThatTimedOut) {
+        if (sceneName == "GameScene") LoadGame();
     }
 
     public override void OnNetworkDespawn() {
@@ -78,61 +79,67 @@ public class DataPersistenceManager : NetworkBehaviour {
         base.OnNetworkDespawn();
     }
 
-    // Ensures data is saved when the application quits (TODO: For testing)
-    void OnApplicationQuit() {
-        SaveGame();
-    }
+    #endregion
 
-    // Finds all objects in the scene that implement IDataPersistance
+    #region Game Data Management
+
+    /// <summary>
+    /// Finds all objects in the scene implementing IDataPersistance for data syncing.
+    /// </summary>
     List<IDataPersistance> FindAllDataPersistanceObjects() {
         var objs = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.InstanceID).OfType<IDataPersistance>();
         return new List<IDataPersistance>(objs);
     }
 
-    // Checks if game data is currently loaded
+    /// <summary>
+    /// Checks whether there is game data loaded.
+    /// </summary>
     public bool HasGameData() => _gameData != null;
 
-    // Retrieves all available profiles' game data
+    /// <summary>
+    /// Retrieves all profiles' game data.
+    /// </summary>
     public Dictionary<string, GameData> GetAllProfilesGameData() => _dataHandler.LoadAllProfiles();
 
-    // Changes the selected profile ID
+    /// <summary>
+    /// Changes the active profile and loads the associated game data.
+    /// </summary>
     public void ChangeSelectedProfile(string newProfileId) {
         _selectedProfileId = newProfileId;
         LoadGame();
     }
 
-    // Starts a new game with optional initial data
+    /// <summary>
+    /// Starts a new game with optional initial game data.
+    /// </summary>
     public void NewGame(GameData newGameData = null) {
         _gameData = newGameData ?? new GameData();
         _gameData.GameVersion = CurrentGameVersion;
         _selectedProfileId = _dataHandler.FindNextProfileID();
     }
 
-    // Loads game data from the selected profile
-    void LoadGame() {
+    /// <summary>
+    /// Loads game data from storage (cloud or local) and applies it to all data persistence objects.
+    /// </summary>
+    public void LoadGame() {
         if (string.IsNullOrEmpty(_selectedProfileId)) {
-            if (_initializeDataIfNull) {
-                NewGame();
-            } else {
+            if (_initializeDataIfNull) NewGame();
+            else {
                 Debug.Log("No profile selected or data uninitialized.");
                 return;
             }
         }
 
-        // Attempt to load from cloud first if enabled
-        if (_useCloudSaves && _cloudSaveProvider.HasCloudSave(_selectedProfileId)) {
+        // Try cloud saves first if enabled
+        if (_useCloudSaves && _cloudSaveProvider != null && _cloudSaveProvider.HasCloudSave(_selectedProfileId)) {
             string cloudData = _cloudSaveProvider.Download(_selectedProfileId);
             if (!string.IsNullOrEmpty(cloudData)) {
                 _gameData = JsonUtility.FromJson<GameData>(cloudData);
-                if (_gameData == null && _initializeDataIfNull) {
-                    NewGame();
-                }
+                if (_gameData == null && _initializeDataIfNull) NewGame();
             }
         } else {
             _gameData = _dataHandler.Load(_selectedProfileId);
-            if (_gameData == null && _initializeDataIfNull) {
-                NewGame();
-            }
+            if (_gameData == null && _initializeDataIfNull) NewGame();
         }
 
         if (_gameData == null) {
@@ -140,24 +147,31 @@ public class DataPersistenceManager : NetworkBehaviour {
             return;
         }
 
-        // Migrate if versions differ
+        // Migrate saved data if the game version has changed.
         MigrateGameData(_gameData);
 
-        foreach (var dataPersistenceObj in _dataPersistenceObjects) {
-            dataPersistenceObj.LoadData(_gameData);
-        }
+        // Let all interested objects load their data.
+        foreach (var dataPersistenceObj in _dataPersistenceObjects) dataPersistenceObj.LoadData(_gameData);
+        _sessionStartTime = DateTime.Now;
     }
 
-    // Saves the current game data to disk
+    /// <summary>
+    /// Saves the current game state to storage (both locally and in the cloud if enabled).
+    /// </summary>
     public void SaveGame() {
         if (_gameData == null) {
             Debug.LogWarning("No data to save. Start a new game first.");
             return;
         }
 
+        // Allow all data persistence objects to update the game data.
         foreach (IDataPersistance dataPersistenceObj in _dataPersistenceObjects) {
             dataPersistenceObj.SaveData(_gameData);
         }
+
+        TimeSpan sessionDuration = DateTime.Now - _sessionStartTime;
+        _gameData.PlayTime = _gameData.PlayTime.Add(sessionDuration);
+        _sessionStartTime = DateTime.Now;
 
         _gameData.LastPlayed = DateTime.Now.ToBinary();
         _gameData.GameVersion = CurrentGameVersion;
@@ -169,33 +183,44 @@ public class DataPersistenceManager : NetworkBehaviour {
         }
     }
 
-    // Duplicates a profile's data file to a new profile ID
+    /// <summary>
+    /// Duplicates a profile's save file to a new profile.
+    /// </summary>
     public void DuplicateFile(string profileId) => _dataHandler.DuplicateFile(profileId);
 
-    // Deletes a profile and updates the currently selected profile
+    /// <summary>
+    /// Deletes a profile's save file and reloads the current game data.
+    /// </summary>
     public void DeleteFile(string profileId) {
         _dataHandler.DeleteFile(profileId);
         InitializeSelectedProfileId();
         LoadGame();
     }
 
-    // Initializes the selected profile ID from the most recently played profile
+    /// <summary>
+    /// Updates the selected profile ID using the most recently played profile.
+    /// </summary>
     void InitializeSelectedProfileId() {
         string recentId = _dataHandler.GetMostRecentlyPlayedProfileId();
         _selectedProfileId = recentId ?? _dataHandler.FindNextProfileID();
     }
 
-    // Opens a given profile's save file in the system file explorer
-    public void OpenFileInExplorer(string profileId) => _dataHandler.OpenFileInExplorer(profileId);
-
+    /// <summary>
+    /// Migrates game data if the save version does not match the current application version.
+    /// </summary>
     void MigrateGameData(GameData data) {
-        // If the loaded data's version is different from the current Application.version,
-        // run migration steps. Here we just log a message and assume compatibility.
-        // Actual migration logic depends on how versions differ.
         if (data.GameVersion != CurrentGameVersion) {
             Debug.Log($"Migrating save data from version {data.GameVersion} to {CurrentGameVersion}.");
-            // Implement migration logic as needed here.
+            // Insert migration logic here if needed.
             data.GameVersion = CurrentGameVersion;
         }
     }
+
+    /// <summary>
+    /// Provides a method to quit the application from in-game or the main menu.
+    /// </summary>
+    public void QuitGame() => Application.Quit();
+    
+
+    #endregion
 }

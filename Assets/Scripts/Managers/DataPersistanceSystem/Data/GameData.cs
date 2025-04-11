@@ -1,13 +1,22 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
 public class GameData {
     [Header("General Data")]
-    public long LastPlayed;
-    public int TimePlayed;
     public string Checksum;
+    public long LastPlayed;
     public string GameVersion;
+    public long PlayTimeTicks;
+
+    public TimeSpan PlayTime {
+        get => TimeSpan.FromTicks(PlayTimeTicks);
+        set => PlayTimeTicks = value.Ticks;
+    }
+
+    [Header("Player Data")]
+    public List<PlayerData> Players;
 
     [Header("Town Data")]
     public string TownName;
@@ -42,8 +51,12 @@ public class GameData {
     public string inkVariables;
 
     public GameData() {
+        Checksum = string.Empty;
         LastPlayed = 0;
-        TimePlayed = 0;
+        GameVersion = string.Empty;
+        PlayTimeTicks = 0;
+
+        Players = new List<PlayerData>();
 
         TownName = "No town founded";
         CityCoatOfArms = null;

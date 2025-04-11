@@ -26,7 +26,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     [HideInInspector] public InputManager InputManager;
     [HideInInspector] public ItemManager ItemManager;
     [HideInInspector] public ItemSpawnManager ItemSpawnManager;
-    [HideInInspector] public SI_LoadSceneManager LoadSceneManager;
+    [HideInInspector] public LoadSceneManager LoadSceneManager;
     [HideInInspector] public QuestManager QuestManager;
     [HideInInspector] public TimeManager TimeManager;
     [HideInInspector] public RecipeManager RecipeManager;
@@ -60,7 +60,7 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         InputManager = GetComponent<InputManager>();
         ItemManager = GetComponent<ItemManager>();
         ItemSpawnManager = GetComponent<ItemSpawnManager>();
-        LoadSceneManager = GetComponent<SI_LoadSceneManager>();
+        LoadSceneManager = GetComponent<LoadSceneManager>();
         QuestManager = GetComponent<QuestManager>();
         TimeManager = GetComponent<TimeManager>();
         RecipeManager = GetComponent<RecipeManager>();
@@ -215,13 +215,12 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
     public void SaveData(GameData data) {
         var allPlayerData = new List<PlayerData>();
         foreach (var pc in PlayerControllers) {
-            var playerData = new PlayerData();
+            var playerData = new PlayerData(pc.OwnerClientId);
             var persisters = pc.GetComponents<IPlayerDataPersistance>();
             foreach (var persister in persisters) {
                 persister.SavePlayer(playerData);
             }
 
-            playerData.OwnerClientId = pc.OwnerClientId;
             allPlayerData.Add(playerData);
         }
 
