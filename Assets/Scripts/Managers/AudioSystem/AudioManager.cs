@@ -9,36 +9,28 @@ using static SwitchMusicTrigger;
 public class AudioManager : MonoBehaviour {
     public static AudioManager Instance { get; private set; }
 
-    [Header("Volume")]
-    [Range(0f, 1f)]
-    public float MasterVolume = 1f;
-    private Bus _masterBus;
-    [Range(0f, 1f)]
-    public float MusicVolume = 1f;
-    private Bus _musicBus;
-    [Range(0f, 1f)]
-    public float AmbienceVolume = 1f;
-    private Bus _ambienceBus;
-    [Range(0f, 1f)]
-    public float SFXVolume = 1f;
-    private Bus _sfxBus;
+    private readonly Dictionary<string, Bus> _busMap = new();
+    private readonly Dictionary<string, EventInstance> _loopingSoundInstances = new();
+    private readonly List<EventInstance> _eventInstances = new();
 
-    // Music
-    private const string SEASONS_PARAMETER_NAME = "Seasons";
-    private const string BOSS_FIGHT_PARAMETER_NAME = "BossFight";
-    // Ambience
-    private const string WEATHER_PARAMETER_NAME = "Weather";
-    private const string TIME_OF_DAY_PARAMETER_NAME = "TimeOfDay";
-    private const string AMBIENCE_WIND_INTENSITY_PARAMETER_NAME = "Wind_Intensity";
-
-    // SFX
-    private const string GROUND_PARAMETER_NAME = "Ground";
-
-    private List<EventInstance> _eventInstances;
-    private EventInstance _ambience;
     private EventInstance _music;
+    private EventInstance _ambience;
 
-    private Dictionary<string, EventInstance> loopingSoundInstances = new();
+    private const string MasterBus = "bus:/";
+    private const string MusicBus = "bus:/Music";
+    private const string AmbienceBus = "bus:/Ambience";
+    private const string SFXBus = "bus:/SFX";
+    private const string MenuBus = "bus:/UI";
+    private const string EnvBus = "bus:/Environment";
+
+    private const string ParamSeason = "Seasons";
+    private const string ParamBossFight = "BossFight";
+    private const string ParamBossPhase = "BossPhase";
+    private const string ParamTimeOfDay = "TimeOfDay";
+    private const string ParamWeather = "Weather";
+    private const string ParamWindIntensity = "Wind_Intensity";
+    private const string ParamGround = "Ground";
+
 
     private void Awake() {
         if (Instance != null) {
@@ -49,142 +41,135 @@ public class AudioManager : MonoBehaviour {
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        _eventInstances = new List<EventInstance>();
-
-        _masterBus = RuntimeManager.GetBus("bus:/");
-        _musicBus = RuntimeManager.GetBus("bus:/Music");
-        _ambienceBus = RuntimeManager.GetBus("bus:/Ambience");
-        _sfxBus = RuntimeManager.GetBus("bus:/SFX");
+        _busMap["Volume_Master"] = RuntimeManager.GetBus(MasterBus);
+        _busMap["Volume_Music"] = RuntimeManager.GetBus(MusicBus);
+        _busMap["Volume_SFX"] = RuntimeManager.GetBus(SFXBus);
+        _busMap["Volume_Menu"] = RuntimeManager.GetBus(MenuBus);
+        _busMap["Volume_Environment"] = RuntimeManager.GetBus(EnvBus);
+        _busMap["Volume_Ambience"] = RuntimeManager.GetBus(AmbienceBus);
     }
 
     private void Update() {
-        _masterBus.setVolume(MasterVolume);
-        _musicBus.setVolume(MusicVolume);
-        _ambienceBus.setVolume(AmbienceVolume);
-        _sfxBus.setVolume(SFXVolume);
+        foreach (var (key, bus) in _busMap) {
+            bus.setVolume(PlayerPrefs.GetFloat(key, 0.5f));
+        }
     }
 
-    public void InitializeAmbience(EventReference eventReference) {
-        StopEvent(_ambience);
-        _ambience = CreateEventInstance(eventReference);
+    #region Music
+
+    public void InitializeMusic(EventReference reference) {
+        StopEvent(ref _music);
+        _music = Create(reference);
+        _music.start();
+    }
+
+    public void PlayMusic(EventReference musicEvent) {
+        StopEvent(ref _music, crossfade: true);
+        _music = Create(musicEvent);
+        _music.start();
+    }
+
+    public void SetMusicSeason(SeasonName season) {
+        if (_music.isValid()) _music.setParameterByName(ParamSeason, (float)season);
+    }
+
+    public void SetBossFight(BossFight boss) {
+        if (_music.isValid()) _music.setParameterByName(ParamBossFight, (float)boss);
+    }
+
+    public void SetBossFightPhase(BossFightPhase phase) {
+        if (_music.isValid()) _music.setParameterByName(ParamBossPhase, (float)phase);
+    }
+
+    #endregion
+
+    #region Ambience
+
+    public void InitializeAmbience(EventReference reference) {
+        StopEvent(ref _ambience);
+        _ambience = Create(reference);
         _ambience.start();
     }
 
-    public void InitializeMusic(EventReference eventReference) {
-        StopEvent(_music);
-        _music = CreateEventInstance(eventReference);
-        _music.start();
+    public void PlayAmbience(EventReference ambienceEvent) {
+        GameManager.Instance.WeatherManager.IsWeatherPlaying = ambienceEvent.Equals(GameManager.Instance.FMODEvents.Weather);
+        StopEvent(ref _ambience);
+        _ambience = Create(ambienceEvent);
+        _ambience.start();
     }
 
-    public void PlayMusic(EventReference newMusicEvent) {
-        StopEvent(_music, crossfade: true);
-        _music = CreateEventInstance(newMusicEvent);
-        _music.start();
+    public void SetAmbienceTimeOfDay(TimeOfDay time) {
+        if (!_ambience.isValid()) return;
+        int value = time switch {
+            TimeOfDay.Morning => 0,
+            TimeOfDay.Evening => 1,
+            TimeOfDay.Night => 2,
+            _ => 0
+        };
+        _ambience.setParameterByName(ParamTimeOfDay, value);
     }
 
-    public void SetMusicSeason(SeasonName seasonName) {
-        if (_music.isValid()) {
-            _music.setParameterByName(SEASONS_PARAMETER_NAME, (float)seasonName);
-        }
+    public void SetAmbienceWeather(WeatherName weather) {
+        if (!_ambience.isValid()) return;
+        int value = weather switch {
+            WeatherName.Rain => 1,
+            WeatherName.Thunder => 2,
+            WeatherName.Wind => 3,
+            _ => 0
+        };
+        _ambience.setParameterByName(ParamWeather, value);
     }
 
-    public void SetBossFight(BossFight bossFight) {
-        if (_music.isValid()) {
-            _music.setParameterByName(BOSS_FIGHT_PARAMETER_NAME, (float)bossFight);
-        }
-    }
+    #endregion
 
-    public void SetBossFightPhase(BossFightPhase bossFightPhase) {
-        if (_music.isValid()) {
-            _music.setParameterByName("", (float)bossFightPhase);
-        }
-    }
+    #region Utiliy
 
-    public void PlayAmbience(EventReference newAmbienceEvent) {
-        GameManager.Instance.WeatherManager.IsWeatherPlaying = newAmbienceEvent.Equals(GameManager.Instance.FMODEvents.Weather);
-        StopEvent(_ambience);
-        InitializeAmbience(newAmbienceEvent);
-    }
-
-    public void SetAmbienceTimeOfDay(TimeOfDay timeOfDay) {
-        if (_ambience.isValid()) {
-            if (timeOfDay == TimeOfDay.Evening) {
-                _ambience.setParameterByName(TIME_OF_DAY_PARAMETER_NAME, 1);
-                return;
-            } else if (timeOfDay == TimeOfDay.Night) {
-                _ambience.setParameterByName(TIME_OF_DAY_PARAMETER_NAME, 2);
-                return;
-            } else {
-                _ambience.setParameterByName(TIME_OF_DAY_PARAMETER_NAME, 0);
-                return;
-            }
-        }
-    }
-
-    public void SetAmbienceWeather(WeatherName weatherName) {
-        if (_ambience.isValid()) {
-            if (weatherName == WeatherName.Rain) {
-                _ambience.setParameterByName(WEATHER_PARAMETER_NAME, 1);
-                return;
-            } else if (weatherName == WeatherName.Thunder) {
-                _ambience.setParameterByName(WEATHER_PARAMETER_NAME, 2);
-                return;
-            } else if (weatherName == WeatherName.Wind) {
-                _ambience.setParameterByName(WEATHER_PARAMETER_NAME, 3);
-                return;
-            } else {
-                _ambience.setParameterByName(WEATHER_PARAMETER_NAME, 0);
-                return;
-            }
-        }
-    }
-
-    // Plays a sound once at the given position
-    public void PlayOneShot(EventReference sound, Vector3 worldPosition) {
-        RuntimeManager.PlayOneShot(sound, worldPosition);
-    }
+    public void PlayOneShot(EventReference sound, Vector3 position) => RuntimeManager.PlayOneShot(sound, position);
 
     public void PlayLoopingSound(EventReference sound, Vector3 position) {
-        if (loopingSoundInstances.ContainsKey(sound.Path)) return;
-        EventInstance instance = RuntimeManager.CreateInstance(sound.Path);
+        if (_loopingSoundInstances.ContainsKey(sound.Path)) return;
+        var instance = RuntimeManager.CreateInstance(sound);
         instance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
         instance.start();
-        loopingSoundInstances.Add(sound.Path, instance);
+        _loopingSoundInstances[sound.Path] = instance;
     }
 
-    public void StopSound(EventReference sound) {
-        if (loopingSoundInstances.TryGetValue(sound.Path, out EventInstance instance)) {
+    public void StopLooping(EventReference sound) {
+        if (_loopingSoundInstances.TryGetValue(sound.Path, out var instance)) {
             instance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
             instance.release();
-            loopingSoundInstances.Remove(sound.Path);
+            _loopingSoundInstances.Remove(sound.Path);
         }
     }
 
-    public EventInstance CreateEventInstance(EventReference eventReference) {
-        EventInstance eventInstance = RuntimeManager.CreateInstance(eventReference);
-        _eventInstances.Add(eventInstance);
-        return eventInstance;
+    public EventInstance Create(EventReference reference) {
+        var instance = RuntimeManager.CreateInstance(reference);
+        _eventInstances.Add(instance);
+        return instance;
     }
 
-    public void StopMusic() => StopEvent(_music);
+    public void StopMusic() => StopEvent(ref _music);
 
-    private bool StopEvent(EventInstance eventInstance, bool crossfade = false) {
-        bool isValid = eventInstance.isValid();
-        if (isValid) {
-            // If crossfade is true, use ALLOWFADEOUT, otherwise IMMEDIATE
-            eventInstance.stop(crossfade ? FMOD.Studio.STOP_MODE.ALLOWFADEOUT
-                                         : FMOD.Studio.STOP_MODE.IMMEDIATE);
-            eventInstance.release();
+    public void StopSound(EventReference sound) {
+        if (_loopingSoundInstances.TryGetValue(sound.Path, out EventInstance instance)) {
+            StopEvent(ref instance, true);
+            _loopingSoundInstances.Remove(sound.Path);
         }
-        return isValid;
+    }
+
+    private void StopEvent(ref EventInstance instance, bool crossfade = false) {
+        if (!instance.isValid()) return;
+        instance.stop(crossfade ? FMOD.Studio.STOP_MODE.ALLOWFADEOUT : FMOD.Studio.STOP_MODE.IMMEDIATE);
+        instance.release();
+        instance = default;
     }
 
     private void OnDestroy() {
-        if (_eventInstances == null) return;
-        foreach (var eventInstance in _eventInstances) {
-            StopEvent(eventInstance);
-        }
-
+        foreach (var evt in _eventInstances) if (evt.isValid()) evt.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
+        foreach (var evt in _loopingSoundInstances.Values) evt.stop(FMOD.Studio.STOP_MODE.IMMEDIATE);
         _eventInstances.Clear();
+        _loopingSoundInstances.Clear();
     }
+
+    #endregion
 }
