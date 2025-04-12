@@ -10,7 +10,7 @@ public class InputManager : MonoBehaviour {
     public static InputManager Instance { get; private set; }
 
     // Input Action Maps
-    private PlayerInputActions _playerInputActions;
+    public PlayerInputActions PlayerInputActions;
 
     // Player Events
     public event Action OnRunAction;
@@ -76,7 +76,7 @@ public class InputManager : MonoBehaviour {
         }
         Instance = this;
 
-        _playerInputActions = new PlayerInputActions();
+        PlayerInputActions = new PlayerInputActions();
     }
 
     /// <summary>
@@ -115,51 +115,51 @@ public class InputManager : MonoBehaviour {
     /// Enables the appropriate action maps on start.
     /// </summary>
     private void Start() {
-        _playerInputActions.Player.Enable();
-        _playerInputActions.DebugConsole.Disable(); // Assuming DebugConsole is disabled by default
+        PlayerInputActions.Player.Enable();
+        PlayerInputActions.DebugConsole.Disable(); // Assuming DebugConsole is disabled by default
 
         // Initialisieren der ToolbeltSlot InputActions
         InitializeToolbeltSlotActions();
 
         // Subscribe to player input actions
-        _playerInputActions.Player.Run.performed += Run_performed;
-        _playerInputActions.Player.Dash.performed += Dash_performed;
-        _playerInputActions.Player.DropItem.performed += DropItem_performed;
-        _playerInputActions.Player.Interact.performed += Interact_performed;
+        PlayerInputActions.Player.Run.performed += Run_performed;
+        PlayerInputActions.Player.Dash.performed += Dash_performed;
+        PlayerInputActions.Player.DropItem.performed += DropItem_performed;
+        PlayerInputActions.Player.Interact.performed += Interact_performed;
 
-        _playerInputActions.Player.Inventory.performed += Inventory_performed;
-        _playerInputActions.Player.Escape.performed += Escape_performed;
+        PlayerInputActions.Player.Inventory.performed += Inventory_performed;
+        PlayerInputActions.Player.Escape.performed += Escape_performed;
 
-        _playerInputActions.Player.RotateCWObj.performed += RotateObj_Performed;
-        _playerInputActions.Player.VMirrorObj.performed += VMirrorObj_Performed;
-        _playerInputActions.Player.HMirrorObj.performed += HMirrorObj_Performed;
+        PlayerInputActions.Player.RotateCWObj.performed += RotateObj_Performed;
+        PlayerInputActions.Player.VMirrorObj.performed += VMirrorObj_Performed;
+        PlayerInputActions.Player.HMirrorObj.performed += HMirrorObj_Performed;
 
         // Mouse Clicks
-        _playerInputActions.Player.LeftClick.performed += LeftClick_performed;
-        _playerInputActions.Player.LeftClick.started += LeftClick_started;
-        _playerInputActions.Player.LeftClick.canceled += LeftClick_canceled;
-        _playerInputActions.Player.RightClick.performed += RightClick_performed;
-        _playerInputActions.Player.RightClick.started += RightClick_started;
-        _playerInputActions.Player.RightClick.canceled += RightClick_canceled;
+        PlayerInputActions.Player.LeftClick.performed += LeftClick_performed;
+        PlayerInputActions.Player.LeftClick.started += LeftClick_started;
+        PlayerInputActions.Player.LeftClick.canceled += LeftClick_canceled;
+        PlayerInputActions.Player.RightClick.performed += RightClick_performed;
+        PlayerInputActions.Player.RightClick.started += RightClick_started;
+        PlayerInputActions.Player.RightClick.canceled += RightClick_canceled;
 
         // Modifier Keys
-        _playerInputActions.Player.LeftControl.performed += LeftControl_performed;
-        _playerInputActions.Player.LeftControl.canceled += LeftControl_canceled;
+        PlayerInputActions.Player.LeftControl.performed += LeftControl_performed;
+        PlayerInputActions.Player.LeftControl.canceled += LeftControl_canceled;
 
         // Debug Console
-        _playerInputActions.DebugConsole.DebugConsole.performed += DebugConsole_DebugConsole_performed;
-        _playerInputActions.Player.DebugConsole.performed += Player_DebugConsole_performed;
-        _playerInputActions.DebugConsole.CheatConsole.performed += DebugConsole_CheatConsole_performed;
-        _playerInputActions.DebugConsole.Enter.performed += DebugConsoleEnter_performed;
-        _playerInputActions.DebugConsole.ArrowUp.performed += DebugConsoleArrowUp_performed;
-        _playerInputActions.DebugConsole.ArrowDown.performed += DebugConsoleArrowDown_performed;
+        PlayerInputActions.DebugConsole.DebugConsole.performed += DebugConsole_DebugConsole_performed;
+        PlayerInputActions.Player.DebugConsole.performed += Player_DebugConsole_performed;
+        PlayerInputActions.DebugConsole.CheatConsole.performed += DebugConsole_CheatConsole_performed;
+        PlayerInputActions.DebugConsole.Enter.performed += DebugConsoleEnter_performed;
+        PlayerInputActions.DebugConsole.ArrowUp.performed += DebugConsoleArrowUp_performed;
+        PlayerInputActions.DebugConsole.ArrowDown.performed += DebugConsoleArrowDown_performed;
 
         // Dialogue
-        _playerInputActions.Dialogue.Continue.performed += Dialogue_Continue_performed;
-        _playerInputActions.Dialogue.Continue.started += Dialogue_Continue_started;
-        _playerInputActions.Dialogue.Continue.canceled += Dialogue_Continue_canceled;
-        _playerInputActions.Dialogue.ResponseDown.performed += Dialogue_ResponseDown_performed;
-        _playerInputActions.Dialogue.ResponseUp.performed += Dialogue_ResponseUp_performed;
+        PlayerInputActions.Dialogue.Continue.performed += Dialogue_Continue_performed;
+        PlayerInputActions.Dialogue.Continue.started += Dialogue_Continue_started;
+        PlayerInputActions.Dialogue.Continue.canceled += Dialogue_Continue_canceled;
+        PlayerInputActions.Dialogue.ResponseDown.performed += Dialogue_ResponseDown_performed;
+        PlayerInputActions.Dialogue.ResponseUp.performed += Dialogue_ResponseUp_performed;
     }
 
     /// <summary>
@@ -167,16 +167,16 @@ public class InputManager : MonoBehaviour {
     /// </summary>
     private void InitializeToolbeltSlotActions() {
         // Manuelles Zuordnen der ToolbeltSlot InputActions
-        _toolbeltSlotInputActions[0] = _playerInputActions.Player.ToolbeltSlot1;
-        _toolbeltSlotInputActions[1] = _playerInputActions.Player.ToolbeltSlot2;
-        _toolbeltSlotInputActions[2] = _playerInputActions.Player.ToolbeltSlot3;
-        _toolbeltSlotInputActions[3] = _playerInputActions.Player.ToolbeltSlot4;
-        _toolbeltSlotInputActions[4] = _playerInputActions.Player.ToolbeltSlot5;
-        _toolbeltSlotInputActions[5] = _playerInputActions.Player.ToolbeltSlot6;
-        _toolbeltSlotInputActions[6] = _playerInputActions.Player.ToolbeltSlot7;
-        _toolbeltSlotInputActions[7] = _playerInputActions.Player.ToolbeltSlot8;
-        _toolbeltSlotInputActions[8] = _playerInputActions.Player.ToolbeltSlot9;
-        _toolbeltSlotInputActions[9] = _playerInputActions.Player.ToolbeltSlot10;
+        _toolbeltSlotInputActions[0] = PlayerInputActions.Player.ToolbeltSlot1;
+        _toolbeltSlotInputActions[1] = PlayerInputActions.Player.ToolbeltSlot2;
+        _toolbeltSlotInputActions[2] = PlayerInputActions.Player.ToolbeltSlot3;
+        _toolbeltSlotInputActions[3] = PlayerInputActions.Player.ToolbeltSlot4;
+        _toolbeltSlotInputActions[4] = PlayerInputActions.Player.ToolbeltSlot5;
+        _toolbeltSlotInputActions[5] = PlayerInputActions.Player.ToolbeltSlot6;
+        _toolbeltSlotInputActions[6] = PlayerInputActions.Player.ToolbeltSlot7;
+        _toolbeltSlotInputActions[7] = PlayerInputActions.Player.ToolbeltSlot8;
+        _toolbeltSlotInputActions[8] = PlayerInputActions.Player.ToolbeltSlot9;
+        _toolbeltSlotInputActions[9] = PlayerInputActions.Player.ToolbeltSlot10;
 
         for (int i = 0; i < _toolbeltSlotInputActions.Length; i++) {
             int slotNumber = i + 1; // 1-basiert
@@ -311,7 +311,7 @@ public class InputManager : MonoBehaviour {
     /// </summary>
     /// <returns>Normalized movement vector.</returns>
     public Vector2 GetMovementVectorNormalized() {
-        return _playerInputActions.Player.Movement.ReadValue<Vector2>().normalized;
+        return PlayerInputActions.Player.Movement.ReadValue<Vector2>().normalized;
     }
 
     /// <summary>
@@ -320,7 +320,7 @@ public class InputManager : MonoBehaviour {
     /// <returns>Mouse wheel vector.</returns>
     public Vector2 GetMouseWheelVector() {
         if (_blockPlayerActions) return Vector2.zero;
-        return _playerInputActions.Player.MouseWheel.ReadValue<Vector2>();
+        return PlayerInputActions.Player.MouseWheel.ReadValue<Vector2>();
     }
 
     /// <summary>
@@ -329,7 +329,7 @@ public class InputManager : MonoBehaviour {
     /// <returns>Pointer position vector.</returns>
     public Vector2 GetPointerPosition() {
         if (_blockPlayerActions) return Vector2.zero;
-        return _playerInputActions.Player.PointerPosition.ReadValue<Vector2>();
+        return PlayerInputActions.Player.PointerPosition.ReadValue<Vector2>();
     }
 
     /// <summary>
@@ -338,7 +338,7 @@ public class InputManager : MonoBehaviour {
     /// <returns>True if shift is pressed; otherwise, false.</returns>
     public bool GetShiftPressed() {
         if (_blockPlayerActions) return false;
-        return _playerInputActions.Player.Run.ReadValue<float>() > 0;
+        return PlayerInputActions.Player.Run.ReadValue<float>() > 0;
     }
 
     /// <summary>
@@ -347,42 +347,42 @@ public class InputManager : MonoBehaviour {
     /// <returns>True if left control is pressed; otherwise, false.</returns>
     public bool GetLeftControlPressed() {
         if (_blockPlayerActions) return false;
-        return _playerInputActions.Player.LeftControl.ReadValue<float>() > 0;
+        return PlayerInputActions.Player.LeftControl.ReadValue<float>() > 0;
     }
 
     #region Action Map Management
 
     public void EnableDebugConsoleActionMap() {
-        _playerInputActions.Player.Disable();
-        _playerInputActions.Dialogue.Disable();
+        PlayerInputActions.Player.Disable();
+        PlayerInputActions.Dialogue.Disable();
 
-        _playerInputActions.DebugConsole.Enable();
+        PlayerInputActions.DebugConsole.Enable();
     }
 
     public void EnablePlayerActionMap() {
-        _playerInputActions.DebugConsole.Disable();
-        _playerInputActions.Dialogue.Disable();
+        PlayerInputActions.DebugConsole.Disable();
+        PlayerInputActions.Dialogue.Disable();
 
-        _playerInputActions.Player.Enable();
+        PlayerInputActions.Player.Enable();
     }
 
     public void EnableDialogueActionMap() {
-        _playerInputActions.DebugConsole.Disable();
-        _playerInputActions.Player.Disable();
+        PlayerInputActions.DebugConsole.Disable();
+        PlayerInputActions.Player.Disable();
 
-        _playerInputActions.Dialogue.Enable();
+        PlayerInputActions.Dialogue.Enable();
     }
 
     public void DisableAll() {
-        _playerInputActions.DebugConsole.Disable();
-        _playerInputActions.Player.Disable();
-        _playerInputActions.Dialogue.Disable();
+        PlayerInputActions.DebugConsole.Disable();
+        PlayerInputActions.Player.Disable();
+        PlayerInputActions.Dialogue.Disable();
     }
 
     public void EnableAll() {
-        _playerInputActions.DebugConsole.Enable();
-        _playerInputActions.Player.Enable();
-        _playerInputActions.Dialogue.Enable();
+        PlayerInputActions.DebugConsole.Enable();
+        PlayerInputActions.Player.Enable();
+        PlayerInputActions.Dialogue.Enable();
     }
 
     public void BlockPlayerActions(bool block) {
@@ -394,9 +394,9 @@ public class InputManager : MonoBehaviour {
 
     #region Intro
 
-    public void InitIntro() => _playerInputActions.Intro.Enable();
-    public bool SkipPressed() => _playerInputActions.Intro.Skip.ReadValue<float>() > 0;
-    public void CleanupIntro() => _playerInputActions.Intro.Disable();
+    public void InitIntro() => PlayerInputActions.Intro.Enable();
+    public bool SkipPressed() => PlayerInputActions.Intro.Skip.ReadValue<float>() > 0;
+    public void CleanupIntro() => PlayerInputActions.Intro.Disable();
 
     #endregion
 
@@ -408,41 +408,41 @@ public class InputManager : MonoBehaviour {
     /// </summary>
     private void OnDestroy() {
         // Unsubscribe from player input actions
-        _playerInputActions.Player.Run.performed -= Run_performed;
-        _playerInputActions.Player.Dash.performed -= Dash_performed;
-        _playerInputActions.Player.DropItem.performed -= DropItem_performed;
-        _playerInputActions.Player.Interact.performed -= Interact_performed;
+        PlayerInputActions.Player.Run.performed -= Run_performed;
+        PlayerInputActions.Player.Dash.performed -= Dash_performed;
+        PlayerInputActions.Player.DropItem.performed -= DropItem_performed;
+        PlayerInputActions.Player.Interact.performed -= Interact_performed;
 
-        _playerInputActions.Player.Inventory.performed -= Inventory_performed;
-        _playerInputActions.Player.Escape.performed -= Escape_performed;
+        PlayerInputActions.Player.Inventory.performed -= Inventory_performed;
+        PlayerInputActions.Player.Escape.performed -= Escape_performed;
 
-        _playerInputActions.Player.RotateCWObj.performed -= RotateObj_Performed;
-        _playerInputActions.Player.VMirrorObj.performed -= VMirrorObj_Performed;
-        _playerInputActions.Player.HMirrorObj.performed -= HMirrorObj_Performed;
+        PlayerInputActions.Player.RotateCWObj.performed -= RotateObj_Performed;
+        PlayerInputActions.Player.VMirrorObj.performed -= VMirrorObj_Performed;
+        PlayerInputActions.Player.HMirrorObj.performed -= HMirrorObj_Performed;
 
-        _playerInputActions.Player.LeftClick.performed -= LeftClick_performed;
-        _playerInputActions.Player.LeftClick.started -= LeftClick_started;
-        _playerInputActions.Player.LeftClick.canceled -= LeftClick_canceled;
-        _playerInputActions.Player.RightClick.performed -= RightClick_performed;
-        _playerInputActions.Player.RightClick.started -= RightClick_started;
-        _playerInputActions.Player.RightClick.canceled -= RightClick_canceled;
+        PlayerInputActions.Player.LeftClick.performed -= LeftClick_performed;
+        PlayerInputActions.Player.LeftClick.started -= LeftClick_started;
+        PlayerInputActions.Player.LeftClick.canceled -= LeftClick_canceled;
+        PlayerInputActions.Player.RightClick.performed -= RightClick_performed;
+        PlayerInputActions.Player.RightClick.started -= RightClick_started;
+        PlayerInputActions.Player.RightClick.canceled -= RightClick_canceled;
 
-        _playerInputActions.Player.LeftControl.performed -= LeftControl_performed;
-        _playerInputActions.Player.LeftControl.canceled -= LeftControl_canceled;
+        PlayerInputActions.Player.LeftControl.performed -= LeftControl_performed;
+        PlayerInputActions.Player.LeftControl.canceled -= LeftControl_canceled;
 
         // Unsubscribe from debug console actions
-        _playerInputActions.DebugConsole.DebugConsole.performed -= DebugConsole_DebugConsole_performed;
-        _playerInputActions.Player.DebugConsole.performed -= Player_DebugConsole_performed;
-        _playerInputActions.DebugConsole.CheatConsole.performed -= DebugConsole_CheatConsole_performed;
-        _playerInputActions.DebugConsole.Enter.performed -= DebugConsoleEnter_performed;
-        _playerInputActions.DebugConsole.ArrowUp.performed -= DebugConsoleArrowUp_performed;
-        _playerInputActions.DebugConsole.ArrowDown.performed -= DebugConsoleArrowDown_performed;
+        PlayerInputActions.DebugConsole.DebugConsole.performed -= DebugConsole_DebugConsole_performed;
+        PlayerInputActions.Player.DebugConsole.performed -= Player_DebugConsole_performed;
+        PlayerInputActions.DebugConsole.CheatConsole.performed -= DebugConsole_CheatConsole_performed;
+        PlayerInputActions.DebugConsole.Enter.performed -= DebugConsoleEnter_performed;
+        PlayerInputActions.DebugConsole.ArrowUp.performed -= DebugConsoleArrowUp_performed;
+        PlayerInputActions.DebugConsole.ArrowDown.performed -= DebugConsoleArrowDown_performed;
 
-        _playerInputActions.Dialogue.Continue.performed -= Dialogue_Continue_performed;
-        _playerInputActions.Dialogue.Continue.started -= Dialogue_Continue_started;
-        _playerInputActions.Dialogue.Continue.canceled -= Dialogue_Continue_canceled;
-        _playerInputActions.Dialogue.ResponseDown.performed -= Dialogue_ResponseDown_performed;
-        _playerInputActions.Dialogue.ResponseUp.performed -= Dialogue_ResponseUp_performed;
+        PlayerInputActions.Dialogue.Continue.performed -= Dialogue_Continue_performed;
+        PlayerInputActions.Dialogue.Continue.started -= Dialogue_Continue_started;
+        PlayerInputActions.Dialogue.Continue.canceled -= Dialogue_Continue_canceled;
+        PlayerInputActions.Dialogue.ResponseDown.performed -= Dialogue_ResponseDown_performed;
+        PlayerInputActions.Dialogue.ResponseUp.performed -= Dialogue_ResponseUp_performed;
 
         // Unsubscribe from toolbelt slot performed events
         foreach (var kvp in _toolbeltSlotPerformedCallbacks) {
@@ -456,6 +456,6 @@ public class InputManager : MonoBehaviour {
         _toolbeltSlotActions.Clear();
 
         // Dispose input actions
-        _playerInputActions.Dispose();
+        PlayerInputActions.Dispose();
     }
 }
