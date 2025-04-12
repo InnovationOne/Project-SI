@@ -7,9 +7,10 @@ public class AudioSettingsManager : MonoBehaviour {
     [Header("Sliders")]
     [SerializeField] private Slider _masterSlider;
     [SerializeField] private Slider _musicSlider;
+    [SerializeField] private Slider _ambienceSlider;
     [SerializeField] private Slider _sfxSlider;
     [SerializeField] private Slider _menuSlider;
-    [SerializeField] private Slider _envSlider;
+    [SerializeField] private Slider _voiceSlider;
 
     [Header("Output Mode")]
     [SerializeField] private TMP_Dropdown _outputDropdown;
@@ -22,9 +23,10 @@ public class AudioSettingsManager : MonoBehaviour {
 
         _masterSlider.onValueChanged.AddListener(v => SetVolume("Volume_Master", v));
         _musicSlider.onValueChanged.AddListener(v => SetVolume("Volume_Music", v));
+        _ambienceSlider.onValueChanged.AddListener(v => SetVolume("Volume_Ambience", v));
         _sfxSlider.onValueChanged.AddListener(v => SetVolume("Volume_SFX", v));
         _menuSlider.onValueChanged.AddListener(v => SetVolume("Volume_Menu", v));
-        _envSlider.onValueChanged.AddListener(v => SetVolume("Volume_Environment", v));
+        _voiceSlider.onValueChanged.AddListener(v => SetVolume("Volume_Voice", v));
 
         _outputDropdown.onValueChanged.AddListener(SetOutputMode);
         _testButton.onClick.AddListener(PlayTest);
@@ -33,9 +35,10 @@ public class AudioSettingsManager : MonoBehaviour {
     private void LoadAll() {
         _masterSlider.value = PlayerPrefs.GetFloat("Volume_Master", 0.5f);
         _musicSlider.value = PlayerPrefs.GetFloat("Volume_Music", 0.5f);
+        _ambienceSlider.value = PlayerPrefs.GetFloat("Volume_Ambience", 0.5f);
         _sfxSlider.value = PlayerPrefs.GetFloat("Volume_SFX", 0.5f);
         _menuSlider.value = PlayerPrefs.GetFloat("Volume_Menu", 0.5f);
-        _envSlider.value = PlayerPrefs.GetFloat("Volume_Environment", 0.5f);
+        _voiceSlider.value = PlayerPrefs.GetFloat("Volume_Voice", 0.5f);
         _outputDropdown.value = PlayerPrefs.GetInt("AudioOutputMode", 0); // 0 = Stereo, 1 = Mono
     }
 

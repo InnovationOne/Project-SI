@@ -21,7 +21,7 @@ public class AudioManager : MonoBehaviour {
     private const string AmbienceBus = "bus:/Ambience";
     private const string SFXBus = "bus:/SFX";
     private const string MenuBus = "bus:/UI";
-    private const string EnvBus = "bus:/Environment";
+    private const string VoiceBus = "bus:/Voice";
 
     private const string ParamSeason = "Seasons";
     private const string ParamBossFight = "BossFight";
@@ -43,10 +43,10 @@ public class AudioManager : MonoBehaviour {
 
         _busMap["Volume_Master"] = RuntimeManager.GetBus(MasterBus);
         _busMap["Volume_Music"] = RuntimeManager.GetBus(MusicBus);
+        _busMap["Volume_Ambience"] = RuntimeManager.GetBus(AmbienceBus);
         _busMap["Volume_SFX"] = RuntimeManager.GetBus(SFXBus);
         _busMap["Volume_Menu"] = RuntimeManager.GetBus(MenuBus);
-        _busMap["Volume_Environment"] = RuntimeManager.GetBus(EnvBus);
-        _busMap["Volume_Ambience"] = RuntimeManager.GetBus(AmbienceBus);
+        _busMap["Volume_Voice"] = RuntimeManager.GetBus(VoiceBus);
     }
 
     private void Update() {

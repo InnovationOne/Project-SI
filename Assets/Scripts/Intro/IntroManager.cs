@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class IntroManager : MonoBehaviour {
-    [SerializeField] private bool _skipEntireIntro = false;
     [SerializeField] private List<IntroStepBase> _steps = new();
     [SerializeField] private GameObject _contextRoot;
 
+    private bool _skipIntro;
+
+    private void Awake() {
+        _skipIntro = PlayerPrefs.GetInt("SkipIntro", 0) == 1;
+    }
+
     private void Start() {
-        if (_skipEntireIntro) {
+        if (_skipIntro) {
             _contextRoot.SetActive(false);
             Destroy(gameObject);
             return;
