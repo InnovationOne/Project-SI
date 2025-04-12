@@ -2,7 +2,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "IntroStepText", menuName = "Intro/Step/Text")]
+[CreateAssetMenu(fileName = "IntroStepText", menuName = "MainMenu/Intro/Step/Text")]
 public class IntroStepText : IntroStepBase {
     [Tooltip("The header text prefab (TMP_Text).")]
     [SerializeField] private TextMeshProUGUI _headerPrefab;
@@ -39,7 +39,7 @@ public class IntroStepText : IntroStepBase {
 
         float timer = 0f;
         while (timer < _displayTime) {
-            if (CanSkip && InputManager.Instance.SkipPressed()) break;
+            if (CanSkip && InputManager.Instance.IntroSkipPressed()) break;
             timer += Time.deltaTime;
             yield return null;
         }

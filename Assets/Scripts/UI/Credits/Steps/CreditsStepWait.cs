@@ -1,10 +1,9 @@
 using System.Collections;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "IntroStepWait", menuName = "MainMenu/Intro/Step/Wait")]
-public class IntroStepWait : IntroStepBase {
+[CreateAssetMenu(fileName = "CreditsStepWait", menuName = "MainMenu/Credits/Step/Wait")]
+public class CreditsStepWait : CreditsStepBase {
     [SerializeField] private float _duration = 1f;
-
     public override IEnumerator RunStep(GameObject context) {
         yield return new WaitForSeconds(_duration);
     }

@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-[CreateAssetMenu(fileName = "IntroStepImage", menuName = "Intro/Step/Image")]
+[CreateAssetMenu(fileName = "IntroStepImage", menuName = "MainMenu/Intro/Step/Image")]
 public class IntroStepImage : IntroStepBase {
     [Tooltip("Image prefab to instantiate.")]
     [SerializeField] private Image _imagePrefab;
@@ -19,7 +19,7 @@ public class IntroStepImage : IntroStepBase {
 
         float timer = 0f;
         while (timer < _displayTime) {
-            if (CanSkip && InputManager.Instance.SkipPressed()) break;
+            if (CanSkip && InputManager.Instance.IntroSkipPressed()) break;
             timer += Time.deltaTime;
             yield return null;
         }

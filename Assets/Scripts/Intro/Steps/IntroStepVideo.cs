@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Video;
 
-[CreateAssetMenu(fileName = "IntroStepVideo", menuName = "Intro/Step/Video")]
+[CreateAssetMenu(fileName = "IntroStepVideo", menuName = "MainMenu/Intro/Step/Video")]
 public class IntroStepVideo : IntroStepBase {
     [Tooltip("Unity Video Player (in the canvas or RawImage).")]
     [SerializeField] private VideoPlayer _videoPlayerPrefab;
@@ -12,7 +12,7 @@ public class IntroStepVideo : IntroStepBase {
         _videoPlayer.Play();
 
         while (_videoPlayer.isPlaying) {
-            if (CanSkip && InputManager.Instance.SkipPressed()) {
+            if (CanSkip && InputManager.Instance.IntroSkipPressed()) {
                 _videoPlayer.Stop();
                 break;
             }

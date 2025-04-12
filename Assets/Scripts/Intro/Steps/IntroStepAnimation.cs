@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "IntroStepAnimation", menuName = "Intro/Step/Animation")]
+[CreateAssetMenu(fileName = "IntroStepAnimation", menuName = "MainMenu/Intro/Step/Animation")]
 public class IntroStepAnimation : IntroStepBase {
     [Tooltip("Animator with activatable state.")]
     [SerializeField] private Animator _animatorPrefab;
@@ -18,7 +18,7 @@ public class IntroStepAnimation : IntroStepBase {
 
         float timer = 0f;
         while (timer < _duration) {
-            if (CanSkip && InputManager.Instance.SkipPressed()) break;
+            if (CanSkip && InputManager.Instance.IntroSkipPressed()) break;
             timer += Time.deltaTime;
             yield return null;
         }

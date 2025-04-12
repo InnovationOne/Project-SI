@@ -2,7 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-[CreateAssetMenu(fileName = "IntroStepDualImage", menuName = "Intro/Step/DualImage")]
+[CreateAssetMenu(fileName = "IntroStepDualImage", menuName = "MainMenu/Intro/Step/DualImage")]
 public class IntroStepDualImage : IntroStepBase {
     [Tooltip("Left Image")]
     [SerializeField] private Image _leftImagePrefab;
@@ -26,7 +26,7 @@ public class IntroStepDualImage : IntroStepBase {
 
         float timer = 0f;
         while (timer < _displayTime) {
-            if (CanSkip && InputManager.Instance.SkipPressed()) break;
+            if (CanSkip && InputManager.Instance.IntroSkipPressed()) break;
             timer += Time.deltaTime;
             yield return null;
         }

@@ -393,13 +393,17 @@ public class InputManager : MonoBehaviour {
 
 
     #region Intro
-
     public void InitIntro() => PlayerInputActions.Intro.Enable();
-    public bool SkipPressed() => PlayerInputActions.Intro.Skip.ReadValue<float>() > 0;
+    public bool IntroSkipPressed() => PlayerInputActions.Intro.Skip.ReadValue<float>() > 0;
     public void CleanupIntro() => PlayerInputActions.Intro.Disable();
-
     #endregion
 
+    #region Credits
+    public void InitCredits() => PlayerInputActions.Credits.Enable();
+    public bool CreditsSkipPressed() => PlayerInputActions.Credits.Skip.ReadValue<float>() > 0;
+    public bool CreditsFastForwardPressed() => PlayerInputActions.Credits.FastForward.ReadValue<float>() > 0;
+    public void CleanupCredits() => PlayerInputActions.Credits.Disable();
+    #endregion
 
 
 
