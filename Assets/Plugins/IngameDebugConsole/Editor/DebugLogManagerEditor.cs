@@ -11,8 +11,10 @@ namespace IngameDebugConsole
 		private SerializedProperty enableHorizontalResizing;
 		private SerializedProperty resizeFromRight;
 		private SerializedProperty minimumWidth;
-		private SerializedProperty enablePopup;
-		private SerializedProperty startInPopupMode;
+		private SerializedProperty logWindowOpacity;
+		private SerializedProperty popupOpacity;
+		private SerializedProperty popupVisibility;
+		private SerializedProperty popupVisibilityLogFilter;
 		private SerializedProperty startMinimized;
 		private SerializedProperty toggleWithKey;
 		private SerializedProperty toggleKey;
@@ -25,6 +27,8 @@ namespace IngameDebugConsole
 		private SerializedProperty receiveExceptionLogs;
 		private SerializedProperty captureLogTimestamps;
 		private SerializedProperty alwaysDisplayTimestamps;
+		private SerializedProperty maxLogCount;
+		private SerializedProperty logsToRemoveAfterMaxLogCount;
 		private SerializedProperty queuedLogLimit;
 		private SerializedProperty clearCommandAfterExecution;
 		private SerializedProperty commandHistorySize;
@@ -35,6 +39,7 @@ namespace IngameDebugConsole
 		private SerializedProperty popupAvoidsScreenCutout;
 		private SerializedProperty autoFocusOnCommandInputField;
 
+		private readonly GUIContent popupVisibilityLogFilterLabel = new GUIContent( "Log Filter", "Determines which log types will show the popup on screen" );
 		private readonly GUIContent receivedLogTypesLabel = new GUIContent( "Received Log Types", "Only these logs will be received by the console window, other logs will simply be skipped" );
 		private readonly GUIContent receiveInfoLogsLabel = new GUIContent( "Info" );
 		private readonly GUIContent receiveWarningLogsLabel = new GUIContent( "Warning" );
@@ -48,8 +53,10 @@ namespace IngameDebugConsole
 			enableHorizontalResizing = serializedObject.FindProperty( "enableHorizontalResizing" );
 			resizeFromRight = serializedObject.FindProperty( "resizeFromRight" );
 			minimumWidth = serializedObject.FindProperty( "minimumWidth" );
-			enablePopup = serializedObject.FindProperty( "enablePopup" );
-			startInPopupMode = serializedObject.FindProperty( "startInPopupMode" );
+			logWindowOpacity = serializedObject.FindProperty( "logWindowOpacity" );
+			popupOpacity = serializedObject.FindProperty( "popupOpacity" );
+			popupVisibility = serializedObject.FindProperty( "popupVisibility" );
+			popupVisibilityLogFilter = serializedObject.FindProperty( "popupVisibilityLogFilter" );
 			startMinimized = serializedObject.FindProperty( "startMinimized" );
 			toggleWithKey = serializedObject.FindProperty( "toggleWithKey" );
 #if ENABLE_INPUT_SYSTEM && !ENABLE_LEGACY_INPUT_MANAGER
@@ -66,6 +73,8 @@ namespace IngameDebugConsole
 			receiveExceptionLogs = serializedObject.FindProperty( "receiveExceptionLogs" );
 			captureLogTimestamps = serializedObject.FindProperty( "captureLogTimestamps" );
 			alwaysDisplayTimestamps = serializedObject.FindProperty( "alwaysDisplayTimestamps" );
+			maxLogCount = serializedObject.FindProperty( "maxLogCount" );
+			logsToRemoveAfterMaxLogCount = serializedObject.FindProperty( "logsToRemoveAfterMaxLogCount" );
 			queuedLogLimit = serializedObject.FindProperty( "queuedLogLimit" );
 			clearCommandAfterExecution = serializedObject.FindProperty( "clearCommandAfterExecution" );
 			commandHistorySize = serializedObject.FindProperty( "commandHistorySize" );
@@ -99,11 +108,20 @@ namespace IngameDebugConsole
 
 			EditorGUILayout.Space();
 
-			EditorGUILayout.PropertyField( enablePopup );
-			if( enablePopup.boolValue )
-				DrawSubProperty( startInPopupMode );
-			else
-				DrawSubProperty( startMinimized );
+			EditorGUILayout.PropertyField( startMinimized );
+			EditorGUILayout.PropertyField( logWindowOpacity );
+			EditorGUILayout.PropertyField( popupOpacity );
+
+			EditorGUILayout.PropertyField( popupVisibility );
+			if( popupVisibility.intValue == (int) PopupVisibility.WhenLogReceived )
+			{
+				EditorGUI.indentLevel++;
+				Rect rect = EditorGUILayout.GetControlRect();
+				EditorGUI.BeginProperty( rect, GUIContent.none, popupVisibilityLogFilter );
+				popupVisibilityLogFilter.intValue = (int) (DebugLogFilter) EditorGUI.EnumFlagsField( rect, popupVisibilityLogFilterLabel, (DebugLogFilter) popupVisibilityLogFilter.intValue );
+				EditorGUI.EndProperty();
+				EditorGUI.indentLevel--;
+			}
 
 			EditorGUILayout.PropertyField( toggleWithKey );
 			if( toggleWithKey.boolValue )
@@ -134,6 +152,9 @@ namespace IngameDebugConsole
 			EditorGUILayout.PropertyField( captureLogTimestamps );
 			if( captureLogTimestamps.boolValue )
 				DrawSubProperty( alwaysDisplayTimestamps );
+
+			EditorGUILayout.PropertyField( maxLogCount );
+			DrawSubProperty( logsToRemoveAfterMaxLogCount );
 
 			EditorGUILayout.PropertyField( queuedLogLimit );
 

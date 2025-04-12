@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using FMODUnity;
 
-public class AudioSettingsManager : MonoBehaviour {
+public class AudioSettingsController : MonoBehaviour {
     [Header("Sliders")]
     [SerializeField] private Slider _masterSlider;
     [SerializeField] private Slider _musicSlider;

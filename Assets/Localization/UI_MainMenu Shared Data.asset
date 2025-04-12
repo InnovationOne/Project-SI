@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: UI_MainMenu Shared Data
+  m_EditorClassIdentifier: 
+  m_TableCollectionName: UI_MainMenu
+  m_TableCollectionNameGuidString: 672bd7f7fcb0b1740b52c68645e26528
+  m_Entries:
+  - m_Id: 1355874820096
+    m_Key: quit_game_btn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1234609102848
+    m_Key: options_btn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1077545000960
+    m_Key: new_game_btn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1119672590336
+    m_Key: multiplayer_btn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1112357724160
+    m_Key: load_game_btn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1294587650048
+    m_Key: credits_btn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 93896826880
+    m_Key: continue_btn
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 1710415965041459606
+  references:
+    version: 2
+    RefIds:
+    - rid: 1710415965041459606
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1744463112559

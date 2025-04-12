@@ -10,7 +10,7 @@ public class AudioManager : MonoBehaviour {
     public static AudioManager Instance { get; private set; }
 
     private readonly Dictionary<string, Bus> _busMap = new();
-    private readonly Dictionary<string, EventInstance> _loopingSoundInstances = new();
+    private readonly Dictionary<EventReference, EventInstance> _loopingSoundInstances = new();
     private readonly List<EventInstance> _eventInstances = new();
 
     private EventInstance _music;
@@ -127,18 +127,18 @@ public class AudioManager : MonoBehaviour {
     public void PlayOneShot(EventReference sound, Vector3 position) => RuntimeManager.PlayOneShot(sound, position);
 
     public void PlayLoopingSound(EventReference sound, Vector3 position) {
-        if (_loopingSoundInstances.ContainsKey(sound.Path)) return;
+        if (_loopingSoundInstances.ContainsKey(sound)) return;
         var instance = RuntimeManager.CreateInstance(sound);
         instance.set3DAttributes(RuntimeUtils.To3DAttributes(position));
         instance.start();
-        _loopingSoundInstances[sound.Path] = instance;
+        _loopingSoundInstances[sound] = instance;
     }
 
     public void StopLooping(EventReference sound) {
-        if (_loopingSoundInstances.TryGetValue(sound.Path, out var instance)) {
+        if (_loopingSoundInstances.TryGetValue(sound, out var instance)) {
             instance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
             instance.release();
-            _loopingSoundInstances.Remove(sound.Path);
+            _loopingSoundInstances.Remove(sound);
         }
     }
 
@@ -151,9 +151,9 @@ public class AudioManager : MonoBehaviour {
     public void StopMusic() => StopEvent(ref _music);
 
     public void StopSound(EventReference sound) {
-        if (_loopingSoundInstances.TryGetValue(sound.Path, out EventInstance instance)) {
+        if (_loopingSoundInstances.TryGetValue(sound, out EventInstance instance)) {
             StopEvent(ref instance, true);
-            _loopingSoundInstances.Remove(sound.Path);
+            _loopingSoundInstances.Remove(sound);
         }
     }
 
