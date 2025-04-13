@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{9d620107-aa29-4727-9ec2-8ab8323ec252}">
+		<property name="name">
+			<value>Seasons</value>
+		</property>
+		<relationship name="folder">
+			<destination>{5cba62f4-f922-413f-9a59-85f3b53b2bb1}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{eab3ac2b-9bb2-4e08-be4d-872fd9db9c03}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{eab3ac2b-9bb2-4e08-be4d-872fd9db9c03}">
+		<property name="parameterType">
+			<value>2</value>
+		</property>
+		<property name="maximum">
+			<value>4</value>
+		</property>
+		<property name="enumerationLabels">
+			<value>Spring</value>
+			<value>Summer</value>
+			<value>Autumn</value>
+			<value>Winter</value>
+		</property>
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+	</object>
+</objects>

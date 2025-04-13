@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.02.00">
+	<object class="ParameterPreset" id="{c63adcfe-0285-458c-a0fe-9106e7f63a18}">
+		<property name="name">
+			<value>BossFight</value>
+		</property>
+		<relationship name="folder">
+			<destination>{5cba62f4-f922-413f-9a59-85f3b53b2bb1}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{26c8282d-c2ba-45e5-a55b-5a514d00e86b}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{26c8282d-c2ba-45e5-a55b-5a514d00e86b}">
+		<property name="parameterType">
+			<value>2</value>
+		</property>
+		<property name="enumerationLabels">
+			<value>SteamyPuppet</value>
+		</property>
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+	</object>
+</objects>
