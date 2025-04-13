@@ -9,6 +9,8 @@ public class MultiplayerMenuController : MonoBehaviour {
     [SerializeField] private Button _joinButton;
     [SerializeField] private TMP_InputField _ipInputField;
     [SerializeField] private TMP_Text _statusText;
+    [SerializeField] private GameObject _lobbyPanel;
+    [SerializeField] private GameObject _optionsPanel;
 
     private void Start() {
         _hostButton.onClick.AddListener(HostGame);
@@ -20,6 +22,8 @@ public class MultiplayerMenuController : MonoBehaviour {
         _statusText.text = "Starte Host...";
         NetworkManager.Singleton.StartHost();
         _statusText.text = "Host gestartet.";
+        _lobbyPanel.SetActive(false);
+        _optionsPanel.SetActive(true);
     }
 
     private void JoinGame() {

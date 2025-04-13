@@ -5,7 +5,7 @@ using UnityEngine.Analytics;
 [Serializable]
 public class PlayerData {
     [Header("Game")]
-    public ulong OwnerClientId;
+    public ulong UniqueId;
 
     [Header("Player")]
     public string Name;
@@ -46,8 +46,8 @@ public class PlayerData {
     public bool SkipIntro;
 
 
-    public PlayerData(ulong ownerClientId) {
-        OwnerClientId = ownerClientId;
+    public PlayerData(ulong uniqueId) {
+        UniqueId = uniqueId;
         Name = "";
         Gender = Gender.Male;
         Position = Vector2.zero;

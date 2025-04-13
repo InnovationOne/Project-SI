@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.Analytics;
+using Unity.Netcode;
 
 public class NewGameManager : MonoBehaviour {
     [Header("Name & Gender")]
@@ -60,9 +61,12 @@ public class NewGameManager : MonoBehaviour {
         };
 
     private void Start() {
-        _playerData = new PlayerData(0); // TODO: Später ersetzen durch LocalClientId
+        _playerData = new PlayerData(NetworkManager.Singleton.LocalClientId);
 
         _randomizeNameButton.onClick.AddListener(GenerateRandomName);
+        if (!NetworkManager.Singleton.IsHost) {
+            _startButton.interactable = false;
+        }
         _startButton.onClick.AddListener(OnStartGame);
 
         _maleButton.onClick.AddListener(() => { _playerData.Gender = Gender.Male; UpdateVisuals(); });
@@ -143,24 +147,3 @@ public class NewGameManager : MonoBehaviour {
         LoadSceneManager.Instance.LoadSceneAsync(LoadSceneManager.SceneName.GameScene);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
