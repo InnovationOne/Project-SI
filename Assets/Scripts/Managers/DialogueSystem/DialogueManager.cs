@@ -24,11 +24,7 @@ public class EmojiEntry {
 public class DialogueManager : NetworkBehaviour, IDataPersistance {
     public event Action DialogueComplete;
 
-    #region -------------------- Inspector Fields --------------------
-
     [Header("Parameters")]
-    [Tooltip("Speed at which the letters are displayed on screen. Lower = Faster")]
-    [SerializeField] public float _typingSpeed = 0.04f;
     [Tooltip("JSON file containing global variables for Ink")]
     [SerializeField] TextAsset _loadGlobalsJSON;
 
@@ -50,10 +46,6 @@ public class DialogueManager : NetworkBehaviour, IDataPersistance {
     Dictionary<string, Sprite> _emojiDict;
     QuickChatController _quickChatController;
 
-    #endregion -------------------- Inspector Fields --------------------
-
-    #region -------------------- Internal Fields --------------------
-
     TextMeshProUGUI[] _choicesText;
     AudioSource _voiceAudioSource;
     Story _currentStoryFile;
@@ -63,6 +55,7 @@ public class DialogueManager : NetworkBehaviour, IDataPersistance {
     InputManager _inputManager;
 
     // Typing & Skip
+    float _typingSpeed; // Set in Options Lower == Faster
     bool _canContinueToNextLine = false;
     bool _continuePressedDuringTyping = false;
     bool _isHoldingContinue = false;
@@ -79,7 +72,6 @@ public class DialogueManager : NetworkBehaviour, IDataPersistance {
     const string VOICE_TAG = "voice";
     const string EMOJI_TAG = "emoji";
 
-    #endregion -------------------- Internal Fields --------------------
 
     #region -------------------- Unity Lifecycle --------------------
     void Awake() {
@@ -93,6 +85,8 @@ public class DialogueManager : NetworkBehaviour, IDataPersistance {
 
     void Start() {
         _inputManager = GameManager.Instance.InputManager;
+
+        _typingSpeed = PlayerPrefs.GetFloat("DialogueSpeed", 0.04f);
 
         // Cache choice button texts for quick updates.
         _choicesText = new TextMeshProUGUI[_choiceButtons.Length];

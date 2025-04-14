@@ -234,8 +234,8 @@ MonoBehaviour:
   switchSettingsMigration: 1
   HasSourceProject: 1
   HasPlatforms: 1
-  sourceProjectPath: ../../audio_system_fmod_project/audio_system_fmod_project.fspro
-  sourceBankPath: ../../audio_system_fmod_project/Build
+  sourceProjectPath: Assets/FMOD/project.fspro
+  sourceBankPath: Assets/FMOD/Build
   sourceBankPathUnformatted: 
   BankRefreshCooldown: 1
   ShowBankRefreshWindow: 1
@@ -262,6 +262,8 @@ MonoBehaviour:
   - Ambience
   - Music
   - SFX
+  - UI
+  - Voice
   BanksToLoad: []
   LiveUpdatePort: 9264
   EnableMemoryTracking: 0
@@ -273,17 +275,17 @@ MonoBehaviour:
   EnableErrorCallback: 0
   SharedLibraryUpdateStage: 0
   SharedLibraryTimeSinceStart: 0
-  CurrentVersion: 131622
+  CurrentVersion: 131624
   HideSetupWizard: 1
   LastEventReferenceScanVersion: 131607
   Platforms:
-  - {fileID: 4531675693401409012}
   - {fileID: -7129320278419701291}
   - {fileID: -5882015302788401759}
   - {fileID: -952770528583295684}
   - {fileID: 848127772328794817}
   - {fileID: 1068976574541261336}
   - {fileID: 1715872233387286251}
+  - {fileID: 4531675693401409012}
   - {fileID: 6576768607813296166}
   - {fileID: 7147780512840108657}
   - {fileID: 7330947037584305305}
@@ -506,11 +508,11 @@ MonoBehaviour:
     HasValue: 0
   displaySortOrder: 0
   childIdentifiers:
-  - de700ef3f37a49b58a57ae3addf01ad9
   - 2c5177b11d81d824dbb064f9ac8527da
   - 2fea114e74ecf3c4f920e1d5cc1c4c40
   - b7716510a1f36934c87976f3a81dbf3d
   - e7a046c753c3c3d4aacc91f6597f310d
+  - de700ef3f37a49b58a57ae3addf01ad9
   - c88d16e5272a4e241b0ef0ac2e53b73d
   - 52eb9df5db46521439908db3a29a1bbb
   - fd7c55dab0fce234b8c25f6ffca523c1

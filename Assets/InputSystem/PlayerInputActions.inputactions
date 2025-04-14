@@ -979,6 +979,104 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Intro",
+            "id": "0353851c-802b-4e3b-a746-a1f96e4d15af",
+            "actions": [
+                {
+                    "name": "Skip",
+                    "type": "Button",
+                    "id": "eb1caa63-e3ce-466c-8bc0-2fb5ce95b765",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "55c36ccf-8d5a-4858-9560-502eff55b5ec",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard",
+                    "action": "Skip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c39df528-1d22-44f9-9946-cc90c23ace25",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard",
+                    "action": "Skip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8d818980-2ac9-4ae8-be8f-7d47b576c2f5",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Skip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Credits",
+            "id": "98532c18-2ba1-423f-86c3-09870edeb68a",
+            "actions": [
+                {
+                    "name": "Skip",
+                    "type": "Button",
+                    "id": "c98772ae-61d9-4120-b083-b224ff6e42b2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "FastForward",
+                    "type": "Button",
+                    "id": "cf92357d-b0f8-44fa-9f18-772f137fe332",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a68eabc9-878b-4e08-b788-0c8c1424efe5",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard",
+                    "action": "Skip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c0f8692a-d0d2-428b-81fb-eea6a50d0caf",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard",
+                    "action": "FastForward",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [

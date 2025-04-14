@@ -16,7 +16,7 @@ public class AudioFollowPlayer : MonoBehaviour {
 
     private void Start() {
         _audioManager = GameManager.Instance.AudioManager;
-        _eventInstance = _audioManager.CreateEventInstance(_audioClip);
+        _eventInstance = _audioManager.Create(_audioClip);
         _eventInstance.start();
     }
 

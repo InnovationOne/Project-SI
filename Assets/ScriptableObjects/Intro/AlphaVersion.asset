@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6caeb713cd5ab44db819b104fe11ba2, type: 3}
+  m_Name: AlphaVersion
+  m_EditorClassIdentifier: 
+  _canSkip: 1
+  _headerPrefab: {fileID: 8024850657055528299, guid: f75a4ae5da4662b4596e817938a4d57d, type: 3}
+  _bodyPrefab: {fileID: 8939631316299114514, guid: 710145949cc3e95428960185f4a7162d, type: 3}
+  _headerText: Alpha Version
+  _bodyText: 'This game is currently in Alpha and is not a final product. You may
+    encounter bugs, incomplete features, and other issues that will be addressed
+    in future updates. The gameplay, mechanics, and content are subject to change
+    based on player feedback and ongoing development. We appreciate your patience
+    and support as we work to improve the game.
+
+
+
+    Thank you for being a part
+    of this journey and helping us shape the final experience!'
+  _displayTime: 4

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6caeb713cd5ab44db819b104fe11ba2, type: 3}
+  m_Name: PhotosensitivityWarning
+  m_EditorClassIdentifier: 
+  _canSkip: 1
+  _headerPrefab: {fileID: 8024850657055528299, guid: f75a4ae5da4662b4596e817938a4d57d, type: 3}
+  _bodyPrefab: {fileID: 8939631316299114514, guid: 710145949cc3e95428960185f4a7162d, type: 3}
+  _headerText: PHOTOSENSITIVITY / EPILEPTIC SEIZURES
+  _bodyText: 'A very small percentage of people may experience epileptic seizures
+    when exposed to certain light effects or patterns in their daily environment.
+    In some cases, these seizures can be triggered when viewing TV images or playing
+    video software. Even players who have never had a seizure before may suffer from
+    an undiagnosed form of epilepsy.
+
+
+    If you or close relatives suffer from
+    epilepsy, consult your doctor before using video games. If you experience any
+    of the following symptoms (dizziness, altered vision, muscle twitching, any kind
+    of uncontrolled movements, loss of consciousness, disorientation, and/or convulsions),
+    stop playing immediately and consult a doctor.'
+  _displayTime: 4

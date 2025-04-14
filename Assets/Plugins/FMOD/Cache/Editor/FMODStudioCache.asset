@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8594043603556504623
+--- !u!114 &-8158904051420347980
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -10,530 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Weapon/Whip Weapon
+  m_Name: event:/SFX/Footsteps
   m_EditorClassIdentifier: 
-  Path: event:/SFX/Weapon/Whip Weapon
+  Path: event:/SFX/Footsteps
   Guid:
-    Data1: 1629887324
-    Data2: 1163004716
-    Data3: -889643852
-    Data4: 1522378969
+    Data1: -1303700149
+    Data2: 1178105785
+    Data3: 1388194479
+    Data4: 468844703
   Banks:
-  - {fileID: 6240625519315304783}
+  - {fileID: -4311334422588667453}
   IsStream: 0
   Is3D: 0
   IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 540
---- !u!114 &-6698614004173746685
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Ambience/Ocean Shore
-  m_EditorClassIdentifier: 
-  Path: event:/Ambience/Ocean Shore
-  Guid:
-    Data1: 35173990
-    Data2: 1154369533
-    Data3: -343020865
-    Data4: -1149394709
-  Banks:
-  - {fileID: 2564618863569493764}
-  IsStream: 1
-  Is3D: 1
-  IsOneShot: 0
-  Parameters: []
-  MinDistance: 5
-  MaxDistance: 20
-  Length: 90107
---- !u!114 &-6131673787572323325
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Ambience/Cave
-  m_EditorClassIdentifier: 
-  Path: event:/Ambience/Cave
-  Guid:
-    Data1: 1731233541
-    Data2: 1282740997
-    Data3: -355820647
-    Data4: -556489479
-  Banks:
-  - {fileID: 2564618863569493764}
-  IsStream: 1
-  Is3D: 0
-  IsOneShot: 0
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 136000
---- !u!114 &-6121670967582171269
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Tools/Fishing Reel Backwards
-  m_EditorClassIdentifier: 
-  Path: event:/SFX/Tools/Fishing Reel Backwards
-  Guid:
-    Data1: -1751174205
-    Data2: 1148322266
-    Data3: -437032023
-    Data4: -32585114
-  Banks:
-  - {fileID: 6240625519315304783}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 0
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 5118
---- !u!114 &-4730818052110342644
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Tools/Axe Hit Wood
-  m_EditorClassIdentifier: 
-  Path: event:/SFX/Tools/Axe Hit Wood
-  Guid:
-    Data1: 1166190329
-    Data2: 1161585379
-    Data3: 1565107847
-    Data4: 2094498868
-  Banks:
-  - {fileID: 6240625519315304783}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 190
---- !u!114 &-3984029040280022659
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Weapon/Shoot Arrow
-  m_EditorClassIdentifier: 
-  Path: event:/SFX/Weapon/Shoot Arrow
-  Guid:
-    Data1: 298487633
-    Data2: 1187477494
-    Data3: -1047772226
-    Data4: 2101242808
-  Banks:
-  - {fileID: 6240625519315304783}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 0
---- !u!114 &-3871599466381281244
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Weapon/Pull Weapon
-  m_EditorClassIdentifier: 
-  Path: event:/SFX/Weapon/Pull Weapon
-  Guid:
-    Data1: 266570646
-    Data2: 1227967843
-    Data3: 1521145999
-    Data4: -221059067
-  Banks:
-  - {fileID: 6240625519315304783}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 775
---- !u!114 &-3853609885845072028
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Ambience/Weather
-  m_EditorClassIdentifier: 
-  Path: event:/Ambience/Weather
-  Guid:
-    Data1: 1884884746
-    Data2: 1305018255
-    Data3: 930076306
-    Data4: 2104860549
-  Banks:
-  - {fileID: 2564618863569493764}
-  IsStream: 1
-  Is3D: 0
-  IsOneShot: 0
   Parameters:
-  - {fileID: 7105078481971262535}
-  - {fileID: 1980608748530829823}
-  - {fileID: -2764135458858928641}
+  - {fileID: -944835047085695466}
   MinDistance: 1
   MaxDistance: 20
   Length: 0
---- !u!114 &-2764135458858928641
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
-  m_Name: parameter:/Weather/Weather
-  m_EditorClassIdentifier: 
-  Name: Weather
-  StudioPath: 
-  Min: 0
-  Max: 3
-  Default: 0
-  ID:
-    data1: 792660260
-    data2: 1454472853
-  Type: 2
-  IsGlobal: 0
-  Labels:
-  - Sun
-  - Light Rain
-  - Heavy Rain
-  - Wind
-  Exists: 1
---- !u!114 &-2007763692080140368
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Tools/Hit Unhittable Object
-  m_EditorClassIdentifier: 
-  Path: event:/SFX/Tools/Hit Unhittable Object
-  Guid:
-    Data1: 1169507789
-    Data2: 1271654477
-    Data3: -1939939944
-    Data4: -1167857153
-  Banks:
-  - {fileID: 6240625519315304783}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 394
---- !u!114 &-1607555585306040564
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Tools/Pickaxe Hit Rock
-  m_EditorClassIdentifier: 
-  Path: event:/SFX/Tools/Pickaxe Hit Rock
-  Guid:
-    Data1: 78790227
-    Data2: 1331170837
-    Data3: 1079737527
-    Data4: 2122553435
-  Banks:
-  - {fileID: 6240625519315304783}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 450
---- !u!114 &-1272813553072869241
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Ambience/River
-  m_EditorClassIdentifier: 
-  Path: event:/Ambience/River
-  Guid:
-    Data1: -1972405970
-    Data2: 1133531171
-    Data3: 94872748
-    Data4: -937256662
-  Banks:
-  - {fileID: 2564618863569493764}
-  IsStream: 1
-  Is3D: 1
-  IsOneShot: 0
-  Parameters: []
-  MinDistance: 3
-  MaxDistance: 12
-  Length: 90112
---- !u!114 &-1268212146789014018
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Ambience/Thunder
-  m_EditorClassIdentifier: 
-  Path: event:/Ambience/Thunder
-  Guid:
-    Data1: 1722642744
-    Data2: 1257671676
-    Data3: 205176194
-    Data4: -1540709306
-  Banks:
-  - {fileID: 2564618863569493764}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 11000
---- !u!114 &-3809318019208544
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
-  m_Name: parameter:/BossFight/BossFight
-  m_EditorClassIdentifier: 
-  Name: BossFight
-  StudioPath: 
-  Min: 0
-  Max: 0
-  Default: 0
-  ID:
-    data1: 2850032794
-    data2: 1296614437
-  Type: 2
-  IsGlobal: 0
-  Labels:
-  - SteamyPuppet
-  Exists: 1
---- !u!114 &11400000
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d32cf7c32a3ed8347bac48ef5ed56d82, type: 3}
-  m_Name: FMODStudioCache
-  m_EditorClassIdentifier: 
-  EditorBanks:
-  - {fileID: 7766028966685734902}
-  - {fileID: 2564618863569493764}
-  - {fileID: 5172267100415077143}
-  - {fileID: 727729615244814933}
-  - {fileID: 6240625519315304783}
-  EditorEvents:
-  - {fileID: -1268212146789014018}
-  - {fileID: 2653430666748407760}
-  - {fileID: 1588012718855554759}
-  - {fileID: 9212408041238751509}
-  - {fileID: -1272813553072869241}
-  - {fileID: -6698614004173746685}
-  - {fileID: 2192842486955466952}
-  - {fileID: 6908431647606510514}
-  - {fileID: -3984029040280022659}
-  - {fileID: -1607555585306040564}
-  - {fileID: -8594043603556504623}
-  - {fileID: 2259216039336230549}
-  - {fileID: -3871599466381281244}
-  - {fileID: 931173125093539253}
-  - {fileID: -6121670967582171269}
-  - {fileID: -2007763692080140368}
-  - {fileID: -4730818052110342644}
-  - {fileID: 2864113022989635722}
-  - {fileID: 3462990327259184499}
-  - {fileID: 5698908039823176324}
-  - {fileID: 2951666345062338256}
-  - {fileID: 8355405912371180275}
-  - {fileID: 438699061293708635}
-  - {fileID: -6131673787572323325}
-  - {fileID: -3853609885845072028}
-  EditorParameters: []
-  MasterBanks:
-  - {fileID: 5172267100415077143}
-  StringsBanks:
-  - {fileID: 7766028966685734902}
-  cacheTime: 638735424274169707
-  cacheVersion: 131622
---- !u!114 &438699061293708635
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Music/Seasons
-  m_EditorClassIdentifier: 
-  Path: event:/Music/Seasons
-  Guid:
-    Data1: -342040179
-    Data2: 1130309669
-    Data3: -1377239659
-    Data4: 724150718
-  Banks:
-  - {fileID: 727729615244814933}
-  IsStream: 1
-  Is3D: 0
-  IsOneShot: 0
-  Parameters:
-  - {fileID: 2416265822532511732}
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 0
---- !u!114 &727729615244814933
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
-  m_Name: bank:/Music.bank
-  m_EditorClassIdentifier: 
-  Path: ../../audio_system_fmod_project/Build/Desktop/Music.bank
-  Name: Music
-  StudioPath: bank:/Music
-  lastModified: 638734549599934103
-  FileSizes:
-  - Name: Desktop
-    Value: 23938752
-  Exists: 1
---- !u!114 &931173125093539253
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Tools/Fishing Water Drop
-  m_EditorClassIdentifier: 
-  Path: event:/SFX/Tools/Fishing Water Drop
-  Guid:
-    Data1: -506909033
-    Data2: 1093740625
-    Data3: 1793578398
-    Data4: 1267022596
-  Banks:
-  - {fileID: 6240625519315304783}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 1285
---- !u!114 &1588012718855554759
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Ambience/Curch Bells
-  m_EditorClassIdentifier: 
-  Path: event:/Ambience/Curch Bells
-  Guid:
-    Data1: 967344135
-    Data2: 1187438675
-    Data3: 1573745044
-    Data4: -555914655
-  Banks:
-  - {fileID: 2564618863569493764}
-  IsStream: 1
-  Is3D: 1
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 75
-  Length: 16015
---- !u!114 &1980608748530829823
+--- !u!114 &-7992458515877940263
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -557,7 +52,7 @@ MonoBehaviour:
   IsGlobal: 0
   Labels: []
   Exists: 1
---- !u!114 &2192842486955466952
+--- !u!114 &-7811636342743642011
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -567,16 +62,43 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Weapon/Hit Unhittable Object
+  m_Name: event:/Ambience/Cave
   m_EditorClassIdentifier: 
-  Path: event:/SFX/Weapon/Hit Unhittable Object
+  Path: event:/Ambience/Cave
   Guid:
-    Data1: -30653675
-    Data2: 1102888701
-    Data3: -177912442
-    Data4: -1326088565
+    Data1: 1731233541
+    Data2: 1282740997
+    Data3: -355820647
+    Data4: -556489479
   Banks:
-  - {fileID: 6240625519315304783}
+  - {fileID: 7950180010394002789}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 0
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 136000
+--- !u!114 &-7575524815874127691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Weapon/Shoot Arrow
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Weapon/Shoot Arrow
+  Guid:
+    Data1: 298487633
+    Data2: 1187477494
+    Data3: -1047772226
+    Data4: 2101242808
+  Banks:
+  - {fileID: -4311334422588667453}
   IsStream: 0
   Is3D: 0
   IsOneShot: 1
@@ -584,7 +106,7 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 0
---- !u!114 &2259216039336230549
+--- !u!114 &-7347332993623657678
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -594,24 +116,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Tools/Pickaxe Breake Rock
+  m_Name: event:/Music/Loading
   m_EditorClassIdentifier: 
-  Path: event:/SFX/Tools/Pickaxe Breake Rock
+  Path: event:/Music/Loading
   Guid:
-    Data1: -1612395923
-    Data2: 1295033190
-    Data3: -1644911205
-    Data4: -1526729245
+    Data1: -1982843576
+    Data2: 1253425051
+    Data3: -490326095
+    Data4: 1004416554
   Banks:
-  - {fileID: 6240625519315304783}
-  IsStream: 0
+  - {fileID: 8207377663929616638}
+  IsStream: 1
   Is3D: 0
-  IsOneShot: 1
+  IsOneShot: 0
   Parameters: []
   MinDistance: 1
   MaxDistance: 20
-  Length: 1008
---- !u!114 &2416265822532511732
+  Length: 136071
+--- !u!114 &-6630791014514215648
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -639,230 +161,7 @@ MonoBehaviour:
   - Autumn
   - Winter
   Exists: 1
---- !u!114 &2564618863569493764
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
-  m_Name: bank:/Ambience.bank
-  m_EditorClassIdentifier: 
-  Path: ../../audio_system_fmod_project/Build/Desktop/Ambience.bank
-  Name: Ambience
-  StudioPath: bank:/Ambience
-  lastModified: 638735424274169707
-  FileSizes:
-  - Name: Desktop
-    Value: 14243776
-  Exists: 1
---- !u!114 &2653430666748407760
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Music/Loading
-  m_EditorClassIdentifier: 
-  Path: event:/Music/Loading
-  Guid:
-    Data1: -1982843576
-    Data2: 1253425051
-    Data3: -490326095
-    Data4: 1004416554
-  Banks:
-  - {fileID: 727729615244814933}
-  IsStream: 1
-  Is3D: 0
-  IsOneShot: 0
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 136071
---- !u!114 &2864113022989635722
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Music/Title
-  m_EditorClassIdentifier: 
-  Path: event:/Music/Title
-  Guid:
-    Data1: -2079989818
-    Data2: 1230313502
-    Data3: -969746801
-    Data4: 2101430498
-  Banks:
-  - {fileID: 727729615244814933}
-  IsStream: 1
-  Is3D: 0
-  IsOneShot: 0
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 168071
---- !u!114 &2951666345062338256
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Teleport
-  m_EditorClassIdentifier: 
-  Path: event:/SFX/Teleport
-  Guid:
-    Data1: 1434472155
-    Data2: 1241141350
-    Data3: 1669304977
-    Data4: -750372729
-  Banks:
-  - {fileID: 6240625519315304783}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 3431
---- !u!114 &3462990327259184499
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Footsteps
-  m_EditorClassIdentifier: 
-  Path: event:/SFX/Footsteps
-  Guid:
-    Data1: -1303700149
-    Data2: 1178105785
-    Data3: 1388194479
-    Data4: 468844703
-  Banks:
-  - {fileID: 6240625519315304783}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters:
-  - {fileID: 8268101421017343716}
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 0
---- !u!114 &5172267100415077143
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
-  m_Name: bank:/Master.bank
-  m_EditorClassIdentifier: 
-  Path: ../../audio_system_fmod_project/Build/Desktop/Master.bank
-  Name: Master
-  StudioPath: bank:/Master
-  lastModified: 638734515231134974
-  FileSizes:
-  - Name: Desktop
-    Value: 1486
-  Exists: 1
---- !u!114 &5698908039823176324
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Tools/Axe Breake Wood
-  m_EditorClassIdentifier: 
-  Path: event:/SFX/Tools/Axe Breake Wood
-  Guid:
-    Data1: -1521712696
-    Data2: 1191119797
-    Data3: 1382946184
-    Data4: 110408763
-  Banks:
-  - {fileID: 6240625519315304783}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 2954
---- !u!114 &6240625519315304783
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
-  m_Name: bank:/SFX.bank
-  m_EditorClassIdentifier: 
-  Path: ../../audio_system_fmod_project/Build/Desktop/SFX.bank
-  Name: SFX
-  StudioPath: bank:/SFX
-  lastModified: 638733454276680699
-  FileSizes:
-  - Name: Desktop
-    Value: 691040
-  Exists: 1
---- !u!114 &6908431647606510514
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX/Tools/Fishing Quickly Reel In
-  m_EditorClassIdentifier: 
-  Path: event:/SFX/Tools/Fishing Quickly Reel In
-  Guid:
-    Data1: 1718343219
-    Data2: 1100790680
-    Data3: 853361027
-    Data4: 489459999
-  Banks:
-  - {fileID: 6240625519315304783}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 1075
---- !u!114 &7105078481971262535
+--- !u!114 &-6346007930149310077
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -889,7 +188,7 @@ MonoBehaviour:
   - Evening
   - Night
   Exists: 1
---- !u!114 &7766028966685734902
+--- !u!114 &-4676920505154629279
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -899,17 +198,200 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
-  m_Name: bank:/Master.strings.bank
+  m_Name: bank:/Voice.bank
   m_EditorClassIdentifier: 
-  Path: ../../audio_system_fmod_project/Build/Desktop/Master.strings.bank
-  Name: Master.strings
-  StudioPath: bank:/Master.strings
-  lastModified: 638734515231150101
+  Path: ../../audio_system_fmod_project/Build/Desktop/Voice.bank
+  Name: Voice
+  StudioPath: bank:/Voice
+  lastModified: 638800651020351815
   FileSizes:
   - Name: Desktop
-    Value: 2450
+    Value: 494
   Exists: 1
---- !u!114 &8268101421017343716
+--- !u!114 &-4632414247832554581
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music/Title
+  m_EditorClassIdentifier: 
+  Path: event:/Music/Title
+  Guid:
+    Data1: -2079989818
+    Data2: 1230313502
+    Data3: -969746801
+    Data4: 2101430498
+  Banks:
+  - {fileID: 8207377663929616638}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 0
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 168071
+--- !u!114 &-4311334422588667453
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/SFX.bank
+  m_EditorClassIdentifier: 
+  Path: ../../audio_system_fmod_project/Build/Desktop/SFX.bank
+  Name: SFX
+  StudioPath: bank:/SFX
+  lastModified: 638733454276680699
+  FileSizes:
+  - Name: Desktop
+    Value: 691040
+  Exists: 1
+--- !u!114 &-2991279765415743333
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Weapon/Pull Weapon
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Weapon/Pull Weapon
+  Guid:
+    Data1: 266570646
+    Data2: 1227967843
+    Data3: 1521145999
+    Data4: -221059067
+  Banks:
+  - {fileID: -4311334422588667453}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 775
+--- !u!114 &-2808646506887816213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Tools/Fishing Quickly Reel In
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Tools/Fishing Quickly Reel In
+  Guid:
+    Data1: 1718343219
+    Data2: 1100790680
+    Data3: 853361027
+    Data4: 489459999
+  Banks:
+  - {fileID: -4311334422588667453}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 1075
+--- !u!114 &-2655483473026140665
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Ambience/Thunder
+  m_EditorClassIdentifier: 
+  Path: event:/Ambience/Thunder
+  Guid:
+    Data1: 1722642744
+    Data2: 1257671676
+    Data3: 205176194
+    Data4: -1540709306
+  Banks:
+  - {fileID: 7950180010394002789}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 11000
+--- !u!114 &-2602715268539387158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Weapon/Hit Unhittable Object
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Weapon/Hit Unhittable Object
+  Guid:
+    Data1: -30653675
+    Data2: 1102888701
+    Data3: -177912442
+    Data4: -1326088565
+  Banks:
+  - {fileID: -4311334422588667453}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 0
+--- !u!114 &-2463597355169915053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Weather/Weather
+  m_EditorClassIdentifier: 
+  Name: Weather
+  StudioPath: 
+  Min: 0
+  Max: 3
+  Default: 0
+  ID:
+    data1: 792660260
+    data2: 1454472853
+  Type: 2
+  IsGlobal: 0
+  Labels:
+  - Sun
+  - Light Rain
+  - Heavy Rain
+  - Wind
+  Exists: 1
+--- !u!114 &-944835047085695466
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -937,7 +419,7 @@ MonoBehaviour:
   - Leaves and Twigs
   - Wood
   Exists: 1
---- !u!114 &8355405912371180275
+--- !u!114 &-735112140479033758
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -947,25 +429,151 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/Music/BossFight
+  m_Name: event:/SFX/Weapon/Whip Weapon
   m_EditorClassIdentifier: 
-  Path: event:/Music/BossFight
+  Path: event:/SFX/Weapon/Whip Weapon
   Guid:
-    Data1: 1005851953
-    Data2: 1162706703
-    Data3: 1789404345
-    Data4: 1679632539
+    Data1: 1629887324
+    Data2: 1163004716
+    Data3: -889643852
+    Data4: 1522378969
   Banks:
-  - {fileID: 727729615244814933}
-  IsStream: 1
+  - {fileID: -4311334422588667453}
+  IsStream: 0
   Is3D: 0
   IsOneShot: 1
-  Parameters:
-  - {fileID: -3809318019208544}
+  Parameters: []
   MinDistance: 1
   MaxDistance: 20
-  Length: 0
---- !u!114 &9212408041238751509
+  Length: 540
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d32cf7c32a3ed8347bac48ef5ed56d82, type: 3}
+  m_Name: FMODStudioCache
+  m_EditorClassIdentifier: 
+  EditorBanks:
+  - {fileID: 7683533815962890991}
+  - {fileID: 7950180010394002789}
+  - {fileID: 1197533043099158043}
+  - {fileID: 8207377663929616638}
+  - {fileID: -4311334422588667453}
+  - {fileID: 6950382524663048415}
+  - {fileID: -4676920505154629279}
+  EditorEvents:
+  - {fileID: -7811636342743642011}
+  - {fileID: 6912130157683415870}
+  - {fileID: 5074533264400529958}
+  - {fileID: 1739983836204621644}
+  - {fileID: 9002517863098724108}
+  - {fileID: -2655483473026140665}
+  - {fileID: 7128266629482517519}
+  - {fileID: 7707339417762614363}
+  - {fileID: -7347332993623657678}
+  - {fileID: 5497040586900446684}
+  - {fileID: -4632414247832554581}
+  - {fileID: -2602715268539387158}
+  - {fileID: -2808646506887816213}
+  - {fileID: -8158904051420347980}
+  - {fileID: -7575524815874127691}
+  - {fileID: 5530604887487127601}
+  - {fileID: -735112140479033758}
+  - {fileID: 3786463243520586327}
+  - {fileID: -2991279765415743333}
+  - {fileID: 7762277028617335473}
+  - {fileID: 304538340786818257}
+  - {fileID: 3093912808266935509}
+  - {fileID: 2449260849757155850}
+  - {fileID: 744129339149894182}
+  - {fileID: 4082032169664783225}
+  EditorParameters: []
+  MasterBanks:
+  - {fileID: 1197533043099158043}
+  StringsBanks:
+  - {fileID: 7683533815962890991}
+  cacheTime: 638800657562190655
+  cacheVersion: 131624
+--- !u!114 &304538340786818257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Tools/Fishing Reel Backwards
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Tools/Fishing Reel Backwards
+  Guid:
+    Data1: -1751174205
+    Data2: 1148322266
+    Data3: -437032023
+    Data4: -32585114
+  Banks:
+  - {fileID: -4311334422588667453}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 0
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 5118
+--- !u!114 &744129339149894182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Teleport
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Teleport
+  Guid:
+    Data1: 1434472155
+    Data2: 1241141350
+    Data3: 1669304977
+    Data4: -750372729
+  Banks:
+  - {fileID: -4311334422588667453}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 3431
+--- !u!114 &1197533043099158043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: ../../audio_system_fmod_project/Build/Desktop/Master.bank
+  Name: Master
+  StudioPath: bank:/Master
+  lastModified: 638800657562165473
+  FileSizes:
+  - Name: Desktop
+    Value: 1778
+  Exists: 1
+--- !u!114 &1739983836204621644
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -984,11 +592,445 @@ MonoBehaviour:
     Data3: -146458237
     Data4: -754156380
   Banks:
-  - {fileID: 2564618863569493764}
+  - {fileID: 7950180010394002789}
   IsStream: 1
   Is3D: 1
   IsOneShot: 0
   Parameters: []
   MinDistance: 5
   MaxDistance: 18
+  Length: 90112
+--- !u!114 &2449260849757155850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Tools/Hit Unhittable Object
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Tools/Hit Unhittable Object
+  Guid:
+    Data1: 1169507789
+    Data2: 1271654477
+    Data3: -1939939944
+    Data4: -1167857153
+  Banks:
+  - {fileID: -4311334422588667453}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 394
+--- !u!114 &3093912808266935509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Tools/Axe Breake Wood
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Tools/Axe Breake Wood
+  Guid:
+    Data1: -1521712696
+    Data2: 1191119797
+    Data3: 1382946184
+    Data4: 110408763
+  Banks:
+  - {fileID: -4311334422588667453}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 2954
+--- !u!114 &3786463243520586327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Tools/Pickaxe Breake Rock
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Tools/Pickaxe Breake Rock
+  Guid:
+    Data1: -1612395923
+    Data2: 1295033190
+    Data3: -1644911205
+    Data4: -1526729245
+  Banks:
+  - {fileID: -4311334422588667453}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 1008
+--- !u!114 &4082032169664783225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Tools/Axe Hit Wood
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Tools/Axe Hit Wood
+  Guid:
+    Data1: 1166190329
+    Data2: 1161585379
+    Data3: 1565107847
+    Data4: 2094498868
+  Banks:
+  - {fileID: -4311334422588667453}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 190
+--- !u!114 &5074533264400529958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Ambience/Weather
+  m_EditorClassIdentifier: 
+  Path: event:/Ambience/Weather
+  Guid:
+    Data1: 1884884746
+    Data2: 1305018255
+    Data3: 930076306
+    Data4: 2104860549
+  Banks:
+  - {fileID: 7950180010394002789}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 0
+  Parameters:
+  - {fileID: -6346007930149310077}
+  - {fileID: -7992458515877940263}
+  - {fileID: -2463597355169915053}
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 0
+--- !u!114 &5497040586900446684
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music/Seasons
+  m_EditorClassIdentifier: 
+  Path: event:/Music/Seasons
+  Guid:
+    Data1: -342040179
+    Data2: 1130309669
+    Data3: -1377239659
+    Data4: 724150718
+  Banks:
+  - {fileID: 8207377663929616638}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 0
+  Parameters:
+  - {fileID: -6630791014514215648}
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 0
+--- !u!114 &5530604887487127601
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Tools/Pickaxe Hit Rock
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Tools/Pickaxe Hit Rock
+  Guid:
+    Data1: 78790227
+    Data2: 1331170837
+    Data3: 1079737527
+    Data4: 2122553435
+  Banks:
+  - {fileID: -4311334422588667453}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 450
+--- !u!114 &6912130157683415870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Ambience/Curch Bells
+  m_EditorClassIdentifier: 
+  Path: event:/Ambience/Curch Bells
+  Guid:
+    Data1: 967344135
+    Data2: 1187438675
+    Data3: 1573745044
+    Data4: -555914655
+  Banks:
+  - {fileID: 7950180010394002789}
+  IsStream: 1
+  Is3D: 1
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 75
+  Length: 16015
+--- !u!114 &6950382524663048415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/UI.bank
+  m_EditorClassIdentifier: 
+  Path: ../../audio_system_fmod_project/Build/Desktop/UI.bank
+  Name: UI
+  StudioPath: bank:/UI
+  lastModified: 638800651020313793
+  FileSizes:
+  - Name: Desktop
+    Value: 494
+  Exists: 1
+--- !u!114 &7128266629482517519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Ambience/Ocean Shore
+  m_EditorClassIdentifier: 
+  Path: event:/Ambience/Ocean Shore
+  Guid:
+    Data1: 35173990
+    Data2: 1154369533
+    Data3: -343020865
+    Data4: -1149394709
+  Banks:
+  - {fileID: 7950180010394002789}
+  IsStream: 1
+  Is3D: 1
+  IsOneShot: 0
+  Parameters: []
+  MinDistance: 5
+  MaxDistance: 20
+  Length: 90107
+--- !u!114 &7683533815962890991
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.strings.bank
+  m_EditorClassIdentifier: 
+  Path: ../../audio_system_fmod_project/Build/Desktop/Master.strings.bank
+  Name: Master.strings
+  StudioPath: bank:/Master.strings
+  lastModified: 638800657562190655
+  FileSizes:
+  - Name: Desktop
+    Value: 2588
+  Exists: 1
+--- !u!114 &7707339417762614363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music/BossFight
+  m_EditorClassIdentifier: 
+  Path: event:/Music/BossFight
+  Guid:
+    Data1: 1005851953
+    Data2: 1162706703
+    Data3: 1789404345
+    Data4: 1679632539
+  Banks:
+  - {fileID: 8207377663929616638}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters:
+  - {fileID: 8406525023790367663}
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 0
+--- !u!114 &7762277028617335473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX/Tools/Fishing Water Drop
+  m_EditorClassIdentifier: 
+  Path: event:/SFX/Tools/Fishing Water Drop
+  Guid:
+    Data1: -506909033
+    Data2: 1093740625
+    Data3: 1793578398
+    Data4: 1267022596
+  Banks:
+  - {fileID: -4311334422588667453}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 1285
+--- !u!114 &7950180010394002789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Ambience.bank
+  m_EditorClassIdentifier: 
+  Path: ../../audio_system_fmod_project/Build/Desktop/Ambience.bank
+  Name: Ambience
+  StudioPath: bank:/Ambience
+  lastModified: 638735424274169707
+  FileSizes:
+  - Name: Desktop
+    Value: 14243776
+  Exists: 1
+--- !u!114 &8207377663929616638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Music.bank
+  m_EditorClassIdentifier: 
+  Path: ../../audio_system_fmod_project/Build/Desktop/Music.bank
+  Name: Music
+  StudioPath: bank:/Music
+  lastModified: 638734549599934103
+  FileSizes:
+  - Name: Desktop
+    Value: 23938752
+  Exists: 1
+--- !u!114 &8406525023790367663
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/BossFight/BossFight
+  m_EditorClassIdentifier: 
+  Name: BossFight
+  StudioPath: 
+  Min: 0
+  Max: 0
+  Default: 0
+  ID:
+    data1: 2850032794
+    data2: 1296614437
+  Type: 2
+  IsGlobal: 0
+  Labels:
+  - SteamyPuppet
+  Exists: 1
+--- !u!114 &9002517863098724108
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Ambience/River
+  m_EditorClassIdentifier: 
+  Path: event:/Ambience/River
+  Guid:
+    Data1: -1972405970
+    Data2: 1133531171
+    Data3: 94872748
+    Data4: -937256662
+  Banks:
+  - {fileID: 7950180010394002789}
+  IsStream: 1
+  Is3D: 1
+  IsOneShot: 0
+  Parameters: []
+  MinDistance: 3
+  MaxDistance: 12
   Length: 90112
