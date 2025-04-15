@@ -1,6 +1,5 @@
 using System;
 using System.Collections.ObjectModel;
-using Unity.Netcode;
 using UnityEngine;
 
 public class PlayerInventoryController : MonoBehaviour, IPlayerDataPersistance {
@@ -32,6 +31,6 @@ public class PlayerInventoryController : MonoBehaviour, IPlayerDataPersistance {
     // Loads inventory data from player persistence.
     public void LoadPlayer(PlayerData playerData) {
         CurrentInventorySize = playerData.InventorySize;
-        InventoryContainer.LoadItemContainer(playerData.Inventory);
+        InventoryContainer.LoadItemContainer(playerData.Inventory.ToString());
     }
 }

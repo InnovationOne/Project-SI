@@ -1,21 +1,23 @@
 using System;
+using Unity.Collections;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Analytics;
 
 [Serializable]
-public class PlayerData {
+public struct PlayerData : INetworkSerializable, IEquatable<PlayerData> {
     [Header("Game")]
-    public ulong UniqueId;
+    public ulong ClientId;
 
     [Header("Player")]
-    public string Name;
+    public FixedString64Bytes Name;
     public Gender Gender;
     public Vector2 Position;
     public Vector2 LastDirection;
     public Vector2 RespawnPosition;
 
     public int InventorySize;
-    public string Inventory;
+    public FixedString4096Bytes Inventory;
     public int ToolbeltSize;
     public int LastSelectedToolbeltSlot;
 
@@ -46,9 +48,9 @@ public class PlayerData {
     public bool SkipIntro;
 
 
-    public PlayerData(ulong uniqueId) {
-        UniqueId = uniqueId;
-        Name = "";
+    public PlayerData(ulong clientId) {
+        ClientId = clientId;
+        Name = string.Empty;
         Gender = Gender.Male;
         Position = Vector2.zero;
         LastDirection = Vector2.zero;
@@ -80,5 +82,77 @@ public class PlayerData {
         DistanceMoved = 0;
 
         SkipIntro = false;
+    }
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter {
+        serializer.SerializeValue(ref ClientId);
+        serializer.SerializeValue(ref Name);
+        serializer.SerializeValue(ref Gender);
+        serializer.SerializeValue(ref Position);
+        serializer.SerializeValue(ref LastDirection);
+        serializer.SerializeValue(ref RespawnPosition);
+
+        serializer.SerializeValue(ref InventorySize);
+        serializer.SerializeValue(ref Inventory);
+        serializer.SerializeValue(ref ToolbeltSize);
+        serializer.SerializeValue(ref LastSelectedToolbeltSlot);
+
+        serializer.SerializeValue(ref MaxHp);
+        serializer.SerializeValue(ref CurrentHp);
+        serializer.SerializeValue(ref MaxEnergy);
+        serializer.SerializeValue(ref CurrentEnergy);
+
+        serializer.SerializeValue(ref HandsStyleIndex);
+        serializer.SerializeValue(ref HelmetStyleIndex);
+        serializer.SerializeValue(ref HairStyleIndex);
+        serializer.SerializeValue(ref HairColor);
+        serializer.SerializeValue(ref EyeColor);
+        serializer.SerializeValue(ref BeltStyleIndex);
+        serializer.SerializeValue(ref TorsoStyleIndex);
+        serializer.SerializeValue(ref LegsStyleIndex);
+        serializer.SerializeValue(ref FeetStyleIndex);
+        serializer.SerializeValue(ref SkinStyleIndex);
+        serializer.SerializeValue(ref SkinColor);
+        serializer.SerializeValue(ref HeadStyleIndex);
+
+        serializer.SerializeValue(ref DistanceMoved);
+
+        serializer.SerializeValue(ref SkipIntro);
+    }
+
+    public bool Equals(PlayerData other) {
+        return ClientId == other.ClientId &&
+               Name.Equals(other.Name) &&
+               Gender == other.Gender &&
+               Position == other.Position &&
+               LastDirection == other.LastDirection &&
+               RespawnPosition == other.RespawnPosition &&
+
+               InventorySize == other.InventorySize &&
+               Inventory.Equals(other.Inventory) &&
+               ToolbeltSize == other.ToolbeltSize &&
+               LastSelectedToolbeltSlot == other.LastSelectedToolbeltSlot &&
+
+               MaxHp == other.MaxHp &&
+               CurrentHp == other.CurrentHp &&
+               MaxEnergy == other.MaxEnergy &&
+               CurrentEnergy == other.CurrentEnergy &&
+
+               HandsStyleIndex == other.HandsStyleIndex &&
+               HelmetStyleIndex == other.HandsStyleIndex &&
+               HairStyleIndex == other.HairStyleIndex &&
+               HairColor.Equals(other.HairColor) &&
+               EyeColor.Equals(other.EyeColor) &&
+               BeltStyleIndex == other.BeltStyleIndex &&
+               TorsoStyleIndex == other.TorsoStyleIndex &&
+               LegsStyleIndex == other.LegsStyleIndex &&
+               FeetStyleIndex == other.FeetStyleIndex &&
+               SkinStyleIndex == other.SkinStyleIndex &&
+               SkinColor.Equals(other.SkinColor) &&
+               HeadStyleIndex == other.HeadStyleIndex &&
+
+               DistanceMoved == other.DistanceMoved &&
+
+               SkipIntro == other.SkipIntro;
     }
 }

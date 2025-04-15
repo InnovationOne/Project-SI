@@ -7,16 +7,16 @@ using UnityEngine;
 /// Manages pathfinding requests and processes the results.
 /// </summary>
 public class PathRequestManager : MonoBehaviour {
-    private static PathRequestManager _instance;
+    public static PathRequestManager Instance { get; private set; }
     private Queue<PathResult> _results = new Queue<PathResult>();
     private Pathfinding _pathfinding;
 
     private void Awake() {
-        if (_instance != null) {
+        if (Instance != null) {
             Debug.LogError("There is more than one instance of PathRequestManager in the scene!");
             return;
         }
-        _instance = this;
+        Instance = this;
 
         _pathfinding = GetComponent<Pathfinding>();
     }
@@ -42,7 +42,7 @@ public class PathRequestManager : MonoBehaviour {
     /// <param name="request">The pathfinding request containing start and end points and a callback.</param>
     public static void RequestPath(PathRequest request) {
         ThreadStart threadStart = delegate {
-            _instance._pathfinding.FindPath(request, _instance.FinishedProcessingPath);
+            Instance._pathfinding.FindPath(request, Instance.FinishedProcessingPath);
         };
 
         threadStart.Invoke();

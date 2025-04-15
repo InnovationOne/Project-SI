@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e7b43e3d30185f4c837d70dd895f35f, type: 3}
+  m_Name: Kira_Definition
+  m_EditorClassIdentifier: 
+  NPCName: Kira
+  Portrait: {fileID: 0}
+  Prefab: {fileID: 7519620172567270222, guid: 06e61611e2d2b804ebc80d7826f89b7f, type: 3}
+  HomeLocation: {fileID: 0}
+  DefaultWorkLocation: {fileID: 0}
+  Punctuality: 1
+  Sociability: 1
+  WorkEthic: 1
+  Spirituality: 1
+  Independence: 1
+  DialogueScript: {fileID: 4900000, guid: 9e912bc8174a2de4ab0c925b4680db02, type: 3}

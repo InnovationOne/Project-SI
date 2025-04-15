@@ -237,9 +237,9 @@ public class GameManager : NetworkBehaviour, IDataPersistance {
         var playerDataList = JsonUtility.FromJson<PlayerDataList>(data.PlayerData);
 
         foreach (var pd in playerDataList._players) {
-            var pc = PlayerControllers.FirstOrDefault(p => p.OwnerClientId == pd.UniqueId);
+            var pc = PlayerControllers.FirstOrDefault(p => p.OwnerClientId == pd.ClientId);
             if (pc == null) {
-                Debug.LogWarning($"No matching PlayerController found for OwnerClientId {pd.UniqueId}.");
+                Debug.LogWarning($"No matching PlayerController found for OwnerClientId {pd.ClientId}.");
                 continue;
             }
 

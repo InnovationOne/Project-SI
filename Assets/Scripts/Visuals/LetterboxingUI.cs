@@ -11,14 +11,12 @@ public class LetterboxingUI : MonoBehaviour {
 
     void Start() {
         // Start with the letterboxes hidden (inactive)
-        _topLetterbox.gameObject.SetActive(false);
-        _bottomLetterbox.gameObject.SetActive(false);
+        gameObject.SetActive(false);
     }
 
     public void ShowLetterboxes() {
         // Activate the letterbox GameObjects
-        _topLetterbox.gameObject.SetActive(true);
-        _bottomLetterbox.gameObject.SetActive(true);
+        gameObject.SetActive(false);
 
         // Get the RectTransforms
         RectTransform topRect = _topLetterbox.rectTransform;
@@ -43,13 +41,10 @@ public class LetterboxingUI : MonoBehaviour {
 
         // Animate them back offscreen:
         // Top letterbox moves back to (0,46) (above)
-        StartCoroutine(AnimateRectTransform(topRect, topRect.anchoredPosition, new Vector2(0, 46), animationDuration, () => {
-            _topLetterbox.gameObject.SetActive(false);
-        }));
+        StartCoroutine(AnimateRectTransform(topRect, topRect.anchoredPosition, new Vector2(0, 46), animationDuration));
         // Bottom letterbox moves to (0,-46) (below)
-        StartCoroutine(AnimateRectTransform(bottomRect, bottomRect.anchoredPosition, new Vector2(0, -46), animationDuration, () => {
-            _bottomLetterbox.gameObject.SetActive(false);
-        }));
+        StartCoroutine(AnimateRectTransform(bottomRect, bottomRect.anchoredPosition, new Vector2(0, -46), animationDuration));
+        gameObject.SetActive(false);
     }
 
     // Coroutine to animate the RectTransform's anchoredPosition

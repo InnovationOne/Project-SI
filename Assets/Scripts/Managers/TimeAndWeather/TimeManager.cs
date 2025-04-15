@@ -17,6 +17,8 @@ using UnityEditor.UIElements;
 /// </summary>
 [RequireComponent(typeof(NetworkObject))]
 public class TimeManager : NetworkBehaviour, IDataPersistance {
+    public static TimeManager Instance { get; private set; }
+
     public enum ShortDayName { Mon, Tue, Wed, Thu, Fri, Sat, Sun }
     public enum DateSuffix { st, nd, rd, th }
     public enum TimeOfDay { Morning, Noon, Afternoon, Evening, Night }
@@ -75,6 +77,7 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
 
     // Time variables:
     float _localTime = 21600f; // 6 AM
+    public float LocalTime => _localTime;
     readonly NetworkVariable<float> _networkTime = new(
         21600f, // default 6 AM
         NetworkVariableReadPermission.Everyone,
@@ -132,6 +135,14 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
 
     #region -------------------- Unity_Callbacks --------------------
 
+    private void Awake() {
+        if (Instance != null) {
+            Debug.LogError("There is more than one instance of TimeManager in the scene!");
+            return;
+        }
+        Instance = this;
+    }
+
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
         if (IsServer) {
@@ -150,17 +161,6 @@ public class TimeManager : NetworkBehaviour, IDataPersistance {
     }
 
     void Update() {
-        if (Input.GetKeyDown(KeyCode.F1)) {
-            Debug.Log("Cheat: Next Season");
-            CheatSetSeasonServerRpc(_currentDate.Season + 1);
-        }
-
-        if (Input.GetKeyDown(KeyCode.F2)) {
-            Debug.Log("Cheat: Next Day");
-            CheatSetDayServerRpc(_currentDate.Day + 1);
-        }
-
-
         if (!IsServer) return;
 
         float delta = Time.deltaTime * _timeScale;

@@ -178,6 +178,24 @@ public class PathfindingGrid : MonoBehaviour {
     }
 
     /// <summary>
+    /// Maybe this should be a further advanced calculation of the travel time in the future.
+    /// </summary>
+    /// <param name="from">From Position</param>
+    /// <param name="to">Target Position</param>
+    /// <param name="speed">Moving Speed</param>
+    /// <returns></returns>
+    public float EstimateTravelTimeInSeconds(Vector3 from, Vector3 to, float speed) {
+        Node start = GetNodeFromWorldPoint(from);
+        Node end = GetNodeFromWorldPoint(to);
+
+        if (!start.Walkable || !end.Walkable) return float.MaxValue;
+
+        int rawCost = Mathf.Abs(start.GridX - end.GridX) + Mathf.Abs(start.GridY - end.GridY);
+        float distance = rawCost * _nodeRadius * 2f; // convert to world units
+        return distance / speed;
+    }
+
+    /// <summary>
     /// Draws the grid gizmos in the editor.
     /// </summary>
     private void OnDrawGizmos() {

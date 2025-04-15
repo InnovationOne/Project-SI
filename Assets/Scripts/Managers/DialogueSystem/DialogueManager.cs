@@ -22,6 +22,8 @@ public class EmojiEntry {
 
 [RequireComponent(typeof(NetworkObject))]
 public class DialogueManager : NetworkBehaviour, IDataPersistance {
+    public static DialogueManager Instance { get; private set; }
+
     public event Action DialogueComplete;
 
     [Header("Parameters")]
@@ -75,6 +77,12 @@ public class DialogueManager : NetworkBehaviour, IDataPersistance {
 
     #region -------------------- Unity Lifecycle --------------------
     void Awake() {
+        if (Instance != null) {
+            Debug.LogError("There is more than one instance of DialogueManager in the scene!");
+            return;
+        }
+        Instance = this;
+
         DialogueIsPlaying = false;
         _dialoguePanel.SetActive(false);
         _layoutAnimator = _dialoguePanel.GetComponent<Animator>(); 

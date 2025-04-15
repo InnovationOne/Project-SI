@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.Analytics;
 
 public class LobbyManager : NetworkBehaviour {
     public static LobbyManager Instance { get; private set; }

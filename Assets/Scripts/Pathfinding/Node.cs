@@ -4,6 +4,7 @@ using UnityEngine;
 /// Represents a node in the pathfinding grid.
 /// </summary>
 public class Node : IHeapItem<Node> {
+    // 
     public bool Walkable;
     public Vector3 WorldPosition;
     public int GridX;

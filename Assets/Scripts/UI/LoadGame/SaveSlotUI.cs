@@ -26,7 +26,7 @@ public class SaveSlotUI : MonoBehaviour {
         _onDuplicateClicked = onDuplicate;
         _onDeleteClicked = onDelete;
 
-        _nameText.text = data.Players.Count > 0 ? data.Players[0].Name : "Unbekannt";
+        _nameText.text = data.Players.Count > 0 ? data.Players[0].Name.ToString() : "Unbekannt";
         _moneyText.text = $"Money: {data.MoneyOfFarm} G";
         _timePlayedText.text = $"Time played: {data.PlayTime:hh\\:mm}";
         _dateText.text = $"Last played: {DateTime.FromBinary(data.LastPlayed):dd.MM.yyyy}";

@@ -1,37 +1,50 @@
-using System;
 using UnityEngine;
 
-[RequireComponent(typeof(TimeAgent))]
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(QuickChatController))]
 public class NPC : MonoBehaviour, IInteractable {
-    public NPCDailyRoutine[] DailyRoutines;
+    public NPCDefinition Definition;
 
-    private int _locationId;
-    private int _weekDay => GameManager.Instance.TimeManager.CurrentDate.Day % TimeManager.DAYS_PER_WEEK;
+    private float _lastQuickChatTime;
+    private float _quickChatCooldown = 8f;
 
-    public float MaxDistanceToPlayer => 1f;
+    public float MaxDistanceToPlayer => 1.2f;
     public bool CircleInteract => false;
 
-    private float _moveSpeed = 1f;
-
-    private void Start() {
-        GetComponent<TimeAgent>().OnMinuteTimeTick += CheckAndUpdateLocation;
-    }
-
-    private void OnDestroy() {
-        GetComponent<TimeAgent>().OnMinuteTimeTick -= CheckAndUpdateLocation;
-    }
-
-    private void CheckAndUpdateLocation() {
-        if (DailyRoutines[_weekDay].Locations[_locationId].LeaveTimeInvoke > GameManager.Instance.TimeManager.TotalTimeAgentInvokesThisDay) {
-            _locationId++;
+    private void Awake() {
+        if (Definition == null) {
+            Debug.LogError($"[NPC] Definition missing on {gameObject.name}");
+            return;
         }
 
-        //GetComponent<Pathfinding>().MoveTo(_moveSpeed, DailyRoutines[_weekDay].Locations[_locationId].Position);
+        name = $"NPC_{Definition.NPCName}";
     }
 
-    public void Interact(PlayerController player) { }
+    private void Start() {
+        _lastQuickChatTime = -Random.Range(0f, _quickChatCooldown);
+    }
+
+    /// <summary>
+    /// Classic ink dialogue (triggered by player interaction).
+    /// </summary>
+    public void Interact(PlayerController player) {
+        if (Definition.DialogueScript != null) {
+            DialogueManager.Instance.EnterDialogueMode(Definition.DialogueScript);
+        } else {
+            Debug.LogWarning($"{Definition.NPCName} has no dialogue assigned.");
+        }
+    }
+
+    /// <summary>
+    /// Optional short chat bubble (used when passing by).
+    /// </summary>
+    public void TryQuickChat(string message) {
+        if (Time.time - _lastQuickChatTime >= _quickChatCooldown) {
+            DialogueManager.Instance.StartTextBubble(message, gameObject);
+            _lastQuickChatTime = Time.time;
+        }
+    }
 
     public void PickUpItemsInPlacedObject(PlayerController player) { }
-
     public void InitializePreLoad(int itemId) { }
 }

@@ -4,6 +4,9 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.Analytics;
 using Unity.Netcode;
+using UnityEngine.SceneManagement;
+using Unity.Collections;
+using System.Linq;
 
 public class NewGameManager : MonoBehaviour {
     [Header("Name & Gender")]
@@ -29,6 +32,7 @@ public class NewGameManager : MonoBehaviour {
     [Header("Preview & Start")]
     [SerializeField] private Toggle _skipIntroToggle;
     [SerializeField] private Button _startButton;
+    [SerializeField] private Button _readyButton;
     [SerializeField] private Transform _previewAnchor;
 
     [Header("Preview Sub-Objects (UI Images)")]
@@ -44,6 +48,8 @@ public class NewGameManager : MonoBehaviour {
 
     private PlayerData _playerData;
     private float _currentRotation;
+
+    public static Dictionary<ulong, PlayerData> ReceivedPlayerData = new Dictionary<ulong, PlayerData>();
 
     private readonly string[] _maleNames = {
             "Arthur", "Edward", "George", "Henry", "Charles", "William", "Thomas", "James", "John", "Robert",
@@ -65,7 +71,12 @@ public class NewGameManager : MonoBehaviour {
 
         _randomizeNameButton.onClick.AddListener(GenerateRandomName);
         if (!NetworkManager.Singleton.IsHost) {
-            _startButton.interactable = false;
+            _startButton.gameObject.SetActive(false);
+            _skipIntroToggle.gameObject.SetActive(false);
+            _readyButton.onClick.AddListener(SubmitLocalPlayerData);
+        } else {
+            _readyButton.gameObject.SetActive(false);
+            SubmitLocalPlayerData();
         }
         _startButton.onClick.AddListener(OnStartGame);
 
@@ -83,6 +94,10 @@ public class NewGameManager : MonoBehaviour {
         // TODO: Je nach Zuweisungslogik Body/Hair/Eye separieren
 
         UpdateVisuals();
+    }
+
+    private void Update() {
+        CheckAllPlayersReady();
     }
 
     private void GenerateRandomName() {
@@ -133,17 +148,67 @@ public class NewGameManager : MonoBehaviour {
     }
 
     private void OnStartGame() {
+        if (!NetworkManager.Singleton.IsHost) return;
         _playerData.Name = _nameInput.text;
 
-        // Neues GameData vorbereiten
-        GameData newGame = new() {
-            Players = new List<PlayerData> { _playerData }
-        };
+        // Stelle sicher, dass der Host auch seine eigenen Daten übermittelt hat.
+        if (!ReceivedPlayerData.ContainsKey(NetworkManager.Singleton.LocalClientId)) {
+            SubmitLocalPlayerData();
+        }
 
-        // Spiel initialisieren
+        int lobbyCount = LobbyManager.Instance.GetLobbyPlayers().Count;
+        if (ReceivedPlayerData.Count < lobbyCount) {
+            Debug.LogWarning("Nicht alle Spieler haben ihre Daten übermittelt!");
+            return;
+        }
+
+        // Aggregiere die gesammelten Daten in eine Liste.
+        List<PlayerData> allPlayerData = ReceivedPlayerData.Values.ToList();
+
+        // Erstelle ein GameData-Objekt und übernehme die Spielerinformationen.
+        var newGame = new GameData {
+            Players = allPlayerData
+        };
         DataPersistenceManager.Instance.NewGame(newGame);
 
-        // Szene laden (asynchron über Ladebildschirm)
-        LoadSceneManager.Instance.LoadSceneAsync(LoadSceneManager.SceneName.GameScene);
+        if (NetworkManager.Singleton.IsHost) NetworkManager.Singleton.SceneManager.LoadScene(LoadSceneManager.SceneName.GameScene.ToString(), LoadSceneMode.Single);
+        else LoadSceneManager.Instance.LoadSceneAsync(LoadSceneManager.SceneName.GameScene);
+    }
+
+    public void SubmitLocalPlayerData() {
+        string playerName = _nameInput.text;
+        bool skipIntro = _skipIntroToggle.isOn;
+        int gender = (int)_playerData.Gender;
+        // Übertrage die Daten zum Host.
+        SubmitPlayerDataServerRpc(playerName, gender, skipIntro);
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SubmitPlayerDataServerRpc(string playerName, int gender, bool skipIntro, ServerRpcParams rpcParams = default) {
+        ulong senderId = rpcParams.Receive.SenderClientId;
+        var data = new PlayerData(senderId) {
+            Name = new FixedString64Bytes(playerName),
+            Gender = (Gender)gender,
+            SkipIntro = skipIntro
+        };
+
+        if (ReceivedPlayerData.ContainsKey(senderId)) ReceivedPlayerData[senderId] = data;
+        else ReceivedPlayerData.Add(senderId, data);
+
+        Debug.Log("Server: Daten von Client " + senderId + " empfangen: " + playerName);
+    }
+
+    private void CheckAllPlayersReady() {
+        bool allReady = true;
+        foreach (var player in LobbyManager.Instance.GetLobbyPlayers()) {
+            if (!player.IsReady) { 
+                allReady = false;
+                break;
+            }
+        }
+
+        if (NetworkManager.Singleton.IsHost) {
+            _startButton.interactable = allReady;
+        }
     }
 }
