@@ -353,12 +353,17 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
     }
 
     bool CanPlowTile(Vector3Int position) {
-        // Checks if tile is valid for plowing.
-        var pObjData = _placeableObjectsManager.GetCropTileAtPosition(position);
-        return !IsPositionPlowed(position) &&
-               Array.Exists(_tilesThatCanBePlowed, t => t == _baseTilemap.GetTile(position)) &&
-               !pObjData.HasValue;
+        var mask = _placeableObjectsManager.CombinedForbiddenLayerMask;
+        // 1) schon gepflügt?
+        if (IsPositionPlowed(position)) return false;
+        // 2) passender Untergrund?
+        if (!Array.Exists(_tilesThatCanBePlowed, t => t == _baseTilemap.GetTile(position))) return false;
+        // 3) Hindernis?Collider prüfen
+        Vector3 worldCenter = _baseTilemap.CellToWorld(position) + _baseTilemap.tileAnchor;
+        if (Physics2D.OverlapPoint(worldCenter, mask) != null) return false;
+        return true;
     }
+
 
     void HandleEnergyReduction(ServerRpcParams serverRpcParams, int totalUsedEnergy) {
         ulong clientId = serverRpcParams.Receive.SenderClientId;
@@ -898,35 +903,15 @@ public class CropsManager : NetworkBehaviour, IDataPersistance {
 
     bool HasScarecrowInRange(Vector3Int position, float radius, ScarecrowType type) {
         float adjustedRadius = radius - 0.5f;
-        float radiusSq = adjustedRadius * adjustedRadius;
-        var centerWorldPos = _baseTilemap.CellToWorld(position) + _baseTilemap.tileAnchor;
-
-        int minX = Mathf.FloorToInt(centerWorldPos.x - adjustedRadius);
-        int maxX = Mathf.CeilToInt(centerWorldPos.x + adjustedRadius);
-        int minY = Mathf.FloorToInt(centerWorldPos.y - adjustedRadius);
-        int maxY = Mathf.CeilToInt(centerWorldPos.y + adjustedRadius);
-
-        for (int x = minX; x <= maxX; x++) {
-            for (int y = minY; y <= maxY; y++) {
-                var checkPos = new Vector3Int(x, y, position.z);
-                Vector3 tileWorldPos = _baseTilemap.CellToWorld(checkPos) + _baseTilemap.tileAnchor;
-                float dx = tileWorldPos.x - centerWorldPos.x;
-                float dy = tileWorldPos.y - centerWorldPos.y;
-                float distSq = dx * dx + dy * dy;
-
-                if (distSq <= radiusSq) {
-                    var pObjData = _placeableObjectsManager.GetCropTileAtPosition(checkPos);
-                    if (!pObjData.HasValue) continue;
-
-                    if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(pObjData.Value.PrefabNetworkObjectId, out var netObj)) {
-                        if (netObj.TryGetComponent<Scarecrow>(out var scarecrow) && scarecrow.ScarecrowSO.Type == type) {
-                            return true;
-                        }
-                    }
-                }
+        Vector3 centerWorld = _baseTilemap.CellToWorld(position) + _baseTilemap.tileAnchor;
+        // alle Collider im Umkreis auf der Hindernis?Maske
+        var mask = _placeableObjectsManager.CombinedForbiddenLayerMask;
+        Collider2D[] hits = Physics2D.OverlapCircleAll(centerWorld, adjustedRadius, mask);
+        foreach (var hit in hits) {
+            if (hit.TryGetComponent<Scarecrow>(out var sc) && sc.ScarecrowSO.Type == type) {
+                return true;
             }
         }
-
         return false;
     }
 

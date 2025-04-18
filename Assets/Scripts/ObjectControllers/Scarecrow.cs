@@ -31,6 +31,10 @@ public class Scarecrow : PlaceableObject {
 
     public override void LoadObject(string data) { }
 
+    public override void OnStateReceivedCallback(string callbackName) {
+        throw new System.NotImplementedException();
+    }
+
     public override void PickUpItemsInPlacedObject(PlayerController player) { }
 
     public override string SaveObject() { return string.Empty; }

@@ -1,138 +1,121 @@
-using Newtonsoft.Json;
-using System;
-using Unity.Collections;
+﻿using Newtonsoft.Json;
+using Unity.Netcode;
 using UnityEngine;
 
 /// <summary>
 /// Manages the production of items based on recipes and timed processes.
+/// This class is a server-side PlaceableObject that saves its own state.
 /// </summary>
 [RequireComponent(typeof(TimeAgent))]
 public class ItemProducer : PlaceableObject {
-    private SpriteRenderer _visual;
-    private int _recipeId;
-    private int _timer;
-    private int _itemId;
+    private SpriteRenderer _spriteRenderer;
+    private SpriteRenderer _notifySpriteRenderer;
+    private ItemProducerSO _itemProducerSO;
+
+    private readonly NetworkVariable<int> _timer = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     public override float MaxDistanceToPlayer => 2f;
     public override bool CircleInteract => false;
 
-    /// <summary>
-    /// Initializes and subscribes to time-based events.
-    /// </summary>
-    private void Start() => GetComponent<TimeAgent>().OnMinuteTimeTick += ItemProducerProcess;
-
-    private new void OnDestroy() { 
-        GetComponent<TimeAgent>().OnMinuteTimeTick -= ItemProducerProcess; 
-        base.OnDestroy();
+    private void Awake() {
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _notifySpriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        _notifySpriteRenderer.enabled = false;
     }
 
-    /// <summary>
-    /// Initializes the item producer with a specific item identifier.
-    /// </summary>
-    /// <param name="itemId">The item identifier used to fetch recipe details.</param>
-    public override void InitializePreLoad(int itemId) {
-        _itemId = itemId;
-        _recipeId = ProducerSO.Recipe != null ? ProducerSO.Recipe.RecipeId : throw new NotImplementedException("Recipe is not set for this item producer");
-        ResetTimer();
-        _visual = GetComponent<SpriteRenderer>();
-        _visual.sprite = ProducerSO.InactiveSprite;
-    }
-
-
-    /// <summary>
-    /// Processes the conversion of items based on the recipe timer.
-    /// </summary>
-    private void ItemProducerProcess() {
-        if (_timer > 0f) {
-            _timer--;
-
-            if (_timer == 0f) {
-                _visual.sprite = ProducerSO.InactiveSprite;
+    public override void OnNetworkSpawn() {
+        base.OnNetworkSpawn();
+        if (IsServer) GetComponent<TimeAgent>().OnMinuteTimeTick += ItemProducerProcess;
+        _timer.OnValueChanged += (_, _) => UpdateVisual();
+        _timer.OnValueChanged += (oldVal, newVal) => {
+            if (newVal == 0 && !IsServer) {
+                _notifySpriteRenderer.enabled = true;
             }
-        } else {
-            ResetTimer();
-        }
+        };
+        UpdateVisual();
     }
 
-    /// <summary>
-    /// Handles interactions with the player, typically used to trigger item production.
-    /// </summary>
-    /// <param name="player">The player interacting with the item producer.</param>
+    private void OnDestroy() {
+        if (IsServer) GetComponent<TimeAgent>().OnMinuteTimeTick -= ItemProducerProcess;
+    }
+
+    public override void InitializePreLoad(int itemId) {
+        _itemProducerSO = ItemManager.Instance.ItemDatabase[itemId] as ItemProducerSO;
+
+        _spriteRenderer.sprite = _itemProducerSO.InactiveSprite;
+
+        // Notify-Icon setzen (z. B. das Icon des ersten Produkts)
+        if (_itemProducerSO.Recipe.ItemsToProduce.Count > 0) {
+            int productId = _itemProducerSO.Recipe.ItemsToProduce[0].ItemId;
+            _notifySpriteRenderer.sprite = GameManager.Instance.ItemManager.ItemDatabase[productId].ItemIcon;
+        }
+
+        if (IsServer) ResetTimer();
+    }
+
+    public override void InitializePostLoad() {
+        UpdateVisual();
+    }
+
+    private void ItemProducerProcess() {
+        if (_timer.Value > 0) _timer.Value--;
+        else ResetTimer();
+    }
+
+
     public override void Interact(PlayerController player) {
-        if (_timer <= 0f) {
+        if (_timer.Value <= 0) {
             ProduceItems();
-            ResetTimer();
-            _visual.sprite = ProducerSO.ActiveSprite;
+            ResetTimerServerRpc();
         }
     }
 
-    /// <summary>
-    /// Produces items based on the current recipe and handles inventory updates.
-    /// </summary>
-    /// <param name="player">The player for whom items are being produced.</param>
     private void ProduceItems() {
-        foreach (ItemSlot itemSlot in GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsToProduce) {
-            int remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(itemSlot, false);
-            if (remainingAmount > 0) {
+        _notifySpriteRenderer.enabled = false;
+
+        foreach (var itemSlot in _itemProducerSO.Recipe.ItemsToProduce) {
+            var scaledSlot = new ItemSlot(itemSlot.ItemId, itemSlot.Amount * _itemProducerSO.AmountMultiply, itemSlot.RarityId);
+            int leftover = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(scaledSlot, false);
+
+            if (leftover > 0) {
                 GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
-                    itemSlot: itemSlot,
-                    initialPosition: transform.position,
-                    motionDirection: PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
+                    new ItemSlot(itemSlot.ItemId, leftover, itemSlot.RarityId),
+                    transform.position,
+                    PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
                     spreadType: ItemSpawnManager.SpreadType.Circle);
             }
         }
     }
 
-    /// <summary>
-    /// Resets the production timer based on the recipe's production time.
-    /// </summary>
-    private void ResetTimer() => _timer = GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].TimeToProduce * ProducerSO.ProduceTimeInPercent / 100;
+    [ServerRpc(RequireOwnership = false)]
+    public void ResetTimerServerRpc() {
+        ResetTimer();
+    }
 
-    /// <summary>
-    /// Fetches the ObjectSO associated with the current item ID.
-    /// </summary>
-    /// <returns>The ObjectSO associated with the current item.</returns>
-    private ProducerSO ProducerSO => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as ProducerSO;
+    private void ResetTimer() {
+        _timer.Value = Mathf.Max(1, _itemProducerSO.Recipe.TimeToProduce / Mathf.Max(1, _itemProducerSO.SpeedMultiply));
+    }
 
+    private void UpdateVisual() {
+        _spriteRenderer.sprite = _timer.Value > 0 ? _itemProducerSO.ActiveSprite : _itemProducerSO.InactiveSprite;
+    }
 
-    /// <summary>
-    /// Handles the collection of produced items when the object is dismanteled with.
-    /// </summary>
-    /// <param name="player">The player interacting with the placed object.</param>
     public override void PickUpItemsInPlacedObject(PlayerController player) {
-        if (_timer <= 0) {
-            ProduceItems();
-        }
+        if (_timer.Value <= 0) ProduceItems();
     }
 
     #region Save & Load
-    [Serializable]
-    public class ItemProducerData {
-        public int RecipeId;
-        public int Timer;
-        public int ItemId;
-    }
 
     public override string SaveObject() {
-        var itemProducerJson = new ItemProducerData {
-            RecipeId = _recipeId,
-            Timer = _timer,
-            ItemId = _itemId
-        };
-
-        return JsonConvert.SerializeObject(itemProducerJson);
+        return JsonConvert.SerializeObject(_timer.Value);
     }
 
     public override void LoadObject(string data) {
-        if (!string.IsNullOrEmpty(data)) {
-            var itemProducerData = JsonConvert.DeserializeObject<ItemProducerData>(data);
-            _recipeId = itemProducerData.RecipeId;
-            _timer = itemProducerData.Timer;
-            _itemId = itemProducerData.ItemId;
-        }
+        if (int.TryParse(data, out int value)) _timer.Value = value; 
+        else _timer.Value = 0;
     }
 
     #endregion
 
-    public override void InitializePostLoad() { }
+    public override void OnStateReceivedCallback(string callbackName) { }
 }

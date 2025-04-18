@@ -77,4 +77,8 @@ public class Building : PlaceableObject {
     public override string SaveObject() { return string.Empty; }
 
     public override void PickUpItemsInPlacedObject(PlayerController player) { }
+
+    public override void OnStateReceivedCallback(string callbackName) {
+        throw new System.NotImplementedException();
+    }
 }

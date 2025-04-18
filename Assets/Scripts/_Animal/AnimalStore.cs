@@ -24,9 +24,10 @@ public class AnimalStore : Store {
     }
 
     public override void OnLeftClick(ItemSO itemSO) {
+        /*
         if (itemSO is AnimalSO) {
             AnimalSO animalSO = itemSO as AnimalSO;
-
+            
             // Search for a stall that can house the animal, TODO make this a choice of the player.
             for (int i = 0; i < _pOM.PlaceableObjects.Count; i++) {
                 int objId = _pOM.PlaceableObjects[i].ObjectId;
@@ -55,6 +56,7 @@ public class AnimalStore : Store {
                 }
             }
         }
+        */
     }
 
     public void OnNextDay() {
@@ -69,7 +71,7 @@ public class AnimalStore : Store {
             var animalName = kvp.Value.AnimalType.ToString();
 
             ac.Initialize(kvp.Value, animalName, kvp.Key);
-
+            /*
             var netId = _pOM.PlaceableObjects[kvp.Key].PrefabNetworkObjectId;
             if (!_nSM.SpawnedObjects.TryGetValue(netId, out NetworkObject netObj)) {
                 Debug.LogError($"No NetworkObject with the ID {netId} found.");
@@ -79,6 +81,7 @@ public class AnimalStore : Store {
             building.AddAnimal(ac);
 
             Debug.Log($"Animal delivered to stall {building.BuildingSO.BuildingName}.");
+            */
         }
 
         _purchasedAnimalsPendingDelivery.Clear();

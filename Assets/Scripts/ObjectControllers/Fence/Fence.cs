@@ -1,47 +1,29 @@
-using Unity.Collections;
 using UnityEngine;
 
 public class Fence : AdjustingObject {
-    private FenceSO FenceSO => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as FenceSO;
+    private FenceSO _fenceSO;
 
-    protected override void UpdateVisualBasedOnNeighbors() {
-        base.UpdateVisualBasedOnNeighbors();
-        UpdateColliderAndSprite();
-    }
-
-    /// <summary>
-    /// Updates the collider and sprite of the fence object based on the current pattern index.
-    /// </summary>
-    private void UpdateColliderAndSprite() {
-        int colliderPatternIndex = DetermineColliderPatternIndex();
-
-        if (colliderPatternIndex >= FenceSO.PolygonColliderPaths.Length || _patternIndex >= FenceSO.Sprites.Length) {
-            Debug.LogError("Index out of range for PolygonColliderPaths or Sprites.");
-            return;
-        }
-    }
-
-    /// <summary>
-    /// Determines the index of the collider pattern based on the current pattern index.
-    /// </summary>
-    /// <returns>The index of the collider pattern.</returns>
-    private int DetermineColliderPatternIndex() {
-        return _patternIndex switch {
-            3 => 0,
-            6 => 1,
-            8 => 2,
-            10 => 3,
-            11 => 4,
-            13 => 6,
-            14 => 5,
-            15 => 7,
-            _ => _patternIndex
-        };
+    public override void Interact(PlayerController player) {
+        // TODO: Klettern o. Ä. implementieren
     }
 
     public override void InitializePostLoad() { }
-
     public override void LoadObject(string data) { }
+    public override string SaveObject() => string.Empty;
+    public override void OnStateReceivedCallback(string callbackName) { }
 
-    public override string SaveObject() { return string.Empty; }
+    protected override void SetTileInternal(int itemId, Vector3Int cell) {
+        if (_fenceSO == null || _itemId != itemId)
+            _fenceSO = GameManager.Instance.ItemManager.ItemDatabase[itemId] as FenceSO;
+
+        if (_fenceSO == null) {
+            Debug.LogError($"Item {itemId} ist kein FenceSO");
+            return;
+        }
+
+        var tile = _fenceSO.FenceRuleTile;
+        SharedTilemap.SetTile(cell, tile);
+        SharedTilemap.RefreshTile(cell);
+        RefreshNeighbors(cell);
+    }
 }

@@ -7,6 +7,8 @@ using Newtonsoft.Json;
 /// </summary>
 [RequireComponent(typeof(NetworkObject))]
 public class RecipeManager : NetworkBehaviour, IDataPersistance {
+    public static RecipeManager Instance { get; private set; }
+
     private RecipeContainer _recipeContainer;
     public RecipeContainer RecipeContainer => _recipeContainer;
     [SerializeField] private RecipeDatabaseSO _recipeDatabase;
@@ -22,6 +24,12 @@ public class RecipeManager : NetworkBehaviour, IDataPersistance {
     /// Otherwise, it sets the instance to this script and initializes the components.
     /// </summary>
     private void Awake() {
+        if (Instance != null) {
+            Debug.LogError("More than one RecipeManager instance found!");
+            return;
+        }
+        Instance = this;
+
         _recipeContainer = new RecipeContainer();
         _recipeDatabase.InitializeRecipes();
     }

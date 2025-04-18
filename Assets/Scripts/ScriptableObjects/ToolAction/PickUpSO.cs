@@ -4,8 +4,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Tool Action/Pick Up")]
 public class PickUpSO : ToolActionSO {
     public override void OnApplyToTileMap(Vector3Int gridPosition, ItemSlot itemSlot) {
-        PlaceableObjectsManager.Instance.PickUpObjectServerRpc(
-            new Vector3IntSerializable(gridPosition)
-        );
+        if (PlaceableObjectsManager.Instance.TryGetNetworkIdAt(gridPosition, out var id)) {
+            PlaceableObjectsManager.Instance.PickUpObjectServerRpc(id);
+        }
     }
 }

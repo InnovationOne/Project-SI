@@ -237,11 +237,11 @@ public class PlayerMarkerController : NetworkBehaviour {
         var itemSO = GameManager.Instance.ItemManager.ItemDatabase[id];
 
         // If the selected item is placeable, show a highlight instead of a tile
-        if (itemSO is ObjectSO objectSO && objectSO.ObjectRotationSprites != null && objectSO.ObjectRotationSprites.Length > 0 && itemSO.ItemType == ItemSO.ItemTypes.PlaceableObject) {
+        if (itemSO is ObjectSO objectSO && objectSO.PrefabRotationSprites != null && objectSO.PrefabRotationSprites.Length > 0 && itemSO.ItemType == ItemSO.ItemTypes.PlaceableObject) {
             SetTile(_lastCellPosition);
-            Sprite sprite = objectSO.ObjectRotationSprites[HighlightId];
+            Sprite sprite = objectSO.PrefabRotationSprites[HighlightId];
             var highlightColor = new Color(0.5f, 1f, 0.5f, 0.75f);
-            ShowHighlight(MarkedCellPosition, sprite, objectSO.tileSpriteOffset, highlightColor);
+            ShowHighlight(MarkedCellPosition, sprite, objectSO.TileSpriteOffset, highlightColor);
         } else if (_lastCellPosition != MarkedCellPosition) {
             // For non-placeable items, simply show a standard marker tile
             HideHighlight();
@@ -286,9 +286,9 @@ public class PlayerMarkerController : NetworkBehaviour {
         // Cycle through available rotation sprites when rotating highlight
         int id = _toolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId;
         ItemSO itemSO = GameManager.Instance.ItemManager.ItemDatabase[id];
-        if (itemSO is ObjectSO objectSO && objectSO.ObjectRotationSprites.Length > 1) {
+        if (itemSO is ObjectSO objectSO && objectSO.PrefabRotationSprites.Length > 1) {
             HighlightId++;
-            if (HighlightId >= objectSO.ObjectRotationSprites.Length) {
+            if (HighlightId >= objectSO.PrefabRotationSprites.Length) {
                 HighlightId = 0;
             }
         }

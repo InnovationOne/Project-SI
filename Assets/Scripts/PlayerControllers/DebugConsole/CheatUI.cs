@@ -141,9 +141,7 @@ public class CheatUI : MonoBehaviour {
 
         // Placeable Objects Manager
         REMOVE_ALL_OBJECTS = new DebugCommand("remove_all_objects", "Removes all placeable objects from the farm.", "remove_all_objects", () => {
-            foreach (var placeableObject in GameManager.Instance.PlaceableObjectsManager.PlaceableObjects) {
-                GameManager.Instance.PlaceableObjectsManager.PickUpObjectServerRpc(new Vector3IntSerializable(placeableObject.Position));
-            }
+            PlaceableObjectsManager.Instance.Cheat_RemoveAllObjects();
         });
         _commandDictionary.Add(REMOVE_ALL_OBJECTS.CommandId, REMOVE_ALL_OBJECTS);
 

@@ -1,260 +1,196 @@
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
-/// <summary>
-/// Manages the conversion of items based on recipes and timed processes.
-/// </summary>
 [RequireComponent(typeof(TimeAgent))]
 public class ItemConverter : PlaceableObject {
+    private SpriteRenderer _spriteRenderer;
+    private SpriteRenderer _notifySpriteRenderer;
     private SelectRecipeUI _selectRecipeUI;
-    private SpriteRenderer _visual;
+    private ItemConverterSO _itemConverterSO;
+
+    private readonly NetworkVariable<int> _timer = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private readonly NetworkVariable<int> _recipeId = new(-1, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private readonly List<ItemSlot> _storedItemSlots = new();
 
     public override float MaxDistanceToPlayer => 2f;
     public override bool CircleInteract => false;
 
-    private int _recipeId;
-    private int _timer;
-    private int _itemId;
-    private List<ItemSlot> _storedItemSlots = new();
-
     private void Awake() {
-        _visual = GetComponent<SpriteRenderer>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _notifySpriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        _notifySpriteRenderer.enabled = false;
     }
 
-    /// <summary>
-    /// Initializes and subscribes to time-based events.
-    /// </summary>
     private void Start() {
         _selectRecipeUI = SelectRecipeUI.Instance;
-        GetComponent<TimeAgent>().OnMinuteTimeTick += ItemConverterProcess;
+    }
+
+    public override void OnNetworkSpawn() {
+        base.OnNetworkSpawn();
+        _timer.OnValueChanged += (_, __) => {
+            UpdateVisual();
+        };
+        _timer.OnValueChanged += (old, newVal) => {
+            if (newVal == 0) _notifySpriteRenderer.enabled = true;
+        };
+        if (IsServer) GetComponent<TimeAgent>().OnMinuteTimeTick += ServerTick;
+        UpdateVisual();
     }
 
     private new void OnDestroy() {
-        GetComponent<TimeAgent>().OnMinuteTimeTick -= ItemConverterProcess;
-        base.OnDestroy();
+        if (IsServer) GetComponent<TimeAgent>().OnMinuteTimeTick -= ServerTick;
     }
 
-    /// <summary>
-    /// Initializes the item producer with a specific item identifier.
-    /// </summary>
-    /// <param name="itemId">The item identifier used to fetch recipe details.</param>
-    public override void InitializePreLoad(int itemId) {
-        _itemId = itemId;
-        ResetTimer();
-        _visual.sprite = ConverterSO.InactiveSprite;
-    }
-
-    /// <summary>
-    /// Performs the item conversion process.
-    /// </summary>
-    private void ItemConverterProcess() {
-        if (_timer > 0 && --_timer == 0) {
-            ProcessConversion();
-        }
-    }
-
-    /// <summary>
-    /// Processes the conversion of items.
-    /// </summary>
-    private void ProcessConversion() {
-        _storedItemSlots.Clear();
-        _storedItemSlots.AddRange(GetRecipeItemsToProduce());
-        _visual.sprite = ConverterSO.InactiveSprite;
-    }
-
-    /// <summary>
-    /// Interacts with the player.
-    /// If the item converter can process items, it spawns the items, clears the stored items, and returns.
-    /// If the item converter is eligible for a new recipe and has all the needed items, it selects a recipe and starts item processing.
-    /// </summary>
-    /// <param name="player">The player interacting with the item converter.</param>
-    public override void Interact(PlayerController player) {
-        if (CanProcessItems()) {
-            SpawnItems();
-            ClearStoredItems();
-            return;
-        }
-
-        if (IsEligibleForNewRecipe()) {
-            _recipeId = SelectRecipe();
-            if (_recipeId != -1 && HasAllNeededItems()) {
-                StartItemProcessing();
-            }
-        }
-    }
-
-    /// <summary>
-    /// Checks if the item processing can be performed.
-    /// </summary>
-    /// <returns>True if the item processing can be performed, false otherwise.</returns>
-    private bool CanProcessItems() => _timer <= 0 && _storedItemSlots.Any();
-
-    /// <summary>
-    /// Checks if the item is eligible for a new recipe.
-    /// </summary>
-    /// <returns>True if the item is eligible for a new recipe, false otherwise.</returns>
-    private bool IsEligibleForNewRecipe()
-    => !PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().IsEmpty
-       && _storedItemSlots != null
-       && _storedItemSlots.Any();
-
-
-    private int SelectRecipe() => ConverterSO.Recipes.Count == 0 ? SelectRecipeAutomatically() : _selectRecipeUI.SelectRecipe(ConverterSO.Recipes);
-    
-
-    /// <summary>
-    /// Selects a recipe automatically based on the provided toolbelt item slot.
-    /// </summary>
-    /// <param name="toolbeltItemSlot">The item slot in the toolbelt.</param>
-    /// <returns>The ID of the selected recipe, or -1 if no recipe is found.</returns>
-    private int SelectRecipeAutomatically() {
-        ItemSlot toolbeltItemSlot = PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot();
-        foreach (var recipe in GameManager.Instance.RecipeManager.RecipeContainer.Recipes) {
-            RecipeSO recipeSO = GameManager.Instance.RecipeManager.RecipeDatabase[recipe];
-
-            for (int i = 0; i < recipeSO.ItemsToConvert.Count; i++) {
-                if (recipeSO.ItemsToConvert[i].ItemId == toolbeltItemSlot.ItemId &&
-                    recipeSO.ItemsToConvert[i].RarityId == toolbeltItemSlot.RarityId &&
-                    recipeSO.RecipeType == ConverterSO.RecipeType) {
-
-                    return recipeSO.RecipeId;
+    private void ServerTick() {
+        if (_timer.Value > 0) {
+            _timer.Value--;
+            if (_timer.Value == 0) {
+                var recipe = RecipeManager.Instance.RecipeDatabase[_recipeId.Value];
+                _storedItemSlots.Clear();
+                foreach (var slot in recipe.ItemsToProduce) {
+                    _storedItemSlots.Add(new ItemSlot(slot.ItemId, slot.Amount * _itemConverterSO.AmountMultiply, slot.RarityId));
                 }
+                
+                PlaceableObjectsManager.Instance.UpdateObjectStateServerRpc(
+                    NetworkObject.NetworkObjectId, 
+                    JsonConvert.SerializeObject(_storedItemSlots));
+                _notifySpriteRenderer.enabled = true;
             }
         }
+    }
 
+    public override void InitializePreLoad(int itemId) {
+        _itemConverterSO = ItemManager.Instance.ItemDatabase[itemId] as ItemConverterSO;
+        _spriteRenderer.sprite = _itemConverterSO.InactiveSprite;
+        _notifySpriteRenderer.enabled = false;
+        if (IsServer) ResetTimer();
+    }
+
+    public override void InitializePostLoad() {
+        UpdateVisual();
+    }
+
+    public override void Interact(PlayerController player) {
+        PlaceableObjectsManager.Instance.RequestObjectStateServerRpc(NetworkObject.NetworkObjectId, "Interact");
+    }
+
+    private int SelectRecipe() {
+        return _itemConverterSO.UseUI
+            ? _selectRecipeUI.SelectRecipe(_itemConverterSO.Recipes)
+            : SelectRecipeAutomatically();
+    }
+
+    private int SelectRecipeAutomatically() {
+        var toolbeltItem = PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot();
+        foreach (var recipe in _itemConverterSO.Recipes) {
+            if (recipe.RecipeType != _itemConverterSO.RecipeType) continue;
+            bool matches = recipe.ItemsToConvert.Any(r => r.ItemId == toolbeltItem.ItemId && r.RarityId == toolbeltItem.RarityId);
+            if (matches) return recipe.RecipeId;
+        }
         return -1;
     }
-
-    /// <summary>
-    /// Checks if the player has all the needed items to perform the conversion.
-    /// </summary>
-    /// <returns>True if the player has all the needed items, false otherwise.</returns>
-    private bool HasAllNeededItems() {
-        List<ItemSlot> inventory = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.CombineItemsByTypeAndRarity();
-
-        var matchingNum = GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsNeededToConvert
-            .Concat(GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsToConvert)
-            .Count(recipe => inventory.Any(inventoryItemSlot =>
-                GameManager.Instance.ItemManager.ItemDatabase[inventoryItemSlot.ItemId] != null &&
-                inventoryItemSlot.ItemId == recipe.ItemId &&
-                inventoryItemSlot.Amount >= recipe.Amount));
-
-        return matchingNum == GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsNeededToConvert.Count + GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsToConvert.Count;
+    private bool HasAllNeededItems(int recipeId) {
+        var recipe = GameManager.Instance.RecipeManager.RecipeDatabase[recipeId];
+        var inventory = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.CombineItemsByTypeAndRarity();
+        return recipe.ItemsNeededToConvert.Concat(recipe.ItemsToConvert)
+            .All(req => inventory.Any(inv => inv.ItemId == req.ItemId && inv.RarityId == req.RarityId && inv.Amount >= req.Amount));
     }
 
-    /// <summary>
-    /// Starts the item processing by deducting required items from the inventory, resetting the timer, and setting the active sprite.
-    /// </summary>
-    private void StartItemProcessing() {
-        DeductRequiredItemsFromInventory();
+    private void RemoveItems(int recipeId) {
+        var recipe = GameManager.Instance.RecipeManager.RecipeDatabase[recipeId];
+        foreach (var need in recipe.ItemsNeededToConvert.Concat(recipe.ItemsToConvert)) {
+            PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.RemoveItem(
+                new ItemSlot(need.ItemId, need.Amount, need.RarityId));
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void StartProcessServerRpc(int recipeId) {
+        _recipeId.Value = recipeId;
         ResetTimer();
-        _visual.sprite = ConverterSO.ActiveSprite;
+        _notifySpriteRenderer.enabled = false;
     }
 
-    /// <summary>
-    /// Deducts the required items from the player's inventory and stores them in the converter.
-    /// </summary>
-    private void DeductRequiredItemsFromInventory() {
-        foreach (ItemSlot itemSlot in GetCombinedItemSlots()) {
-            PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.RemoveItem(itemSlot);
-            _storedItemSlots.Add(itemSlot);
-        }
-    }
-
-    /// <summary>
-    /// Retrieves the recipe items needed to produce the desired item.
-    /// </summary>
-    /// <returns>An enumerable collection of ItemSlot representing the recipe items.</returns>
-    private IEnumerable<ItemSlot> GetRecipeItemsToProduce() => GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsToProduce;
-
-    /// <summary>
-    /// Retrieves the combined item slots required for conversion.
-    /// </summary>
-    /// <returns>An enumerable collection of ItemSlot objects representing the combined item slots.</returns>
-    private IEnumerable<ItemSlot> GetCombinedItemSlots() => GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsNeededToConvert.Concat(GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].ItemsToConvert);
-
-    /// <summary>
-    /// Picks up items in the placed object and spawns them.
-    /// </summary>
-    /// <param name="player">The player who is picking up the items.</param>
-    public override void PickUpItemsInPlacedObject(PlayerController player) {
-        if (_storedItemSlots.Count > 0) {
-            SpawnItems();
-        }
-    }
-
-    /// <summary>
-    /// Spawns the items stored in the item slots.
-    /// </summary>
     private void SpawnItems() {
-        foreach (ItemSlot itemSlot in _storedItemSlots) {
-            int remainingAmount = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(itemSlot, false);
-            if (remainingAmount > 0) {
-                GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
-                    itemSlot: itemSlot,
-                    initialPosition: transform.position,
-                    motionDirection: PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
-                    spreadType: ItemSpawnManager.SpreadType.Circle);
-            }
-        }
+        PlaceableObjectsManager.Instance.RequestObjectStateServerRpc(NetworkObject.NetworkObjectId, "PickUpItems");
     }
 
-    /// <summary>
-    /// Resets the production timer based on the recipe's production time.
-    /// </summary>
-    private void ResetTimer() => _timer = GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId].TimeToProduce * ConverterSO.ProduceTimeInPercent / 100;
+    private void ResetTimer() {
+        if (_recipeId.Value < 0) return;
+        var recipe = GameManager.Instance.RecipeManager.RecipeDatabase[_recipeId.Value];
+        _timer.Value = Mathf.Max(1, recipe.TimeToProduce / Mathf.Max(1, _itemConverterSO.SpeedMultiply));
+    }
 
-    /// <summary>
-    /// Fetches the ObjectSO associated with the current item ID.
-    /// </summary>
-    /// <returns>The ObjectSO associated with the current item.</returns>
-    private ConverterSO ConverterSO => GameManager.Instance.ItemManager.ItemDatabase[_itemId] as ConverterSO;
+    private void UpdateVisual() {
+        _spriteRenderer.sprite = _timer.Value > 0 ? _itemConverterSO.ActiveSprite : _itemConverterSO.InactiveSprite;
+    }
 
-    private void ClearStoredItems() {
-        _storedItemSlots.Clear();
-        _recipeId = -1;
+    public override void PickUpItemsInPlacedObject(PlayerController player) {
+        SpawnItems();
+    }
+
+    public override void OnStateReceivedCallback(string callbackName) {
+        switch (callbackName) {
+            case "Interact":
+                if (_timer.Value <= 0 && _storedItemSlots.Count > 0) {
+                    SpawnItems();
+                    _storedItemSlots.Clear();
+
+                } else if (_timer.Value <= 0) {
+                    int newId = SelectRecipe();
+                    if (newId >= 0 && HasAllNeededItems(newId)) {
+                        RemoveItems(newId);
+                        StartProcessServerRpc(newId);
+                    }
+                }
+                break;
+            case "PickUpItems":
+                foreach (var slot in _storedItemSlots) {
+                    int leftover = PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(slot, false);
+                    if (leftover > 0) {
+                        GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
+                            slot,
+                            transform.position,
+                            PlayerController.LocalInstance.PlayerMovementController.LastMotionDirection,
+                            spreadType: ItemSpawnManager.SpreadType.Circle);
+                    }
+                }
+                break;
+        }
     }
 
 
     #region Save & Load
+
     [Serializable]
     public class ItemConverterData {
         public int RecipeId;
         public int Timer;
-        public List<string> StoredItemSlots = new();
+        public List<string> StoredItemSlots;
     }
 
     public override string SaveObject() {
-        var itemConverterJson = new ItemConverterData {
-            RecipeId = _recipeId,
-            Timer = _timer,
-        };
-
-        foreach (var slot in _storedItemSlots) {
-            itemConverterJson.StoredItemSlots.Add(JsonConvert.SerializeObject(slot));
-        }
-
-        return JsonConvert.SerializeObject(itemConverterJson);
+        return JsonConvert.SerializeObject(new ItemConverterData {
+            RecipeId = _recipeId.Value,
+            Timer = _timer.Value,
+            StoredItemSlots = _storedItemSlots.Select(s => JsonConvert.SerializeObject(s)).ToList()
+        });
     }
 
-    public override void LoadObject(string data) {
-        if (!string.IsNullOrEmpty(data)) {
-            var itemConverterData = JsonConvert.DeserializeObject<ItemConverterData>(data);
-            _storedItemSlots.Clear();
-            _recipeId = itemConverterData.RecipeId;
-            _timer = itemConverterData.Timer;
-            foreach (var slot in itemConverterData.StoredItemSlots) {
-                _storedItemSlots.Add(JsonConvert.DeserializeObject<ItemSlot>(slot));
-            }
+    public override void LoadObject(string json) {
+        if (string.IsNullOrEmpty(json)) return;
+        var data = JsonConvert.DeserializeObject<ItemConverterData>(json);
+        _recipeId.Value = data.RecipeId;
+        _timer.Value = data.Timer;
+        _storedItemSlots.Clear();
+        foreach (var slotJson in data.StoredItemSlots) {
+            _storedItemSlots.Add(JsonConvert.DeserializeObject<ItemSlot>(slotJson));
         }
     }
 
     #endregion
-
-
-    public override void InitializePostLoad() { }
 }
