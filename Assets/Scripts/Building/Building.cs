@@ -49,7 +49,6 @@ public class Building : PlaceableObject {
 
     private void HandleNextDay() {
         if (!IsServer || !_underConstruction.Value) return;
-
         _daysRemaining.Value--;
         if (_daysRemaining.Value <= 0) FinishConstruction();
     }
@@ -78,7 +77,11 @@ public class Building : PlaceableObject {
     /// </summary>
     protected virtual void OnConstructionFinished() {
         Debug.Log($"Bau abgeschlossen: {buildingSO.name} (Level {_buildingLevel.Value})");
-        // z.B. hier das korrekte Model für Level wechseln
+        if (IsServer) {
+            PlaceableObjectsManager.Instance.ReplacePrefabServerRpc(
+                NetworkObjectId,
+                buildingSO.FinishedBuildingPrefab.name);
+        }
     }
 
     #region Save & Load

@@ -1,62 +1,38 @@
 using Unity.Netcode;
 using UnityEngine;
 
-/// <summary>
-/// Verteilt Heu vom Silo zur Futterbank. Manuell oder automatisch.
-/// </summary>
 [RequireComponent(typeof(NetworkObject))]
-public class HayDistributor : NetworkBehaviour, IInteractable {
+public class HayDistributor : PlaceableObject, IInteractable {
     [SerializeField] private ItemSO _hayItem;
 
-    private const int MAX_HAY_CAPACITY = 20;
-    private int _hayInFeeder = 0;
-    public int HayInFeeder => _hayInFeeder;
-    public float MaxDistanceToPlayer => 2f;
-    public bool CircleInteract => false;
+    public override float MaxDistanceToPlayer => 2f;
+    public override bool CircleInteract => false;
 
-    private PlayerToolbeltController _pTC;
-    private PlayerInventoryController _pIC;
-
-    public override void OnNetworkSpawn() {
-        base.OnNetworkSpawn();
-
-        _pTC = PlayerController.LocalInstance.PlayerToolbeltController;
-        _pIC = PlayerController.LocalInstance.PlayerInventoryController;
-        GameManager.Instance.TimeManager.OnNextDayStarted += OnNextDay;
-    }
-
-    public override void OnNetworkDespawn() {
-        base.OnNetworkDespawn();
-
-        GameManager.Instance.TimeManager.OnNextDayStarted -= OnNextDay;
-    }
-
-    public void Interact(PlayerController player) {
-        if (_pTC.GetCurrentlySelectedToolbeltItemSlot().ItemId == _hayItem.ItemId && _hayInFeeder < MAX_HAY_CAPACITY) {
-            _hayInFeeder++;
-            _pIC.InventoryContainer.RemoveItem(new ItemSlot(_hayItem.ItemId, 1, 0));
+    public override void Interact(PlayerController player) {
+        var slot = player.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot();
+        if (slot.ItemId == _hayItem.ItemId && slot.Amount > 0) {
+            foreach (var silo in Silo.AllSilos) {
+                if (silo.HayStored < silo.MaxHay) {
+                    silo.AddHayServerRpc(1);
+                    player.PlayerInventoryController.InventoryContainer.RemoveItem(new ItemSlot(_hayItem.ItemId, 1, 0));
+                    return;
+                }
+            }
         } else {
-            _hayInFeeder--;
-            _pIC.InventoryContainer.AddItem(new ItemSlot(_hayItem.ItemId, 1, 0), false);
-        }
-    }
-
-    private void OnNextDay() {
-        int needed = MAX_HAY_CAPACITY - _hayInFeeder;
-        if (needed > 0) {
-            // Prüfe, wie viel Heu im Silo ist. 
-            // Angenommen Silo ist einfach Teil des PlayerInventars mit ItemId von _hayItem
-            int siloCount = 0;
-
-            if (siloCount > 0) {
-                int toTake = Mathf.Min(needed, siloCount);
-                siloCount -= toTake; // Pseudo-Code
-                _hayInFeeder += toTake;
+            foreach (var silo in Silo.AllSilos) {
+                if (silo.HayStored > 0) {
+                    silo.RemoveHayServerRpc(1);
+                    player.PlayerInventoryController.InventoryContainer.AddItem(new ItemSlot(_hayItem.ItemId, 1, 0), false);
+                    return;
+                }
             }
         }
     }
 
-    public void PickUpItemsInPlacedObject(PlayerController player) { }
-
-    public void InitializePreLoad(int itemId) { }
+    public override void PickUpItemsInPlacedObject(PlayerController player) { }
+    public override void InitializePreLoad(int itemId) { }
+    public override void InitializePostLoad() { }
+    public override void OnStateReceivedCallback(string callbackName) { }
+    public override string SaveObject() { return ""; }
+    public override void LoadObject(string data) { }
 }

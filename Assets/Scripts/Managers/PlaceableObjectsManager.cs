@@ -190,6 +190,28 @@ public class PlaceableObjectsManager : NetworkBehaviour, IDataPersistance {
         _objectDataByNetId.Clear();
     }
 
+    [ServerRpc(RequireOwnership = false)]
+    public void ReplacePrefabServerRpc(ulong netId, string finishedPrefabName, ServerRpcParams rpcParams = default) {
+        if (!_objectDataByNetId.TryGetValue(netId, out var data)) return;
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(netId, out var oldObj)) {
+            oldObj.Despawn();
+        }
+        _objectDataByNetId.Remove(netId);
+
+        // Neues Prefab instanziieren
+        if (_itemDatabase[data.ObjectId] is BuildingSO bso && bso.FinishedBuildingPrefab.name == finishedPrefabName) {
+            Vector3 pos = _targetTilemap.GetCellCenterWorld(data.Position) + new Vector3(0, 0.5f, 0);
+            GameObject inst = Instantiate(bso.FinishedBuildingPrefab, transform);
+            inst.transform.position = pos;
+            var netObj = inst.GetComponent<NetworkObject>() ?? inst.AddComponent<NetworkObject>();
+            netObj.Spawn();
+
+            // Daten aktualisieren
+            var newData = new PlaceableObjectData { ObjectId = data.ObjectId, RotationIdx = data.RotationIdx, Position = data.Position, State = "" };
+            _objectDataByNetId[netObj.NetworkObjectId] = newData;
+        }
+    }
+
     #region Save & Load
 
     public void SaveData(GameData data) {

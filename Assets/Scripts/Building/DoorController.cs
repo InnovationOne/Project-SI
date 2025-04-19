@@ -1,66 +1,103 @@
+using System;
+using Unity.Netcode;
 using UnityEngine;
 
-public class DoorController : MonoBehaviour, IInteractable {
-    [SerializeField] private bool _isWeatherControlled = false;
-    [SerializeField] private bool _isTimeControlled = false;
-    [SerializeField] private Collider2D _doorCollider;
+[RequireComponent(typeof(NetworkObject))]
+[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(TimeAgent))]
+public class DoorController : PlaceableObject, IInteractable {
+    [SerializeField] private bool _canBeWeatherControlled;
+    [SerializeField] private bool _canBeTimeControlled;
+    private Collider2D _doorCollider;
 
     private const float OPEN_HOUR = 6f;
     private const float CLOSE_HOUR = 18f;
 
-    private bool _isOpen = false;
+    // Player setting on the door itself
+    private NetworkVariable<bool> _weatherActive = new(true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private NetworkVariable<bool> _timeActive = new(true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     private TimeManager _timeManager;
     private WeatherManager _weatherManager;
 
-    public float MaxDistanceToPlayer => 1.5f;
-    public bool CircleInteract => false;
+    public override float MaxDistanceToPlayer => 1.5f;
+    public override bool CircleInteract => false;
 
-    private void Start() {
+    public override void OnNetworkSpawn() {
+        base.OnNetworkSpawn();
+        _doorCollider = GetComponent<Collider2D>();
         _timeManager = GameManager.Instance.TimeManager;
         _weatherManager = GameManager.Instance.WeatherManager;
-    }
-
-    public void Interact(PlayerController player) {
-        if (_isOpen) {
-            Close();
-        } else {
-            Open();
+        if (IsServer) { 
+            _timeManager.OnNextDayStarted += UpdateDoorState;
+            GetComponent<TimeAgent>().OnMinuteTimeTick += UpdateDoorState; 
         }
     }
 
-    public void Open() {
-        _isOpen = true;
-        if (_doorCollider != null) _doorCollider.enabled = false;
-        Debug.Log("Door opened");
+    public override void OnNetworkDespawn() {
+        if (IsServer) {
+            _timeManager.OnNextDayStarted -= UpdateDoorState;
+            GetComponent<TimeAgent>().OnMinuteTimeTick -= UpdateDoorState; 
+        }
+        base.OnNetworkDespawn();
     }
 
-    public void Close() {
-        _isOpen = false;
-        if (_doorCollider != null) _doorCollider.enabled = true;
-        Debug.Log("Door closed");
+    public override void Interact(PlayerController player) {
+        if (_doorCollider.enabled) Close();
+        else Open();
     }
 
-    private void Update() { 
-        if (_isTimeControlled) {
+    public void Open() => _doorCollider.enabled = false;
+    public void Close() => _doorCollider.enabled = true;
+
+    private void UpdateDoorState() {
+        if (!IsServer) return;
+        bool closed = false;
+        if (_canBeTimeControlled && _timeActive.Value) {
             float hour = _timeManager.GetHours();
-            if (hour >= OPEN_HOUR && hour <= CLOSE_HOUR  && !_isOpen) {
-                if (_isWeatherControlled) {
-                    if (!_weatherManager.RainThunderSnow()) {
-                        Open();
-                    } else {
-                        Close();
-                    }
-                } else {
-                    Open();
-                }
-            }
-
-            if (hour >= CLOSE_HOUR && _isOpen) {
-                Close();
-            }
+            if (hour < OPEN_HOUR || hour >= CLOSE_HOUR) closed = true;
         }
+        if (_canBeWeatherControlled && _weatherActive.Value && _weatherManager.RainThunderSnow()) {
+            closed = true;
+        }
+
+        if (closed) Close(); 
+        else Open();
     }
 
-    public void PickUpItemsInPlacedObject(PlayerController player) { }
-    public void InitializePreLoad(int itemId) { }
+    [ServerRpc(RequireOwnership = false)]
+    public void SetWeatherActiveServerRpc(bool weatherControlled) {
+        _weatherActive.Value = weatherControlled;
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    public void SetTimeActiveServerRpc(bool timeControlled) {
+        _timeActive.Value = timeControlled;
+    }
+
+    [Serializable]
+    private struct DoorData {
+        public bool WeatherActive;
+        public bool TimeActive;
+    }
+
+    public override string SaveObject() {
+        DoorData data = new() {
+            WeatherActive = _weatherActive.Value,
+            TimeActive = _timeActive.Value
+        };
+        return JsonUtility.ToJson(data);
+    }
+    public override void LoadObject(string data) {
+        if (string.IsNullOrEmpty(data)) return;
+        DoorData doorData = JsonUtility.FromJson<DoorData>(data);
+        _weatherActive.Value = doorData.WeatherActive;
+        _timeActive.Value = doorData.TimeActive;
+    }
+
+    public override void PickUpItemsInPlacedObject(PlayerController player) { }
+    public override void InitializePreLoad(int itemId) { }
+    public override void InitializePostLoad() { }
+    public override void OnStateReceivedCallback(string callbackName) { }
+    
 }

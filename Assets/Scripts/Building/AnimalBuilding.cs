@@ -1,17 +1,37 @@
 ﻿using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public class AnimalBuilding : Building {
     [Header("Animal Building Settings")]
     [SerializeField] private AnimalBuildingSO _animalBuildingSO;
+    public AnimalBuildingSO AnimalBuildingSO => _animalBuildingSO;
 
-    private readonly List<AnimalController> _housedAnimals = new();
-    public IReadOnlyList<AnimalController> HousedAnimals => _housedAnimals;
+    private NetworkList<ulong> _housedAnimalIds;
+    public List<ulong> HousedAnimalIdsList {
+        get {
+            var list = new List<ulong>();
+            foreach (var id in _housedAnimalIds){ 
+                list.Add(id); 
+            }
+            return list;
+        }
+    }
 
     /// <summary>
     /// Maximum number of animals in the building.
     /// </summary>
     public int Capacity => _animalBuildingSO.Capacity;
+
+    public override void OnNetworkSpawn() {
+        base.OnNetworkSpawn();
+        if (IsServer) {
+            _housedAnimalIds = new NetworkList<ulong>(
+                new List<ulong>(),
+                NetworkVariableReadPermission.Everyone,
+                NetworkVariableWritePermission.Server);
+        }
+    }
 
     protected override void OnConstructionFinished() {
         base.OnConstructionFinished();
@@ -21,23 +41,18 @@ public class AnimalBuilding : Building {
     /// <summary>
     /// Add an animal if there is still room.
     /// </summary>
-    public virtual void AddAnimal(AnimalController animal) {
-        if (_housedAnimals.Count >= Capacity) {
-            Debug.LogWarning($"{_animalBuildingSO.name} ist voll ({Capacity}).");
-            return;
-        }
-        _housedAnimals.Add(animal);
-        Debug.Log($"Tier {animal.name} in {_animalBuildingSO.name} untergebracht.");
+    public void AddAnimal(AnimalController animal) {
+        if (!IsServer) return;
+        if (_housedAnimalIds.Count >= Capacity) return;
+        _housedAnimalIds.Add(animal.NetworkObjectId);
     }
 
     /// <summary>
     /// Remove an animal from this stable.
     /// </summary>
-    public virtual void RemoveAnimal(AnimalController animal) {
-        if (_housedAnimals.Remove(animal)) {
-            Debug.Log($"Tier {animal.name} aus {_animalBuildingSO.name} entfernt.");
-        }
-            
+    public void RemoveAnimal(AnimalController animal) {
+        if (!IsServer) return;
+        _housedAnimalIds.Remove(animal.NetworkObjectId);
     }
 
     public override void Interact(PlayerController player) { }

@@ -1,4 +1,5 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
 /// <summary>
@@ -6,7 +7,8 @@ using UnityEngine;
 /// - Feed, pet, pick up product (if available)
 /// - Passes more complex logic to other components such as StateMachine, Friendship, Production.
 /// </summary>
-public class AnimalController : MonoBehaviour, IInteractable {
+[RequireComponent(typeof(NetworkObject))]
+public class AnimalController : NetworkBehaviour, IInteractable {
     [SerializeField] private AnimalSO _animalData;
     [SerializeField] private string _animalName;
     [SerializeField] private bool _wasFed;
