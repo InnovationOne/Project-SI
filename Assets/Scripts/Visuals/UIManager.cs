@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour {
@@ -18,6 +19,8 @@ public class UIManager : MonoBehaviour {
     public HostDisconnectedUI HostDisconnectedUI;
     public LetterboxingUI LetterboxingUI;
     public FishCatchUI FishCatchUI;
+
+    [SerializeField] private GameObject RenameDialogPrefab;
 
     Canvas _mainCanvas;
     InputManager _inputManager;
@@ -135,6 +138,12 @@ public class UIManager : MonoBehaviour {
         InventoryUI.gameObject.SetActive(false);
         ClothingUI.gameObject.SetActive(false);
         ChestUI.gameObject.SetActive(false);
+    }
+
+    public void ShowRenameAnimalDialog(string currentName, Action<string> onSubmit) {
+        var go = Instantiate(RenameDialogPrefab, _mainCanvas.transform);
+        var ui = go.GetComponent<AnimalRenameUI>();
+        ui.Initialize(currentName, onSubmit);
     }
 
     #endregion -------------------- Methods for specific scenarios --------------------

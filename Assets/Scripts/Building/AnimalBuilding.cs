@@ -5,6 +5,7 @@ using UnityEngine;
 public class AnimalBuilding : Building {
     [Header("Animal Building Settings")]
     [SerializeField] private AnimalBuildingSO _animalBuildingSO;
+    [SerializeField] private BoxCollider2D _spawnArea;
     public AnimalBuildingSO AnimalBuildingSO => _animalBuildingSO;
 
     private NetworkList<ulong> _housedAnimalIds;
@@ -18,24 +19,19 @@ public class AnimalBuilding : Building {
         }
     }
 
-    /// <summary>
-    /// Maximum number of animals in the building.
-    /// </summary>
     public int Capacity => _animalBuildingSO.Capacity;
+    private int _reservedSlots = 0;
+    public bool HasFreeSpace => _housedAnimalIds.Count + _reservedSlots < _animalBuildingSO.Capacity;
 
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
         if (IsServer) {
-            _housedAnimalIds = new NetworkList<ulong>(
-                new List<ulong>(),
-                NetworkVariableReadPermission.Everyone,
-                NetworkVariableWritePermission.Server);
+            _housedAnimalIds = new NetworkList<ulong>(new List<ulong>(), NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         }
     }
 
     protected override void OnConstructionFinished() {
-        base.OnConstructionFinished();
-        // Nach dem Bau z.B. Tür, Heu‑Verteiler, Inkubator aktivieren …
+        base.OnNetworkDespawn();
     }
 
     /// <summary>
@@ -53,6 +49,26 @@ public class AnimalBuilding : Building {
     public void RemoveAnimal(AnimalController animal) {
         if (!IsServer) return;
         _housedAnimalIds.Remove(animal.NetworkObjectId);
+    }
+
+    /// <summary>
+    /// Spawn a product directly in the building.
+    /// </summary>
+    public void SpawnProductInside(ItemSlot product) {
+        var bounds = _spawnArea.bounds;
+        Vector2 spawnPos = new(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y));
+        GameManager.Instance.ItemSpawnManager.SpawnItemServerRpc(
+            product, 
+            spawnPos, 
+            Vector2.zero, 
+            spreadType: ItemSpawnManager.SpreadType.Circle);
+    }
+
+    public void ReserveSlot() {
+        _reservedSlots++; 
+    }
+    public void UnreserveSlot() { 
+        _reservedSlots--; 
     }
 
     public override void Interact(PlayerController player) { }

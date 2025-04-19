@@ -4,7 +4,7 @@ public enum AnimalSize {
     None, Small, Large
 }
 
-public enum AnimalBase {
+public enum AnimalCategory {
     None, Chicken, Goose, Duck, Cow, Sheep, Goat, Pig, Alpaca
 }
 
@@ -22,22 +22,20 @@ public enum AnimalType {
 
 [CreateAssetMenu(menuName = "Scriptable Objects/ItemSO/Animal")]
 public class AnimalSO : ItemSO {
+    [HideInInspector] public int AnimalId;
     public AnimalSize AnimalSize;
-    public AnimalBase AnimalBase;
+    public AnimalCategory AnimalBase;
     public AnimalType AnimalType;
 
     [Header("Food / Items")]
+    public bool HasQualityLevels = true;
+    public ItemSO PrimaryProductItem;
+    public ItemSO SecondaryProductItem;
+
+    [Header("Production Tools")]
     public ItemSO FeedItem;
     public ItemSO PetItem;
-    public bool HasQualityLevels = true;
-    public ItemSO ProductItem;
-
-    [Header("Visuals & Animation Sprites")]
-    public Sprite[] WalkUp;
-    public Sprite[] WalkRight;
-    public Sprite[] WalkDown;
-    public Sprite[] WalkLeft;
-    // Additional arrays for standing, sleeping and eating could be added here.
+    public ItemSO ProductTool;     // z.B. Milchkübel, Schere
 
     [Header("Friendship & growth")]
     public int InitialFriendship = 0;
@@ -47,4 +45,11 @@ public class AnimalSO : ItemSO {
     [Header("Mating / Breeding")]
     public bool CanLayEggs = false;
     public bool CanBeIncubated = false;
+
+    [Header("Visuals & Animation Sprites")]
+    public Sprite[] WalkUp;
+    public Sprite[] WalkRight;
+    public Sprite[] WalkDown;
+    public Sprite[] WalkLeft;
+    // Additional arrays for standing, sleeping and eating could be added here.    
 }

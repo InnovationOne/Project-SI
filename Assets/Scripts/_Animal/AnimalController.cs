@@ -48,84 +48,17 @@ public class AnimalController : NetworkBehaviour, IInteractable {
 
         //_stateMachine.SetStateIdle();
 
-        _timeManager.OnNextDayStarted += OnNextDay;
     }
 
-    public void Interact(PlayerController player) {
-        var currentItemId = PlayerController.LocalInstance.PlayerToolbeltController.GetCurrentlySelectedToolbeltItemSlot().ItemId;
-        var currentItem = GameManager.Instance.ItemManager.ItemDatabase[currentItemId];
-
-        if (currentItem == _animalData.FeedItem && !_wasFed) {
-            _wasFed = true;
-            ModifyFriendship(5);
-            ShowLove();
-            return;
-        }
-
-        if (!_wasPetted) {
-            ModifyFriendship(currentItem == _animalData.PetItem ? 10 : 5);
-            _wasPetted = true;
-            ShowLove();
-            return;
-        }
-
-        if (!_gaveItem) {
-            var productSlot = GetTodaysProduct();
-            if (productSlot.ItemId >= 0) {
-                PlayerController.LocalInstance.PlayerInventoryController.InventoryContainer.AddItem(productSlot, false);
-                _gaveItem = true;
-                ShowLove();
-            }
-        }
-    }
-
-    private void OnNextDay() {
-        _wasFed = false;
-        _wasPetted = false;
-        _gaveItem = false;
-
-        if (!_isAdult) {
-            _daysAsJuv++;
-            if (_daysAsJuv >= _animalData.GrowthDays) {
-                _isAdult = true;
-                // Here you could customize the appearance of the animal (change spriter)
-            }
-        }
-    }
-
-    #region -------------------- Friendship --------------------
-    public void ModifyFriendship(int amount) {
-        _friendship += amount;
-        if (_friendship < 0) _friendship = 0;
-        if (_friendship > _maxFriendship) _friendship = _maxFriendship;
-    }
-
-    public int GetFriendshipValue() {
-        return _friendship;
-    }
-
-    public float GetNormalizedFriendship() {
-        return (float)_friendship / (float)_maxFriendship;
-    }
-    #endregion -------------------- Friendship --------------------
-
-    #region -------------------- Production --------------------
-    public ItemSlot GetTodaysProduct() {
-        float val = GetNormalizedFriendship();
-        int quality = 0;
-        if (val > 0.98f) quality = 3;
-        else if (val > 0.92f) quality = 2;
-        else if (val > 0.80f) quality = 1;
-
-        // Gibt 1x das Produkt zurück, mit ermittelter Qualität
-        return new ItemSlot(_animalData.ProductItem.ItemId, 1, quality);
-    }
-    #endregion -------------------- Production --------------------
 
     private void ShowLove() => _animalVisual.ShowLoveIcon();    
 
     public void InitializePreLoad(int itemId) { }
 
     public void PickUpItemsInPlacedObject(PlayerController player) { }
+
+    public void Interact(PlayerController player) {
+        throw new NotImplementedException();
+    }
 }
 
