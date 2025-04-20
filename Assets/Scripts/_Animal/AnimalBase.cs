@@ -1,5 +1,4 @@
-﻿using System;
-using Unity.Collections;
+﻿using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -11,15 +10,14 @@ public abstract class AnimalBase : NetworkBehaviour, IInteractable {
     [Header("Config")]
     [SerializeField] protected AnimalSO _animalSO;
 
-    [Header("Items")]
-    [SerializeField] protected ItemSO items; // Items that can be used on this animal
-
     // Networked state
     private NetworkVariable<FixedString64Bytes> _animalName = new("", NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<int> _friendship = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> _wasFed = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> _wasPetted = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     private NetworkVariable<bool> _gaveItem = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public bool WasFed => _wasFed.Value;
+    public string AnimalName => _animalName.Value.ToString();
 
     // Breeding
     private NetworkVariable<bool> _isPregnant = new(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -65,17 +63,18 @@ public abstract class AnimalBase : NetworkBehaviour, IInteractable {
         // Feeding
         if (!_wasFed.Value && itemSO == _animalSO.FeedItem) {
             _wasFed.Value = true;
-            ChangeFriendship(5);
+            ChangeFriendship(_animalSO.FeedAmount);
             return;
         }
         // Petting
         if (!_wasPetted.Value) {
-            ChangeFriendship(itemSO == _animalSO.PetItem ? 10 : 5);
+            ChangeFriendship(itemSO == _animalSO.PetItem ? _animalSO.BrushAmount : _animalSO.PetAmount);
             _wasPetted.Value = true;
             return;
         }
         // Production
         if (!_gaveItem.Value && TryGiveProduct(player, toolId)) {
+            ChangeFriendship(_animalSO.ProductAmount);
             _gaveItem.Value = true;
             return;
         }
@@ -214,6 +213,12 @@ public abstract class AnimalBase : NetworkBehaviour, IInteractable {
         _animalName.Value = newName;
     }
 
+    public void Feed() {
+        if (!IsServer) return;
+        _wasFed.Value = true;
+        ChangeFriendship(_animalSO.FeedAmount);
+    }
+
     #endregion
 
     #region Friendship
@@ -233,13 +238,6 @@ public abstract class AnimalBase : NetworkBehaviour, IInteractable {
     [ServerRpc(RequireOwnership = false)]
     private void RenameServerRpc(string newName) {
         _animalName.Value = newName;
-    }
-
-    [ServerRpc(RequireOwnership = false)]
-    public void InitializeSOServerRpc(FixedString64Bytes soGuid, FixedString64Bytes name) {
-        _animalSO = AnimalSORepository.Instance.GetByGuid(soGuid.ToString());
-        _animalName.Value = name;
-        _friendship.Value = _animalSO.InitialFriendship;
     }
 
     #endregion

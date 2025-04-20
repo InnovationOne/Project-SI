@@ -1,64 +1,44 @@
-using System;
 using Unity.Netcode;
+
 using UnityEngine;
 
 /// <summary>
-/// The AnimalController manages a single animal and its basic interactions:
-/// - Feed, pet, pick up product (if available)
-/// - Passes more complex logic to other components such as StateMachine, Friendship, Production.
+/// Replaces AnimalNavigation by using NPCMovementController for pathfinding.
+/// AnimalController now directly invokes MoveTo and checks IsMoving.
 /// </summary>
 [RequireComponent(typeof(NetworkObject))]
-public class AnimalController : NetworkBehaviour, IInteractable {
-    [SerializeField] private AnimalSO _animalData;
-    [SerializeField] private string _animalName;
-    [SerializeField] private bool _wasFed;
-    public bool WasFed => _wasFed;
-    [SerializeField] private bool _wasPetted;
-    [SerializeField] private bool _gaveItem;
-
-    [SerializeField] private int _stallID; // ID des Stalls in dem das Tier lebt
-    [SerializeField] private AnimalVisual _animalVisual;
-
-    [SerializeField] private int _friendship;
-    [SerializeField] private int _maxFriendship;
-
-    [SerializeField] private bool _isAdult = false;
-    [SerializeField] private int _daysAsJuv = 0;
-
-    // Components
+[RequireComponent(typeof(AnimalStateMachine))]
+[RequireComponent(typeof(NPCMovementController))]
+[RequireComponent(typeof(AnimalVisual))]
+public class AnimalController : AnimalBase {
     private AnimalStateMachine _stateMachine;
-    private AnimalNavigation _navigation;
-    private TimeManager _timeManager;
+    private NPCMovementController _movement;
+    private AnimalVisual _visual;
 
-
-    public float MaxDistanceToPlayer => 2f;
-    public bool CircleInteract => false;
+    public override float MaxDistanceToPlayer => 2f;
+    public override bool CircleInteract => false;
 
     private void Awake() {
         _stateMachine = GetComponent<AnimalStateMachine>();
-        _navigation = GetComponent<AnimalNavigation>();
+        _movement = GetComponent<NPCMovementController>();
+        _visual = GetComponent<AnimalVisual>();
     }
 
-    public void Initialize(AnimalSO animalData, string animalName, int stallID) {
-        _animalData = animalData;
-        _animalName = animalName;
-        _stallID = stallID;
-        _friendship = animalData.InitialFriendship;
-        _maxFriendship = animalData.MaxFriendship;
-
-        //_stateMachine.SetStateIdle();
-
+    public override void OnNetworkSpawn() {
+        base.OnNetworkSpawn();
+        if (IsServer) {
+            _stateMachine.Initialize(_animalSO, transform, this, _movement);
+            _stateMachine.SetStateIdle();
+        }
     }
 
+    private void Update() {
+        if (!IsServer) return;
+        _stateMachine.Tick();
+    }
 
-    private void ShowLove() => _animalVisual.ShowLoveIcon();    
-
-    public void InitializePreLoad(int itemId) { }
-
-    public void PickUpItemsInPlacedObject(PlayerController player) { }
-
-    public void Interact(PlayerController player) {
-        throw new NotImplementedException();
+    public override void Interact(PlayerController player) {
+        base.Interact(player);
+        _visual.ShowHighlight(true);
     }
 }
-

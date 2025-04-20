@@ -1,53 +1,37 @@
+using TMPro;
 using UnityEngine;
 
+[RequireComponent(typeof(AnimalBase))]
 public class AnimalVisual : MonoBehaviour {
-    [SerializeField] private SpriteRenderer _animalHighlight;
-    [SerializeField] private Transform _loveIcon;
-    [SerializeField] private Transform _fedIcon;
-    [SerializeField] private Transform _petIcon;
-    [SerializeField] private Transform _gaveIcon;
-    [SerializeField] private Transform _fpgBackground;
+    [Header("Highlight & Name Tag")]
+    [SerializeField] private SpriteRenderer _highlightSprite;
+    [SerializeField] private Canvas _nameCanvas;
+    [SerializeField] private TMP_Text _nameText;
+    [SerializeField] private Vector3 _nameOffset = new(0, 1.5f, 0);
 
-    private const float SHOW_LOVE_TIMER_MAX = 3f;
-    private float _showLoveTimer = 0f;
-    private bool _showLoveIcon = false;
+    private AnimalBase _animal;
+    private Camera _mainCamera;
 
-    private void Start() {
-        if (_animalHighlight != null) _animalHighlight.gameObject.SetActive(false);
-        if (_loveIcon != null) _loveIcon.gameObject.SetActive(false);
-        if (_fedIcon != null) _fedIcon.gameObject.SetActive(false);
-        if (_petIcon != null) _petIcon.gameObject.SetActive(false);
-        if (_gaveIcon != null) _gaveIcon.gameObject.SetActive(false);
-        if (_fpgBackground != null) _fpgBackground.gameObject.SetActive(false);
+    void Awake() {
+        _animal = GetComponent<AnimalBase>();
+        _mainCamera = Camera.main;
+        if (_highlightSprite) _highlightSprite.enabled = false;
     }
 
-    private void Update() {
-        if (_showLoveIcon) {
-            _showLoveTimer += Time.deltaTime;
-            if (_showLoveTimer <= SHOW_LOVE_TIMER_MAX) {
-                if (_loveIcon != null) _loveIcon.gameObject.SetActive(true);
-            } else {
-                if (_loveIcon != null) _loveIcon.gameObject.SetActive(false);
-                _showLoveIcon = false;
-                _showLoveTimer = 0f;
-            }
+    void LateUpdate() {
+        // Position name tag above animal
+        if (_nameCanvas) {
+            // Face the camera
+            _nameCanvas.transform.SetPositionAndRotation(transform.position + _nameOffset, Quaternion.LookRotation(
+                _nameCanvas.transform.position - _mainCamera.transform.position));
         }
+        // Update name text
+        if (_nameText != null)
+            _nameText.text = _animal.AnimalName;
     }
 
-    internal void ShowLoveIcon() => _showLoveIcon = true;    
-
-    internal void ShowFPGIcon(bool fed, bool pet, bool gave, bool show) {
-        if (!_showLoveIcon) {
-            if (_fedIcon != null) _fedIcon.gameObject.SetActive(fed);
-            if (_petIcon != null) _petIcon.gameObject.SetActive(pet);
-            if (_gaveIcon != null) _gaveIcon.gameObject.SetActive(gave);
-            if (_fpgBackground != null) _fpgBackground.gameObject.SetActive(show);
-        } else {
-            if (_fpgBackground != null) _fpgBackground.gameObject.SetActive(false);
-        }
-    }
-
+    /// <summary>Show or hide interaction highlight.</summary>
     public void ShowHighlight(bool show) {
-        if (_animalHighlight != null) _animalHighlight.gameObject.SetActive(show);
+        if (_highlightSprite) _highlightSprite.enabled = show;
     }
 }

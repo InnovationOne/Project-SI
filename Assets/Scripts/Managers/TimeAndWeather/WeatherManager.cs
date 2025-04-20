@@ -9,6 +9,8 @@ using static TimeManager;
 /// </summary>
 [RequireComponent(typeof(NetworkObject))]
 public class WeatherManager : NetworkBehaviour, IDataPersistance {
+    public static WeatherManager Instance { get; private set; }
+
     public enum WeatherName { Sun, Cloudy, Wind, Rain, Thunder, Snow, Event, Wedding, None }
 
     // Event to update UI weather forecast (sends an array of weather indices).
@@ -73,6 +75,14 @@ public class WeatherManager : NetworkBehaviour, IDataPersistance {
     private TimeOfDay _lastAmbienceUpdate;
 
     #region -------------------- Unity Lifecycle --------------------
+
+    private void Awake() {
+        if (Instance != null) {
+            Debug.LogError("More than one WeatherManager instance found!");
+            return;
+        }
+        Instance = this;
+    }
 
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();

@@ -1,170 +1,190 @@
-using System.Collections;
+ï»¿using System;
 using UnityEngine;
 
-/// <summary>
-/// State machine for an animal. Controls which state it is in.
-/// Additional logic to make state changes dependent on external influences (hunger, weather, time).
-/// </summary>
 public enum AnimalState {
     Idle,
-    Searching,
-    Eating,
+    SearchingFood,
     Moving,
+    Eating,
     Sleeping
 }
 
-[RequireComponent(typeof(AnimalNavigation))]
 public class AnimalStateMachine : MonoBehaviour {
-    private AnimalState _currentState = AnimalState.Idle;
-    private AnimalNavigation _navigation;
-    private AnimalController _controller;
+    [Header("Timers & Ranges")]
+    [SerializeField] private float wanderRadius = 5f;
+    [SerializeField] private float wanderInterval = 10f;
+    [SerializeField] private float eatingDuration = 3f;
+    [SerializeField] private float matingDuration = 5f;
 
-    private bool _hasEatenToday = false;
-    private bool _isNightTime = false;
+    // Laufzeitâ€‘Variablen
+    private AnimalState currentState;
+    private AnimalState previousState;
+    private float stateTimer;
+    private Vector3 targetPosition;
 
-    [SerializeField] private float _wanderRadius = 5f;
-    [SerializeField] private float _wanderInterval = 10f;
-    private float _wanderTimer = 0f;
+    // Referenzen
+    private AnimalSO animalSO;
+    private AnimalBase controller;
+    private Transform animalTransform;
+    private TimeManager timeManager;
+    private WeatherManager weatherManager;
+    private NPCMovementController movement;
 
-
-    private TimeManager _tM;
-    private WeatherManager _wM;
-
-    /*
-    private void Awake() {
-        _navigation = GetComponent<AnimalNavigation>();
-        _controller = GetComponent<AnimalController>();
-    }
-
-    private void Start() {
-        _tM = TimeManager.Instance;
-        _wM = WeatherManager.Instance;
-    }
-
-    // In Update oder Coroutine könnte man abhängig vom State Aktionen ausführen:
-    private void Update() {
-        UpdateDayNightStatus();
-
-        switch (_currentState) {
-            case AnimalState.Idle:
-                // Tier steht einfach rum. Nach einiger Zeit möchte es sich vielleicht bewegen.
-                _wanderTimer += Time.deltaTime;
-                if (_wanderTimer >= Random.Range(2, _wanderInterval + 1) && !_isNightTime) {
-                    // Neues Zufallsziel festlegen
-                    Vector3 randomDestination = GetRandomDestination();
-                    SetStateMoving(randomDestination);
-                    _wanderTimer = 0f;
-                }
-
-                // Wenn Tier noch nicht gegessen hat und Tag ist -> Suchen nach Grass
-                if (!_hasEatenToday && !_isNightTime) {
-                    SetStateSearching();
-                }
-
-                // Wenn Nacht -> Schlafen
-                if (_isNightTime) {
-                    SetStateSleeping();
-                }
-                break;
-
-            case AnimalState.Searching:
-                // Suche nach Grass
-                GameObject grass = FindNearestGrass();
-                if (grass != null) {
-                    SetStateMoving(grass.transform.position);
-                } else {
-                    // Kein Grass gefunden, versuche später nochmal -> zurück zu Idle
-                    SetStateIdle();
-                }
-                break;
-
-            case AnimalState.Eating:
-                StartCoroutine(EatingRoutine());
-                break;
-
-            case AnimalState.Moving:
-                if (_navigation.HasReachedDestination()) {
-                    if (!_hasEatenToday && !_isNightTime && IsAtGrass()) {
-                        SetStateEating();
-                    } else {
-                        // Ansonsten einfach Idle stehen bleiben
-                        SetStateIdle();
-                    }
-                }
-                break;
-
-            case AnimalState.Sleeping:
-                if (!_isNightTime) {
-                    SetStateIdle();
-                    _hasEatenToday = false;
-                }
-                break;
-        }
-    }
-
-    private IEnumerator EatingRoutine() {
-        yield return new WaitForSeconds(3f);
-        _hasEatenToday = true;
+    /// <summary>
+    /// Wird vom AnimalController beim Spawn aufgerufen.
+    /// </summary>
+    public void Initialize(AnimalSO so, Transform transformRef, AnimalBase animalController, NPCMovementController movementController) {
+        animalSO = so;
+        animalTransform = transformRef;
+        controller = animalController;
+        movement = movementController;
+        timeManager = TimeManager.Instance;
+        weatherManager = WeatherManager.Instance;
         SetStateIdle();
     }
 
+    /// <summary>
+    /// Muss pro Frame aufgerufen werden (z.B. im Update des Controllers).
+    /// </summary>
+    public void Tick() {
+        switch (currentState) {
+            case AnimalState.Idle: UpdateIdle(); break;
+            case AnimalState.SearchingFood: UpdateSearchingFood(); break;
+            case AnimalState.Moving: UpdateMoving(); break;
+            case AnimalState.Eating: UpdateEating(); break;
+            case AnimalState.Sleeping: UpdateSleeping(); break;
+        }
+    }
+
+    #region --- State Entry Methods ---
+
     public void SetStateIdle() {
-        _currentState = AnimalState.Idle;
+        currentState = AnimalState.Idle;
+        stateTimer = 0f;
+        movement.MoveTo(transform.position);
     }
 
-    public void SetStateSearching() {
-        _currentState = AnimalState.Searching;
+    private void SetStateSearchingFood() {
+        currentState = AnimalState.SearchingFood;
+        stateTimer = 0f;
     }
 
-    public void SetStateEating() {
-        _currentState = AnimalState.Eating;
+    private void SetStateMoving(Vector3 dest) {
+        previousState = currentState;
+        currentState = AnimalState.Moving;
+        targetPosition = dest;
+        movement.MoveTo(dest);
     }
 
-    public void SetStateMoving(Vector3 target) {
-        _currentState = AnimalState.Moving;
-        _navigation.SetDestination(target);
+    private void SetStateEating() {
+        currentState = AnimalState.Eating;
+        stateTimer = 0f;
     }
 
-    public void SetStateSleeping() {
-        _currentState = AnimalState.Sleeping;
+    private void SetStateSleeping() {
+        currentState = AnimalState.Sleeping;
+        stateTimer = 0f;
     }
 
-    private void UpdateDayNightStatus() {
-        float hour = _tM.GetHours();
-        _isNightTime = (hour >= 22 || hour < 6);
+    #endregion
+
+    #region --- State Update Methods ---
+
+    private void UpdateIdle() {
+        float hour = timeManager.GetHours();
+        var building = controller.GetComponentInParent<AnimalBuilding>();
+
+        // Morgens: Stall verlassen, wenn TÃ¼r offen und Zeit >= wakeUp
+        if (hour >= DoorController.OpenHour && building != null && building.IsDoorOpen) {
+            SetStateMoving(building.DoorPosition);
+            return;
+        }
+
+        // Abends: Schlafen im Stall, wenn Zeit >= sleepTime und Tier drauÃŸen oder im Stall
+        if (hour >= DoorController.CloseHour && building != null) {
+            SetStateMoving(building.DoorPosition);
+            return;
+        }
+
+        // 1) Nachts schlafen
+        if (hour >= DoorController.CloseHour || hour < DoorController.OpenHour) {
+            SetStateSleeping();
+            return;
+        }
+
+        // 2) Wenn noch nicht gefÃ¼ttert, Futter suchen
+        if (!controller.WasFed) {
+            SetStateSearchingFood();
+            return;
+        }
+
+        // 3) ZufÃ¤lliges Herumwandern
+        stateTimer += Time.deltaTime;
+        if (stateTimer >= UnityEngine.Random.Range(2f, wanderInterval)) {
+            Vector2 rand = UnityEngine.Random.insideUnitCircle * wanderRadius;
+            Vector3 dest = animalTransform.position + new Vector3(rand.x, rand.y, 0f);
+            SetStateMoving(dest);
+        }
     }
 
-    private Vector3 GetRandomDestination() {
-        // Zufallsziel in der Nähe
-        Vector3 randomDirection = Random.insideUnitCircle * _wanderRadius;
-        return transform.position + new Vector3(randomDirection.x, randomDirection.y, 0f);
-    }
+    private void UpdateSearchingFood() {
+        // PrÃ¼fe Futtertrog im Stall
+        var building = controller.GetComponentInParent<AnimalBuilding>();
+        if (building != null) {
+            var trough = building.GetComponentInChildren<FeedingTrough>();
+            if (trough != null && trough.HasHay) {
+                SetStateMoving(trough.transform.position);
+                return;
+            }
+        }
 
-    private GameObject FindNearestGrass() {
-        GameObject[] allGrass = FindFirstObjectByType<Grass>();
-        if (allGrass.Length == 0) return null;
+        // Sonst drauÃŸen Gras suchen
+        var grasses = GameObject.FindGameObjectsWithTag("Grass");
         GameObject nearest = null;
-        float minDist = Mathf.Infinity;
-        Vector3 currentPos = transform.position;
-        foreach (var go in allGrass) {
-            float dist = Vector3.Distance(currentPos, go.transform.position);
-            if (dist < minDist) {
-                minDist = dist;
-                nearest = go.gameObject;
+        float minDist = float.MaxValue;
+        Vector3 pos = animalTransform.position;
+        foreach (var g in grasses) {
+            float d = Vector3.Distance(pos, g.transform.position);
+            if (d < minDist) {
+                minDist = d;
+                nearest = g;
             }
         }
-        return nearest;
+        if (nearest != null) SetStateMoving(nearest.transform.position); 
+        else SetStateIdle();
     }
 
-    private bool IsAtGrass() {
-        // Prüfe, ob Tier bei einem Grass-Objekt steht
-        GameObject[] allGrass = FindFirstObjectByType<Grass>();
-        foreach (var go in allGrass) {
-            if (Vector3.Distance(go.transform.position, transform.position) < 1f) {
-                return true;
+    private void UpdateMoving() {
+        if (!movement.IsMoving()) {
+            // Wenn Ziel Stall-TÃ¼r und Zeit zum Schlafen
+            float hour = timeManager.GetHours();
+            var building = controller.GetComponentInParent<AnimalBuilding>();
+            if (building != null && Vector3.Distance(animalTransform.position, building.DoorPosition) < 0.5f) {
+                if (hour >= DoorController.CloseHour) { SetStateSleeping(); return; }
+                if (hour >= DoorController.OpenHour) { SetStateIdle(); return; }
             }
+
+            // ... vorherige Logik: Essen oder Idle ...
+            if (previousState == AnimalState.SearchingFood) SetStateEating();
+            else SetStateIdle();
         }
-        return false;
     }
-    */
+
+    private void UpdateEating() {
+        stateTimer += Time.deltaTime;
+        if (stateTimer >= eatingDuration) {
+            controller.Feed();
+            SetStateIdle();
+        }
+    }
+
+    private void UpdateSleeping() {
+        float hour = timeManager.GetHours();
+        // Morgens aufwachen
+        if (hour >= DoorController.OpenHour && hour < DoorController.CloseHour) {
+            SetStateIdle();
+        }
+    }
+
+    #endregion
 }

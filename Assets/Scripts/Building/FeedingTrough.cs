@@ -8,7 +8,8 @@ public class FeedingTrough : PlaceableObject, IInteractable {
     [SerializeField] private int _maxHayCount;
     [SerializeField] private bool _autoFeed;
     private NetworkVariable<int> _hayCount = new(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-    
+    public bool HasHay => _hayCount.Value > 0;
+
     public override float MaxDistanceToPlayer => 2f;
     public override bool CircleInteract => false;
 

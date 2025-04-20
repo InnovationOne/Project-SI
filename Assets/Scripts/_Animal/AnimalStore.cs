@@ -1,89 +1,65 @@
-using UnityEngine;
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEngine;
 
+/// <summary>
+/// Store for purchasing animals. Handles purchase, pending delivery, and next-day delivery.
+/// </summary>
 public class AnimalStore : Store {
-    private Dictionary<int, AnimalSO> _purchasedAnimalsPendingDelivery = new();
-
-    private PlayerInventoryController _pIC;
-    private FinanceManager _fM;
-    private PlaceableObjectsManager _pOM;
-    private ItemManager _iM;
-    private NetworkSpawnManager _nSM;
+    [Header("Animal Store Settings")]
+    [SerializeField] private AnimalSO[] _animalsForSale;  // configured in Inspector
+    /*
+    // Purchased entries: key = building NetId, value = list of AnimalSO to deliver
+    private Dictionary<ulong, List<AnimalSO>> _pendingDeliveries = new();
 
     public override void OnNetworkSpawn() {
         base.OnNetworkSpawn();
-
-        _pIC = PlayerController.LocalInstance.PlayerInventoryController;
-        _fM = GameManager.Instance.FinanceManager;
-        _pOM = GameManager.Instance.PlaceableObjectsManager;
-        _iM = GameManager.Instance.ItemManager;
-        _nSM = NetworkManager.Singleton.SpawnManager;
-
-        GameManager.Instance.TimeManager.OnNextDayStarted += OnNextDay;
+        if (IsServer) {
+            GameManager.Instance.TimeManager.OnNextDayStarted += DeliverAnimals;
+        }
     }
 
-    public override void OnLeftClick(ItemSO itemSO) {
-        /*
-        if (itemSO is AnimalSO) {
-            AnimalSO animalSO = itemSO as AnimalSO;
-            
-            // Search for a stall that can house the animal, TODO make this a choice of the player.
-            for (int i = 0; i < _pOM.PlaceableObjects.Count; i++) {
-                int objId = _pOM.PlaceableObjects[i].ObjectId;
-                BuildingSO buildingSO = _iM.ItemDatabase[objId] as BuildingSO;
-                if (buildingSO.AnimalSize == animalSO.AnimalSize) {
-                    var netId = _pOM.PlaceableObjects[i].PrefabNetworkObjectId;
-                    if (!_nSM.SpawnedObjects.TryGetValue(netId, out NetworkObject netObj)) {
-                        Debug.LogError($"No NetworkObject with the ID {netId} found.");
-                        return;
-                    }
+    public override void Interact(PlayerController player) {
+        // Open store UI listing _animalsForSale
+        StoreUI.Instance.ShowAnimalStore(_animalsForSale);
+    }
 
-                    Building building = netObj.GetComponent<Building>();
-                    if (!building.IsFull) {
-                        _purchasedAnimalsPendingDelivery.Add(i, animalSO);
-                        Debug.Log("Animal purchased, will be delivered tomorrow.");
-                        return;
-                    }
-                }
-            }
-        } else {
-            for (int i = 0; i < _storeContainer.ItemSlots.Count; i++) {
-                if (itemSO.ItemId == _storeContainer.ItemSlots[i].ItemId) {
-                    if (_pIC.InventoryContainer.CanAddItem(new ItemSlot(itemSO.ItemId, 1, 0), false)) {
-                        _fM.RemoveMoneyServerRpc(itemSO.BuyPrice, true);
-                    }
-                }
+    /// <summary>
+    /// Called when player clicks an AnimalSO in the store UI.
+    /// </summary>
+    public void PurchaseAnimal(AnimalSO animalSO, ulong buildingNetId) {
+        // Deduct money
+        if (!GameManager.Instance.FinanceManager.RemoveMoney(animalSO.BuyPrice)) return;
+
+        // Queue for delivery
+        if (!_pendingDeliveries.TryGetValue(buildingNetId, out var list)) {
+            list = new List<AnimalSO>();
+            _pendingDeliveries[buildingNetId] = list;
+        }
+        list.Add(animalSO);
+        // Notify player
+        NotificationManager.Instance.ShowMessage($"{animalSO.AnimalName} bestellt, Lieferung morgen.");
+    }
+
+    private void DeliverAnimals() {
+        foreach (var kv in _pendingDeliveries) {
+            if (kv.Key == 0) continue;
+            if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(kv.Key, out var netObj))
+                continue;
+            var building = netObj.GetComponent<AnimalBuilding>();
+            if (building == null) continue;
+
+            foreach (var animalSO in kv.Value) {
+                // Spawn at stall entrance
+                Vector3 spawnPos = building.DoorPosition;
+                AnimalManager.Instance.RequestSpawnJuvenile(animalSO.AnimalId, spawnPos);
+                building.AddAnimal(
+                    NetworkManager.Singleton.SpawnManager.SpawnedObjects[
+                        netObj.NetworkObjectId]
+                        .GetComponent<AnimalController>());
+                NotificationManager.Instance.ShowMessage($"{animalSO.AnimalName} geliefert in {building.BuildingSO.BuildingName}.");
             }
         }
-        */
-    }
-
-    public void OnNextDay() {
-        foreach (var kvp in _purchasedAnimalsPendingDelivery) {
-            var animalGO = new GameObject("Animal_" + kvp.Value.AnimalType.ToString());
-            var ac = animalGO.AddComponent<AnimalController>();
-            animalGO.AddComponent<AnimalStateMachine>();
-            animalGO.AddComponent<AnimalNavigation>();
-            animalGO.AddComponent<AnimalVisual>();
-
-            // TODO: When buying let the player choose the name.
-            var animalName = kvp.Value.AnimalType.ToString();
-
-            ac.Initialize(kvp.Value, animalName, kvp.Key);
-            /*
-            var netId = _pOM.PlaceableObjects[kvp.Key].PrefabNetworkObjectId;
-            if (!_nSM.SpawnedObjects.TryGetValue(netId, out NetworkObject netObj)) {
-                Debug.LogError($"No NetworkObject with the ID {netId} found.");
-                return;
-            }
-            Building building = netObj.GetComponent<Building>();
-            building.AddAnimal(ac);
-
-            Debug.Log($"Animal delivered to stall {building.BuildingSO.BuildingName}.");
-            */
-        }
-
-        _purchasedAnimalsPendingDelivery.Clear();
-    }
+        _pendingDeliveries.Clear();
+    }*/
 }

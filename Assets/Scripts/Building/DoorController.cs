@@ -8,10 +8,11 @@ using UnityEngine;
 public class DoorController : PlaceableObject, IInteractable {
     [SerializeField] private bool _canBeWeatherControlled;
     [SerializeField] private bool _canBeTimeControlled;
+    [SerializeField] private Transform _exitPoint;
     private Collider2D _doorCollider;
 
-    private const float OPEN_HOUR = 6f;
-    private const float CLOSE_HOUR = 18f;
+    public static float OpenHour = 6f;
+    public static float CloseHour = 18f;
 
     // Player setting on the door itself
     private NetworkVariable<bool> _weatherActive = new(true, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -19,6 +20,9 @@ public class DoorController : PlaceableObject, IInteractable {
 
     private TimeManager _timeManager;
     private WeatherManager _weatherManager;
+
+    public Transform ExitPoint => _exitPoint;
+    public bool IsOpen => !_doorCollider.enabled;
 
     public override float MaxDistanceToPlayer => 1.5f;
     public override bool CircleInteract => false;
@@ -55,7 +59,7 @@ public class DoorController : PlaceableObject, IInteractable {
         bool closed = false;
         if (_canBeTimeControlled && _timeActive.Value) {
             float hour = _timeManager.GetHours();
-            if (hour < OPEN_HOUR || hour >= CLOSE_HOUR) closed = true;
+            if (hour < OpenHour || hour >= CloseHour) closed = true;
         }
         if (_canBeWeatherControlled && _weatherActive.Value && _weatherManager.RainThunderSnow()) {
             closed = true;

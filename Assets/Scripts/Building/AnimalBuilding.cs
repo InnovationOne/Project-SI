@@ -6,6 +6,10 @@ public class AnimalBuilding : Building {
     [Header("Animal Building Settings")]
     [SerializeField] private AnimalBuildingSO _animalBuildingSO;
     [SerializeField] private BoxCollider2D _spawnArea;
+    [SerializeField] private DoorController _doorController;
+    public bool IsDoorOpen => _doorController.IsOpen;
+    public Vector3 DoorPosition => _doorController.ExitPoint.position;
+
     public AnimalBuildingSO AnimalBuildingSO => _animalBuildingSO;
 
     private NetworkList<ulong> _housedAnimalIds;

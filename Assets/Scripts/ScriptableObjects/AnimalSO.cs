@@ -35,12 +35,27 @@ public class AnimalSO : ItemSO {
     [Header("Production Tools")]
     public ItemSO FeedItem;
     public ItemSO PetItem;
-    public ItemSO ProductTool;     // z.B. Milchkübel, Schere
+    public ItemSO ProductTool;
 
     [Header("Friendship & growth")]
     public int InitialFriendship = 0;
     public int MaxFriendship = 1000;
     public int GrowthDays = 4;
+
+    // Positive Effects
+    public int FeedAmount = 5;
+    public int PetAmount = 5;
+    public int BrushAmount = 10;
+    public int ProductAmount = 5;
+    public int AteOutsideAmount = 10;
+    public int AnimalIsWarmAmount = 5;
+
+    // Negative Effects
+    public int NotFedAmount = -25;
+    public int NotPettedAmount = -5;
+    public int OutsideInRainAmount = -10;
+    public int OutsideByNightAmount = -15;
+    public int InColdAmount = -5;
 
     [Header("Mating / Breeding")]
     public bool CanLayEggs = false;
